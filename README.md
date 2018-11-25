@@ -14,8 +14,13 @@ In the COI case, two clustering algorithms can be performed by P.E.M.A. (CROP an
 What things you need to install the software and how to install them
 
 ```
-Give examples
+Docker ( https://docs.docker.com/install/ )
 ```
+
+You should check your software version. Docker is avalable for both Windows, Mac and Linux. 
+However, in case of Windows and Mac, if you have previous versions of those software, you migh need to
+install Docker toolbox ( https://docs.docker.com/toolbox/ ).
+
 
 ### Installing
 
