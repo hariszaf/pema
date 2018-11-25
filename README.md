@@ -50,7 +50,7 @@ P.E.M.A. is a quite large image (~2Gb) so it will take a while until it is downl
 
 Running P.E.M.A. has two discrete steps. 
 
-### Step 1 - Build a Docker container
+#### Step 1 - Build a Docker container
 
 At first, you need to let Docker have access in your dataset. For this you need to run this command, specifying the path to where your data is stored, i.e. changing the path_to_my_data accordingly:
 
@@ -74,7 +74,7 @@ docker run -it --rm --name foo --volumes-from=vol
 ```
 
 
-### Step 2 - Run P.E.M.A.
+#### Step 2 - Run P.E.M.A.
 
 To run P.E.M.A. you first need to set all parameters the way they should be, depending on your dataset and your experiment. 
 
