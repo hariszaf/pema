@@ -11,15 +11,9 @@ In the COI case, two clustering algorithms can be performed by P.E.M.A. (CROP an
 
 ### Prerequisites
 
-In order to get P.E.M.A. running to your environment, you first need to install Docker, in case you do not already have it.
+In order to get P.E.M.A. running to your environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
 
-```
-Docker ( https://docs.docker.com/install/ )
-```
-
-You should check your software version. Docker is avalable for both Windows, Mac and Linux. 
-However, in case of Windows and Mac, if you have previous versions of those software, you migh need to
-install Docker toolbox ( https://docs.docker.com/toolbox/ ).
+You should check your software version. Docker is avalable for both Windows, Mac and Linux.  However, in case of Windows and Mac, if you have previous versions of those software, you migh need to install Docker toolbox ( https://docs.docker.com/toolbox/ ).
 
 
 ### Installing
