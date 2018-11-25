@@ -133,11 +133,9 @@ In order to run P.E.M.A. on a HPC environmnet, the only extra step you need to d
 
 See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
 
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
-
 ## Acknowledgments
 P.E.M.A. uses a series of tools, datasets as well as Big Data Script language. We have to thank all of these groups. 
 * Hat tip to anyone whose code was used
 * Inspiration
+
+## Cite 
