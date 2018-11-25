@@ -13,7 +13,20 @@ In the COI case, two clustering algorithms can be performed by P.E.M.A. (CROP an
 
 In order to get P.E.M.A. running to your environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
 
-You should check your software version. Docker is avalable for both Windows, Mac and Linux.  However, in case of Windows and Mac, if you have previous versions of those software, you migh need to install Docker toolbox ( https://docs.docker.com/toolbox/ ).
+You should check your software version. Docker is avalable for all Windows, Mac and Linux.  
+However, in case of Windows and Mac, you might need to install Docker toolbox instead ( https://docs.docker.com/toolbox/ ), if your System Requirements are not the ones mentioned below.
+
+**System Requirements**
+'''
+**Windows 10 64bit**: Pro, Enterprise or Education (1607 Anniversary Update, Build 14393 or later).
+Virtualization is enabled in BIOS. Typically, virtualization is enabled by default. This is different from having Hyper-V enabled. For more detail see Virtualization must be enabled in Troubleshooting.
+CPU SLAT-capable feature.
+At least 4GB of RAM.
+
+**Mac** hardware must be a 2010 or newer model, with Intel’s hardware support for memory management unit (MMU) virtualization, including Extended Page Tables (EPT) and Unrestricted Mode. You can check to see if your machine has this support by running the following command in a terminal: sysctl kern.hv_support macOS El Capitan 10.11 and newer macOS releases are supported. We recommend upgrading to the latest version of macOS.
+At least 4GB of RAM
+VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible with Docker for Mac). If you have a newer version of VirtualBox installed, it’s fine.
+'''
 
 
 ### Installing
