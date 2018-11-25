@@ -106,7 +106,7 @@ docker ps -a
 and then, copying anything you want to, from a single file to the whole folder, with a command like this: 
 
 ```
-docker cp <contaier_ID>:/path/to/what/you/need/to/copy/ /path/to/the/directory/you/want/to/copy/it/to/
+docker cp <contaier_ID>:/path_to_what_you_need_to_copy/ /path_to_the_directory_you_want_to_copy_it_to/
 ```
 
 Please, keep in mind that when you want to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located. 
