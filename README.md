@@ -1,6 +1,5 @@
 
-# P.E.M.A.
-# a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
+# P.E.M.A. : a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
 
 P.E.M.A. is a pipeline for two marker genes, 16S rRNA (microbes) and COI (eukaryotes). As input, P.E.M.A. accepts fastq files as returned by Illumina sequencing platforms. P.E.M.A. processes the reads from each sample and returns an OTU-table with the taxonomies of the organisms found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, P.E.M.A. returns alpha and beta diversities, and make correlations between samples. The last step is facilitated by Rhea, a set of R scripts for downstream 16S amplicon analysis of microbial profiles.
 
@@ -9,8 +8,12 @@ In the COI case, two clustering algorithms can be performed by P.E.M.A. (CROP an
 
 ## Getting Started
 
+P.E.M.A. is able to run either on a simple PC or to a HPC environment (server, cluster etc). 
 
-### Prerequisites
+
+### P.E.M.A on a simple PC
+
+#### Prerequisites
 
 In order to get P.E.M.A. running to your environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
 
@@ -33,7 +36,7 @@ VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible wit
 ```
 
 
-### Installing
+#### Installing
 
 After you install Docker in your environment and open it, the only thing you need to do, is to download P.E.M.A.'s image, by running the command:
 
@@ -44,14 +47,11 @@ docker pull hariszaf/pema
 P.E.M.A. is a quite large image (~2Gb) so it will take a while until it is downloaded in your computer system. 
 
 
-
-
-
-## Running P.E.M.A. 
+#### Running P.E.M.A. 
 
 Running P.E.M.A. has two discrete steps. 
 
-### Step 1 - Build a Docker container
+#### Step 1 - Build a Docker container
 
 At first, you need to let Docker have access in your dataset. For this you need to run this command, specifying the path to where your data is stored, i.e. changing the path_to_my_data accordingly:
 
@@ -70,13 +70,12 @@ In this and only in this case, you need to tell P.E.M.A. where to find your BLAS
 
 docker run -it --name vol -v /<path_to_my_data>:/vol_myData -v /<path_to_BLAST_Database>:/vol_myDataBase PEMA_image
 
-
 docker run -it --rm --name foo --volumes-from=vol
 
 ```
 
 
-### Step 2 - Run P.E.M.A.
+#### Step 2 - Run P.E.M.A.
 
 To run P.E.M.A. you first need to set all parameters the way they should be, depending on your dataset and your experiment. 
 
@@ -86,7 +85,18 @@ To do so, run the command below and set the parameters in it:
 nano parameters.csv
 ```
 
-For more details about the #parameters.csv#, please check on the [manual for the parapeter's file](https://www.google.com)
+For more details about the #parameters.csv#, please check on the [manual for the parapeter's file](https://www.google.com).
+
+
+Finally, when all the above are set, the only thing remaining to do, is to run P.E.M.A. 
+
+```
+./PEMA_docker_version.bds
+```
+
+P.E.M.A. is now running and it depends on your computer (or server or cluster), on the size of your data, as well as on the parameters you chose, how long it will take.
+
+When 
 
 In order to get the output file in your computer, you just need to copy it from the Docker container you are working on. To do so, you just need to see the **id** of your container, simply by typing:
 
@@ -102,6 +112,24 @@ docker cp <contaier_ID>:/path/to/what/you/need/to/copy/ /path/to/the/directory/y
 
 Please, keep in mind that when you want to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located. 
 
+
+
+
+
+
+### P.E.M.A on a simple PC
+
+
+
+
+
+
+
+
+
+
+
+
 \## Authors
 
 * **Haris Zafeiropoulos** - *Initial work* - 
@@ -113,7 +141,6 @@ See also the list of [contributors](https://github.com/your/project/contributors
 This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
-
+P.E.M.A. uses a series of tools, datasets as well as Big Data Script language. We have to thank all of these groups. 
 * Hat tip to anyone whose code was used
 * Inspiration
-* 
