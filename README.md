@@ -114,7 +114,7 @@ Please, keep in mind that when you want to copy a whole directory, then you alwa
 
 ## P.E.M.A on HPC 
 
-In order to run P.E.M.A. on a HPC environmnet, the only extra step you need to do, is to install **[Singularity]** ( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps ) on it. 
+In order to run P.E.M.A. on a HPC environmnet, the only extra step you need to do, is to install **[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )** on it. 
 
 
 
