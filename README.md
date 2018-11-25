@@ -1,5 +1,6 @@
 
-# P.E.M.A.: a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
+# P.E.M.A.: 
+# a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
 
 P.E.M.A. is a pipeline for two marker genes, 16S rRNA (microbes) and COI (eukaryotes). As input, P.E.M.A. accepts fastq files as returned by Illumina sequencing platforms. P.E.M.A. processes the reads from each sample and returns an OTU-table with the taxonomies of the organisms found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, P.E.M.A. returns alpha and beta diversities, and make correlations between samples. The last step is facilitated by Rhea, a set of R scripts for downstream 16S amplicon analysis of microbial profiles.
 
@@ -48,17 +49,46 @@ P.E.M.A. is a quite large image (~2Gb) so it will take a while until it is downl
 
 ## Running P.E.M.A.
 
+Running P.E.M.A. has two discrete steps. 
+
+At first, you need to let Docker have access in your dataset. For this you need to run this command:
+
+```
+docker run -it vol -v /path/to/my/data:/vol_myData pema
+``` 
+
+After you run the command above, you have now built a Docker container, in which you can work with P.E.M.A.
+
+
+P.E.M.A. gives you the opportunity among other, to BLAST your data, in case you want to. 
+
+In this and only in this case, you need to tell P.E.M.A. where to find your BLAST database. So, in this case, you skip the previous command, and execute the below:
+
+```
+
+docker run -it --name vol -v /path/to/my/data:/vol_myData -v /path/to/DataBase:/vol_myDataBase PEMA_image
+
+
+docker run -it --rm --name foo --volumes-from=vol
+
+```
 
 
 
 
+In order to get the output file in your computer, you just need to copy it from the Docker container you are working on. To do so, you just need to see the **id** of your container, simply by typing:
 
+```
+docker ps -a
+```
 
+and then, copying anything you want to, from a single file to the whole folder, with a command like this: 
 
+```
+docker cp <contaier_ID>:/path/to/what/you/need/to/copy/ /path/to/the/directory/you/want/to/copy/it/to/
+```
 
-
-
-
+Please, keep in mind that when you want to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located. 
 
 \## Authors
 
