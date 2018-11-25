@@ -1,5 +1,5 @@
 
-## P.E.M.A.: a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
+# P.E.M.A.: a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
 
 P.E.M.A. is a pipeline for two marker genes, 16S rRNA (microbes) and COI (eukaryotes). As input, P.E.M.A. accepts fastq files as returned by Illumina sequencing platforms. P.E.M.A. processes the reads from each sample and returns an OTU-table with the taxonomies of the organisms found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, P.E.M.A. returns alpha and beta diversities, and make correlations between samples. The last step is facilitated by Rhea, a set of R scripts for downstream 16S amplicon analysis of microbial profiles.
 
@@ -19,13 +19,13 @@ However, in case of Windows and Mac, you might need to install Docker toolbox in
 **System Requirements**
 
 ```
-**Windows 10 64bit**: 
+**__Windows 10 64bit__**: 
 Pro, Enterprise or Education (1607 Anniversary Update, Build 14393 or later).
 Virtualization is enabled in BIOS. Typically, virtualization is enabled by default. This is different from having Hyper-V enabled. For more detail see Virtualization must be enabled in Troubleshooting.
 CPU SLAT-capable feature.
 At least 4GB of RAM.
 
-**Mac** 
+**__Mac__** 
 Mac hardware must be a 2010 or newer model, with Intel’s hardware support for memory management unit (MMU) virtualization, including Extended Page Tables (EPT) and Unrestricted Mode. You can check to see if your machine has this support by running the following command in a terminal: sysctl kern.hv_support macOS El Capitan 10.11 and newer macOS releases are supported. We recommend upgrading to the latest version of macOS.
 At least 4GB of RAM
 VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible with Docker for Mac). If you have a newer version of VirtualBox installed, it’s fine.
@@ -34,36 +34,30 @@ VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible wit
 
 ### Installing
 
-A step by step series of examples that tell you how to get a development env running
-
-Say what the step will be
+After you install Docker in your environment and open it, the only thing you need to do, is to download P.E.M.A.'s image, by running the command:
 
 ```
-Give the example
+docker pull hariszaf/pema
 ```
 
-And repeat
-
-```
-until finished
-```
-
-End with an example of getting some data out of the system or using it for a little demo
-
-## Running the tests
-
-Explain how to run the automated tests for this system
+P.E.M.A. is a quite large image (~2Gb) so it will take a while until it is downloaded in your computer system. 
 
 
-## Deployment
 
-Add additional notes about how to deploy this on a live system
 
-## Built With
 
-* [Dropwizard](http://www.dropwizard.io/1.0.2/docs/) - The web framework used
-* [Maven](https://maven.apache.org/) - Dependency Management
-* [ROME](https://rometools.github.io/rome/) - Used to generate RSS Feeds
+## Running P.E.M.A.
+
+
+
+
+
+
+
+
+
+
+
 
 
 \## Authors
