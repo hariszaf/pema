@@ -11,9 +11,9 @@ In the COI case, two clustering algorithms can be performed by P.E.M.A. (CROP an
 P.E.M.A. is able to run either on a simple PC or to a HPC environment (server, cluster etc). 
 
 
-### P.E.M.A on a simple PC
+## P.E.M.A on a simple PC
 
-#### Prerequisites
+### Prerequisites
 
 In order to get P.E.M.A. running to your environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
 
@@ -35,8 +35,7 @@ At least 4GB of RAM
 VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible with Docker for Mac). If you have a newer version of VirtualBox installed, it’s fine.
 ```
 
-
-#### Installing
+### Installing
 
 After you install Docker in your environment and open it, the only thing you need to do, is to download P.E.M.A.'s image, by running the command:
 
@@ -47,11 +46,11 @@ docker pull hariszaf/pema
 P.E.M.A. is a quite large image (~2Gb) so it will take a while until it is downloaded in your computer system. 
 
 
-#### Running P.E.M.A. 
+### Running P.E.M.A. 
 
 Running P.E.M.A. has two discrete steps. 
 
-#### Step 1 - Build a Docker container
+### Step 1 - Build a Docker container
 
 At first, you need to let Docker have access in your dataset. For this you need to run this command, specifying the path to where your data is stored, i.e. changing the path_to_my_data accordingly:
 
@@ -75,7 +74,7 @@ docker run -it --rm --name foo --volumes-from=vol
 ```
 
 
-#### Step 2 - Run P.E.M.A.
+### Step 2 - Run P.E.M.A.
 
 To run P.E.M.A. you first need to set all parameters the way they should be, depending on your dataset and your experiment. 
 
@@ -113,11 +112,7 @@ docker cp <contaier_ID>:/path/to/what/you/need/to/copy/ /path/to/the/directory/y
 Please, keep in mind that when you want to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located. 
 
 
-
-
-
-
-### P.E.M.A on a simple PC
+## P.E.M.A on HPC 
 
 
 
