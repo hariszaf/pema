@@ -32,13 +32,6 @@ P.E.M.A. is best to run on HPC (server, cluster, cloud). Usually Environmental d
 
 
 
-
-
-
-
-
-
-
 ## P.E.M.A on a simple PC
 
 To run P.E.M.A. in a simple PC on your own environment, you first need to install Docker (https://docs.docker.com/install/), in case you do not already have it.
