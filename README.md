@@ -1,4 +1,4 @@
-
+![alt text](https://i.paste.pics/ad5d63dabc2cb3aad4c146ad68640ed5.png)
 # P.E.M.A. : a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
 
 P.E.M.A. is a pipeline for two marker genes, **16S rRNA** (microbes) and **COI** (Eukaryotes). As input, P.E.M.A. accepts .fastq files as returned by Illumina sequencing platforms. P.E.M.A. processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, P.E.M.A. returns **alpha and beta diversities**, and make correlations between samples. The last step is facilitated by Rhea, a set of R scripts for downstream 16S amplicon analysis of microbial profiles.
@@ -158,9 +158,8 @@ So, here is the **parameters.tsv** file as it looks like, in a study case of our
 
 
 
-![alt text](https://paste.pics/9ff7fbf0786d451e253d7273e47be285)
 
-![alt text](https://raw.githubusercontent.com/username/projectname/branch/path/to/img.png)
+
 
 
 
