@@ -31,6 +31,38 @@ P.E.M.A. is best to run on HPC (server, cluster, cloud). Usually Environmental d
 
 
 
+
+
+
+## P.E.M.A on a simple PC
+
+To run P.E.M.A. in a simple PC on your own environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
+
+You should check your software version. Docker is avalable for all Windows, Mac and Linux.  
+However, in case of Windows and Mac, you might need to install Docker toolbox instead ( https://docs.docker.com/toolbox/ ), if your System Requirements are not the ones mentioned below.
+
+**System Requirements**
+
+```
+**__Windows 10 64bit__**:
+Pro, Enterprise or Education (1607 Anniversary Update, Build 14393 or later).
+Virtualization is enabled in BIOS. Typically, virtualization is enabled by default. 
+This is different from having Hyper-V enabled. For more detail see Virtualization must be enabled in Troubleshooting.
+CPU SLAT-capable feature.
+At least 4GB of RAM.
+
+**__Mac__**
+Mac hardware must be a 2010 or newer model, with Intel’s hardware support for memory management unit (MMU)
+virtualization, including Extended Page Tables (EPT) and Unrestricted Mode. You can check to see if your machine 
+has this support by running the following command in a terminal: 
+sysctl kern.hv_support macOS El Capitan 10.11 and newer macOS releases are supported. 
+We recommend upgrading to the latest version of macOS.
+At least 4GB of RAM
+VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible with Docker for Mac). 
+If you have a newer version of VirtualBox installed, it’s fine.
+```
+
+
 ### Installing
 
 After you install Docker in your environment and open it, the only thing you need to do, is to download P.E.M.A.'s image, by running the command:
@@ -110,38 +142,13 @@ Please, keep in mind that when you want to copy a whole directory, then you alwa
 
 
 
-## P.E.M.A on a simple PC
+## Parameters' file
+The most crucial component in running P.E.M.A. is the parameters' file. This is located in the same directory as P.E.M.A. does and the user needs to fill it **every time** P.E.M.A. is about to be called. 
 
-To run P.E.M.A. in a simple PC, you follow the
-
-
-
+So, here is the **parameters.tsv** file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
 
 
-
-
-
-
-
-In order to get P.E.M.A. running to your environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
-
-You should check your software version. Docker is avalable for all Windows, Mac and Linux.  
-However, in case of Windows and Mac, you might need to install Docker toolbox instead ( https://docs.docker.com/toolbox/ ), if your System Requirements are not the ones mentioned below.
-
-**System Requirements**
-
-```
-**__Windows 10 64bit__**:
-Pro, Enterprise or Education (1607 Anniversary Update, Build 14393 or later).
-Virtualization is enabled in BIOS. Typically, virtualization is enabled by default. This is different from having Hyper-V enabled. For more detail see Virtualization must be enabled in Troubleshooting.
-CPU SLAT-capable feature.
-At least 4GB of RAM.
-
-**__Mac__**
-Mac hardware must be a 2010 or newer model, with Intel’s hardware support for memory management unit (MMU) virtualization, including Extended Page Tables (EPT) and Unrestricted Mode. You can check to see if your machine has this support by running the following command in a terminal: sysctl kern.hv_support macOS El Capitan 10.11 and newer macOS releases are supported. We recommend upgrading to the latest version of macOS.
-At least 4GB of RAM
-VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible with Docker for Mac). If you have a newer version of VirtualBox installed, it’s fine.
-```
+--------------------------------------------------------------------------------------
 
 
 
@@ -152,7 +159,26 @@ VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible wit
 
 
 
-##
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
