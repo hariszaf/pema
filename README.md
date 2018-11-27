@@ -34,12 +34,17 @@ P.E.M.A. is best to run on HPC (server, cluster, cloud). Usually Environmental d
 
 
 
+
+
+
+
+
 ## P.E.M.A on a simple PC
 
-To run P.E.M.A. in a simple PC on your own environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
+To run P.E.M.A. in a simple PC on your own environment, you first need to install Docker (https://docs.docker.com/install/), in case you do not already have it.
 
 You should check your software version. Docker is avalable for all Windows, Mac and Linux.  
-However, in case of Windows and Mac, you might need to install Docker toolbox instead ( https://docs.docker.com/toolbox/ ), if your System Requirements are not the ones mentioned below.
+However, in case of Windows and Mac, you might need to install Docker toolbox instead (https://docs.docker.com/toolbox/), if your System Requirements are not the ones mentioned below.
 
 **System Requirements**
 
@@ -47,14 +52,15 @@ However, in case of Windows and Mac, you might need to install Docker toolbox in
 **__Windows 10 64bit__**:
 Pro, Enterprise or Education (1607 Anniversary Update, Build 14393 or later).
 Virtualization is enabled in BIOS. Typically, virtualization is enabled by default. 
-This is different from having Hyper-V enabled. For more detail see Virtualization must be enabled in Troubleshooting.
+This is different from having Hyper-V enabled. For more detail see Virtualization 
+must be enabled in Troubleshooting.
 CPU SLAT-capable feature.
 At least 4GB of RAM.
 
 **__Mac__**
 Mac hardware must be a 2010 or newer model, with Intel’s hardware support for memory management unit (MMU)
-virtualization, including Extended Page Tables (EPT) and Unrestricted Mode. You can check to see if your machine 
-has this support by running the following command in a terminal: 
+virtualization, including Extended Page Tables (EPT) and Unrestricted Mode. 
+You can check to see if your machine  has this support by running the following command in a terminal: 
 sysctl kern.hv_support macOS El Capitan 10.11 and newer macOS releases are supported. 
 We recommend upgrading to the latest version of macOS.
 At least 4GB of RAM
@@ -89,9 +95,9 @@ docker run -it vol -v /<path_to_my_data>:/vol_myData pema
 After you run the command above, you have now built a Docker container, in which you can work with P.E.M.A.
 
 
-P.E.M.A. gives you the opportunity, among others, to BLAST your data, in case you want to.
+P.E.M.A. gives you the opportunity, among others, to **BLAST** your data, in case you want to.
 
-In this and only in this case, you need to tell P.E.M.A. where to find your BLAST database. So, in this case, you skip the previous command, and execute the commands below,specifying the path to where your data and the BLAST database are stored, i.e. changing the path_to_my_data and the path_to_BLAST_Database accordingly:
+In this and only in this case, you need to tell P.E.M.A. **where** to find your **BLAST database**. So, in this case, you skip the previous command, and execute the commands below,specifying the path to where your data and the BLAST database are stored, i.e. changing the path_to_my_data and the path_to_BLAST_Database accordingly:
 
 ```
 
