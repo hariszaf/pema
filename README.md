@@ -158,7 +158,9 @@ So, here is the **parameters.tsv** file as it looks like, in a study case of our
 
 
 
+![alt text](https://paste.pics/9ff7fbf0786d451e253d7273e47be285)
 
+![alt text](https://raw.githubusercontent.com/username/projectname/branch/path/to/img.png)
 
 
 
