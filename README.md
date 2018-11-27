@@ -1,4 +1,5 @@
-![alt text](https://i.paste.pics/ad5d63dabc2cb3aad4c146ad68640ed5.png =100x20)
+\\\\![alt text](https://i.paste.pics/ad5d63dabc2cb3aad4c146ad68640ed5.png)
+<img src="https://i.paste.pics/ad5d63dabc2cb3aad4c146ad68640ed5.png" width="200">
 
 
 # P.E.M.A. : a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
