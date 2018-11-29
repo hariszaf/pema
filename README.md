@@ -1,5 +1,5 @@
-![alt text](https://i.paste.pics/ad5d63dabc2cb3aad4c146ad68640ed5.png)
 
+![alt text](https://i.paste.pics/ad5d63dabc2cb3aad4c146ad68640ed5.png)
 # P.E.M.A. : a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
 
 P.E.M.A. is a pipeline for two marker genes, **16S rRNA** (microbes) and **COI** (Eukaryotes). As input, P.E.M.A. accepts .fastq files as returned by Illumina sequencing platforms. P.E.M.A. processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, P.E.M.A. returns **alpha and beta diversities**, and make correlations between samples. The last step is facilitated by Rhea, a set of R scripts for downstream 16S amplicon analysis of microbial profiles.
@@ -20,45 +20,80 @@ Running P.E.M.A. is exactly **the same** procedure in both oh these cases.
 
 ## P.E.M.A on HPC
 
-P.E.M.A. is best to run on HPC (server, cluster, cloud). Usually Environmental data are quite large and the whole process has huge computational demands. To get P.E.M.A. running on your HPC you need just to do the followings. 
+P.E.M.A. is best to run on HPC (server, cluster, cloud). Usually Environmental data are quite large and the whole process has huge computational demands. To get P.E.M.A. running on your HPC you need just to do the followings.
 
 ### Prerequisites
 
 **[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )**  is a free, cross-platform and open-source computer program that performs operating-system-level virtualization also known as containerization. One of the main uses of Singularity is to bring containers and reproducibility to scientific computing and the high-performance computing (HPC) world
 
+Singularity, needs a Linux system to run .
+
+### Installing
+
+After you install Singularity in your environment and open it, you need to download P.E.M.A.'s image from Docker Hub, by running the command:
+
+```
+singularity pull docker://hariszaf/pema
+```
+
+Now you have P.E.M.A. on your environment and the only thing that is left to do, is to fulfill the **parapeters.tsv**  file (see below, on "Parameters' file" section) and run P.E.M.A.
 
 
+### Running P.E.M.A.
+Singularity allows to use a  job scheduler that allocates compute resources on clusters and at the same time, works as a queuing system, as **[Slurm](https://slurm.schedmd.com/overview.html)**. This way you are able to create a job as you useally do in your system and after setting the parameters' file as you want to, run P.E.M.A. as a job on your cluster.
 
+#### Example
+
+```
+#SBATCH --partition=batch
+#SBATCH --nodes=2
+#SBATCH --ntasks-per-node=20
+#SBATCH --mem=
+# Memory per node specification is in MB. It is optional.
+# The default limit is 3000MB per core.
+#SBATCH --job-name="testPema"
+#SBATCH --output=PEMA.output
+#SBATCH --mail-user=haris-zafr@hcmr.gr
+#SBATCH --mail-type=ALL
+#SBATCH --requeue
+
+singularity exec ~/ubuntu.img echo "Hey, I'm running ubuntu"
+
+```
+
+In the above job, we set HCMR's  cluster "Zorba", to run P.E.M.A. in 2 nodes, with 20 cores in each of those.
 
 
 
 
 ## P.E.M.A on a simple PC
 
-To run P.E.M.A. in a simple PC on your own environment, you first need to install Docker (https://docs.docker.com/install/), in case you do not already have it.
+
+### Prerequisites
+
+To run P.E.M.A. in a simple PC on your own environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
 
 You should check your software version. Docker is avalable for all Windows, Mac and Linux.  
-However, in case of Windows and Mac, you might need to install Docker toolbox instead (https://docs.docker.com/toolbox/), if your System Requirements are not the ones mentioned below.
+However, in case of Windows and Mac, you might need to install Docker toolbox instead ( https://docs.docker.com/toolbox/ ), if your System Requirements are not the ones mentioned below.
 
 **System Requirements**
 
 ```
 **__Windows 10 64bit__**:
 Pro, Enterprise or Education (1607 Anniversary Update, Build 14393 or later).
-Virtualization is enabled in BIOS. Typically, virtualization is enabled by default. 
-This is different from having Hyper-V enabled. For more detail see Virtualization 
-must be enabled in Troubleshooting.
+Virtualization is enabled in BIOS. Typically, virtualization is enabled by default.
+This is different from having Hyper-V enabled. For more detail see Virtualization must be enabled in Troubleshooting.
 CPU SLAT-capable feature.
 At least 4GB of RAM.
 
 **__Mac__**
 Mac hardware must be a 2010 or newer model, with Intel’s hardware support for memory management unit (MMU)
-virtualization, including Extended Page Tables (EPT) and Unrestricted Mode. 
-You can check to see if your machine  has this support by running the following command in a terminal: 
-sysctl kern.hv_support macOS El Capitan 10.11 and newer macOS releases are supported. 
+virtualization, including Extended Page Tables (EPT) and Unrestricted Mode. You can check to see if your machine
+has this support by running the following command in a terminal:
+sysctl kern.hv_support macOS El Capitan 10.11 and newer macOS releases are supported.
 We recommend upgrading to the latest version of macOS.
 At least 4GB of RAM
-VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible with Docker for Mac). 
+VirtualBox prior to version 4.3.30 must NOT be installed (it is incompatible with Docker for Mac).
 If you have a newer version of VirtualBox installed, it’s fine.
 ```
 
@@ -89,9 +124,9 @@ docker run -it vol -v /<path_to_my_data>:/vol_myData pema
 After you run the command above, you have now built a Docker container, in which you can work with P.E.M.A.
 
 
-P.E.M.A. gives you the opportunity, among others, to **BLAST** your data, in case you want to.
+P.E.M.A. gives you the opportunity, among others, to BLAST your data, in case you want to.
 
-In this and only in this case, you need to tell P.E.M.A. **where** to find your **BLAST database**. So, in this case, you skip the previous command, and execute the commands below,specifying the path to where your data and the BLAST database are stored, i.e. changing the path_to_my_data and the path_to_BLAST_Database accordingly:
+In this and only in this case, you need to tell P.E.M.A. where to find your BLAST database. So, in this case, you skip the previous command, and execute the commands below,specifying the path to where your data and the BLAST database are stored, i.e. changing the path_to_my_data and the path_to_BLAST_Database accordingly:
 
 ```
 
@@ -143,68 +178,10 @@ Please, keep in mind that when you want to copy a whole directory, then you alwa
 
 
 ## Parameters' file
-The most crucial component in running P.E.M.A. is the parameters' file. This is located in the same directory as P.E.M.A. does and the user needs to fill it **every time** P.E.M.A. is about to be called. 
+The most crucial component in running P.E.M.A. is the parameters' file. This is located in the same directory as P.E.M.A. does and the user needs to fill it **every time** P.E.M.A. is about to be called.
 
 So, here is the **parameters.tsv** file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
 
-
---------------------------------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-## Authors
-
-* **Haris Zafeiropoulos** - *Initial work* -
-
-See also the list of [contributors](https://github.com/your/project/contributors) who participated in this project.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
 
 ## Acknowledgments
 P.E.M.A. uses a series of tools, datasets as well as Big Data Script language. We have to thank all of these groups.
