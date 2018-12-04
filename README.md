@@ -42,6 +42,14 @@ Now you have P.E.M.A. on your environment and the only thing that is left to do,
 ### Running P.E.M.A.
 Singularity allows to use a  job scheduler that allocates compute resources on clusters and at the same time, works as a queuing system, as **[Slurm](https://slurm.schedmd.com/overview.html)**. This way you are able to create a job as you useally do in your system and after setting the parameters' file as you want to, run P.E.M.A. as a job on your cluster.
 
+
+
+
+sudo singularity shell --overlay my_overlay/ pema_on_singularity.sif
+
+
+
+
 #### Example
 
 ```
@@ -62,6 +70,13 @@ singularity exec ~/ubuntu.img echo "Hey, I'm running ubuntu"
 ```
 
 In the above job, we set HCMR's  cluster "Zorba", to run P.E.M.A. in 2 nodes, with 20 cores in each of those.
+
+
+
+
+
+
+
 
 
 
