@@ -12,7 +12,7 @@ the one from all samples and it is the one that P.E.M.A. ended up with.
 The same for all the final files (Cumulative, Chao1 etc). This way you can see the final results of the complete analyses, 
 but the immediate files of only one sample.
 
-ATTENTION! 
-You need to download all four .rar folders in order to get the complete output folder as it is!
+## **ATTENTION!** 
+You need to download **all four** .rar folders in order to get the complete output folder as it is!
 
 
