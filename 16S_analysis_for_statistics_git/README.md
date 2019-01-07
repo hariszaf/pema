@@ -1,4 +1,4 @@
-This is an example output folder of P.E.M.A. for the Pavloudi *et al.* dataset.
+This is an example output folder of P.E.M.A. for the Pavloudi *et al.* dataset (https://www.ebi.ac.uk/ena/data/view/PRJEB20211).
 
 In this output folder you can find all the files as they are produced from P.E.M.A. but only for the one of the 
 samples of the dataset. 
@@ -16,3 +16,5 @@ but the immediate files of only one sample.
 You need to download **all four** .rar folders in order to get the complete output folder as it is!
 
 
+Reference 
+C. Pavloudi, J. B. Kristoffersen, A. Oulas, M. De Troch, and C. Arvanitidis, “Sediment microbial taxonomic and functional diversity in a natural salinity gradient challenge Remane’s “species minimum” concept,” PeerJ, vol. 5, p. e3687, 2017.
