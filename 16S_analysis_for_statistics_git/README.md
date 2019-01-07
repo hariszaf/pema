@@ -1,4 +1,4 @@
-This is an example output folder of P.E.M.A. for the Pavloudi et al. dataset.
+This is an example output folder of P.E.M.A. for the Pavloudi *et al.* dataset.
 
 In this output folder you can find all the files as they are produced from P.E.M.A. but only for the one of the 
 samples of the dataset. 
