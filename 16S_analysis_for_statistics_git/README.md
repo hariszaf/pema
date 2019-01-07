@@ -13,8 +13,8 @@ The same for all the final files (Cumulative, Chao1 etc). This way you can see t
 but the immediate files of only one sample.
 
 ## **ATTENTION!** 
-You need to download **all four** .rar folders in order to get the complete output folder as it is!
+You need to download **all four** .rar folders in order to get the complete output folder as it is! \
 
 
-Reference 
+**Reference**
 C. Pavloudi, J. B. Kristoffersen, A. Oulas, M. De Troch, and C. Arvanitidis, “Sediment microbial taxonomic and functional diversity in a natural salinity gradient challenge Remane’s “species minimum” concept,” PeerJ, vol. 5, p. e3687, 2017.
