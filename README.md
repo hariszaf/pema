@@ -198,6 +198,28 @@ The most crucial component in running P.E.M.A. is the parameters' file. This is 
 So, here is the **parameters.tsv** file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
 
 
+
+## P.E.M.A.'s output files
+Each of the next paragraphs stands for a subfolder in the output folder that P.E.M.A. creates after each run.
+
+### 1.quality_control
+
+The first folder in the output folder contains the results of FastQC; the quality control results. In this folder, there is a folder for each sample, as well as a .html file and a .zip file which contain all the information included in the folder with the sample’s output. The sequences of each sample, could get either a “pass”, “warn” or “fail” to each of FASTQC’s tests. 
+
+
+
+### 2.trimmomatic_output
+
+
+
+
+
+
+
+
+
+
+
 ## Acknowledgments
 P.E.M.A. uses a series of tools, datasets as well as Big Data Script language. We have to thank all of these groups.
 The tools & databases that PEMA uses are :
