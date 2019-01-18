@@ -5,9 +5,7 @@
 <br/><br/>
 # P.E.M.A.:
 # a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
-<br/>
-<br/>
-
+<br/><br/><br/>
 
 P.E.M.A. is a pipeline for two marker genes, **16S rRNA** (microbes) and **COI** (Eukaryotes). As input, P.E.M.A. accepts .fastq files as returned by Illumina sequencing platforms. P.E.M.A. processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, P.E.M.A. returns **alpha and beta diversities**, and make correlations between samples. The last step is facilitated by Rhea, a set of R scripts for downstream 16S amplicon analysis of microbial profiles.
 
@@ -247,8 +245,7 @@ Finally, ***“16S_otutab.txt”*** is the OTU-table that P.E.M.A. ends up with.
 
 
 
-In case that the phylogeny-based taxonomy approach is also performed, then another folder called **16S_taxon_assign_phylogeny_assignment** is being created 
-
+In case that the phylogeny-based taxonomy approach has also been performed, another folder called **16S_taxon_assign_phylogeny_assignment** has been created;  two output files are included in this folder: the “epa_info.log” which includes all parameters as they were set in EPA-ng and the “epa_result.jplace” file which is the final output of this approach and can be used as an input to a series of different tools (e.g. iTOL) in order to visualize the assignments of the OTUs found to the reference tree of 1000 taxa. . 
 
 
 
