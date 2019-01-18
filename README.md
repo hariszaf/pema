@@ -213,13 +213,8 @@ Each of the next paragraphs stands for a subfolder in the output folder that P.E
 
 The first folder in the output folder contains the results of FastQC; the quality control results. In this folder, there is a folder for each sample, as well as a .html file and a .zip file which contain all the information included in the folder with the sample’s output. The sequences of each sample, could get either a “pass”, “warn” or “fail” to each of FASTQC’s tests. 
 
-
-
-### 2.trimmomatic_output
-
-
-
-
+### Pre-processing steps
+In folders *2.trimmomatic_output*, *3.correct_by_BayesHammer*, *4.merged_by_SPAdes*, *5.dereplicate_by_obiuniq* and *6.linearized_files* the output of each of the tools used for the pre-processing of the reads, are placed. 
 
 ### 6.linearized_files
 
@@ -259,6 +254,11 @@ In case that the phylogeny-based taxonomy approach is also performed, then anoth
 
 
 
+
+**Attention!**
+For the phylogeny-based taxonomy assignemnt, an MSA is supposed to be made with both the reference sequences and the queries; the final file is supposed to contain only the alignment of the query sequences as it ensued. The reference sequences are removed automatically from the final MSA by P.E.M.A. which subsequently executes the “convertPhylipToFasta.sh” (which is located in the folder *scripts* of P.E.M.A.) manually written program, to convert this final MSA from phylip (.phy) to Fasta (.fasta) format. 
+
+Finally, EPA-ng is performed using the MSA file (“papara_alignment.fasta”, located in the *gene_16S* folder) along with the reference MSA (“raxml_easy_right_refmsa.raxml.reduced.phy.fasta”) and the reference tree (“raxml_easy_right_refmsa.raxml.bestTree”). The last two files, can be found here: *PEMA/tools/silva_132/for_placement/createTreeTheEasyWay*
 
 
 * #### gene_COI
