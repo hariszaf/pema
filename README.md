@@ -229,7 +229,8 @@ The folder called “6.linearized_files” contains the sequences that remained 
 
 In this folder, all output from clustering and taxonomy assignment steps are placed. Depending on the marker gene, another folder is created on it. 
 
-#### gene_16S
+
+* #### gene_16S
 
 The sequences that were defined as OTUs (Operational Taxonomic Unit) can be found in the “16S_all_samples.otus.fa” file. 
 
@@ -260,7 +261,7 @@ In case that the phylogeny-based taxonomy approach is also performed, then anoth
 
 
 
-#### gene_COI
+* #### gene_COI
 
 The file “SWARM_otu_no_chimera.fasta” contains all the MOTUs found.
 
