@@ -168,7 +168,7 @@ nano parameters.csv
 ```
 
 For more details about the #parameters.csv#, please check on the [manual for the parapeter's file](https://www.google.com).
-
+Αpparently, you can use any text-editor. The "Nano" editor that is mentioned, is just an example.
 
 Finally, when all the above are set, the only thing remaining to do, is to run P.E.M.A.
 
