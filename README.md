@@ -214,6 +214,53 @@ The first folder in the output folder contains the results of FastQC; the qualit
 
 
 
+### 6.linearized_files
+
+The folder called “6.linearized_files” contains the sequences that remained after they were treated properly to form a single .fasta (“teliko_all_samples.fasta”). That is the file P.E.M.A. will use from this point onwards for the clustering and taxonomy assignment steps.
+
+### 7.gene_dependent
+
+In this folder, all output from clustering and taxonomy assignment steps are placed. Depending on the marker gene, another folder is created on it. 
+
+#### gene_16S
+
+The sequences that were defined as OTUs (Operational Taxonomic Unit) can be found in the “16S_all_samples.otus.fa” file. 
+
+The OTU-table that includes the OTUs found and the number of the copies observed in each sample, lies in the file “16S_otutab.txt”.
+
+The OTU-table that includes the OTUs found and the number of the copies observed in each sample, lies in the file “16S_otutab.txt”. Obviously, in this OTU-table there are no taxonomies.
+
+Finally, there is also a folder called **16S_taxon_assign** where the output of the alignmet-based taxonomy assignment step is placed.
+
+The *“Relative_Abundance.tsv”* file contains relative abundance data across the dataset, which are normalised to the total number of assigned reads.
+
+The number of assignments at each taxonomic rank are provided in *“All_Assignments.tsv”*. Assignments to the taxon node itself are counted only and not to child taxa at lower ranks. For each taxon, the full taxonomic path from root to the taxon itself is also provided.
+
+In *“All_Cumulative.tsv”* file, cumulative counts for the number of assignments at each taxonomic rank are listed. Contrary to *“All_Assignments.tsv”*, here assignments to child taxa are counted too.
+
+Total count of OTUs for each taxon as well as their number can be found in *“Richness.tsv”*. 
+
+Finally, ***“16S_otutab.txt”*** is the OTU-table that P.E.M.A. ends up with. The OTU-table contains all information about how OTUs are distributed, and hence it contains the taxonomic composition across each sample of the dataset.
+
+
+
+In case that the phylogeny-based taxonomy approach is also performed, then another folder called **16S_taxon_assign_phylogeny_assignment** is being created 
+
+
+
+
+
+
+
+
+#### gene_COI
+
+The file “SWARM_otu_no_chimera.fasta” contains all the MOTUs found.
+
+As SWARM does the clustering and then the chimera removal takes place, in this file only the true MOTU sequences are included. Contrary, MOTU representatives are included in the “SWARM_final_OTU_representative.fasta” .
+
+SWARM also produces two files “.stats” and “.swarms”. The first one is a tab-separated table with one MOTU per row and 8 columns of information, while  the MOTUs are written in the “.swarms” file. In fact, each line of this file, contains as much MOTUs as it is mentioned in the first column of the “.stats” file.
+
 
 
 
