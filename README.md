@@ -2,11 +2,10 @@
   <img src="https://i.paste.pics/870189fadf668a958c8aac83f38e799c.png"  width="300" align="left" >
 </p>
 
-<br/><br/><br/><br/>
+<br/><br/><br/>
 # P.E.M.A.:
 # a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
 
-<br/><br/><br/>
 
 
 
