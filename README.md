@@ -195,7 +195,7 @@ Please, keep in mind that when you want to copy a whole directory, then you alwa
 ## Parameters' file
 The most crucial component in running P.E.M.A. is the parameters' file. This is located in the same directory as P.E.M.A. does and the user needs to fill it **every time** P.E.M.A. is about to be called.
 
-So, here is the **parameters.tsv** file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
+So, here is the [**parameters.tsv**](https://github.com/hariszaf/pema/blob/master/parameters_docker.tsv) file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
 
 
 
