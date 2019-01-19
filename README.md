@@ -3,9 +3,34 @@
 </p>
 
 <br/><br/>
-P.E.M.A.: a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
+# P.E.M.A.: 
+# a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes
 <br/><br/><br/>
 
+Table of Contents
+=================
+
+      * [Getting Started](#getting-started)
+      * [P.E.M.A on HPC](#pema-on-hpc)
+         * [Prerequisites](#prerequisites)
+         * [Installing](#installing)
+         * [Running P.E.M.A.](#running-pema)
+            * [Example](#example)
+      * [P.E.M.A on a simple PC](#pema-on-a-simple-pc)
+         * [Prerequisites](#prerequisites-1)
+         * [Installing](#installing-1)
+         * [Running P.E.M.A.](#running-pema-1)
+            * [Step 1 - Build a Docker container](#step-1---build-a-docker-container)
+            * [Step 2 - Run P.E.M.A.](#step-2---run-pema)
+      * [Parameters' file](#parameters-file)
+      * [P.E.M.A.'s output files](#pemas-output-files)
+         * [1.quality_control](#1quality_control)
+         * [Pre-processing steps](#pre-processing-steps)
+         * [6.linearized_files](#6linearized_files)
+         * [7.gene_dependent](#7gene_dependent)
+            * [gene_16S](#gene_16s)
+            * [gene_COI](#gene_coi)
+      * [Acknowledgments](#acknowledgments)
 
 
 
