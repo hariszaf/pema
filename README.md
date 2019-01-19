@@ -253,6 +253,7 @@ In case that the phylogeny-based taxonomy approach has also been performed, anot
 
 
 **Attention!**
+<br/>
 For the phylogeny-based taxonomy assignemnt, an MSA is supposed to be made with both the reference sequences and the queries; the final file is supposed to contain only the alignment of the query sequences as it ensued. The reference sequences are removed automatically from the final MSA by P.E.M.A. which subsequently executes the “convertPhylipToFasta.sh” (which is located in the folder *scripts* of P.E.M.A.) manually written program, to convert this final MSA from phylip (.phy) to Fasta (.fasta) format. 
 
 Finally, EPA-ng is performed using the MSA file (“papara_alignment.fasta”, located in the *gene_16S* folder) along with the reference MSA (“raxml_easy_right_refmsa.raxml.reduced.phy.fasta”) and the reference tree (“raxml_easy_right_refmsa.raxml.bestTree”). The last two files, can be found here: *PEMA/tools/silva_132/for_placement/createTreeTheEasyWay*
