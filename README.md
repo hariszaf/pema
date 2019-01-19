@@ -14,7 +14,7 @@ P.E.M.A. is a pipeline for two marker genes, **16S rRNA** (microbes) and **COI**
 In the COI case, two clustering algorithms can be performed by P.E.M.A. (CROP and SWARM), while in the 16S, two approaches for taxonomy assignment are supported: alignment- and phylogenetic-based. For the latter, a reference tree with 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
 
 
-## Getting Started
+# Getting Started
 
 P.E.M.A. is able to run either on a HPC environment (server, cluster etc) or on a simple PC of your own. However, we definitely suggest to run it on an HPC environment. A powerful server or a cluster, even better, is necessary, as  P.E.M.A. would take ages in a common PC.
 
@@ -25,17 +25,17 @@ On the next chapters, you can find how to install P.E.M.A. in each case as well 
 Running P.E.M.A. is exactly **the same** procedure in both oh these cases.
 
 
-## P.E.M.A on HPC
+# P.E.M.A on HPC
 
 P.E.M.A. is best to run on HPC (server, cluster, cloud). Usually Environmental data are quite large and the whole process has huge computational demands. To get P.E.M.A. running on your HPC you need just to do the followings.
 
-### Prerequisites
+## Prerequisites
 
 **[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )**  is a free, cross-platform and open-source computer program that performs operating-system-level virtualization also known as containerization. One of the main uses of Singularity is to bring containers and reproducibility to scientific computing and the high-performance computing (HPC) world
 
 Singularity, needs a Linux system to run .
 
-### Installing
+## Installing
 
 After you install Singularity in your environment and open it, you need to download P.E.M.A.'s image from Docker Hub, by running the command:
 
@@ -46,7 +46,7 @@ singularity pull docker://hariszaf/pema
 Now you have P.E.M.A. on your environment and the only thing that is left to do, is to fulfill the **parapeters.tsv**  file (see below, on "Parameters' file" section) and run P.E.M.A.
 
 
-### Running P.E.M.A.
+## Running P.E.M.A.
 Singularity allows to use a  job scheduler that allocates compute resources on clusters and at the same time, works as a queuing system, as **[Slurm](https://slurm.schedmd.com/overview.html)**. This way you are able to create a job as you useally do in your system and after setting the parameters' file as you want to, run P.E.M.A. as a job on your cluster.
 
 
@@ -57,7 +57,7 @@ sudo singularity shell --overlay my_overlay/ pema_on_singularity.sif
 
 
 
-#### Example
+### Example
 
 ```
 #SBATCH --partition=batch
@@ -88,10 +88,10 @@ In the above job, we set HCMR's  cluster "Zorba", to run P.E.M.A. in 2 nodes, wi
 
 
 
-## P.E.M.A on a simple PC
+# P.E.M.A on a simple PC
 
 
-### Prerequisites
+## Prerequisites
 
 To run P.E.M.A. in a simple PC on your own environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
 
@@ -120,7 +120,7 @@ If you have a newer version of VirtualBox installed, it’s fine.
 ```
 
 
-### Installing
+## Installing
 
 After you install Docker in your environment and open it, the only thing you need to do, is to download P.E.M.A.'s image, by running the command:
 
@@ -131,11 +131,11 @@ docker pull hariszaf/pema
 P.E.M.A. is a quite large image (~2Gb) so it will take a while until it is downloaded in your computer system.
 
 
-### Running P.E.M.A.
+## Running P.E.M.A.
 
 Running P.E.M.A. has two discrete steps.
 
-#### Step 1 - Build a Docker container
+### Step 1 - Build a Docker container
 
 At first, you need to let Docker have access in your dataset. For this you need to run this command, specifying the path to where your data is stored, i.e. changing the path_to_my_data accordingly:
 
@@ -159,7 +159,7 @@ docker run -it --rm --name foo --volumes-from=vol
 ```
 
 
-#### Step 2 - Run P.E.M.A.
+### Step 2 - Run P.E.M.A.
 
 To run P.E.M.A. you first need to set all parameters the way they should be, depending on your dataset and your experiment.
 
@@ -199,33 +199,33 @@ Please, keep in mind that when you want to copy a whole directory, then you alwa
 
 
 
-## Parameters' file
+# Parameters' file
 The most crucial component in running P.E.M.A. is the parameters' file. This is located in the same directory as P.E.M.A. does and the user needs to fill it **every time** P.E.M.A. is about to be called.
 
 So, here is the [**parameters.tsv**](https://github.com/hariszaf/pema/blob/master/parameters_docker.tsv) file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
 
 
 
-## P.E.M.A.'s output files
+# P.E.M.A.'s output files
 Each of the next paragraphs stands for a subfolder in the output folder that P.E.M.A. creates after each run.
 
-### 1.quality_control
+## 1.quality_control
 
 The first folder in the output folder contains the results of FastQC; the quality control results. In this folder, there is a folder for each sample, as well as a .html file and a .zip file which contain all the information included in the folder with the sample’s output. The sequences of each sample, could get either a “pass”, “warn” or “fail” to each of FASTQC’s tests. 
 
-### Pre-processing steps
+## Pre-processing steps
 In folders *2.trimmomatic_output*, *3.correct_by_BayesHammer*, *4.merged_by_SPAdes*, *5.dereplicate_by_obiuniq* and *6.linearized_files* the output of each of the tools used for the pre-processing of the reads, are placed. 
 
-### 6.linearized_files
+## 6.linearized_files
 
 The folder called “6.linearized_files” contains the sequences that remained after they were treated properly to form a single .fasta (“teliko_all_samples.fasta”). That is the file P.E.M.A. will use from this point onwards for the clustering and taxonomy assignment steps.
 
-### 7.gene_dependent
+## 7.gene_dependent
 
 In this folder, all output from clustering and taxonomy assignment steps are placed. Depending on the marker gene, another folder is created on it. 
 
 
-* #### gene_16S
+* ### gene_16S
 
 The sequences that were defined as OTUs (Operational Taxonomic Unit) can be found in the “16S_all_samples.otus.fa” file. 
 
@@ -261,7 +261,7 @@ For the phylogeny-based taxonomy assignemnt, an MSA is supposed to be made with 
 Finally, EPA-ng is performed using the MSA file (“papara_alignment.fasta”, located in the *gene_16S* folder) along with the reference MSA (“raxml_easy_right_refmsa.raxml.reduced.phy.fasta”) and the reference tree (“raxml_easy_right_refmsa.raxml.bestTree”). The last two files, can be found here: *PEMA/tools/silva_132/for_placement/createTreeTheEasyWay*
 
 
-* #### gene_COI
+* ### gene_COI
 
 The file “SWARM_otu_no_chimera.fasta” contains all the MOTUs found.
 
@@ -275,7 +275,7 @@ SWARM also produces two files “.stats” and “.swarms”. The first one is a
 
 
 
-## Acknowledgments
+# Acknowledgments
 P.E.M.A. uses a series of tools, datasets as well as Big Data Script language. We have to thank all of these groups.
 The tools & databases that PEMA uses are :
 * FASTQC - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
