@@ -3,10 +3,36 @@
 </p>
 
 <br/><br/>
-
+# P.E.M.A.: a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes 
 <br/><br/><br/><br/>
 
 
+Table of Contents
+=================
+
+   * [Getting Started](#getting-started)
+   * [P.E.M.A on HPC](#pema-on-hpc)
+      * [Prerequisites](#prerequisites)
+      * [Installing](#installing)
+      * [Running P.E.M.A.](#running-pema)
+         * [Example](#example)
+   * [P.E.M.A on a simple PC](#pema-on-a-simple-pc)
+      * [Prerequisites](#prerequisites-1)
+      * [Installing](#installing-1)
+      * [Running P.E.M.A.](#running-pema-1)
+         * [Step 1 - Build a Docker container](#step-1---build-a-docker-container)
+         * [Step 2 - Run P.E.M.A.](#step-2---run-pema)
+   * [Parameters' file](#parameters-file)
+   * [P.E.M.A.'s output files](#pemas-output-files)
+      * [1.quality_control](#1quality_control)
+      * [Pre-processing steps](#pre-processing-steps)
+      * [6.linearized_files](#6linearized_files)
+      * [7.gene_dependent](#7gene_dependent)
+         * [gene_16S](#gene_16s)
+         * [gene_COI](#gene_coi)
+   * [Acknowledgments](#acknowledgments)
+
+Created by [gh-md-toc](https://github.com/ekalinin/github-markdown-toc)
 
 
 P.E.M.A. is a pipeline for two marker genes, **16S rRNA** (microbes) and **COI** (Eukaryotes). As input, P.E.M.A. accepts .fastq files as returned by Illumina sequencing platforms. P.E.M.A. processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, P.E.M.A. returns **alpha and beta diversities**, and make correlations between samples. The last step is facilitated by Rhea, a set of R scripts for downstream 16S amplicon analysis of microbial profiles.
