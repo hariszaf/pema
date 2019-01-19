@@ -3,8 +3,8 @@
 </p>
 
 <br/><br/>
-# P.E.M.A.: 
-# a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes 
+ P.E.M.A.: 
+ a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes 
 *P.E.M.A. is reposited in* [*DockerHub*](https://hub.docker.com/r/hariszaf/pema)
 <br/><br/><br/><br/>
 
@@ -254,13 +254,13 @@ In this folder, all output from clustering and taxonomy assignment steps are pla
 
 * ### gene_16S
 
-The sequences that were defined as OTUs (Operational Taxonomic Unit) can be found in the “16S_all_samples.otus.fa” file. 
+The sequences that were defined as OTUs (Operational Taxonomic Unit) by the USEARCH/UPARSE clustering algorithm, can be found in the “16S_all_samples.otus.fa” file. 
 
 The OTU-table that includes the OTUs found and the number of the copies observed in each sample, lies in the file “16S_otutab.txt”.
 
 The OTU-table that includes the OTUs found and the number of the copies observed in each sample, lies in the file “16S_otutab.txt”. Obviously, in this OTU-table there are no taxonomies.
 
-Finally, there is also a folder called **16S_taxon_assign** where the output of the alignmet-based taxonomy assignment step is placed.
+Finally, there is also a folder called **16S_taxon_assign** where the output of the **alignmet-based taxonomy assignment** step is placed.
 
 The *“Relative_Abundance.tsv”* file contains relative abundance data across the dataset, which are normalised to the total number of assigned reads.
 
@@ -273,11 +273,7 @@ Total count of OTUs for each taxon as well as their number can be found in *“R
 Finally, ***“16S_otutab.txt”*** is the OTU-table that P.E.M.A. ends up with. The OTU-table contains all information about how OTUs are distributed, and hence it contains the taxonomic composition across each sample of the dataset.
 
 
-
-In case that the phylogeny-based taxonomy approach has also been performed, another folder called **16S_taxon_assign_phylogeny_assignment** has been created;  two output files are included in this folder: the “epa_info.log” which includes all parameters as they were set in EPA-ng and the “epa_result.jplace” file which is the final output of this approach and can be used as an input to a series of different tools (e.g. iTOL) in order to visualize the assignments of the OTUs found to the reference tree of 1000 taxa. . 
-
-
-
+In case that the **phylogeny-based taxonomy approach** has also been performed, another folder called **16S_taxon_assign_phylogeny_assignment** has been created;  two output files are included in this folder: the “epa_info.log” which includes all parameters as they were set in EPA-ng and the “epa_result.jplace” file which is the final output of this approach and can be used as an input to a series of different tools (e.g. iTOL) in order to visualize the assignments of the OTUs found to the reference tree of 1000 taxa. . 
 
 
 
@@ -290,15 +286,25 @@ Finally, EPA-ng is performed using the MSA file (“papara_alignment.fasta”, l
 
 * ### gene_COI
 
+For the COI marker gene, there are two clustering algorithms provided by P.E.M.A.  but only one taxonomy assignment methond. Depending on the chosen clustering algorithm, a subfolder in the  Let us assume that the clustering method chosen by the user, was the Swarm clustering algorithm. Then a subfolder in the *7.gene_dependent* folder is created called as the clustering algorithm chosen; in our case *"SWARM"**. 
+
 The file “SWARM_otu_no_chimera.fasta” contains all the MOTUs found.
 
 As SWARM does the clustering and then the chimera removal takes place, in this file only the true MOTU sequences are included. Contrary, MOTU representatives are included in the “SWARM_final_OTU_representative.fasta” .
 
 SWARM also produces two files “.stats” and “.swarms”. The first one is a tab-separated table with one MOTU per row and 8 columns of information, while  the MOTUs are written in the “.swarms” file. In fact, each line of this file, contains as much MOTUs as it is mentioned in the first column of the “.stats” file.
 
+Finally, for the alignment-based taxonomy assignment that is used in the case of the COI marker gene, CREST - LCAClassifier and the MIDORI database, are used and their results are placed in the same folder as the clustering step's output. 
+
+In the ***tax_assign_swarm_COI.txt*** file, the user can find the final OTU-table.
 
 
 
+## Rhea - for the analysis of microbial profiles
+
+In the case of 16S marker gene and for the analysis of the microbial profiles, P.E.M.A. includes the Rhea list of scripts. 
+
+When the user runs Rhea as part of the analysis, then he has to follow Rhea's [instructions] (https://github.com/Lagkouvardos/Rhea) in each of its scripts and its output will be placed in an extra subfolder in the main output folder of P.E.M.A. called *Rhea_otus*. 
 
 
 
