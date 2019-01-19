@@ -206,8 +206,6 @@ Finally, when all the above are set, the only thing remaining to do, is to run P
 
 P.E.M.A. is now running and it depends on your computer (or server or cluster), on the size of your data, as well as on the parameters you chose, how long it will take.
 
-When
-
 In order to get the output file in your computer, you just need to copy it from the Docker container you are working on. To do so, you just need to see the **id** of your container, simply by typing:
 
 ```
@@ -221,6 +219,9 @@ docker cp <contaier_ID>:/path/to/what/you/need/to/copy/ /path/to/the/directory/y
 ```
 
 Please, keep in mind that when you want to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located.
+
+
+
 
 
 
