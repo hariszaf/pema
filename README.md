@@ -300,7 +300,7 @@ SWARM also produces two files “.stats” and “.swarms”. The first one is a
 
 Finally, for the alignment-based taxonomy assignment that is used in the case of the COI marker gene, CREST - LCAClassifier and the MIDORI database, are used and their results are placed in the same folder as the clustering step's output. 
 
-In the ***tax_assign_swarm_COI.txt*** file, the user can find the final OTU-table.
+In the ***tax_assign_swarm_COI.txt*** file, the user can find the final MOTU-table. All MOTUs found, are assigned to species level; each of them has a taxonomy and next to each taxon level, the percentage of similarity that the MOTU belongs to that taxon is reported. However, the final MOTU-table for the case of the COI marker gene, is not made by the *“tax_assign_swarm_COI.txt”* file, but after a pre-process on that, during which only the assignments that have more than 97% similarity to the MIDORI taxa, are kept. The final MOTU-table is the *OTU_table_for_significantly_assigned.tsv* file, where the user can see the taxonomies found with certainty and the samples in which they were recorded.
 
 
 
