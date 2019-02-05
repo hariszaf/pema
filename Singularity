@@ -9,5 +9,5 @@ parameters_singularity.tsv ./
 
 
 
-%post
-/home/tools/BDS/.bds/bds /home/PEMA_singularity_version.bds
+#%post
+#/home/tools/BDS/.bds/bds /home/PEMA_singularity_version.bds
