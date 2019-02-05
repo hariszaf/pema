@@ -5,7 +5,7 @@ From: hariszaf/pema2
 
 
 %files 
-parameters_docker.tsv ./
+parameters_singularity.tsv ./
 
 
 
