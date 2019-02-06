@@ -4,8 +4,8 @@ From: hariszaf/pema2
 
 
 
-%files 
-parameters_singularity.tsv ./
+#%files 
+#parameters_singularity.tsv ./
 
 
 
