@@ -9,8 +9,8 @@ From: hariszaf/pema2
 
 
 
-%environment
-    export PATH /usr/games:${PATH}
-    export LC_ALL=C
+#%environment
+#    export PATH /usr/games:${PATH}
+#    export LC_ALL=C
 
 
