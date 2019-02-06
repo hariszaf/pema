@@ -9,5 +9,10 @@ parameters_singularity.tsv ./
 
 
 
+%environment
+    export PATH="$PATH:/home"
+    export LC_ALL=C
+
+
 #%post
 #/home/tools/BDS/.bds/bds /home/PEMA_singularity_version.bds
