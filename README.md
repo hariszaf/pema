@@ -70,10 +70,19 @@ Singularity, needs a Linux system to run .
 After you install Singularity in your environment and open it, you need to download P.E.M.A.'s image from Docker Hub, by running the command:
 
 ```
-singularity pull docker://hariszaf/pema
+singularity build pema docker://hariszaf/pema2
 ```
 
-Now you have P.E.M.A. on your environment and the only thing that is left to do, is to fulfill the **parapeters.tsv**  file (see below, on "Parameters' file" section) and run P.E.M.A.
+or 
+
+```
+ singularity build pema shub://hariszaf/pema
+```
+
+Now you have P.E.M.A. on your environment. But there is still one thing that you need to do! And it is an **important** one!
+Please **download** the **[parapeters.tsv]**( https://github.com/hariszaf/pema/blob/master/parameters.tsv ).
+
+Now you are ready to go! 
 
 
 ## Running P.E.M.A.
