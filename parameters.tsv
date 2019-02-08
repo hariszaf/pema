@@ -1,0 +1,209 @@
+############################################################################################
+###############################   P.E.M.A. 's PARAMETERS   #####################################
+############################################################################################
+#
+#
+# In this file there are all the parameters that NEED TO BE ASSIGNED every time you need PEMA to run!
+# That does not mean that these parameters that we have her,  are the only  parameters of the tools PEMA uses!
+# As you already may know, the combinations are infinite!
+# Hence, we encourage you the most to study the manual of each tool and make them as good as possible for your SPECIFIC experiment.
+# In each and every variable that you see quotes ( '' ) you have to write inside those the option you choose
+# The rest, you need to complete them with a number and never add quotes.
+# We chose to have a set of parameters for some tools (mainly for Trimmomatic) as 'by default'. That is because in some cases, plenty of time is required
+# in order to have a correct set of those. In the link next to each tool, you can find further information about its parameters.
+# YOU NEED TO BE REALLY CAREFUL WHEN YOU FILL THIS FILE !!
+#  From each variable you have to leave EXACTLY FOUR (4) BLANKS and then fill the parameter as you wish.
+#
+## just to test that the parameters are assigned right in our main script:
+#
+sources	my_parameters_work_just_fine!
+#
+#
+## Give the path where your data is located
+#
+pathOfYourData	/home/haris/test/data
+#
+#
+## give in your each uniq experiment a NAME, so a single output file will be created for each of them
+outputFile	testingSingularity
+#
+#############################################################
+######################   blastqc    #########################
+#############################################################
+#
+## no parameters here!
+#
+#
+#############################################################
+##################### trimmomatic   #########################		//	http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/TrimmomaticManual_V0.32.pdf
+#############################################################
+#
+## Performs an adaptive quality trim, balancing the benefits
+## of retaining longer reads against the costs of retaining
+## bases with errors.
+## can be either 'Yes' or 'No'
+maxInfo	Y
+#
+#
+############ for MAXINFO ####################
+## Specifies the read length which is likely to allow the
+## location of the read within the target sequence to be determined
+targetLength	200
+#
+#
+## this value, which should be set between 0 and 1, specifies the
+## balance between preserving as much read length as possible vs.
+## removal of incorrect bases. A low value of this parameter (<0.2)
+## favours longer reads, while a high value (>0.8) favours read correctness.
+strictness	0.3
+#
+#
+############ for ILLUMINACLIP ##################
+## specifies the path to a fasta file containing all the adapters, PCR sequences etc.
+## The naming of the various sequences within this file determines how they are used.
+adapters	TruSeq2-PE.fa
+#
+##specifies the maximum mismatch count which will still allow a full match
+## to be performed
+seedMismatches	1
+#
+#
+## specifies how accurate the match between the two 'adapter ligated' reads
+## must be for PE palindrome read alignment.
+palindromeClipThreshold	30
+#
+#
+## specifies how accurate the match between any adapter etc. sequence must be against a read.
+simpleClipThreshold	10
+#
+#
+############ for LEADING  ##########################
+## Remove low quality bases from the beginning. As long as a base has a value
+## below this threshold the base is removed and the next base will be investigated.
+## quality: Specifies the minimum quality required to keep a base.
+leading	3
+#
+#
+############ for TRAILING  #############################
+## Remove low quality bases from the end. As long as a base has a value below this
+## threshold the base is removed and the next base (which as trimmomatic is starting
+## from the 3‟ prime end would be base preceding the just removed base) will be investigated.
+trailing	3
+#
+#
+############  for MINLEN  ################################
+## This module removes reads that fall below the specified minimal length. If required, it should
+## normally be after all other processing steps. Reads removed by this step will be counted and
+## included in the „dropped reads‟ count presented in the trimmomatic summary
+minlen	100
+#
+#
+#
+###############################################################
+#################   BayesHammer   #############################
+###############################################################
+#
+## no parameters here!
+#
+#
+################################################################
+####################    SPAdes       ########################### ######
+################################################################
+#
+## PANDAseq has more than one merging algorithms. Here, we set the algorithm used for assembly
+## The most common of them are:
+## pear --> uses the formula described in the PEAR paper (Zhang 2013), optionally with the probability of a random base (q) provide
+## simple_bayesian --> uses the formula described in the original paper (Masella 2012), optionally with an error estimation (ε) provided.
+## other options are stich, flash and more that you can fing in the above link
+spadesAlgorithm	simple_bayesian
+#
+#
+## in our command, we also have -a that strips the primers after assembly, rather than before.
+## and -B that allows input sequences to lack a barcode/tag.
+## if you wish to have even more option of SPAdes you should visit http://neufeldserver.uwaterloo.ca/%7Eapmasell/pandaseq_man1.html
+##and then add them to the main script
+#
+#
+################################################################
+################  DEREPLICATE me ti voitheia ton OBITools !  ###################
+#################################################################
+#
+#
+## no parameters here!
+#
+#
+#
+################################################################################################
+#//////////////////////////////////////////////////////////////////////////////////////////////
+############################ GENE -  dependent parameters #####################################
+#//////////////////////////////////////////////////////////////////////////////////////////////
+###############################################################################################
+#
+## The marker gene you have is really important for both the clustering & chimera removal procedure and the
+## taxonomy assignment. By default, the pipeline runs for 16S. Substitute with 'COI' if COI is your marker gene
+## write down your gene after "_" character - do not erase it!!
+gene	gene_16S
+#
+## You might want to download the last version of SILVA database and handle it with the primers you have used
+## in your experiment in order to get an even better assignment. You can find SILVA 132 already in PEMA/tools
+## Hence, by default getting_silva is FALSE. You have to turn it to TRUE in order to do so.
+gettingSilva	FALSE
+primerF	''
+primerR	''
+#
+#
+## if your marker gene is 16S, you can choose between 2 different approaches of taxonomy assignment (alignment & phylogenetic based)
+## by  default, you get an alignment based taxonomy assignment - set as 'alignment' -  which is based on SILVA and CREST
+## however you can also get a phylogenetic based assignment, by putting 'phylogeny' in this parameter
+taxonomyAssignmentMethod	alignment
+#
+#
+## if your marker gene is  COI, you can choose between 2 different approaches of clustering. Depending on which of them you choose
+## you get either a robust output in a short time (SWARM)  or a non-robust output (CROP) that requires quite much more time. CROP is a bayesian
+## algorithm and that is why its output in non-robust. By default, SWARM algorithm runs for the clustering. You have to change in to 'CROP'
+## if you want the CROP algorithm to do the clustering step
+clusteringAlgo	algo_SWARM
+#
+#
+#
+#
+# in case of SWARM, the user needs to speeecify the value of "d" parameter
+# d is the number of missmatches
+d	10
+#
+#######################################################################################################
+#
+## Would you like to get one taxonomy assignment using normal BLAST?!
+## can be either 'Yes' or 'No'.
+blast	N
+blastPath	/home/haris/blocking_primers/programs/BLAST/ncbi-blast-2.7.1+/bin
+blastDatabase	/mnt/big/blastdb/nt/nt/nt
+#
+#
+#
+#
+#  If your marker gene is 16S and you wish to use Rhea in order to analyse your returned data
+#  then you need to create a tree using these OTUs. If you do wish so, set 'preparingForRhea' as 'Yes'
+#
+forRhea	N
+#
+## If you need to make a tree for running Rhea, you will need RAxMl
+## Hence please give us the path where RAxML is located on your cluster
+raxmlPath	/usr/bin/raxmlHPC
+pathForR	/usr/bin/Rscript
+# In case you wish for Beta-diversity from Rhea, then you have to set a categorical variable.
+# Hence, you have to set 'categoricalVariable' as 'Y' and then go to the Rhea script for Beta-diversity to set which variable you want as categorical
+# We should mention here, that P.E.M.A has already created the tree Rhea needs from its first step. Hence, the user now can use Rhea scripts, even out of P.E.M.A
+# as all needed files are made.
+categoricalVariable	Y
+#
+#
+## Give to PEMA the percentage of similarity over which you want to keep taxonomy as for sure taxa
+percentageOfSimilarity	91
+#
+#
+## Finally, do you want your raw data to be removed in another file and empty the "rawData" file and all the checkpoints of PEMA to be also in an extra folder
+## Swich 'Yes' to 'No' if you wish so. Be very careful when you do that, as you need to remember that if you want to analyze another dataset through P.E.M.A
+## you will have to remove the first one manually.
+emptyRawDataFile	Y
+emptyCheckpoints	Y
