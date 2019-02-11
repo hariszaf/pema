@@ -3,11 +3,11 @@ From: hariszaf/pema2
 
 
 
-% post
+%post
 export WORKDIR="/home"
 echo "export WORKDIR=$WORKDIR" >> $SINGULARITY_ENVIRONMENT
 mkdir -p $WORKDIR
 
 echo "export PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/tools/BDS/.bds" >> $SINGULARITY_ENVIRONMENT 
-echo "export PATH=$PATH:/home/tools/BDS/.bds/bds" >> $SINGULARITY_ENVIRONMENT
+##echo "export PATH=$PATH:/home/tools/BDS/.bds/bds" >> $SINGULARITY_ENVIRONMENT
   
