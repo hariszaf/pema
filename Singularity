@@ -10,7 +10,9 @@ mkdir -p $WORKDIR
 
 echo "export PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/tools/BDS/.bds" >> $SINGULARITY_ENVIRONMENT 
 ##echo "export PATH=$PATH:/home/tools/BDS/.bds/bds" >> $SINGULARITY_ENVIRONMENT
-  
+
+echo "cdmod +777 /home/tools/PANDAseq/pandaseq/.libs" >> $SINGULARITY_ENVIRONMENT 
+
 
 %runscript
 /home/tools/BDS/.bds/bds /home/PEMA.bds
