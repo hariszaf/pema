@@ -13,5 +13,9 @@ echo "export PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin
 
 
 
+
+
+
+
 %runscript
 /home/tools/BDS/.bds/bds /home/PEMA.bds
