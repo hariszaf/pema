@@ -2,7 +2,6 @@ Bootstrap: docker
 From: hariszaf/pema2
 
 
-
 %post
 export WORKDIR="/home"
 echo "export WORKDIR=$WORKDIR" >> $SINGULARITY_ENVIRONMENT
