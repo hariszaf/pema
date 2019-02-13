@@ -10,7 +10,6 @@ mkdir -p $WORKDIR
 echo "export PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/tools/BDS/.bds" >> $SINGULARITY_ENVIRONMENT 
 echo "export PATH=$PATH:/bin/gzip" >> ~/.bashrc 
 
-
 %runscript
 
 #/home/tools/BDS/.bds/bds /home/PEMA.bds
