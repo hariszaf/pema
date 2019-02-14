@@ -11,8 +11,6 @@ echo "export PATH=/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin
 echo "export PATH=$PATH:/bin/gzip" >> ~/.bashrc 
 
 
-
-
 %runscript
 
 #/home/tools/BDS/.bds/bds /home/PEMA.bds
