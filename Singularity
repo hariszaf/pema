@@ -13,7 +13,6 @@ echo "export PATH=$PATH:/bin/gzip" >> ~/.bashrc
 
 
 
-
 %runscript
 
 #/home/tools/BDS/.bds/bds /home/PEMA.bds
