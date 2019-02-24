@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # This is a script that converts the raw data file of Illumina sequencer, to the ENA format. 
-# In case of P.E.M.A., the ENA format was used as a template and all sample files that are going to be used in running P.E.M.A. need to be in the ENA format.
+# In case of P.E.M.A. the ENA format was used as a template.
+# All sample files that are going to be used in running P.E.M.A., they need to be in the ENA format.
 
 
 directory=${1}
