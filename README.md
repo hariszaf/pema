@@ -5,7 +5,7 @@
 <br/><br/>
 # P.E.M.A.: 
 # a Pipeline for Environmental DNA Metabarcoding Analysis for the 16S and COI marker genes 
-*P.E.M.A. is reposited in* [*DockerHub*](https://hub.docker.com/r/hariszaf/pema) *as well as in* [*Singularity Hub*](https://singularity-hub.org/collections/2295)
+*P.E.M.A. is reposited in* [*Docker Hub*](https://hub.docker.com/r/hariszaf/pema) *as well as in* [*Singularity Hub*](https://singularity-hub.org/collections/2295)
 <br/><br/><br/><br/>
 
 
