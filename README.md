@@ -210,7 +210,7 @@ To do so, run the command below and set the parameters in it:
 nano parameters.csv
 ```
 
-For more details about the #parameters.csv#, please check on the [manual for the parapeter's file](https://www.google.com).
+For more details about the #parameters.csv#, please check on the [manual for the parameter's file](https://github.com/hariszaf/pema#parameters-file).
 Αpparently, you can use any text-editor. The "Nano" editor that is mentioned, is just an example.
 
 Finally, when all the above are set, the only thing remaining to do, is to run P.E.M.A.
