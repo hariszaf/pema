@@ -70,17 +70,19 @@ Singularity, needs a Linux system to run .
 After you install Singularity in your environment and open it, you need to download P.E.M.A.'s image from Docker Hub, by running the command:
 
 ```
-singularity build pema docker://hariszaf/pema2
+singularity build pema shub://hariszaf/pema
 ```
 
 or 
 
 ```
- singularity build pema shub://hariszaf/pema
+ singularity pull pema shub://hariszaf/pema
 ```
 
+We suggest to run the second command as it takes much less time and it will also be easier to use. 
+
 Now you have P.E.M.A. on your environment. But there is still one thing that you need to do! And it is an **important** one!
-Please **download** the **[parapeters.tsv]**( https://github.com/hariszaf/pema/blob/master/parameters.tsv ).
+Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/parameters.tsv).
 
 Now you are ready to go! 
 
@@ -242,7 +244,7 @@ Please, keep in mind that when you want to copy a whole directory, then you alwa
 # Parameters' file
 The most crucial component in running P.E.M.A. is the parameters' file. This is located in the same directory as P.E.M.A. does and the user needs to fill it **every time** P.E.M.A. is about to be called.
 
-So, here is the [**parameters.tsv**](https://github.com/hariszaf/pema/blob/master/parameters_docker.tsv) file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
+So, here is the **[parameters.tsv]** (https://github.com/hariszaf/pema/blob/master/parameters_docker.tsv) file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
 
 
 
