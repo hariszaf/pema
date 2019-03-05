@@ -139,10 +139,10 @@ In the above job, we set HCMR's  cluster "Zorba", to run P.E.M.A. in 2 nodes, wi
 
 ## Prerequisites
 
-To run P.E.M.A. in a simple PC on your own environment, you first need to install Docker ( https://docs.docker.com/install/ ), in case you do not already have it.
+To run P.E.M.A. in a simple PC on your own environment, you first need to install [Docker]( https://docs.docker.com/install/ ), in case you do not already have it.
 
 You should check your software version. Docker is avalable for all Windows, Mac and Linux.  
-However, in case of Windows and Mac, you might need to install Docker toolbox instead ( https://docs.docker.com/toolbox/ ), if your System Requirements are not the ones mentioned below.
+However, in case of Windows and Mac, you might need to install [Docker toolbox]( https://docs.docker.com/toolbox/) instead, if your System Requirements are not the ones mentioned below.
 
 **System Requirements**
 
