@@ -75,30 +75,17 @@ Singularity, needs a Linux system to run .
 After you install Singularity in your environment and open it, you need to download P.E.M.A.'s image from Docker Hub, by running the command:
 
 ```
-singularity build pema shub://hariszaf/pema
-```
-
-or 
-
-```
  singularity pull pema shub://hariszaf/pema
 ```
 
-We suggest to run the second command as it takes much less time and it will also be easier to use. 
-
 Now you have P.E.M.A. on your environment. But there is still one thing that you need to do! And it is an **important** one!
-Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/parameters.tsv).
+Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/parameters.tsv) and move it or copy it to the same folder with your raw data.
 
 Now you are ready to go! 
 
 
 ## Running P.E.M.A.
 Singularity allows to use a  job scheduler that allocates compute resources on clusters and at the same time, works as a queuing system, as **[Slurm](https://slurm.schedmd.com/overview.html)**. This way you are able to create a job as you useally do in your system and after setting the parameters' file as you want to, run P.E.M.A. as a job on your cluster.
-
-
-
-
-sudo singularity shell --overlay my_overlay/ pema_on_singularity.sif
 
 
 
@@ -118,7 +105,8 @@ sudo singularity shell --overlay my_overlay/ pema_on_singularity.sif
 #SBATCH --mail-type=ALL
 #SBATCH --requeue
 
-singularity exec ~/ubuntu.img echo "Hey, I'm running ubuntu"
+
+singularity run -B /<path>/<of>/<input>/<folder>/:/mnt /<path>/<of>/<PEMA_Image>
 
 ```
 
@@ -126,9 +114,12 @@ In the above job, we set HCMR's  cluster "Zorba", to run P.E.M.A. in 2 nodes, wi
 
 
 
+## ATTENTION!
+In the **input folder** you have to put:
+* a subfolder that contains your data (.fastq.gz) files 
+* the **parameters.tsv** file
 
-
-
+Those two things need to be in the same folder and that is the **input folder** that you will mount to the Singularity image.
 
 
 
