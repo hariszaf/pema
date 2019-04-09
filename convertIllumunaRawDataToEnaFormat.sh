@@ -33,26 +33,43 @@ done
 
 
 # convert them in the ENA format
+let counter=-1
+let giveName=0
+
 for sample in ./*
 do
+    ((counter+=1))
+    echo counter = $counter
+    let test=$counter%2
+    echo test = $test
 
-	sampleName=${sample#*/}
+    if [ "$test" -eq "0" ]
+    then
+        ((giveName+=1))
+    fi                              # i added this counter
+
+    echo giveName = $giveName
+
+	sampleName=${sample##*/}            # i added a "#"
 	sampleId=${sampleName%%_*}
-	 
-
+	newName="ERR0000"$giveName           # i inserted this variable 
+    echo $sample
 	if [ ${sample: -7}=="1.fastq" ]
 	then
 		
-		sed "s/^@M0.*/@$sampleId\./g" $sampleName > $directoryPath/"half_${sampleId}_1.fastq"	
-		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/1"} else print $0}' half_"${sampleId}"\_1.fastq  > $directoryPath/ena_"${sampleId}"\_1.fastq 
+        # i muted the line below, and i replaced it with the same but this time we call the files and the sequences with the newName variable. In addition, in the next command I also put "newName" where it used to be "sampleId"
+		#sed "s/^@M0.*/@$sampleId\./g" $sampleName > $directoryPath/"half_${sampleId}_1.fastq"	
+		sed "s/^@M0.*/@$newName\./g" $sampleName > $directoryPath/"half_${sampleName}_1.fastq"	
+		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/1"} else print $0}' half_"${sampleName}"\_1.fastq  > $directoryPath/ena_"${newName}"\_1.fastq 
 		
 	fi
 	
 	if [ ${sample: -7}=="2.fastq" ]
 	then
 		
-		sed "s/^@M0.*/@$sampleId\./g" $sampleName > $directoryPath/"half_${sampleId}_2.fastq"
-		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/2"} else print $0}' half_"${sampleId}"\_2.fastq  > $directoryPath/ena_"${sampleId}"\_2.fastq
+		#sed "s/^@M0.*/@$sampleId\./g" $sampleName > $directoryPath/"half_${sampleId}_2.fastq"
+		sed "s/^@M0.*/@$newName\./g" $sampleName > $directoryPath/"half_${newName}_2.fastq"
+		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/2"} else print $0}' half_"${newName}"\_2.fastq  > $directoryPath/ena_"${newName}"\_2.fastq
 		
 	fi
 done
