@@ -38,29 +38,25 @@ let giveName=0
 
 for sample in ./*
 do
-    ((counter+=1))
-    echo counter = $counter
-    let test=$counter%2
-    echo test = $test
+	((counter+=1))
+	echo counter = $counter
+	let test=$counter%2
+	echo test = $test
 
-    if [ "$test" -eq "0" ]
-    then
-        ((giveName+=1))
-    fi                              # i added this counter
+	if [ "$test" -eq "0" ]
+	then
+		((giveName+=1))
+	fi                              
+	
+	echo giveName = $giveName
 
-    echo giveName = $giveName
-
-	sampleName=${sample##*/}            # i added a "#"
+	sampleName=${sample##*/}            
 	sampleId=${sampleName%%_*}
-	base=ERR
-	#newName="ERR00000"$giveName           # i inserted this variable 
 	newName=$(printf "ERR%07d" $giveName)
-    echo $sample
+	echo $sample
 	if [ ${sample: -7}=="1.fastq" ]
 	then
-		
-        # i muted the line below, and i replaced it with the same but this time we call the files and the sequences with the newName variable. In addition, in the next command I also put "newName" where it used to be "sampleId"
-		#sed "s/^@M0.*/@$sampleId\./g" $sampleName > $directoryPath/"half_${sampleId}_1.fastq"	
+			
 		sed "s/^@M0.*/@$newName\./g" $sampleName > $directoryPath/"half_${sampleName}_1.fastq"	
 		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/1"} else print $0}' half_"${sampleName}"\_1.fastq  > $directoryPath/ena_"${newName}"\_1.fastq 
 		
@@ -69,13 +65,19 @@ do
 	if [ ${sample: -7}=="2.fastq" ]
 	then
 		
-		#sed "s/^@M0.*/@$sampleId\./g" $sampleName > $directoryPath/"half_${sampleId}_2.fastq"
 		sed "s/^@M0.*/@$newName\./g" $sampleName > $directoryPath/"half_${newName}_2.fastq"
 		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/2"} else print $0}' half_"${newName}"\_2.fastq  > $directoryPath/ena_"${newName}"\_2.fastq
 		
 	fi
+	
+	echo $sampleId    "-->"    $newName >> transformations.txt
+	
+	
 done
 
+
+cat transformations.txt | sort | uniq > transformations_sort.txt
+rm transformations.txt ; mv transformations_sort.txt mapping_files_for_PEMA.txt
 
 
 # remove some temp files created and move the converted files to a new folder
