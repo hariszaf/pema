@@ -52,7 +52,9 @@ do
 
 	sampleName=${sample##*/}            # i added a "#"
 	sampleId=${sampleName%%_*}
-	newName="ERR0000"$giveName           # i inserted this variable 
+	base=ERR
+	#newName="ERR00000"$giveName           # i inserted this variable 
+	newName=$(printf "ERR%07d" $giveName)
     echo $sample
 	if [ ${sample: -7}=="1.fastq" ]
 	then
