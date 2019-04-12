@@ -38,22 +38,22 @@ let giveName=0
 
 for sample in ./*
 do
-	((counter+=1))
-	echo counter = $counter
-	let test=$counter%2
-	echo test = $test
+    ((counter+=1))
+    echo counter = $counter
+    let test=$counter%2
+    echo test = $test
 
-	if [ "$test" -eq "0" ]
-	then
-		((giveName+=1))
-	fi                              
-	
-	echo giveName = $giveName
+    if [ "$test" -eq "0" ]
+    then
+        ((giveName+=1))
+    fi                              
+
+    echo giveName = $giveName
 
 	sampleName=${sample##*/}            
 	sampleId=${sampleName%%_*}
 	newName=$(printf "ERR%07d" $giveName)
-	echo $sample
+    echo $sample
 	if [ ${sample: -7}=="1.fastq" ]
 	then
 			
@@ -70,7 +70,7 @@ do
 		
 	fi
 	
-	echo $sampleId    "-->"    $newName >> transformations.txt
+	echo -e $sampleId"\t"$newName >> transformations.txt
 	
 	
 done
@@ -78,6 +78,10 @@ done
 
 cat transformations.txt | sort | uniq > transformations_sort.txt
 rm transformations.txt ; mv transformations_sort.txt mapping_files_for_PEMA.txt
+#sed -i '1s/^/-------------------------------------------------\n/' mapping_files_for_PEMA.txt
+sed -i '1s/^/initial_label_from_sequencer\t\ena_format_label\n\n/' mapping_files_for_PEMA.txt
+
+
 
 
 # remove some temp files created and move the converted files to a new folder
