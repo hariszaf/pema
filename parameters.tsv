@@ -20,7 +20,7 @@ sources	my_parameters_work_just_fine!
 #
 #
 ## give in your each uniq experiment a NAME, so a single output file will be created for each of them
-outputFile	testingSingularity
+outputFile	tutorial_analysis
 #
 #############################################################
 ######################   blastqc    #########################
