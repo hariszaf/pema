@@ -102,7 +102,7 @@ minlen	100
 #
 #
 ################################################################
-####################    SPAdes       ########################### ######
+####################    PANDAseq       ########################### // https://storage.googleapis.com/pandaseq/pandaseq.html
 ################################################################
 #
 ## PANDAseq has more than one merging algorithms. Here, we set the algorithm used for assembly
