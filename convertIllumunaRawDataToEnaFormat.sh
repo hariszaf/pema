@@ -1,8 +1,16 @@
 #!/bin/bash
 
 # This is a script that converts the raw data file of Illumina sequencer, to the ENA format. 
+#
 # In case of P.E.M.A. the ENA format was used as a template.
 # All sample files that are going to be used in running P.E.M.A., they need to be in the ENA format.
+#
+# This script will accomplish this task as long as your paired end raw data files end like this:
+#
+# forward read: "1.fastq.gz"
+# reverese reads "2.fastq.gz"
+#
+# The rest of the name is irrelevant. 
 
 
 directory=${1}
