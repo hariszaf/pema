@@ -14,7 +14,7 @@
 ---------  **This is still a BETA version!**    ---------
 ```
 
-P.E.M.A. is a pipeline for two marker genes, **16S rRNA** (microbes) and **COI** (Eukaryotes). As input, P.E.M.A. accepts .fastq files as returned by Illumina sequencing platforms. P.E.M.A. processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, P.E.M.A. returns **alpha and beta diversities**, and make correlations between samples. The last step is facilitated by Rhea, a set of R scripts for downstream 16S amplicon analysis of microbial profiles.
+P.E.M.A. is a pipeline for two marker genes, **16S rRNA** (microbes) and **COI** (Eukaryotes). As input, P.E.M.A. accepts .fastq files as returned by Illumina sequencing platforms. P.E.M.A. processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, P.E.M.A. returns **alpha and beta diversities**, and make correlations between samples. The last step is facilitated by the "phyloseq" R package for downstream 16S amplicon analysis of microbial profiles.
 
 In the COI case, two clustering algorithms can be performed by P.E.M.A. (CROP and SWARM), while in the 16S, two approaches for taxonomy assignment are supported: alignment- and phylogenetic-based. For the latter, a reference tree with 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
 
@@ -42,7 +42,7 @@ Table of Contents
       * [7.gene_dependent](#7gene_dependent)
          * [gene_16S](#gene_16s)
          * [gene_COI](#gene_coi)
-      * [Rhea - for the analysis of microbial profiles](#rhea---for-the-analysis-of-microbial-profiles)
+      * [**phyloseq** - for the analysis of microbial profiles](#rhea---for-the-analysis-of-microbial-profiles)
    * [Acknowledgments](#acknowledgments)
    * [Citation](#citation)
 
