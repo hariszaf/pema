@@ -331,6 +331,7 @@ The tools & databases that PEMA uses are :
 * BLAST- https://blast.ncbi.nlm.nih.gov/Blast.cgiCMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download
 * CREST - https://github.com/lanzen/CREST
 * SILVA db - https://www.arb-silva.de/no_cache/download/archive/current/Exports/
+* "phat" algorithm, from the "gappa" package - https://github.com/lczech/gappa/wiki/Subcommand:-phat
 * RAxML - https://sco.h-its.org/exelixis/web/software/raxml/index.html
 * RAxML -ng - https://github.com/amkozlov/raxml-ng
 * EPA-ng - https://github.com/Pbdas/epa-ng
