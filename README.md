@@ -311,12 +311,11 @@ In the ***tax_assign_swarm_COI.txt*** file, the user can find the final MOTU-tab
 
 
 
-## Rhea - for the analysis of microbial profiles
+## "phyloseq" R package - for the analysis of microbial profiles
 
-In the case of 16S marker gene and for the analysis of the microbial profiles, P.E.M.A. includes the Rhea list of scripts. 
+In the case of 16S marker gene and for the analysis of the microbial profiles, P.E.M.A. performs all that the "phyloseq" R package provides. 
 
-When the user runs Rhea as part of the analysis, then he has to follow Rhea's [instructions] (https://github.com/Lagkouvardos/Rhea) in each of its scripts and its output will be placed in an extra subfolder in the main output folder of P.E.M.A. called *Rhea_otus*. 
-
+When the user asks for a downstream analysis using the "phyloseq" R package, then an extra input file called *"phyloseq_script.R"* needs to be imported in the "analysis_folder". In PEMA's main repository, you can find a template of this file; this file needs to be as it would run on your own computer, as you would run *phyloseq* in any case. PEMA will create the *"pgyloseq object"* automatically and then it will perform the analysis as asked. The output will be placed in an extra subfolder in the main output folder of P.E.M.A. called *phyloseq_analysis*. 
 
 
 # Acknowledgments
@@ -337,8 +336,9 @@ The tools & databases that PEMA uses are :
 * EPA-ng - https://github.com/Pbdas/epa-ng
 * SWARM - https://github.com/torognes/swarm
 * CROP - https://github.com/tingchenlab/CROP
-* VSEARCH-2.7.1 - https://github.com/torognes/vsearch/releases/tag/v2.7.1
+* VSEARCH-2.9.1 - https://github.com/torognes/vsearch/releases/tag/v2.9.1
 * RDPClassifier - https://github.com/rdpstaff/classifier
 (RPDtools are required in order to execute RDPClassifier)
+* phyloseq R package - http://joey711.github.io/phyloseq/index.html
 
 # Citation
