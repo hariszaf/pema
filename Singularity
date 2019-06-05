@@ -1,5 +1,6 @@
-Bootstrap: docker
-From: hariszaf/pema2
+### Unmute the 2 following lines, to put on the Singularity image
+#Bootstrap: docker
+#From: hariszaf/pema2
 
 
 %post
