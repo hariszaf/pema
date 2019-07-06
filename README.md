@@ -60,6 +60,21 @@ On the next chapters, you can find how to install P.E.M.A. in each case as well 
 Running P.E.M.A. is exactly **the same** procedure in both oh these cases.
 
 
+Hence, you need to create on **your computational environment** a folder where you will have everything PEMA needs to run - in the framework of this README file, we will call it ***analysis folder*.
+
+In this folder, you need to add:
+* the ***parameters.tsv*** file which you can download from this repository and **you need to complete** according to the needs of your analysis - mandatory 
+* a subfolder called ***mydata*** where your .fastq.gz files will be located - mandatory 
+and in case that your marker gene is the 16S and you need phyloseq to perform, in the analysis folder you also need to add:
+* the ***phyloseq_in_PEMA.R** which you can also download from this repository and set it the way you want - optioanally
+* and finaly your ***metadata.csv*** file which has to be comma separated - optionally
+
+**Attention**
+You need to call these files exactly as it is described above and the ***mydata*** subfolder as well.
+If you don't PEMA will fail. 
+
+
+
 # P.E.M.A on HPC
 
 P.E.M.A. is best to run on HPC (server, cluster, cloud). Usually Environmental data are quite large and the whole process has huge computational demands. To get P.E.M.A. running on your HPC you need just to do the followings.
@@ -311,7 +326,7 @@ In the ***tax_assign_swarm_COI.txt*** file, the user can find the final MOTU-tab
 
 
 
-## "phyloseq" R package - for the analysis of microbial profiles
+## "phyloseq" R package - for the of microbial profiles
 
 In the case of 16S marker gene and for the analysis of the microbial profiles, P.E.M.A. performs all that the "phyloseq" R package provides. 
 
