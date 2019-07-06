@@ -32,7 +32,7 @@ Table of Contents
       * [Running PEMA](#running-pema-1)
          * [Step 1 - Build a Docker container](#step-1---build-a-docker-container)
          * [Step 2 - Run PEMA](#step-2---run-pema)
-    * [PEMA on HPC](#pema-on-hpc)
+  * [PEMA on HPC](#pema-on-hpc)
       * [Prerequisites](#prerequisites)
       * [Installing](#installing)
       * [Running PEMA](#running-pema)
