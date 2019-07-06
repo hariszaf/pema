@@ -148,42 +148,26 @@ Running PEMA has two discrete steps.
 At first, you need to let Docker have access in your dataset. For this you need to run this command, specifying the path to where your data is stored, i.e. changing the path_to_my_data accordingly:
 
 ```
-docker run -it vol -v /<path_to_my_data>:/vol_myData pema
+docker run -it vol -v /<path_to_analysis_folder>/:/mnt/analysis pema
 ```
 
-After you run the command above, you have now built a Docker container, in which you can work with PEMA
+After you run the command above, you have now built a Docker container, in which you can run PEMA!
 
 
 ### Step 2 - Run PEMA
 
-To run PEMA you first need to set all parameters the way they should be, depending on your dataset and your experiment.
-
-For more details about the #parameters.csv#, please check on the [manual for the parameter's file](https://github.com/hariszaf/pema#parameters-file).
-Αpparently, you can use any text-editor. The "Nano" editor that is mentioned, is just an example.
-
-Finally, when all the above are set, the only thing remaining to do, is to run PEMA
+Now, being inside the PEMA contaienr, the only thing remaining to do, is to run PEMA
 
 ```
 ./PEMA_docker_version.bds
 ```
 
-PEMA is now running and it depends on your computer (or server or cluster), on the size of your data, as well as on the parameters you chose, how long it will take.
-
-In order to get the output file in your computer, you just need to copy it from the Docker container you are working on. To do so, you just need to see the **id** of your container, simply by typing:
-
-```
-docker ps -a
-```
-
-and then, copying anything you want to, from a single file to the whole folder, with a command like this:
-
-```
-docker cp <contaier_ID>:/path/to/what/you/need/to/copy/ /path/to/the/directory/you/want/to/copy/it/to/
-```
+PEMA is now running and it depends on the computational feautres of your environment, on the size of your data, as well as on the parameters you chose, how long it will take.
 
 Please, keep in mind that when you want to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located.
 
-
+Finally, you will find the PEMA output in the analysis folder on your computer. <br />
+As the output folder is mounted into the Docker container we built, you can copy its contents wherever you want to as you would do regularly, however, in case you want to remove it permanently, you need to do this as a sudo user. 
 
 
 # PEMA on HPC
