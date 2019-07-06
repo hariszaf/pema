@@ -308,25 +308,32 @@ When the user asks for a downstream analysis using the "phyloseq" R package, the
 
 
 # Acknowledgments
-PEMA uses a series of tools, datasets as well as Big Data Script language. We have to thank all of these groups.
+PEMA uses a series of tools, datasets as well as Big Data Script language. We need to thank all of these groups.
 The tools & databases that PEMA uses are :
+* BigDataScript programming language - https://pcingola.github.io/BigDataScript/
 * FASTQC - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 * Τrimmomatic - http://www.usadellab.org/cms/?page=trimmomatic
-* SPAdes - http://cab.spbu.ru/software/spades/
-* BayesHammer - included in SPAdes
+* BayesHammer - included in SPAdes - http://cab.spbu.ru/software/spades/
+* PANDAseq - https://github.com/neufeld/pandaseq
 * OBITools - https://pythonhosted.org/OBITools/welcome.html
-* USEARCH - https://www.drive5.com/usearch/
-* BLAST- https://blast.ncbi.nlm.nih.gov/Blast.cgiCMD=Web&PAGE_TYPE=BlastDocs&DOC_TYPE=Download
-* CREST - https://github.com/lanzen/CREST
-* SILVA db - https://www.arb-silva.de/no_cache/download/archive/current/Exports/
-* "phat" algorithm, from the "gappa" package - https://github.com/lczech/gappa/wiki/Subcommand:-phat
-* RAxML -ng - https://github.com/amkozlov/raxml-ng
-* EPA-ng - https://github.com/Pbdas/epa-ng
+* BLAST Command Line Applications - https://www.ncbi.nlm.nih.gov/books/NBK52640/
+* VSEARCH-2.9.1 - https://github.com/torognes/vsearch/releases/tag/v2.9.1
 * SWARM - https://github.com/torognes/swarm
 * CROP - https://github.com/tingchenlab/CROP
-* VSEARCH-2.9.1 - https://github.com/torognes/vsearch/releases/tag/v2.9.1
+* CREST - https://github.com/lanzen/CREST
 * RDPClassifier - https://github.com/rdpstaff/classifier
 (RPDtools are required in order to execute RDPClassifier)
+* SILVA db - https://www.arb-silva.de/no_cache/download/archive/current/Exports/
+* MIDORI db - http://reference-midori.info/index.html
+* "phat" algorithm, from the "gappa" package - https://github.com/lczech/gappa/wiki/Subcommand:-phat
+* MAFFT - https://mafft.cbrc.jp/alignment/software/
+* RAxML -ng - https://github.com/amkozlov/raxml-ng
+* PaPaRa - https://cme.h-its.org/exelixis/web/software/papara/index.html
+* EPA-ng - https://github.com/Pbdas/epa-ng
 * phyloseq R package - http://joey711.github.io/phyloseq/index.html
+
+And definitely, we also need to thank the container-based technologies that allow PEMA to run in such an easy and efficient way:
+* Docker - https://www.docker.com/
+* Singularity - https://sylabs.io/singularity/
 
 # Citation
