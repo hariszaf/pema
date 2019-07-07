@@ -63,7 +63,7 @@ As you can see in the [**PEMA_tutorial.pdf**](https://github.com/hariszaf/pema/b
 
 PEMA is able to run either on a HPC environment (server, cluster etc) or on a simple PC of your own. However, we definitely suggest to run it on an HPC environment. A powerful server or a cluster, even better, is necessary, as  PEMA would take ages in a common PC.
 
-There is one **major difference** between running PEMA on your own PC than running it on a HPC environment. In the first case, PEMA runs through **Docker**, while in the latter one, it runs through **Singularity**.
+There is one **major difference** between running PEMA on your own PC than running it on a HPC environment. In the first case, PEMA runs through [**Docker**](https://www.docker.com/), while in the latter one, it runs through [**Singularity**](https://sylabs.io/singularity/).
 
 On the next chapters, you can find how to install PEMA in each case as well as an example of running it.
 
