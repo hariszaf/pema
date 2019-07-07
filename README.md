@@ -79,7 +79,7 @@ and in case that your marker gene is the 16S and you need phyloseq to perform, i
 * the ***phyloseq_in_PEMA.R** which you can also download from this repository and set it the way you want - optioanally
 * and finaly your ***metadata.csv*** file which has to be comma separated - optionally
 
-**Attention**
+**Attention!**  <br />
 You need to call these files exactly as it is described above and the ***mydata*** subfolder as well. <br />
 If you don't PEMA will fail. 
 
