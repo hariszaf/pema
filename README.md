@@ -53,7 +53,7 @@ PEMA supports the metabarcoding analysis of two marker genes, **16S rRNA** (micr
 In the COI case, two clustering algorithms can be performed by PEMA (CROP and SWARM), while in the 16S, two approaches for taxonomy assignment are supported: alignment- and phylogenetic-based. For the latter, a reference tree with 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
 
 
-PEMA has been implemented in ***BigDataScript*** programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such feature  and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine - for example, if PEMA is performed on a personal laptop with 4 cores, it is going to use them all. 
+PEMA has been implemented in [BigDataScript](https://pcingola.github.io/BigDataScript/) programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such feature  and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine - for example, if PEMA is performed on a personal laptop with 4 cores, it is going to use them all. 
 
 Finally, container-based technologies such as Docker and Singularity, make PEMA easy accessible for all operating systems.
 As you can see in the [**PEMA_tutorial.pdf**](https://github.com/hariszaf/pema/blob/master/PEMA_tutorial.pdf), once you have either Docker or Singularity on your computational evironment (see below which of those suits best for your case), running PEMA is cakewalk.
