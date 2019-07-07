@@ -14,11 +14,6 @@
 ---------  **This is still a BETA version!**    ---------
 ```
 
-PEMA is a pipeline for two marker genes, **16S rRNA** (microbes) and **COI** (Eukaryotes). As input, PEMA accepts .fastq.gz files as returned by Illumina sequencing platforms. PEMA processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, PEMA returns **alpha and beta diversities**, and make correlations between samples. The last step is facilitated by the "phyloseq" R package for downstream 16S amplicon analysis of microbial profiles.
-
-In the COI case, two clustering algorithms can be performed by PEMA (CROP and SWARM), while in the 16S, two approaches for taxonomy assignment are supported: alignment- and phylogenetic-based. For the latter, a reference tree with 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
-
-
 Table of Contents
 =================
 
@@ -53,9 +48,15 @@ Table of Contents
 
 # Intro 
 
-PEMA is a pipeline for two marker genes, 16S rRNA (microbes) and COI (eukaryotes). As input, PEMA accepts fastq files as returned by Illumina sequencing platforms. PEMA processes the reads from each sample and returns an OTU-table with the taxonomies of the organisms found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, in the case of 16S, PEMA returns alpha and beta diversities, and make correlations between samples. The last step is facilitated by Rhea, a set of R scripts for downstream 16S amplicon analysis of microbial profiles.
+PEMA supports the metabarcoding analysis of two marker genes, **16S rRNA** (microbes) and **COI** (eukaryotes). As input, PEMA accepts .fastq.gz files as returned by Illumina sequencing platforms. PEMA processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, for the case of the 16S marker gene, PEMA returns **alpha and beta diversities**, as well as correlations between samples. The last step is facilitated by the ***phyloseq*** R package which allows the downstream 16S amplicon analysis of microbial profiles.
 
 In the COI case, two clustering algorithms can be performed by PEMA (CROP and SWARM), while in the 16S, two approaches for taxonomy assignment are supported: alignment- and phylogenetic-based. For the latter, a reference tree with 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
+
+
+PEMA has been implemented in ***BigDataScript*** programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such feature  and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine - for example, if PEMA is performed on a personal laptop with 4 cores, it is going to use them all. 
+
+Finally, container-based technologies such as Docker and Singularity, make PEMA easy accessible for all operating systems.
+As you can see in the [**PEMA_tutorial.pdf**](https://github.com/hariszaf/pema/blob/master/PEMA_tutorial.pdf), once you have either Docker or Singularity on your computational evironment (see below which of those suits best for your case), running PEMA is cakewalk.
 
 
 # Getting Started
@@ -66,7 +67,7 @@ There is one **major difference** between running PEMA on your own PC than runni
 
 On the next chapters, you can find how to install PEMA in each case as well as an example of running it.
 
-Running PEMA is exactly **the same** procedure in both oh these cases.
+Running PEMA is exactly **the same** procedure in both oh these cases. As we already mentioned, we strongly suggest to use either a server or a cluster, instead of a common laptop. However, for analyses with a small number of samples, a common laptop can be used to.
 
 # First things first
 
@@ -94,7 +95,6 @@ mydata  parameters.tsv  phyloseq_in_PEMA.R  metadata.csv
 The most crucial component in running PEMA is the parameters file. This is located in the same directory as PEMA does and the user needs to fill it **every time** PEMA is about to be called.
 
 So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
-
 
 
 # PEMA on a simple PC
