@@ -70,7 +70,7 @@ Running PEMA is exactly **the same** procedure in both oh these cases.
 
 # First things first
 
-Hence, you need to create on **your computational environment** a folder where you will have everything PEMA needs to run - in the framework of this README file, we will call it ***analysis folder*.
+Hence, you need to create on **your computational environment** a folder where you will have everything PEMA needs to run - in the framework of this README file, we will call it ***analysis folder***.
 
 In this folder, you need to add:
 * the ***parameters.tsv*** file which you can download from this repository and **you need to complete** according to the needs of your analysis - mandatory 
