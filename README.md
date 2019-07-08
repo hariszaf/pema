@@ -48,7 +48,7 @@ Table of Contents
 
 # Intro 
 
-PEMA supports the metabarcoding analysis of two marker genes, **16S rRNA** (microbes) and **COI** (eukaryotes). As input, PEMA accepts .fastq.gz files as returned by Illumina sequencing platforms. PEMA processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, for the case of the 16S marker gene, PEMA returns **alpha and beta diversities**, as well as correlations between samples. The last step is facilitated by the [phyloseq](http://joey711.github.io/phyloseq/index.html) R package which allows the downstream 16S amplicon analysis of microbial profiles.
+PEMA supports the metabarcoding analysis of two marker genes, **16S rRNA** (microbes) and **COI** (eukaryotes). As input, PEMA accepts .fastq.gz files as returned by Illumina sequencing platforms. PEMA processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, for the case of the 16S marker gene, PEMA returns **alpha and beta diversities**, as well as other **multivariate analyses between samples**. The last step is facilitated by the [phyloseq](http://joey711.github.io/phyloseq/index.html) R package, which allows the downstream analysis of microbial profiles.
 
 In the COI case, two clustering algorithms can be performed by PEMA (CROP and SWARM), while in the 16S, two approaches for taxonomy assignment are supported: alignment- and phylogenetic-based. For the latter, a reference tree with 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
 
@@ -56,18 +56,18 @@ In the COI case, two clustering algorithms can be performed by PEMA (CROP and SW
 PEMA has been implemented in [BigDataScript](https://pcingola.github.io/BigDataScript/) programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such feature  and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine - for example, if PEMA is performed on a personal laptop with 4 cores, it is going to use them all. 
 
 Finally, container-based technologies such as Docker and Singularity, make PEMA easy accessible for all operating systems.
-As you can see in the [**PEMA_tutorial.pdf**](https://github.com/hariszaf/pema/blob/master/PEMA_tutorial.pdf), once you have either Docker or Singularity on your computational evironment (see below which of those suits best for your case), running PEMA is cakewalk.
+As you can see in the [**PEMA_tutorial.pdf**](https://github.com/hariszaf/pema/blob/master/PEMA_tutorial.pdf), once you have either Docker or Singularity on your computational environment (see below which of those suits best for your case), running PEMA is cakewalk.
 
 
 # Getting Started
 
-PEMA is able to run either on a HPC environment (server, cluster etc) or on a simple PC of your own. However, we definitely suggest to run it on an HPC environment. A powerful server or a cluster, even better, is necessary, as  PEMA would take ages in a common PC.
+PEMA is able to run either on a HPC environment (server, cluster etc) or on a simple PC of your own. However, we definitely suggest to run it on an HPC environment to exploit the full potential of PEMA. A powerful server or a cluster, even better, is necessary, as PEMA would require more computational time in a common PC.
 
 There is one **major difference** between running PEMA on your own PC than running it on a HPC environment. In the first case, PEMA runs through [**Docker**](https://www.docker.com/), while in the latter one, it runs through [**Singularity**](https://sylabs.io/singularity/).
 
 On the next chapters, you can find how to install PEMA in each case as well as an example of running it.
 
-Running PEMA is exactly **the same** procedure in both oh these cases. As we already mentioned, we strongly suggest to use either a server or a cluster, instead of a common laptop. However, for analyses with a small number of samples, a common laptop can be used to.
+Running PEMA is exactly **the same** procedure in both of those cases. As we already mentioned, we strongly suggest to use either a server or a cluster, instead of a common laptop. However, for analyses with a small number of samples, a common laptop can be used to.
 
 # First things first
 
