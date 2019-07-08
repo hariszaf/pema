@@ -76,6 +76,7 @@ Hence, you need to create on **your computational environment** a folder where y
 In this folder, you need to add (**mandatory**):
 * the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file which you can download from this repository and **you need to complete** according to the needs of your analysis 
 * a subfolder called ***mydata*** where your .fastq.gz files will be located <br /> <br />
+
 In case that your marker gene is 16S and you need to perform phyloseq, in the analysis folder you also need to add (**optionally**):
 * the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want
 * and finaly your ***metadata.csv*** file which has to be **comma separated**
