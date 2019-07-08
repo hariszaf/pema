@@ -50,7 +50,7 @@ Table of Contents
 
 PEMA supports the metabarcoding analysis of two marker genes, **16S rRNA** (microbes) and **COI** (eukaryotes). As input, PEMA accepts .fastq.gz files as returned by Illumina sequencing platforms. PEMA processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, for the case of the 16S marker gene, PEMA returns **alpha and beta diversities**, as well as other **multivariate analyses between samples**. The last step is facilitated by the [phyloseq](http://joey711.github.io/phyloseq/index.html) R package, which allows the downstream analysis of microbial profiles.
 
-In the COI case, two clustering algorithms can be performed by PEMA (CROP and SWARM), while in the 16S, two approaches for taxonomy assignment are supported: alignment- and phylogenetic-based. For the latter, a reference tree with 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
+In the COI case, two clustering algorithms can be performed by PEMA (CROP and SWARM), while in the 16S, two approaches for taxonomy assignment are supported: alignment- and phylogenetic-based. For the latter, a reference tree of 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
 
 
 PEMA has been implemented in [BigDataScript](https://pcingola.github.io/BigDataScript/) programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such feature  and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine - for example, if PEMA is performed on a personal laptop with 4 cores, it is going to use them all. 
@@ -79,7 +79,7 @@ In this folder, you need to add (**mandatory**):
 
 In case that your marker gene is 16S and you need to perform phyloseq, in the analysis folder you also need to add (**optionally**):
 * the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want
-* and finaly your ***metadata.csv*** file which has to be **comma separated**
+* and finally, your ***metadata.csv*** file which has to be **comma separated**
 
 **Attention!**  <br />
 You need to call these files exactly as it is described above and the ***mydata*** subfolder as well. <br />
@@ -146,7 +146,7 @@ Running PEMA has two discrete steps.
 
 ### Step 1 - Build a Docker container
 
-At first, you need to let Docker have access in your dataset. For this you need to run this command, specifying the path to where your data is stored, i.e. changing the path_to_my_data accordingly:
+At first, you need to let Docker have access in your dataset. For this you need to run this command, specifying the path to where your data is stored, i.e. changing the <path_to_analysis_folder> accordingly:
 
 ```
 docker run -it vol -v /<path_to_analysis_folder>/:/mnt/analysis pema
@@ -157,13 +157,13 @@ After you run the command above, you have now built a Docker container, in which
 
 ### Step 2 - Run PEMA
 
-Now, being inside the PEMA contaienr, the only thing remaining to do, is to run PEMA
+Now, being inside the PEMA container, the only thing remaining to do, is to run PEMA
 
 ```
 ./PEMA_docker_version.bds
 ```
 
-PEMA is now running and it depends on the computational feautres of your environment, on the size of your data, as well as on the parameters you chose, how long it will take.
+PEMA is now running and it depends on the computational features of your environment, on the size of your data, as well as on the parameters you chose, how long it will take.
 
 Please, keep in mind that when you want to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located.
 
@@ -177,9 +177,9 @@ PEMA is best to run on HPC (server, cluster, cloud). Usually Environmental data 
 
 ## Prerequisites
 
-**[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )**  is a free, cross-platform and open-source computer program that performs operating-system-level virtualization also known as containerization. One of the main uses of Singularity is to bring containers and reproducibility to scientific computing and the high-performance computing (HPC) world
+**[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )**  is a free, cross-platform and open-source computer program that performs operating-system-level virtualization also known as containerization. One of the main uses of Singularity is to bring containers and reproducibility to scientific computing and the high-performance computing (HPC) world.
 
-Singularity, needs a Linux system to run .
+Singularity needs a Linux system to run.
 
 ## Installing
 
@@ -224,23 +224,19 @@ singularity run -B /<path>/<of>/<input>/<folder>/:/mnt /<path>/<of>/<PEMA_Image>
 In the above job, we set HCMR's  cluster "Zorba", to run PEMA in 1 node, with 20 cores.
 
 
-
-
-
-
 # PEMA's output files
 Each of the next paragraphs stands for a subfolder in the output folder that PEMA creates after each run.
 
 ## 1.quality_control
 
-The first folder in the output folder contains the results of FastQC; the quality control results. In this folder, there is a folder for each sample, as well as a .html file and a .zip file which contain all the information included in the folder with the sample’s output. The sequences of each sample, could get either a “pass”, “warn” or “fail” to each of FASTQC’s tests. 
+The first folder in the output folder contains the results of FastQC; the quality control results. In this folder, there is a folder for each sample, as well as an .html file and a .zip file which contain all the information included in the folder with the sample’s output. The sequences of each sample, could get either a “pass”, “warn” or “fail” to each of FASTQC’s tests. 
 
 ## Pre-processing steps
 In folders *2.trimmomatic_output*, *3.correct_by_BayesHammer*, *4.merged_by_SPAdes*, *5.dereplicate_by_obiuniq* and *6.linearized_files* the output of each of the tools used for the pre-processing of the reads, are placed. 
 
 ## 6.linearized_files
 
-The folder called “6.linearized_files” contains the sequences that remained after they were treated properly to form a single .fasta (“teliko_all_samples.fasta”). That is the file PEMA will use from this point onwards for the clustering and taxonomy assignment steps.
+The folder called “6.linearized_files” contains the sequences that remained after they were treated properly to form a single .fasta (“final_all_samples.fasta”). That is the file PEMA will use from this point onwards for the clustering and taxonomy assignment steps.
 
 ## 7.gene_dependent
 
@@ -249,13 +245,11 @@ In this folder, all output from clustering and taxonomy assignment steps are pla
 
 * ### gene_16S
 
-The sequences that were defined as OTUs (Operational Taxonomic Unit) by the USEARCH/UPARSE clustering algorithm, can be found in the “16S_all_samples.otus.fa” file. 
-
-The OTU-table that includes the OTUs found and the number of the copies observed in each sample, lies in the file “16S_otutab.txt”.
+The sequences that were defined as OTUs (Operational Taxonomic Unit) by the VSEARCH clustering algorithm, can be found in the “16S_all_samples.otus.fa” file. 
 
 The OTU-table that includes the OTUs found and the number of the copies observed in each sample, lies in the file “16S_otutab.txt”. Obviously, in this OTU-table there are no taxonomies.
 
-Finally, there is also a folder called **16S_taxon_assign** where the output of the **alignmet-based taxonomy assignment** step is placed.
+Finally, there is also a folder called **16S_taxon_assign** where the output of the **alignment-based taxonomy assignment** step is placed.
 
 The *“Relative_Abundance.tsv”* file contains relative abundance data across the dataset, which are normalised to the total number of assigned reads.
 
@@ -268,20 +262,20 @@ Total count of OTUs for each taxon as well as their number can be found in *“R
 Finally, ***“16S_otutab.txt”*** is the OTU-table that PEMA ends up with. The OTU-table contains all information about how OTUs are distributed, and hence it contains the taxonomic composition across each sample of the dataset.
 
 
-In case that the **phylogeny-based taxonomy approach** has also been performed, another folder called **16S_taxon_assign_phylogeny_assignment** has been created;  two output files are included in this folder: the “epa_info.log” which includes all parameters as they were set in EPA-ng and the “epa_result.jplace” file which is the final output of this approach and can be used as an input to a series of different tools (e.g. iTOL) in order to visualize the assignments of the OTUs found to the reference tree of 1000 taxa. . 
+In case that the **phylogeny-based taxonomy approach** has also been performed, another folder called **16S_taxon_assign_phylogeny_assignment** has been created;  two output files are included in this folder: the “epa_info.log” which includes all parameters as they were set in EPA-ng and the “epa_result.jplace” file which is the final output of this approach and can be used as an input to a series of different tools (e.g. iTOL) in order to visualize the assignments of the OTUs found to the reference tree of 1000 taxa.
 
 
 
 **Attention!**
 <br/>
-For the phylogeny-based taxonomy assignemnt, an MSA is supposed to be made with both the reference sequences and the queries; the final file is supposed to contain only the alignment of the query sequences as it ensued. The reference sequences are removed automatically from the final MSA by PEMA which subsequently executes the “convertPhylipToFasta.sh” (which is located in the folder *scripts* of PEMA) manually written program, to convert this final MSA from phylip (.phy) to Fasta (.fasta) format. 
+For the phylogeny-based taxonomy assignment, an MSA is supposed to be made with both the reference sequences and the queries; the final file is supposed to contain only the alignment of the query sequences as it ensued. The reference sequences are removed automatically from the final MSA by PEMA which subsequently executes the “convertPhylipToFasta.sh” (which is located in the folder *scripts* of PEMA) manually written program, to convert this final MSA from phylip (.phy) to Fasta (.fasta) format. 
 
 Finally, EPA-ng is performed using the MSA file (“papara_alignment.fasta”, located in the *gene_16S* folder) along with the reference MSA (“raxml_easy_right_refmsa.raxml.reduced.phy.fasta”) and the reference tree (“raxml_easy_right_refmsa.raxml.bestTree”). The last two files, can be found here: *PEMA/tools/silva_132/for_placement/createTreeTheEasyWay*
 
 
 * ### gene_COI
 
-For the COI marker gene, there are two clustering algorithms provided by PEMA but only one taxonomy assignment methond. Depending on the chosen clustering algorithm, a subfolder in the  Let us assume that the clustering method chosen by the user, was the Swarm clustering algorithm. Then a subfolder in the *7.gene_dependent* folder is created called as the clustering algorithm chosen; in our case *"SWARM"**. 
+For the COI marker gene, there are two clustering algorithms provided by PEMA but only one taxonomy assignment method. Depending on the chosen clustering algorithm, a subfolder is created in it. Let us assume that the clustering method chosen by the user, was the Swarm clustering algorithm. Then a subfolder in the *7.gene_dependent* folder is created called as the clustering algorithm chosen; in our case *"SWARM"**. 
 
 The file “SWARM_otu_no_chimera.fasta” contains all the MOTUs found.
 
@@ -289,22 +283,22 @@ As SWARM does the clustering and then the chimera removal takes place, in this f
 
 SWARM also produces two files “.stats” and “.swarms”. The first one is a tab-separated table with one MOTU per row and 8 columns of information, while  the MOTUs are written in the “.swarms” file. In fact, each line of this file, contains as much MOTUs as it is mentioned in the first column of the “.stats” file.
 
-Finally, for the alignment-based taxonomy assignment that is used in the case of the COI marker gene, CREST - LCAClassifier and the MIDORI database, are used and their results are placed in the same folder as the clustering step's output. 
+Finally, for the alignment-based taxonomy assignment that is used in the case of the COI marker gene, CREST - LCAClassifier and the MIDORI database, are used and you can find the output of each of the tools used for the pre-processing of the reads.
 
-In the ***tax_assign_swarm_COI.txt*** file, the user can find the final MOTU-table. All MOTUs found, are assigned to species level; each of them has a taxonomy and next to each taxon level, the percentage of similarity that the MOTU belongs to that taxon is reported. However, the final MOTU-table for the case of the COI marker gene, is not made by the *“tax_assign_swarm_COI.txt”* file, but after a pre-process on that, during which only the assignments that have more than 97% similarity to the MIDORI taxa, are kept. The final MOTU-table is the ***OTU_table_for_significantly_assigned.tsv*** file, where the user can see the taxonomies found with certainty and the samples in which they were recorded.
+In the ***tax_assign_swarm_COI.txt*** file, the user can find the final MOTU-table. All MOTUs found, are assigned to species level; each of them has a taxonomy and next to each taxon level, the confidence estimate that the MOTU belongs to that taxon is reported. However, the final MOTU-table for the case of the COI marker gene, is not made by the *“tax_assign_swarm_COI.txt”* file, but after a pre-process on that, during which only the assignments that have more than 97% confidence estimate to the MIDORI taxa, are kept. The final MOTU-table is the ***OTU_table_for_significantly_assigned.tsv*** file, where the user can see the taxonomies found with certainty and the samples in which they were recorded.
 
 
 
-## "phyloseq" R package - for the of microbial profiles
+## "phyloseq" R package - for the analysis of microbial profiles
 
-In the case of 16S marker gene and for the analysis of the microbial profiles, PEMA. performs all that the "phyloseq" R package provides. 
+In the case of 16S marker gene and for the analysis of the microbial profiles, PEMA performs all the basic functions of the "phyloseq" R package. In addition, it performs certain functions of the [***vegan***](https://cran.r-project.org/web/packages/vegan/index.html) R package. 
 
-When the user asks for a downstream analysis using the "phyloseq" R package, then an extra input file called *"phyloseq_script.R"* needs to be imported in the "analysis_folder". In PEMA's main repository, you can find a template of this file; this file needs to be as it would run on your own computer, as you would run *phyloseq* in any case. PEMA will create the *"pgyloseq object"* automatically and then it will perform the analysis as asked. The output will be placed in an extra subfolder in the main output folder of PEMA called *phyloseq_analysis*. 
+When the user asks for a downstream analysis using the "phyloseq" R package, then an extra input file called *"phyloseq_script.R"* needs to be imported in the "analysis_folder". In PEMA's main repository, you can find a template of this file; this file needs to be as it would run on your own computer, as you would run *phyloseq* in any case. PEMA will create the *"phyloseq object"* automatically and then it will perform the analysis as asked. The output will be placed in an extra subfolder in the main output folder of PEMA called *phyloseq_analysis*. 
 
 
 # Acknowledgments
 PEMA uses a series of tools, datasets as well as Big Data Script language. We need to thank all of these groups.
-The tools & databases that PEMA uses are :
+The tools & databases that PEMA uses are: 
 * BigDataScript programming language - https://pcingola.github.io/BigDataScript/
 * FASTQC - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 * Τrimmomatic - http://www.usadellab.org/cms/?page=trimmomatic
@@ -326,6 +320,7 @@ The tools & databases that PEMA uses are :
 * PaPaRa - https://cme.h-its.org/exelixis/web/software/papara/index.html
 * EPA-ng - https://github.com/Pbdas/epa-ng
 * phyloseq R package - http://joey711.github.io/phyloseq/index.html
+* vegan R package - https://cran.r-project.org/web/packages/vegan/index.html 
 
 And definitely, we also need to thank the container-based technologies that allow PEMA to run in such an easy and efficient way:
 * Docker - https://www.docker.com/
