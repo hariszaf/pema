@@ -82,8 +82,8 @@ In case that your marker gene is 16S and you need to perform phyloseq, in the an
 * and finally, your ***metadata.csv*** file which has to be **comma separated**
 
 **Attention!**  <br />
-You need to call these files exactly as it is described above and the ***mydata*** subfolder as well. <br />
-If you don't PEMA will fail. 
+You need to **call** these files **exactly as it is described above** and the ***mydata*** subfolder as well. <br />
+If you don't PEMA will **fail**. 
 
 Here is an example of how your *analysis folder* should be:
 
