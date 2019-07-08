@@ -1,6 +1,6 @@
 ### Unmute the 2 following lines, to put on the Singularity image
 Bootstrap: docker
-From: hariszaf/pemav1sing
+From: hariszaf/pema:v1
 
 
 %post
