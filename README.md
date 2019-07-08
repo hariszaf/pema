@@ -9,10 +9,11 @@
 <br/><br/><br/><br/>
 
 
-
+<!---
 ```diff
----------  **This is still a BETA version!**    ---------
+[//]---------  **This is still a BETA version!**    ---------
 ```
+-->
 
 Table of Contents
 =================
