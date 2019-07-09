@@ -48,54 +48,55 @@ Table of Contents
 
 # Intro 
 
-PEMA supports the metabarcoding analysis of two marker genes, **16S rRNA** (microbes) and **COI** (eukaryotes). As input, PEMA accepts .fastq.gz files as returned by Illumina sequencing platforms. PEMA processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, for the case of the 16S marker gene, PEMA returns **alpha and beta diversities**, as well as other **multivariate analyses between samples**. The last step is facilitated by the [phyloseq](http://joey711.github.io/phyloseq/index.html) R package, which allows the downstream analysis of microbial profiles.
+PEMA supports the metabarcoding analysis of two marker genes, **16S rRNA** (microbes) and **COI** (eukaryotes). As input, PEMA accepts .fastq.gz files as returned by Illumina sequencing platforms
 
-In the COI case, two clustering algorithms can be performed by PEMA (CROP and SWARM), while in the 16S, two approaches for taxonomy assignment are supported: alignment- and phylogenetic-based. For the latter, a reference tree of 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
+. PEMA processes the reads from each sample and **returns an OTU-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, for the case of the 16S marker gene, PEMA returns **alpha and beta diversity values**, as well as other **multivariate analyses between samples**, facilitated by the [phyloseq](http://joey711.github.io/phyloseq/index.html) R package, which allows the downstream analysis of microbial profiles.
 
+In the case of the COI marker gene, PEMA can perform clustering with two different algorithms (CROP and SWARM), while in the case of 16S rRNA marker gene, PEMA includes two separate approaches for taxonomy assignment: alignment-based and phylogenetic-based. For the latter, a reference tree of 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
 
-PEMA has been implemented in [BigDataScript](https://pcingola.github.io/BigDataScript/) programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such feature  and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine - for example, if PEMA is performed on a personal laptop with 4 cores, it is going to use them all. 
+PEMA has been implemented in [BigDataScript](https://pcingola.github.io/BigDataScript/) programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such features and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine; for example, if PEMA is executed on a personal laptop with 4 cores, it is going to use all four of them. 
 
 Finally, container-based technologies such as Docker and Singularity, make PEMA easy accessible for all operating systems.
-As you can see in the [**PEMA_tutorial.pdf**](https://github.com/hariszaf/pema/blob/master/PEMA_tutorial.pdf), once you have either Docker or Singularity on your computational environment (see below which of those suits best for your case), running PEMA is cakewalk.
+As you can see in the [**PEMA_tutorial.pdf**](https://github.com/hariszaf/pema/blob/master/PEMA_tutorial.pdf), once you have either Docker or Singularity on your computational environment (see below which suits your case better), running PEMA is cakewalk.
 
 
 # Getting Started
 
-PEMA is able to run either on a HPC environment (server, cluster etc) or on a simple PC of your own. However, we definitely suggest to run it on an HPC environment to exploit the full potential of PEMA. A powerful server or a cluster, even better, is necessary, as PEMA would require more computational time in a common PC.
+PEMA can run either on a HPC environment (server, cluster etc) or on a simple PC. However, we definitely suggest to run it on an HPC environment to exploit the full potential of PEMA. Running on a powerful server or a cluster can be time-saving since it would require significantly less computational time than in a common PC. However, for analyses with a small number of samples, a common PC can suffice.
 
-There is one **major difference** between running PEMA on your own PC than running it on a HPC environment. In the first case, PEMA runs through [**Docker**](https://www.docker.com/), while in the latter one, it runs through [**Singularity**](https://sylabs.io/singularity/).
+There is one **major difference** between running PEMA on a common PC than running it on a HPC environment. In the first case, PEMA runs through [**Docker**](https://www.docker.com/), while in the latter one, it runs through [**Singularity**](https://sylabs.io/singularity/).
 
-On the next chapters, you can find how to install PEMA in each case as well as an example of running it.
+On the following chapters, you can find how to install PEMA both in Docker and Singlularity including examples.
 
-Running PEMA is exactly **the same** procedure in both of those cases. As we already mentioned, we strongly suggest to use either a server or a cluster, instead of a common laptop. However, for analyses with a small number of samples, a common laptop can be used to.
+Running PEMA is exactly **the same** procedure in both of those cases. 
 
 # First things first
 
-Hence, you need to create on **your computational environment** a folder where you will have everything PEMA needs to run - in the framework of this README file, we will call it ***analysis folder***.
+In the begining, on **your computational environment** you need to create a directory where you will have everything PEMA needs to run - in this README file, we will call it ***analysis folder***.
 
-In this folder, you need to add (**mandatory**):
-* the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file which you can download from this repository and **you need to complete** according to the needs of your analysis 
-* a subfolder called ***mydata*** where your .fastq.gz files will be located <br />
+In this directory, you need to add (**mandatory**):
+* the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file (you can download it from this repository and then **complete it** according to the needs of your analysis) 
+* a subdirectory called ***mydata*** where your .fastq.gz files will be located <br />
 
-In case that your marker gene is 16S and you need to perform phyloseq, in the analysis folder you also need to add (**optionally**):
-* the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want
-* and finally, your ***metadata.csv*** file which has to be **comma separated**
+If your marker gene is 16S and you need to perform phyloseq, in the analysis folder you also need to add (**optionally**):
+* the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want (that is an R script which we have implemented and has some main features that need to stay always the same in order to be executed as part of PEMA and some parts where the user can set what exactly needs to get from the phyloseq package)
+* and finally, your ***metadata.csv*** file which has to be in a **comma separated** format.
 
 **Attention!**  <br />
-You need to **call** these files **exactly as it is described above** and the ***mydata*** subfolder as well. <br />
-If you don't PEMA will **fail**. 
+PEMA will **fail** unless you name the aforementioned files and directories exactly as described above.
+<br />
 
 Here is an example of how your *analysis folder* should be:
 
 ```
-haris@haris-XPS-13-9343:~/Desktop/analysis_folder$ ls
+user@home-PC:~/Desktop/analysis_folder$ ls
 mydata  parameters.tsv  phyloseq_in_PEMA.R  metadata.csv
 ```
 
 # Parameters' file
-The most crucial component in running PEMA is the parameters file. This is located in the same directory as PEMA does and the user needs to fill it **every time** PEMA is about to be called.
+The most crucial component in running PEMA is the parameters file. This file must be located **in** the *analysis folder* and the user needs to fill it **every time** PEMA is about to be called. If you need more than one analyses to run, then you need to make copies of the parameters' file and have one of those in eah of the analysis folders you create.
 
-So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file as it looks like, in a study case of our own. The user has to set it the way it fits to his own data.  
+So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file as it looks like, in a study case of our own. 
 
 
 # PEMA on a simple PC
@@ -104,8 +105,7 @@ So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/mas
 
 To run PEMA in a simple PC on your own environment, you first need to install [Docker]( https://docs.docker.com/install/ ), in case you do not already have it.
 
-You should check your software version. Docker is avalable for all Windows, Mac and Linux.  
-However, in case of Windows and Mac, you might need to install [Docker toolbox]( https://docs.docker.com/toolbox/) instead, if your System Requirements are not the ones mentioned below.
+You should check your software version. A version of Docker is avalable for all Windows, Mac and Linux. If you have Windows 10 Pro or your Mac's hardware in after 2010, then you can insall Docker straightforward. Otherwise, you need to install the [Docker toolbox]( https://docs.docker.com/toolbox/) instead. You can check if your System Requirements are according to the ones mentioned below in order to be sure what you need to do.
 
 **System Requirements**
 
@@ -131,13 +131,13 @@ If you have a newer version of VirtualBox installed, it’s fine.
 
 ## Installing
 
-After you install Docker in your environment and open it, the only thing you need to do, is to download PEMA's image, by running the command:
+After you install Docker in your environment and run it, the only thing you need to do, is to download PEMA's image, by running the command:
 
 ```
 docker pull hariszaf/pema
 ```
 
-PEMA is a quite large image (~2Gb) so it will take a while until it is downloaded in your computer system.
+The PEMA image file is a quite large (~3Gb), so it will take a while until it is downloaded in your computer system.
 
 
 ## Running PEMA
@@ -146,7 +146,7 @@ Running PEMA has two discrete steps.
 
 ### Step 1 - Build a Docker container
 
-At first, you need to let Docker have access in your dataset. For this you need to run this command, specifying the path to where your data is stored, i.e. changing the <path_to_analysis_folder> accordingly:
+At first, you need to let Docker have access in your dataset. To provide access you need to run the following command and specifying the path to where your data is stored, i.e. changing the <path_to_analysis_folder> accordingly:
 
 ```
 docker run -it vol -v /<path_to_analysis_folder>/:/mnt/analysis pema
@@ -163,23 +163,23 @@ Now, being inside the PEMA container, the only thing remaining to do, is to run 
 ./PEMA_docker_version.bds
 ```
 
-PEMA is now running and it depends on the computational features of your environment, on the size of your data, as well as on the parameters you chose, how long it will take.
+PEMA is now running. The runtime of PEMA depends on the computational features of your environment, on the size of your data, as well as the parameters you chose.
 
-Please, keep in mind that when you want to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located.
+Please, keep in mind that when you need to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located.
 
 Finally, you will find the PEMA output in the analysis folder on your computer. <br />
-As the output folder is mounted into the Docker container we built, you can copy its contents wherever you want to as you would do regularly, however, in case you want to remove it permanently, you need to do this as a sudo user. 
+As the output folder is mounted into the built Docker container, you can copy its contents wherever you want. However, in case you want to remove it permanently, you need to do this as a sudo user. 
 
 
 # PEMA on HPC
 
-PEMA is best to run on HPC (server, cluster, cloud). Usually Environmental data are quite large and the whole process has huge computational demands. To get PEMA running on your HPC you need just to do the followings.
+PEMA is best to run on HPC (server, cluster, cloud). Usually environmental data are quite large and the whole process has huge computational demands. To get PEMA running on your HPC you (actually your system administrator) need to install Singularity as described below. 
 
 ## Prerequisites
 
 **[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )**  is a free, cross-platform and open-source computer program that performs operating-system-level virtualization also known as containerization. One of the main uses of Singularity is to bring containers and reproducibility to scientific computing and the high-performance computing (HPC) world.
 
-Singularity needs a Linux system to run.
+Singularity needs a Linux/Unix system to run.
 
 ## Installing
 
@@ -189,14 +189,13 @@ After you install Singularity in your environment and open it, you need to downl
  singularity pull pema shub://hariszaf/pema
 ```
 
-Now you have PEMA on your environment. But there is still one thing that you need to do! And it is an **important** one!
-Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/parameters.tsv) and move it or copy it to the same folder with your raw data.
+Now you have PEMA on your environment. But there is still one really **important** thing that you need to do! Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file and move it or copy it to the same folder with your raw data.
 
 Now you are ready to go! 
 
 
 ## Running PEMA
-Singularity allows to use a  job scheduler that allocates compute resources on clusters and at the same time, works as a queuing system, as **[Slurm](https://slurm.schedmd.com/overview.html)**. This way you are able to create a job as you useally do in your system and after setting the parameters' file as you want to, run PEMA as a job on your cluster.
+Singularity permits the use of a job scheduler that allocates computional resources on clusters and at the same time, works as a queuing system, as **[Slurm](https://slurm.schedmd.com/overview.html)**. This way you are able to create a job as you usually do in your system and after editing the parameters file as needed, run PEMA as a job on your cluster.
 
 
 
@@ -221,7 +220,7 @@ singularity run -B /<path>/<of>/<input>/<folder>/:/mnt /<path>/<of>/<PEMA_Image>
 
 ```
 
-In the above job, we set HCMR's  cluster "Zorba", to run PEMA in 1 node, with 20 cores.
+In the above example, we set the cluster "Zorba", to run PEMA in 1 node, with 20 cores.
 
 
 # PEMA's output files
