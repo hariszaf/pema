@@ -183,7 +183,7 @@ Singularity needs a Linux/Unix system to run.
 
 ## Installing
 
-After you install Singularity in your environment and open it, you need to download PEMA's image from Docker Hub, by running the command:
+After you install Singularity in your environment and open it, you need to download PEMA's image from Singularity Hub, by running the command:
 
 ```
  singularity pull pema shub://hariszaf/pema:v1
