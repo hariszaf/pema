@@ -199,6 +199,9 @@ taxonomyFolderName	16S_taxon_assign
 phyloseq	Yes
 #
 #
+## The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees. Do you want to create such a tree with your OTUs? In case you build this once, you can use it as many times as you want.
+tree	No
+#
 ## In case you are about to use the phyloseq option, then a phylogeny tree has to be built. Hence, PEMA invokes the RAxML-ng algorithm
 ## which is able to run in more than one threads. Please set the number of threads RAxML is able to use.
 raxmlThreads	10
