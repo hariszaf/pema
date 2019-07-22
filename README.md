@@ -149,7 +149,7 @@ Running PEMA has two discrete steps.
 At first, you need to let Docker have access in your dataset. To provide access you need to run the following command and specifying the path to where your data is stored, i.e. changing the <path_to_analysis_folder> accordingly:
 
 ```
-docker run -it vol -v /<path_to_analysis_folder>/:/mnt/analysis pema
+docker run -it -v /<path_to_analysis_folder>/:/mnt/analysis hariszaf/pema
 ```
 
 After you run the command above, you have now built a Docker container, in which you can run PEMA!
