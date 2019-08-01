@@ -222,6 +222,7 @@ singularity run -B /<path>/<of>/<input>/<folder>/:/mnt /<path>/<of>/<PEMA_Image>
 
 In the above example, we set the cluster "Zorba", to run PEMA in 1 node, with 20 cores.
 
+For further information, you can always check [PEMA's tutorial](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?fbclid=IwAR14PpWfPtxB8lLBBnoxs7UbG3IJfkArrJBS5f2kRA__kvGDUb8wiJ2Cy_s#slide=id.g57f092f54d_1_21).
 
 # PEMA's output files
 Each of the next paragraphs stands for a subdirectory in the output folder that PEMA creates after each run.
@@ -326,3 +327,6 @@ And definitely, we also need to thank the container-based technologies that allo
 * Singularity - https://sylabs.io/singularity/
 
 # Citation
+PEMA: from the raw .fastq files of 16S rRNA and COI marker genes to the (M)OTU-table, a thorough metabarcoding analysis
+Haris Zafeiropoulos, Ha Quoc Viet, Katerina Vasileiadou, Antonis Potirakis, Christos Arvanitidis, Pantelis Topalis, Christina Pavloudi, Evangelos Pafilis
+bioRxiv 709113; doi: https://doi.org/10.1101/709113
