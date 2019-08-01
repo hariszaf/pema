@@ -216,7 +216,7 @@ Singularity permits the use of a job scheduler that allocates computional resour
 #SBATCH --requeue
 
 
-singularity run -B /<path>/<of>/<input>/<folder>/:/mnt /<path>/<of>/<PEMA_Image>
+singularity run -B /<path>/<of>/<input>/<folder>/:/mnt/analysis /<path>/<of>/<PEMA_Image>
 
 ```
 
