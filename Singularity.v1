@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: hariszaf/pema:v2
+From: hariszaf/pema:v3
 
 
 %post
