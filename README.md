@@ -60,7 +60,7 @@ Finally, container-based technologies such as Docker and Singularity, make PEMA 
 As you can see in the [PEMA_tutorial.pdf](https://github.com/hariszaf/pema/blob/master/PEMA_tutorial.pdf), once you have either Docker or Singularity on your computational environment (see below which suits your case better), running PEMA is cakewalk. You can also find the [**PEMA tutorial**](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?usp=sharing) as a Google Slides file.
 
 
-# Getting Started
+# A container-based tool
 
 PEMA can run either on a HPC environment (server, cluster etc) or on a simple PC. However, we definitely suggest to run it on an HPC environment to exploit the full potential of PEMA. Running on a powerful server or a cluster can be time-saving since it would require significantly less computational time than in a common PC. However, for analyses with a small number of samples, a common PC can suffice.
 
