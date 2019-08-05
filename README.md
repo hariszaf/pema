@@ -186,7 +186,7 @@ Singularity needs a Linux/Unix system to run.
 After you install Singularity in your environment and open it, you need to download PEMA's image from Singularity Hub, by running the command:
 
 ```
- singularity pull pema shub://hariszaf/pema:v1
+ singularity pull shub://hariszaf/pema:v1
 ```
 
 Now you have PEMA on your environment. But there is still one really **important** thing that you need to do! Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file and move it or copy it to the same folder with your raw data.
