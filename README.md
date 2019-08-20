@@ -44,7 +44,9 @@ Table of Contents
    * [Citation](#citation)
 
 
-
+```diff
+- We are now fixing a bug for the case of running PEMA on macOS. We are sorry for the inconvenience! We will release it as soon as possible.
+```
 
 # Intro 
 
