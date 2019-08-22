@@ -45,8 +45,7 @@ Table of Contents
 
 
 ```diff
-- We are now fixing a bug for the case of running PEMA on macOS. We are sorry for the inconvenience! 
-- We will release it as soon as possible.
++ PEMA is now available for macOS!
 ```
 
 # Intro 
