@@ -1,5 +1,5 @@
 Bootstrap: docker
-From: hariszaf/pema:27_08_19
+From: hariszaf/pema:27_08_19_javas
 
 
 %post
