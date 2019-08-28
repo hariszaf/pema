@@ -60,7 +60,7 @@ In the case of the COI marker gene, PEMA can perform clustering with two differe
 PEMA has been implemented in [BigDataScript](https://pcingola.github.io/BigDataScript/) programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such features and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine; for example, if PEMA is executed on a personal laptop with 4 cores, it is going to use all four of them. 
 
 Finally, container-based technologies such as Docker and Singularity, make PEMA easy accessible for all operating systems.
-As you can see in the [PEMA_tutorial.pdf](https://github.com/hariszaf/pema/blob/master/PEMA_tutorial.pdf), once you have either Docker or Singularity on your computational environment (see below which suits your case better), running PEMA is cakewalk. You can also find the [**PEMA tutorial**](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?usp=sharing) as a Google Slides file.
+As you can see in the [PEMA_tutorial.pdf](https://github.com/hariszaf/pema/blob/master/GitHub%20tutorial.pdf), once you have either Docker or Singularity on your computational environment (see below which suits your case better), running PEMA is cakewalk. You can also find the [**PEMA tutorial**](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?usp=sharing) as a Google Slides file.
 
 
 # A container-based tool
