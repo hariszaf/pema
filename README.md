@@ -46,6 +46,7 @@ Table of Contents
 
 ```diff
 + PEMA is now available for macOS!
+for anything feel free to contact me at: haris-zaf@hcmr.gr
 ```
 
 # Intro 
