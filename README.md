@@ -18,6 +18,7 @@ Table of Contents
 =================
 
    * [Intro](#intro)
+      * [ A container-based tool](#a-container-based-tool)
    * [Getting Started](#getting-started)
    * [First things first](#first-things-first)
    * [Parameters' file](#parameters-file)
@@ -32,7 +33,7 @@ Table of Contents
       * [Installing](#installing-1)
       * [Running PEMA](#running-pema-1)
         * [Example](#example)
-   * [phyloseq - for the analysis of microbial profiles](#rhea---for-the-analysis-of-microbial-profiles)
+   * [phyloseq - for a downstream ecological analysis](#the-phyloseq-r-package)
    * [Acknowledgments](#acknowledgments)
    * [Citation](#citation)
 
@@ -231,7 +232,8 @@ For further information, you can always check [PEMA's tutorial](https://docs.goo
 
 
 
-# The "phyloseq" R package - for a downstream ecological analysis of OTUs/ASVs retrieved
+# The "phyloseq" R package 
+**for a downstream ecological analysis of OTUs/ASVs retrieved**
 
 For the analysis of the microbial profiles using the 16S marker gene, PEMA performs all the basic functions of the "phyloseq" R package. In addition, it performs certain functions of the [***vegan***](https://cran.r-project.org/web/packages/vegan/index.html) R package. 
 
