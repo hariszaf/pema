@@ -86,18 +86,25 @@ In this directory, you need to add (**mandatory**):
 
 If your marker gene is 16S and you need to perform phyloseq, in the analysis folder you also need to add (**optionally**):
 * the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want (that is an R script which we have implemented and has some main features that need to stay always the same in order to be executed as part of PEMA and some parts where the user can set what exactly needs to get from the phyloseq package)
-* and finally, your ***metadata.csv*** file which has to be in a **comma separated** format.
+* the [***metadata.csv***](https://raw.githubusercontent.com/hariszaf/pema/master/metadata.csv) file which has to be in a **comma separated** format (you can find an example of this file on PEMA's GitHub repository).
 
 **Attention!**  <br />
-PEMA will **fail** unless you name the aforementioned files and directories exactly as described above.
+PEMA will **fail** unless you name the aforementioned files and directories **exactly** as described above.
 <br />
 
-Here is an example of how your *analysis folder* should be:
+Here is an example of how your *analysis folder* should be in case you do want a phyloseq analysis:
 
 ```
 user@home-PC:~/Desktop/analysis_folder$ ls
 mydata  parameters.tsv  phyloseq_in_PEMA.R  metadata.csv
 ```
+
+and in case you do not:
+```
+user@home-PC:~/Desktop/analysis_folder$ ls
+mydata  parameters.tsv 
+```
+
 
 # Parameters' file
 The most crucial component in running PEMA is the parameters file. This file must be located **in** the *analysis folder* and the user needs to fill it **every time** PEMA is about to be called. If you need more than one analyses to run, then you need to make copies of the parameters' file and have one of those in eah of the analysis folders you create.
