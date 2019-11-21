@@ -246,6 +246,7 @@ The tools & databases that PEMA uses are:
 * BigDataScript programming language - https://pcingola.github.io/BigDataScript/
 * FASTQC - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 * Τrimmomatic - http://www.usadellab.org/cms/?page=trimmomatic
+* Cutadapt - https://cutadapt.readthedocs.io/en/stable/
 * BayesHammer - included in SPAdes - http://cab.spbu.ru/software/spades/
 * PANDAseq - https://github.com/neufeld/pandaseq
 * OBITools - https://pythonhosted.org/OBITools/welcome.html
