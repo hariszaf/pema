@@ -1705,7 +1705,7 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
 	sys cp $path/phyloseq_in_PEMA.R .
 	wait
 	
-	sys /mnt/big/R-3.5.2/bin/Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
+	sys /usr/bin/R-3.6.0/bin/Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
 
 	wait		
 }
