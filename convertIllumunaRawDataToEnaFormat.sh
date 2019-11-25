@@ -65,7 +65,7 @@ do
 	if [ ${sample: -7}=="1.fastq" ]
 	then
 			
-		sed "s/^@M0.*/@$newName\./g" $sampleName > $directoryPath/"half_${sampleName}_1.fastq"	
+		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sampleName > $directoryPath/"half_${sampleName}_1.fastq"	
 		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/1"} else print $0}' half_"${sampleName}"\_1.fastq  > $directoryPath/ena_"${newName}"\_1.fastq 
 		
 	fi
@@ -73,7 +73,7 @@ do
 	if [ ${sample: -7}=="2.fastq" ]
 	then
 		
-		sed "s/^@M0.*/@$newName\./g" $sampleName > $directoryPath/"half_${newName}_2.fastq"
+		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sampleName > $directoryPath/"half_${newName}_2.fastq"
 		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/2"} else print $0}' half_"${newName}"\_2.fastq  > $directoryPath/ena_"${newName}"\_2.fastq
 		
 	fi
