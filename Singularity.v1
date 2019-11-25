@@ -20,4 +20,4 @@ echo "export PATH=$PATH:/bin/gzip" >> ~/.bashrc
 
 %runscript
 
-/home/tools/BDS/.bds/bds /home/PEMA_v1.bds
+/home/tools/BDS/.bds/bds /home/PEMA_v1_1.bds
