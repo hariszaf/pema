@@ -1,5 +1,5 @@
 Bootstrap: docker
-#From: hariszaf/pema:27_08_19_javas
+####From: hariszaf/pema:27_08_19_javas
 From: hariszaf/pema:25_11_19
 
 %post
@@ -20,4 +20,4 @@ echo "export PATH=$PATH:/bin/gzip" >> ~/.bashrc
 
 %runscript
 
-/home/tools/BDS/.bds/bds /home/PEMA_v1_1.bds
+/home/tools/BDS/.bds/bds /home/PEMA_v1.bds
