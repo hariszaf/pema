@@ -14,7 +14,6 @@ echo "export PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/lib/jvm/java-11-ope
 
 
 
-
 echo "export PATH=$PATH:/bin/gzip" >> ~/.bashrc 
 
 
