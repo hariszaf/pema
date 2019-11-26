@@ -79,8 +79,8 @@ In this directory, you need to add (**mandatory**):
 * a subdirectory called ***mydata*** where your .fastq.gz files will be located <br />
 
 If your marker gene is 16S and you need to perform phyloseq, in the analysis directory you also need to add (**optionally**):
-* the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want (that is an R script which we have implemented and has some main features that need to stay always the same in order to be executed as part of PEMA and some parts where the user can set what exactly needs to get from the phyloseq package)
-* the [***metadata.csv***](https://raw.githubusercontent.com/hariszaf/pema/master/metadata.csv) file which has to be in a **comma separated** format (you can find an example of this file on PEMA's GitHub repository).
+* the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/analysis_directory/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want (that is an R script which we have implemented and has some main features that need to stay always the same in order to be executed as part of PEMA and some parts where the user can set what exactly needs to get from the phyloseq package)
+* the [***metadata.csv***](https://raw.githubusercontent.com/hariszaf/pema/master/analysis_directory/metadata.csv) file which has to be in a **comma separated** format (you can find an example of this file on PEMA's GitHub repository).
 
 **Attention!**  <br />
 PEMA will **fail** unless you name the aforementioned files and directories **exactly** as described above.
@@ -235,9 +235,9 @@ For further information, you can always check [PEMA's tutorial](https://docs.goo
 
 PEMA performs all the basic functions of the "phyloseq" R package. In addition, it performs certain functions of the [***vegan***](https://cran.r-project.org/web/packages/vegan/index.html) R package. 
 
-When the user asks for a downstream analysis using the "phyloseq" R package, then an extra input file called [***"phyloseq_script.R"***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) needs to be imported in the "analysis_directory". In PEMA's main repository, you can find a template of this file; this file needs to be as it would run on your own computer, as you would run *phyloseq* in any case. PEMA will create the *"phyloseq object"* automatically and then it will perform the analysis as asked. The output will be placed in an extra subfolder in the main output directory of PEMA called *phyloseq_analysis*. 
+When the user asks for a downstream analysis using the "phyloseq" R package, then an extra input file called [***"phyloseq_script.R"***](https://github.com/hariszaf/pema/blob/master/analysis_directory/phyloseq_in_PEMA.R) needs to be imported in the "analysis_directory". In PEMA's main repository, you can find a template of this file; this file needs to be as it would run on your own computer, as you would run *phyloseq* in any case. PEMA will create the *"phyloseq object"* automatically and then it will perform the analysis as asked. The output will be placed in an extra subfolder in the main output directory of PEMA called *phyloseq_analysis*. 
 
-In addition, the ***metadata.tsv*** file is also required when the phyloseq option has been selected. An example of this file you can find [here](https://raw.githubusercontent.com/hariszaf/pema/master/metadata.csv).
+In addition, the ***metadata.tsv*** file is also required when the phyloseq option has been selected. An example of this file you can find [here](https://raw.githubusercontent.com/hariszaf/pema/master/analysis_directory/metadata.csv).
 
 
 # Acknowledgments
