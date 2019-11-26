@@ -38,6 +38,7 @@ Table of Contents
          * [Step 2 - Run PEMA](#step-2---run-pema)
    * [phyloseq - for a downstream ecological analysis](#the-phyloseq-r-package)
    * [Acknowledgments](#acknowledgments)
+   * [License](#license)
    * [Citation](#citation)
 
 
