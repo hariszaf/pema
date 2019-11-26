@@ -47,7 +47,7 @@ theme_set(theme_bw())
 
 
 #import the OTU table (or else biotic data)
-biotic <- read.csv("otu_table.txt", sep = "\t", header=TRUE, row.names = 1) 
+biotic <- read.csv("final_table.tsv", sep = "\t", header=TRUE, row.names = 1) 
 
 #import the tree of the OTUs
 testTree <- "OTUs_tree.tre"
