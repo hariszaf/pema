@@ -322,6 +322,11 @@ And definitely, we also need to thank the container-based technologies that allo
 * Docker - https://www.docker.com/
 * Singularity - https://sylabs.io/singularity/
 
+
+
+# License
+PEMA is under the GNU GPLv3 license (for 3rd party components separate licenses apply).
+
 # Citation
 PEMA: from the raw .fastq files of 16S rRNA and COI marker genes to the (M)OTU-table, a thorough metabarcoding analysis
 Haris Zafeiropoulos, Ha Quoc Viet, Katerina Vasileiadou, Antonis Potirakis, Christos Arvanitidis, Pantelis Topalis, Christina Pavloudi, Evangelos Pafilis
