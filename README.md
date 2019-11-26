@@ -20,7 +20,7 @@ Table of Contents
    * [Intro](#intro)
       * [ A container-based tool](#a-container-based-tool)
    * [Getting Started](#getting-started)
-   * [First things first](#first-things-first)
+   * [How to run PEMA](#how-to-run-pema)
    * [Parameters' file](#parameters-file)
    * [PEMA on a simple PC](#pema-on-a-simple-pc)
       * [Prerequisites](#prerequisites)
@@ -70,7 +70,7 @@ On the following chapters, you can find how to install PEMA both in Docker and S
 
 Running PEMA is exactly **the same** procedure in both of those cases. 
 
-# First things first
+# How to run PEMA
 
 In the begining, on **your computational environment** you need to create a directory where you will have everything PEMA needs to run - in this README file, we will call it ***analysis directory***.
 
