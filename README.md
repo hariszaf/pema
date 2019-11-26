@@ -319,7 +319,7 @@ The tools & databases that PEMA uses are:
 * phyloseq R package - http://joey711.github.io/phyloseq/index.html
 * vegan R package - https://cran.r-project.org/web/packages/vegan/index.html 
 
-And definitely, we also need to thank the container-based technologies that allow PEMA to run in such an easy and efficient way:
+And of course the container-based technologies:
 * Docker - https://www.docker.com/
 * Singularity - https://sylabs.io/singularity/
 
