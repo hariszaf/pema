@@ -24,7 +24,7 @@ Table of Contents
    * [PEMA: biodiversity in all its different levels](#pema-biodiversity-in-all-its-different-levels)
    * [ A container-based tool](#a-container-based-tool)
    * [How to run PEMA](#how-to-run-pema)
-   * [Parameters' file](#parameters-file)
+      * [Parameters' file](#parameters-file)
    * [PEMA on HPC](#pema-on-hpc)
       * [Prerequisites](#prerequisites-1)
       * [Installing](#installing-1)
@@ -86,7 +86,7 @@ Running PEMA is exactly **the same** procedure in both of those cases.
 
 
 
-# How to run PEMA
+## How to run PEMA
 
 Assuming you have either Docker or Singularity on your system (see below how to get them). 
 You need to create a directory where you will have everything PEMA needs - we will call it ***analysis directory***.
