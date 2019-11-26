@@ -72,13 +72,13 @@ Running PEMA is exactly **the same** procedure in both of those cases.
 
 # First things first
 
-In the begining, on **your computational environment** you need to create a directory where you will have everything PEMA needs to run - in this README file, we will call it ***analysis folder***.
+In the begining, on **your computational environment** you need to create a directory where you will have everything PEMA needs to run - in this README file, we will call it ***analysis directory***.
 
 In this directory, you need to add (**mandatory**):
 * the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file (you can download it from this repository and then **complete it** according to the needs of your analysis) 
 * a subdirectory called ***mydata*** where your .fastq.gz files will be located <br />
 
-If your marker gene is 16S and you need to perform phyloseq, in the analysis folder you also need to add (**optionally**):
+If your marker gene is 16S and you need to perform phyloseq, in the analysis directory you also need to add (**optionally**):
 * the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want (that is an R script which we have implemented and has some main features that need to stay always the same in order to be executed as part of PEMA and some parts where the user can set what exactly needs to get from the phyloseq package)
 * the [***metadata.csv***](https://raw.githubusercontent.com/hariszaf/pema/master/metadata.csv) file which has to be in a **comma separated** format (you can find an example of this file on PEMA's GitHub repository).
 
@@ -86,22 +86,22 @@ If your marker gene is 16S and you need to perform phyloseq, in the analysis fol
 PEMA will **fail** unless you name the aforementioned files and directories **exactly** as described above.
 <br />
 
-Here is an example of how your *analysis folder* should be in case you do want a phyloseq analysis:
+Here is an example of how your *analysis directory* should be in case you do want a phyloseq analysis:
 
 ```
-user@home-PC:~/Desktop/analysis_folder$ ls
+user@home-PC:~/Desktop/analysis_directory$ ls
 mydata  parameters.tsv  phyloseq_in_PEMA.R  metadata.csv
 ```
 
 and in case you do not:
 ```
-user@home-PC:~/Desktop/analysis_folder$ ls
+user@home-PC:~/Desktop/analysis_directory$ ls
 mydata  parameters.tsv 
 ```
 
 
 # Parameters' file
-The most crucial component in running PEMA is the parameters file. This file must be located **in** the *analysis folder* and the user needs to fill it **every time** PEMA is about to be called. If you need more than one analyses to run, then you need to make copies of the parameters' file and have one of those in eah of the analysis folders you create.
+The most crucial component in running PEMA is the parameters file. This file must be located **in** the *analysis directory* and the user needs to fill it **every time** PEMA is about to be called. If you need more than one analyses to run, then you need to make copies of the parameters' file and have one of those in eah of the analysis directrories you create.
 
 So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file as it looks like, in a study case of our own. 
 
@@ -153,10 +153,10 @@ Running PEMA has two discrete steps.
 
 ### Step 1 - Build a Docker container
 
-At first, you need to let Docker have access in your dataset. To provide access you need to run the following command and specifying the path to where your data is stored, i.e. changing the <path_to_analysis_folder> accordingly:
+At first, you need to let Docker have access in your dataset. To provide access you need to run the following command and specifying the path to where your data is stored, i.e. changing the <path_to_analysis_directory> accordingly:
 
 ```
-docker run -it -v /<path_to_analysis_folder>/:/mnt/analysis hariszaf/pema
+docker run -it -v /<path_to_analysis_directory>/:/mnt/analysis hariszaf/pema
 ```
 
 After you run the command above, you have now built a Docker container, in which you can run PEMA!
@@ -172,10 +172,10 @@ Now, being inside the PEMA container, the only thing remaining to do, is to run 
 
 PEMA is now running. The runtime of PEMA depends on the computational features of your environment, on the size of your data, as well as the parameters you chose.
 
-Please, keep in mind that when you need to copy a whole directory, then you always have to put "/" in the end of the path that describes where the folder is located.
+Please, keep in mind that when you need to copy a whole directory, then you always have to put "/" in the end of the path that describes where the directory is located.
 
-Finally, you will find the PEMA output in the analysis folder on your computer. <br />
-As the output folder is mounted into the built Docker container, you can copy its contents wherever you want. However, in case you want to remove it permanently, you need to do this as a sudo user. 
+Finally, you will find the PEMA output in the analysis directory on your computer. <br />
+As the output directory is mounted into the built Docker container, you can copy its contents wherever you want. However, in case you want to remove it permanently, you need to do this as a sudo user. 
 
 
 # PEMA on HPC
@@ -196,7 +196,7 @@ After you install Singularity in your environment and open it, you need to downl
  singularity pull shub://hariszaf/pema:v1
 ```
 
-Now you have PEMA on your environment. But there is still one really **important** thing that you need to do! Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file and move it or copy it to the same folder with your raw data.
+Now you have PEMA on your environment. But there is still one really **important** thing that you need to do! Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file and move it or copy it to the same directory with your raw data.
 
 Now you are ready to go! 
 
@@ -221,7 +221,7 @@ Singularity permits the use of a job scheduler that allocates computional resour
 #SBATCH --requeue
 
 
-singularity run -B /<path>/<of>/<input>/<folder>/:/mnt/analysis /<path>/<of>/<PEMA_Image>
+singularity run -B /<path>/<of>/<input>/<directory>/:/mnt/analysis /<path>/<of>/<PEMA_Image>
 
 ```
 
@@ -235,7 +235,7 @@ For further information, you can always check [PEMA's tutorial](https://docs.goo
 
 PEMA performs all the basic functions of the "phyloseq" R package. In addition, it performs certain functions of the [***vegan***](https://cran.r-project.org/web/packages/vegan/index.html) R package. 
 
-When the user asks for a downstream analysis using the "phyloseq" R package, then an extra input file called [***"phyloseq_script.R"***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) needs to be imported in the "analysis_folder". In PEMA's main repository, you can find a template of this file; this file needs to be as it would run on your own computer, as you would run *phyloseq* in any case. PEMA will create the *"phyloseq object"* automatically and then it will perform the analysis as asked. The output will be placed in an extra subfolder in the main output folder of PEMA called *phyloseq_analysis*. 
+When the user asks for a downstream analysis using the "phyloseq" R package, then an extra input file called [***"phyloseq_script.R"***](https://github.com/hariszaf/pema/blob/master/phyloseq_in_PEMA.R) needs to be imported in the "analysis_directory". In PEMA's main repository, you can find a template of this file; this file needs to be as it would run on your own computer, as you would run *phyloseq* in any case. PEMA will create the *"phyloseq object"* automatically and then it will perform the analysis as asked. The output will be placed in an extra subfolder in the main output directory of PEMA called *phyloseq_analysis*. 
 
 In addition, the ***metadata.tsv*** file is also required when the phyloseq option has been selected. An example of this file you can find [here](https://raw.githubusercontent.com/hariszaf/pema/master/metadata.csv).
 
