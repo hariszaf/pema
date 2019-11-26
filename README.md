@@ -74,11 +74,11 @@ Running PEMA is exactly **the same** procedure in both of those cases.
 
 In the begining, on **your computational environment** you need to create a directory where you will have everything PEMA needs to run - in this README file, we will call it ***analysis directory***.
 
-In this directory, you need to add (**mandatory**):
+In this directory, you need to add the following **mandatory** files:
 * the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file (you can download it from this repository and then **complete it** according to the needs of your analysis) 
 * a subdirectory called ***mydata*** where your .fastq.gz files will be located <br />
 
-If your marker gene is 16S and you need to perform phyloseq, in the analysis directory you also need to add (**optionally**):
+If your need to perform phyloseq, in the analysis directory you also need to add the following **optionally** files:
 * the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/analysis_directory/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want (that is an R script which we have implemented and has some main features that need to stay always the same in order to be executed as part of PEMA and some parts where the user can set what exactly needs to get from the phyloseq package)
 * the [***metadata.csv***](https://raw.githubusercontent.com/hariszaf/pema/master/analysis_directory/metadata.csv) file which has to be in a **comma separated** format (you can find an example of this file on PEMA's GitHub repository).
 
