@@ -75,7 +75,7 @@ Running PEMA is exactly **the same** procedure in both of those cases.
 In the begining, on **your computational environment** you need to create a directory where you will have everything PEMA needs to run - in this README file, we will call it ***analysis directory***.
 
 In this directory, you need to add (**mandatory**):
-* the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file (you can download it from this repository and then **complete it** according to the needs of your analysis) 
+* the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file (you can download it from this repository and then **complete it** according to the needs of your analysis) 
 * a subdirectory called ***mydata*** where your .fastq.gz files will be located <br />
 
 If your marker gene is 16S and you need to perform phyloseq, in the analysis directory you also need to add (**optionally**):
@@ -103,7 +103,7 @@ mydata  parameters.tsv
 # Parameters' file
 The most crucial component in running PEMA is the parameters file. This file must be located **in** the *analysis directory* and the user needs to fill it **every time** PEMA is about to be called. If you need more than one analyses to run, then you need to make copies of the parameters' file and have one of those in eah of the analysis directrories you create.
 
-So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file as it looks like, in a study case of our own. 
+So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file as it looks like, in a study case of our own. 
 
 
 # PEMA on a simple PC
@@ -196,7 +196,7 @@ After you install Singularity in your environment and open it, you need to downl
  singularity pull shub://hariszaf/pema:v1
 ```
 
-Now you have PEMA on your environment. But there is still one really **important** thing that you need to do! Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/parameters.tsv) file and move it or copy it to the same directory with your raw data.
+Now you have PEMA on your environment. But there is still one really **important** thing that you need to do! Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file and move it or copy it to the same directory with your raw data.
 
 Now you are ready to go! 
 
