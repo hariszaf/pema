@@ -100,7 +100,7 @@ If your need to perform phyloseq, in the analysis directory you also need to add
 * the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/analysis_directory/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want (that is an R script which we have implemented and has some main features that need to stay always the same in order to be executed as part of PEMA and some parts where the user can set what exactly needs to get from the phyloseq package)
 * the [***metadata.csv***](https://raw.githubusercontent.com/hariszaf/pema/master/analysis_directory/metadata.csv) file which has to be in a **comma separated** format (you can find an example of this file on PEMA's GitHub repository).
 
-**Attention!**  <br />
+### **Attention!**  <br />
 PEMA will **fail** unless you name the aforementioned files and directories **exactly** as described above.
 <br />
 
