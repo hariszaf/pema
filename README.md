@@ -17,22 +17,21 @@
 Table of Contents
 =================
 
-   * [Intro](#intro)
-      * [ A container-based tool](#a-container-based-tool)
-   * [Getting Started](#getting-started)
+   * [PEMA: biodiversity in all its different levels](#pema-biodiversity-in-all-its-different-levels)
+   * [ A container-based tool](#a-container-based-tool)
    * [How to run PEMA](#how-to-run-pema)
    * [Parameters' file](#parameters-file)
+   * [PEMA on HPC](#pema-on-hpc)
+      * [Prerequisites](#prerequisites-1)
+      * [Installing](#installing-1)
+      * [Running PEMA](#running-pema-1)
+        * [Example](#example)
    * [PEMA on a simple PC](#pema-on-a-simple-pc)
       * [Prerequisites](#prerequisites)
       * [Installing](#installing)
       * [Running PEMA](#running-pema)
          * [Step 1 - Build a Docker container](#step-1---build-a-docker-container)
          * [Step 2 - Run PEMA](#step-2---run-pema)
-   * [PEMA on HPC](#pema-on-hpc)
-      * [Prerequisites](#prerequisites-1)
-      * [Installing](#installing-1)
-      * [Running PEMA](#running-pema-1)
-        * [Example](#example)
    * [phyloseq - for a downstream ecological analysis](#the-phyloseq-r-package)
    * [Acknowledgments](#acknowledgments)
    * [Citation](#citation)
@@ -44,7 +43,13 @@ Table of Contents
 for anything feel free to contact me at: haris-zaf@hcmr.gr
 ```
 
-# Intro 
+
+
+<!---  ################   FIRST CHAPTER     ########################          -->
+
+
+
+# PEMA: biodiversity in all its different levels
 
 PEMA supports the metabarcoding analysis of four marker genes, **16S rRNA** (Bacteria), **ITS** (Fungi) as well as **COI** and **18S rRNA** (metazoa). As input, PEMA accepts .fastq.gz files as returned by Illumina sequencing platforms.
 
@@ -60,6 +65,9 @@ Finally, container-based technologies such as Docker and Singularity, make PEMA 
 As you can see in the [PEMA_tutorial.pdf](https://github.com/hariszaf/pema/blob/master/help_files/GitHub%20tutorial.pdf), once you have either Docker or Singularity on your computational environment (see below which suits your case better), running PEMA is cakewalk. You can also find the [**PEMA tutorial**](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?usp=sharing) as a Google Slides file.
 
 
+<!---  ################   NEXT CHAPTER     ########################          -->
+
+
 # A container-based tool
 
 PEMA can run either on a HPC environment (server, cluster etc) or on a simple PC. However, we definitely suggest to run it on an HPC environment to exploit the full potential of PEMA. Running on a powerful server or a cluster can be time-saving since it would require significantly less computational time than in a common PC. However, for analyses with a small number of samples, a common PC can suffice.
@@ -70,9 +78,16 @@ On the following chapters, you can find how to install PEMA both in Docker and S
 
 Running PEMA is exactly **the same** procedure in both of those cases. 
 
+
+
+<!---  ################   NEXT CHAPTER     ########################          -->
+
+
+
 # How to run PEMA
 
-In the begining, on **your computational environment** you need to create a directory where you will have everything PEMA needs to run - in this README file, we will call it ***analysis directory***.
+Assuming you have either Docker or Singularity on your system (see below how to get them). 
+You need to create a directory where you will have everything PEMA needs - we will call it ***analysis directory***.
 
 In this directory, you need to add the following **mandatory** files:
 * the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file (you can download it from this repository and then **complete it** according to the needs of your analysis) 
@@ -99,7 +114,18 @@ user@home-PC:~/Desktop/analysis_directory$ ls
 mydata  parameters.tsv 
 ```
 
+[**Here**](https://github.com/hariszaf/pema/tree/master/analysis_directory) you can find an example of an *analysis directory*.
+
+After you have prepared this *analysis directory* you are ready to run PEMA (see below).
+
 **An extended list with PEMA's ouput can be found [**here**](https://github.com/hariszaf/pema/blob/master/help_files/PEMA's%20output%20files.md).**
+
+
+
+
+
+<!---  ################   NEXT CHAPTER     ########################          -->
+
 
 
 
@@ -107,6 +133,71 @@ mydata  parameters.tsv
 The most crucial component in running PEMA is the parameters file. This file must be located **in** the *analysis directory* and the user needs to fill it **every time** PEMA is about to be called. If you need more than one analyses to run, then you need to make copies of the parameters' file and have one of those in eah of the analysis directrories you create.
 
 So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file as it looks like, in a study case of our own. 
+
+
+
+<!---  ################   NEXT CHAPTER     ########################          -->
+
+
+
+
+# PEMA on HPC
+
+PEMA is best to run on HPC (server, cluster, cloud). Usually environmental data are quite large and the whole process has huge computational demands. To get PEMA running on your HPC you (actually your system administrator) need to install Singularity as described below. 
+
+## Prerequisites
+
+**[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )**  is a free, cross-platform and open-source computer program that performs operating-system-level virtualization also known as containerization. One of the main uses of Singularity is to bring containers and reproducibility to scientific computing and the high-performance computing (HPC) world.
+
+Singularity needs a Linux/Unix system to run.
+
+## Installing
+
+After you install Singularity in your environment and open it, you need to download PEMA's image from Singularity Hub, by running the command:
+
+```
+ singularity pull shub://hariszaf/pema:v1
+```
+
+Now you have PEMA on your environment. But there is still one really **important** thing that you need to do! Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file and move it or copy it to the same directory with your raw data.
+
+Now you are ready to go! 
+
+
+## Running PEMA
+Singularity permits the use of a job scheduler that allocates computional resources on clusters and at the same time, works as a queuing system, as **[Slurm](https://slurm.schedmd.com/overview.html)**. This way you are able to create a job as you usually do in your system and after editing the parameters file as needed, run PEMA as a job on your cluster.
+
+
+### Example
+
+```
+#SBATCH --partition=batch
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=20
+#SBATCH --mem=
+# Memory per node specification is in MB. It is optional.
+# The default limit is 3000MB per core.
+#SBATCH --job-name="testPema"
+#SBATCH --output=PEMA.output
+#SBATCH --mail-user=haris-zafr@hcmr.gr
+#SBATCH --mail-type=ALL
+#SBATCH --requeue
+
+
+singularity run -B /<path>/<of>/<input>/<directory>/:/mnt/analysis /<path>/<of>/<PEMA_Image>
+
+```
+
+In the above example, we set the cluster "Zorba", to run PEMA in 1 node, with 20 cores.
+
+For further information, you can always check [PEMA's tutorial](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?fbclid=IwAR14PpWfPtxB8lLBBnoxs7UbG3IJfkArrJBS5f2kRA__kvGDUb8wiJ2Cy_s#slide=id.g57f092f54d_1_21).
+
+
+
+
+<!---  ################   NEXT CHAPTER     ########################          -->
+
+
 
 
 # PEMA on a simple PC
@@ -181,56 +272,11 @@ Finally, you will find the PEMA output in the analysis directory on your compute
 As the output directory is mounted into the built Docker container, you can copy its contents wherever you want. However, in case you want to remove it permanently, you need to do this as a sudo user. 
 
 
-# PEMA on HPC
 
-PEMA is best to run on HPC (server, cluster, cloud). Usually environmental data are quite large and the whole process has huge computational demands. To get PEMA running on your HPC you (actually your system administrator) need to install Singularity as described below. 
-
-## Prerequisites
-
-**[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )**  is a free, cross-platform and open-source computer program that performs operating-system-level virtualization also known as containerization. One of the main uses of Singularity is to bring containers and reproducibility to scientific computing and the high-performance computing (HPC) world.
-
-Singularity needs a Linux/Unix system to run.
-
-## Installing
-
-After you install Singularity in your environment and open it, you need to download PEMA's image from Singularity Hub, by running the command:
-
-```
- singularity pull shub://hariszaf/pema:v1
-```
-
-Now you have PEMA on your environment. But there is still one really **important** thing that you need to do! Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file and move it or copy it to the same directory with your raw data.
-
-Now you are ready to go! 
+<!---  ################   NEXT CHAPTER     ########################          -->
 
 
-## Running PEMA
-Singularity permits the use of a job scheduler that allocates computional resources on clusters and at the same time, works as a queuing system, as **[Slurm](https://slurm.schedmd.com/overview.html)**. This way you are able to create a job as you usually do in your system and after editing the parameters file as needed, run PEMA as a job on your cluster.
 
-
-### Example
-
-```
-#SBATCH --partition=batch
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=20
-#SBATCH --mem=
-# Memory per node specification is in MB. It is optional.
-# The default limit is 3000MB per core.
-#SBATCH --job-name="testPema"
-#SBATCH --output=PEMA.output
-#SBATCH --mail-user=haris-zafr@hcmr.gr
-#SBATCH --mail-type=ALL
-#SBATCH --requeue
-
-
-singularity run -B /<path>/<of>/<input>/<directory>/:/mnt/analysis /<path>/<of>/<PEMA_Image>
-
-```
-
-In the above example, we set the cluster "Zorba", to run PEMA in 1 node, with 20 cores.
-
-For further information, you can always check [PEMA's tutorial](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?fbclid=IwAR14PpWfPtxB8lLBBnoxs7UbG3IJfkArrJBS5f2kRA__kvGDUb8wiJ2Cy_s#slide=id.g57f092f54d_1_21).
 
 
 # The "phyloseq" R package 
