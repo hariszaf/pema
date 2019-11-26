@@ -48,7 +48,7 @@ for anything feel free to contact me at: haris-zaf@hcmr.gr
 
 PEMA supports the metabarcoding analysis of four marker genes, **16S rRNA** (Bacteria), **ITS** (Fungi) as well as **COI** and **18S rRNA** (metazoa). As input, PEMA accepts .fastq.gz files as returned by Illumina sequencing platforms.
 
-PEMA processes the reads from each sample and **returns an OTU- or an ASV-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, for the case of the 16S marker gene, PEMA returns **alpha and beta diversity values**, as well as other **multivariate analyses between samples**, facilitated by the [phyloseq](http://joey711.github.io/phyloseq/index.html) R package, which allows the downstream analysis of microbial profiles.
+PEMA processes the reads from each sample and **returns an OTU- or an ASV-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, PEMA supports **downstream ecological analysis** of the profiles retrieved, facilitated by the [phyloseq](http://joey711.github.io/phyloseq/index.html) R package.
 
 PEMA supports both OTU clustering (thanks to VSEARCH and CROP algorithms) and ASV inference (via SWARM) for all four marker genes.
 
@@ -99,7 +99,7 @@ user@home-PC:~/Desktop/analysis_directory$ ls
 mydata  parameters.tsv 
 ```
 
-An extended list with PEMA's ouput can be found [**here**](https://github.com/hariszaf/pema/blob/master/help_files/PEMA's%20output%20files.md)
+**An extended list with PEMA's ouput can be found [**here**](https://github.com/hariszaf/pema/blob/master/help_files/PEMA's%20output%20files.md).**
 
 
 
