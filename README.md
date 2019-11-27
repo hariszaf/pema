@@ -238,7 +238,7 @@ If you have a newer version of VirtualBox installed, it’s fine.
 After you install Docker in your environment and run it, the only thing you need to do, is to download PEMA's image, by running the command:
 
 ```
-docker pull hariszaf/pema
+docker pull hariszaf/pema:v1
 ```
 
 The PEMA image file is a quite large (~3Gb), so it will take a while until it is downloaded in your computer system.
