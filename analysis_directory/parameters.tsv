@@ -321,3 +321,4 @@ abskew	2
 ## Swich 'Yes' to 'No' if you wish so. Be very careful when you do that, as you need to remember that if you want to analyze another dataset through P.E.M.A
 ## you will have to remove the first one manually.
 emptyRawDataFile	Yes
+#
