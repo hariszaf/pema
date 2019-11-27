@@ -134,13 +134,13 @@ paramsFirstAssignment{'gene'}.mkdir()
 wait
 
 ##########################################################################################
-#											 #
-#		From this point, PEMA and its tools are about to start running  	 #
-#                                           						 #
+#																						 #
+#		  	From this point, PEMA and its tools are about to start running         	     #
+#																						 #
 ##########################################################################################
 
 ##########################################################################################
-#########################		1. FastQC			##################
+##########################		1. FastQC			######################################
 ##########################################################################################
 
  # If there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
@@ -173,7 +173,7 @@ string g = "parameters.tsv"
 string{} paramsTrimmoStep =  readParameterFile(g)
  
 ###########################################################################################
-#####################		2. Trimmomatic			###########################
+###########################			2. Trimmomatic			###############################
 ###########################################################################################
 
 dataPath.chdir() ;
@@ -467,8 +467,8 @@ string j = "parameters.tsv"
 string{} paramsDereplication =  readParameterFile(j)
 
 ##########################################################################################################
-#############################     5. DEREPLICATE with  OBITools !!           #############################
-##########################################################################################################
+#########################     5. DEREPLICATE me ti voitheia ton OBITools !!           ####################
+#########################################################################################################
  
 unzipPath.chdir() ;
 sys if [ $(find "$unzipPath" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
@@ -489,8 +489,8 @@ string k = "parameters.tsv"
 string{} paramsOfTable =  readParameterFile(k)
 
 ##############################################################################################################
-################################       MERGING ALL FILES IN (1) ONE     ######################################
-##############################################################################################################
+#########################################       MERGING ALL FILES IN (1) ONE     ############################
+#############################################################################################################
 
 derePath.chdir()
 sys if [ $(find "$derePath" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
@@ -559,12 +559,12 @@ if ( paramsOfTable{'clusteringAlgoFor16S_18SrRNA'} == "algo_swarm" || paramsOfTa
 	}
 }
 
-#######################################################################################################################
+######################################################################################################################################
 ## in the file 'final_all_samples.fasta' we now have all the reads from all our samples
 ## and we are able to move on CLUSTERING - STEP 				      
 ## however, even if until now the procedure was the same no matter what gene we had,
 ## we now have to choose between different paths depending on the gene and our needs 
-########################################################################################################################
+######################################################################################################################################
 
 # depending on the marker gene and the grouping method selected, we make the right folders
 genePath.chdir()																									
@@ -616,9 +616,9 @@ if ( paramsOfTable{'gene'} == 'gene_COI' ) {
 }
 
 ###################################################################################################################
-#														  #
-#             	  		        OTU Clustering / ASV inference                   		  	  #
-#														  #
+#																												  #
+#										  	   Clustering     													  #
+#																												  #
 ###################################################################################################################
 
 ###################################################################################################################
@@ -646,7 +646,7 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
 		
 		wait
 
-		######################   here i execute the VSEARCH algorithms    ##############################
+		######################   here i execute the VSEARCH algorithms    #############################################
 				
 		vsearchPath16S.chdir()
 		
@@ -680,9 +680,9 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
 		
 		wait
 		
-		sys mv all.otus.fasta rna_samples.otus.fa
+		sys mv all.otus.fasta rna_all_samples.otus.fa
 		sys mv all.otutab.txt rna_otutab.txt
-		sys cp 16S_otutab.txt rna_otutab_$paramsOfTable{'taxonomyFolderName'}.txt
+		sys cp rna_otutab.txt rna_otutab_$paramsOfTable{'taxonomyFolderName'}.txt
 		
 		wait
 		
@@ -929,11 +929,11 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
 	}
 }
 
-#############################################################################################################
-# 									    				    #
-#    			                  Taxonomy Assignment    	       	              		    #
-#													    #
-#############################################################################################################
+#############################################################################################################################
+#																															#
+#												Taxonomy Assignment 														#
+#																															#
+##############################################################################################################################
 
 checkpoint "taxonomyAssignment.chp"
 parameterFilePath.chdir()
@@ -1187,7 +1187,7 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_COI' || paramsOfTaxonomy{'gene'} == "ge
 		
 		string taxonomyDirectoryITS = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + 'SWARM' + '/' + paramsOfTaxonomy{'taxonomyFolderName'}
 		taxonomyDirectoryITS.chdir()
-		cp ITS_otutab_* final_table.tsv
+		sys cp ITS_otutab_* final_table.tsv
 	}		
 }
 
@@ -1499,7 +1499,7 @@ wait
 
 ########################################################################################################
 ############      making output per sample for 16S marker gene & alignment based assignment   ##########
-########################################################################################################
+#########################################################################################################
 
 genePath.chdir()
 if  ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'gene_18S' )  &&  paramsOfTaxonomy{'taxonomyAssignmentMethod'} == 'alignment') {
@@ -1592,9 +1592,9 @@ string{} paramForPhyloseq = readParameterFile(m)
 
 
 #################################################################################################
-#	        										#
-#		                        phyloseq time !!!  					#
-#						                                                #
+#																								#
+#								    phyloseq time!!!     										#
+#																								#
 #################################################################################################
 
 # In order to get a phyloseq analysis, a phylogenetic tree for the OTUs found, needs to be made. 
@@ -1678,31 +1678,33 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
 			
 	## finally, I have to copy all the necessary PEMA's output files, that phyloseq uses as input, to the phyloseq-output folder
 	assignmentPath.chdir()
-	task{
-		
-		## add the OTU-table found in the phyloseq folder and name it as the phyloseq script wants 
-		sys cp final_table.tsv $outputFilePath/phyloseq_output
-		sys cd $outputFilePath/phyloseq_output
-		sys mv final_table.tsv otu_table.txt
-		sys sed -i 's/:/_/g' otu_table.txt
-		
-		## add the metadata file in the phyloseq folder
-		sys cp $path/metadata.csv $outputFilePath/phyloseq_output	
-	}
+	
+	
+	## add the OTU-table found in the phyloseq folder and name it as the phyloseq script wants 
+	sys sed -i 's/:/_/g' final_table.tsv
+	sys cp final_table.tsv $outputFilePath/phyloseq_output
+	# sys cd $outputFilePath/phyloseq_output
+	# sys mv final_table.tsv otu_table.txt
+	
+	
+	## add the metadata file in the phyloseq folder
+	sys cp $outputPoint/metadata.csv $outputFilePath/phyloseq_output	
+	
+	wait
 
 	string test2 = "aligned_otus.fasta.raxml.bestTree"
 	if ( test2.exists() == 'true' ) {
 		task{
 			sys cp aligned_otus.fasta.raxml.bestTree $outputFilePath/phyloseq_output
 			sys cd $outputFilePath/phyloseq_output
-			sys mv aligned_otus.fasta.raxml.bestTree OTUs_tree.tre	
+			sys mv aligned_otus.fasta.raxml.bestTree tree.tre	
 		}			
 	}
 	
 	# run the phyloseq script	
 	string phyloseqPath = outputFilePath + '/' + "phyloseq_output"
 	phyloseqPath.chdir()
-	sys cp $path/phyloseq_in_PEMA.R .
+	sys cp $outputPoint/phyloseq_in_PEMA.R .
 	wait
 	
 	sys /usr/bin/R-3.6.0/bin/Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
@@ -1711,9 +1713,9 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
 }
 
 ###################################################################################################################
-#								                                                  #
-#	                      		   phyloseq has been concluded 						  #
-#								                                                  #
+#																												  #
+#									     phyloseq has been concluded    										  #
+#																												  #
 ###################################################################################################################  
 
 
@@ -1743,8 +1745,8 @@ if ( paramForPhyloseq{'emptyCheckpoints'} == 'Yes' ) {
 outputFilePath.chdir()
 print(" \n PEMA has come to an end! Let biology start! \n ")
 
-##############################################################################################################
-#					   								     #
-#		                             PEMA has been concluded.			                     #
-#		                                                            		   		     #
-##############################################################################################################
+################################################################################################
+#																							   #
+#								PEMA has been concluded.									   #
+#																							   #
+################################################################################################
