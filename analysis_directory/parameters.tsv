@@ -317,8 +317,6 @@ removeSingletons	Yes
 abskew	2
 #
 #
-## Finally, do you want your raw data to be removed in another file and empty the "rawData" file and all the checkpoints of PEMA to be also in an extra folder
-## Swich 'Yes' to 'No' if you wish so. Be very careful when you do that, as you need to remember that if you want to analyze another dataset through P.E.M.A
-## you will have to remove the first one manually.
-emptyRawDataFile	Yes
+## Finally, do you want all the checkpoints of PEMA to be removed in an extra directory on the output directory?
+emptyCheckpoints	Yes
 #
