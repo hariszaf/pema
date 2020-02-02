@@ -1,6 +1,6 @@
 Bootstrap: docker
 ####From: hariszaf/pema:27_08_19_javas
-From: hariszaf/pema:30_01_2020
+From: hariszaf/pema:02_02_2020
 
 %post
 export WORKDIR="/home"
