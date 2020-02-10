@@ -264,7 +264,7 @@ After you run the command above, you have now built a Docker container, in which
 Now, being inside the PEMA container, the only thing remaining to do, is to run PEMA
 
 ```
-./PEMA_docker_version.bds
+./PEMA_v1.bds
 ```
 
 PEMA is now running. The runtime of PEMA depends on the computational features of your environment, on the size of your data, as well as the parameters you chose.
