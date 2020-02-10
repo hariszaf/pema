@@ -68,8 +68,8 @@ for (base in reverse_split) {
 ##########################################################################################
 
 
-cutadapt <- "/home1/haris/metabar_pipeline/tools/cutadapt" # CHANGE ME to the cutadapt path on your machine
-system2(cutadapt, args = "--version") # Run shell commands from R
+cutadapt <- "/usr/local/bin/cutadapt" 
+system2(cutadapt, args = "--version")
 
 
 path <- data
