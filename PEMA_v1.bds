@@ -134,13 +134,13 @@ paramsFirstAssignment{'gene'}.mkdir()
 wait
 
 ##########################################################################################
-#											 #
-#	 	From this point, PEMA and its tools are about to start running   	 #
-#											 #
+#																						 #
+#		  	From this point, PEMA and its tools are about to start running         	     #
+#																						 #
 ##########################################################################################
 
 ##########################################################################################
-##########################		1. FastQC			##################
+##########################		1. FastQC			######################################
 ##########################################################################################
 
  # If there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
@@ -165,7 +165,7 @@ print("FastQC is completed!" + "\n")
  # now i create a checkpoint and read again the parameters file.
  # this way if i change any of my parameters, i can do only the steps from here and after with the new ones.
  if ( qualityControl.isEmpty() == false ) {
- 	checkpoint "trimming.chp"
+ 	checkpoint "$outputPoint/trimming.chp"
 }
 			
 parameterFilePath.chdir()
@@ -173,7 +173,7 @@ string g = "parameters.tsv"
 string{} paramsTrimmoStep =  readParameterFile(g)
  
 ###########################################################################################
-###########################			2. Trimmomatic			###########
+###########################			2. Trimmomatic			###############################
 ###########################################################################################
 
 dataPath.chdir() ;
@@ -183,26 +183,28 @@ dataPath.chdir() ;
 if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
 	
 	dataPath.chdir()
-	string cutadaptOutputDirectory = "cutadapt"
-	string initialData = "initialData"
+	string cutadaptOutputDirectory = dataPath + "/" + "cutadapt"
+	string initialData = dataPath + "/" + "initialData"
 	if ( cutadaptOutputDirectory.isDir() && initialData.isDir() ) {												 
 	   print " done that! \n" 
 	} else {
 		# if it is not, create a file with its name
 		cutadaptOutputDirectory.mkdir()
 		initialData.mkdir()
+		wait
 		print "we made an output directory for cutadapt \n"
 	}	
 	
 	wait
-	task /usr/bin/R-3.6.0/bin/Rscript $path/scripts/cutadaptITS.R $paramsTrimmoStep{'forwardITSPrimer'} $paramsTrimmoStep{'reverseITSPrimer'} $dataPath
+
+	task Rscript $path/scripts/cutadaptITS.R $paramsTrimmoStep{'forwardITSPrimer'} $paramsTrimmoStep{'reverseITSPrimer'} $dataPath
 	
 	wait
 	
 	sys mv *.fastq.gz initialData
 	sys mv $initialData $outputPoint/$analysisName
-	sys mv cutadapt/* .
-	sys rm -r cutadapt
+	sys mv $cutadaptOutputDirectory/* $dataPath
+	sys rm -r $cutadaptOutputDirectory
 	
 	wait
 
@@ -270,7 +272,7 @@ print "Trimmomatic  is done\n\n" ;
 #  let us make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
 path.chdir() ; trimoPath.chdir() ;
 if ( trimoPath.isEmpty() == false ) {
-	checkpoint "errorCorrection.chp"
+	checkpoint "$outputPoint/errorCorrection.chp"
 }
 
 parameterFilePath.chdir()
@@ -360,7 +362,7 @@ print("Error correction using BayesHammer is completed!" + "\n")
  
 #  let us make a checkpoint to start our pipeline from the  merging step!
 if ( bayesPath.isEmpty() == false ) {
-	checkpoint "mergingWithSpades.chp"
+	checkpoint "$outputPoint/mergingWithSpades.chp"
 	}
 
 parameterFilePath.chdir()
@@ -459,7 +461,7 @@ print("Merging step by SPAdes is completed" +"\n")
 
 # we make a checkpoint to start our pipeline from the dereplication step!
 if ( spaPath.isEmpty() == false ) {
-checkpoint "dereplicationStep.chp"
+checkpoint "$outputPoint/dereplicationStep.chp"
 }
 
 parameterFilePath.chdir()
@@ -483,7 +485,7 @@ for ( string nodereplicate : unzips ) {
 wait
 print("all the first steps are done! clustering is about to start!" +"\n")
  
-checkpoint "tableStep.chp"
+checkpoint "$outputPoint/tableStep.chp"
 parameterFilePath.chdir()
 string k = "parameters.tsv"
 string{} paramsOfTable =  readParameterFile(k)
@@ -533,13 +535,13 @@ wait
 # this command forces applications to use the default language for output, and forces sorting to be bytewise.  
 sys export LC_ALL=C 									
 
-###########################################################################################################################
+######################################################################################################################################
 # here I read all the files I have made at once and run over them an awk command in which I set as record separator ">"
 # and as field separaton '_' or new line.
 # from the second line I make an array with the sample as keys and their abundances as value and anotherone with the otus
 # as keys and the sequnece asw value.
 # finally, I make a file in which in every line i have the amplicon name (sample) its abundance and its sequence.
-###########################################################################################################################
+######################################################################################################################################
 
 task cat *.g.fasta | awk 'BEGIN {RS = ">" ; FS = "[_\n]"} {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}} END {for (amplicon in sequences) {print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > $outputFilePath/all_samples.fasta
 
@@ -559,12 +561,12 @@ if ( paramsOfTable{'clusteringAlgoFor16S_18SrRNA'} == "algo_swarm" || paramsOfTa
 	}
 }
 
-###########################################################################################################################
+######################################################################################################################################
 ## in the file 'final_all_samples.fasta' we now have all the reads from all our samples
 ## and we are able to move on CLUSTERING - STEP 				      
 ## however, even if until now the procedure was the same no matter what gene we had,
 ## we now have to choose between different paths depending on the gene and our needs 
-###########################################################################################################################
+######################################################################################################################################
 
 # depending on the marker gene and the grouping method selected, we make the right folders
 genePath.chdir()																									
@@ -616,9 +618,9 @@ if ( paramsOfTable{'gene'} == 'gene_COI' ) {
 }
 
 ###################################################################################################################
-#														  #
-#					  	   Clustering     						  #
-#														  #
+#																												  #
+#										  	   Clustering     													  #
+#																												  #
 ###################################################################################################################
 
 ###################################################################################################################
@@ -929,13 +931,13 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
 	}
 }
 
-#################################################################################################################
-#														#
-#						Taxonomy Assignment 						#
-#														#
-#################################################################################################################
+#############################################################################################################################
+#																															#
+#												Taxonomy Assignment 														#
+#																															#
+##############################################################################################################################
 
-checkpoint "taxonomyAssignment.chp"
+checkpoint "$outputPoint/taxonomyAssignment.chp"
 parameterFilePath.chdir()
 string l = "parameters.tsv"
 string{} paramsOfTaxonomy =  readParameterFile(l)
@@ -1450,9 +1452,9 @@ wait
 
 #////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-##########################################################################################################################
-##  now, i have everything i need to, so I make files per sample in which i keep only the info I consider as valuable ! ##
-##########################################################################################################################
+##############################################################################################################################
+####  now, i have everything i need to, so I make files per sample in which i keep only the info I consider as valuable ! ####
+##############################################################################################################################
 
 bayesPath.chdir()
 string[] names = bayesPath.dir()
@@ -1499,7 +1501,7 @@ wait
 
 ########################################################################################################
 ############      making output per sample for 16S marker gene & alignment based assignment   ##########
-########################################################################################################
+#########################################################################################################
 
 genePath.chdir()
 if  ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'gene_18S' )  &&  paramsOfTaxonomy{'taxonomyAssignmentMethod'} == 'alignment') {
@@ -1585,16 +1587,16 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
 }		
 
 
-checkpoint "phyloseq.chp"
+checkpoint "$outputPoint/phyloseq.chp"
 parameterFilePath.chdir()
 string m = "parameters.tsv"
 string{} paramForPhyloseq = readParameterFile(m)
 
 
 #################################################################################################
-#												#
-#					phyloseq time!!!					#
-#												#
+#																								#
+#								    phyloseq time!!!     										#
+#																								#
 #################################################################################################
 
 # In order to get a phyloseq analysis, a phylogenetic tree for the OTUs found, needs to be made. 
@@ -1707,15 +1709,16 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
 	sys cp $outputPoint/phyloseq_in_PEMA.R .
 	wait
 	
-	sys /usr/bin/R-3.6.0/bin/Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
+	# sys /usr/bin/R-3.6.0/bin/Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
+	sys Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
 
 	wait		
 }
 
 ###################################################################################################################
-#														  #
-#					     phyloseq has been concluded					  #
-#														  #
+#																												  #
+#									     phyloseq has been concluded    										  #
+#																												  #
 ###################################################################################################################  
 
 
@@ -1727,16 +1730,26 @@ if ( paramForPhyloseq{'emptyCheckpoints'} == 'Yes' ) {
 	checkpointsDir.mkdir()
 	#parameterFilePath.chdir()
 	
-	path.chdir()
+	outputPoint.chdir()
 	sys mv *.chp $outputFilePath/$checkpointsDir
 }
 
+# # keep only one OTU-table for every analysis in the case of the 16S marker gene and the alignment based taxonomy assignment method
+# if ( paramForPhyloseq{'gene'} == '16S' &&  paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' ) {
+# 
+# 	string algoCluster = paramForPhyloseq{'clusteringAlgoFor16S_18SrRNA'}
+# 	string algo = algoCluster.split('_')[1]	
+# 	string assignmentPath = genePath + '/' + "gene_16S" + '/' + algo + '/' + paramForPhyloseq{'taxonomyFolderName'}
+# 	assignmentPath.chdir()
+# 	sys cd 
+# 	sys mv 16S_otu_table.txt 16S_otutab_$paramForPhyloseq{'taxonomyFolderName'}.txt
+# }
 
 outputFilePath.chdir()
 print(" \n PEMA has come to an end! Let biology start! \n ")
 
-####################################################################################################
-#												   #
-#					PEMA has been concluded.			   	   #
-#												   #
-####################################################################################################
+################################################################################################
+#																							   #
+#								PEMA has been concluded.									   #
+#																							   #
+################################################################################################
