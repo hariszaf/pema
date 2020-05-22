@@ -48,39 +48,45 @@ for sample in ./*
 do
     ((counter+=1))
     echo counter = $counter
+	
     let test=$counter%2
     echo test = $test
 
     if [ "$test" -eq "0" ]
     then
         ((giveName+=1))
-    fi                              
+    fi
 
     echo giveName = $giveName
 
-	sampleName=${sample##*/}            
+	sampleName=${sample##*/} 
 	sampleId=${sampleName%%_*}
 	newName=$(printf "ERR%07d" $giveName)
-    echo $sample
-	if [ ${sample: -7}=="1.fastq" ]
+    
+	sample="${sample:2}"
+	
+	if [[ $sample == *"_1.fastq"* ]]
 	then
-			
-		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sampleName > $directoryPath/"half_${sampleName}_1.fastq"	
+		
+		echo sample_1 is: $sample
+		
+		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${sampleName}_1.fastq"
 		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/1"} else print $0}' half_"${sampleName}"\_1.fastq  > $directoryPath/ena_"${newName}"\_1.fastq 
-		
 	fi
 	
-	if [ ${sample: -7}=="2.fastq" ]
+	if [[ $sample == *"_2.fastq"* ]]
 	then
-		
-		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sampleName > $directoryPath/"half_${newName}_2.fastq"
+
+		echo sample_2 is: $sample
+
+		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${newName}_2.fastq"
 		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/2"} else print $0}' half_"${newName}"\_2.fastq  > $directoryPath/ena_"${newName}"\_2.fastq
-		
+
 	fi
-	
+
 	echo -e $sampleId"\t"$newName >> transformations.txt
-	
-	
+
+
 done
 
 
