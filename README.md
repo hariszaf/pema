@@ -160,7 +160,7 @@ Singularity needs a Linux/Unix system to run.
 After you install Singularity in your environment and open it, you need to download PEMA's image from Singularity Hub, by running the command:
 
 ```
- singularity pull shub://hariszaf/pema
+ singularity pull shub://hariszaf/pema:v.1.1
 ```
 
 Now you have PEMA on your environment. But there is still one really **important** thing that you need to do! Please **download** the [*parameters.tsv*](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file and move it or copy it to the same directory with your raw data.
@@ -188,7 +188,7 @@ Singularity permits the use of a job scheduler that allocates computional resour
 #SBATCH --requeue
 
 
-singularity run -B /<path>/<of>/<input>/<directory>/:/mnt/analysis /<path>/<of>/<PEMA_Image>
+singularity run -B /<path>/<of>/<input>/<directory>/:/mnt/analysis /<path>/<of>/<PEMA_container>
 
 ```
 
@@ -239,7 +239,7 @@ If you have a newer version of VirtualBox installed, it’s fine.
 After you install Docker in your environment and run it, the only thing you need to do, is to download PEMA's image, by running the command:
 
 ```
-docker pull hariszaf/pema:v2
+docker pull hariszaf/pema
 ```
 
 The PEMA image file is a quite large (~3Gb), so it will take a while until it is downloaded in your computer system.
