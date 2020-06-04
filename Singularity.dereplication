@@ -1,6 +1,7 @@
 Bootstrap: docker
 From: hariszaf/pema:dereplication
 
+
 %post
 export WORKDIR="/home"
 echo "export WORKDIR=$WORKDIR" >> $SINGULARITY_ENVIRONMENT
