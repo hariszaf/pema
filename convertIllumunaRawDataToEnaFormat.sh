@@ -7,8 +7,8 @@
 #
 # This script will accomplish this task as long as your paired end raw data files end like this:
 #
-# forward read: "1.fastq.gz"
-# reverese reads "2.fastq.gz"
+# forward read: "_1.fastq.gz"
+# reverese reads "_2.fastq.gz"
 #
 # The rest of the name is irrelevant. 
 
