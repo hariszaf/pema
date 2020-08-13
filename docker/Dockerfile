@@ -2,12 +2,9 @@ FROM ubuntu:16.04
 MAINTAINER Haris Zafeiropoulos haris-zaf@hcmr.gr
 
 
-#### Now I am about to build the PEMA base image. 
-#### When you are about to build the final image containing the PEMA.bds script, 
-#### just comment in the line 280 of this Dockerfile.
+#### This is the Dockerfile for building PEMA base image. 
 
 ## Here is all JAVA 11 !
-
 RUN rm -rf /var/lib/apt/lists/* && apt-get clean && apt-get update && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
@@ -237,19 +234,9 @@ RUN mkdir analysis
 RUN mkdir databases
 
 
-
-
-
 # We need to be sure that in the directory to mount, all permissions are set properly.
 RUN chmod 777 /mnt/analysis
 RUN chmod g+s /mnt/analysis
-
-
-
-
-
-
-
 
 
 # Download and install "nano" editor.
