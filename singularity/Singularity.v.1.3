@@ -1,6 +1,6 @@
 Bootstrap: docker
 ####From: hariszaf/pema:27_08_19_javas
-From: hariszaf/pema:crop
+From: hariszaf/pema:v.1.3
 
 %post
 export WORKDIR="/home"
@@ -13,4 +13,4 @@ echo "export PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/lib/jvm/java-11-ope
 echo "export PATH=$PATH:/bin/gzip" >> ~/.bashrc 
 
 %runscript
-/home/tools/BDS/.bds/bds /home/PEMA_v1.bds
+/home/tools/BDS/.bds/bds /home/pema_latest.bds
