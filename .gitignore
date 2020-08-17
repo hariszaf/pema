@@ -11,3 +11,6 @@ createTreeTheEasyWay/
 R_libs/
 
 
+
+# Ignore old version of scripts
+scripts_OLD_VERSION/
