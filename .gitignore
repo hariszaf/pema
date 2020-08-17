@@ -1,2 +1,13 @@
 # Ignore the tools directory
 tools/
+
+# Ignore the backups directory
+backups/
+
+# Ignore the create Tree directory
+createTreeTheEasyWay/
+
+# Ignore the R_libs directory
+R_libs/
+
+
