@@ -1287,7 +1287,7 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
 		sys cp taxonomy_from_rdpclassifer_COI_CROP.txt tax_assign_swarm_COI.txt
 		sys cp CROP_OTU_table.tsv SWARM_OTU_table.tsv
 		sys bash $path/scripts/makeMotuTableForRDPClassifier.sh
-		sys rm *_sorted tax_assign_swarm_COI.txt SWARM_OTU_table.tsv
+		sys rm *_sorted tax_assign_swarm_COI.txt SWARM_OTU_table.tsv SWARM.stats SWARM.swarms
 	}
 
 } else if ( paramsOfTaxonomy{'gene'} == 'gene_ITS'  &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_CROP') {
