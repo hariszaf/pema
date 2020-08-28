@@ -742,9 +742,6 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
 		wait
 		# sys rm rna_SWARM_all_samples.fasta
 		sys mv derep.fasta rna_SWARM_all_samples.fasta
-	}
-		
-		
 		
 		
 		## here is the clustering step with SWARM algorithm 	
