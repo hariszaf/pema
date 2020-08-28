@@ -739,10 +739,10 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
 		
 		##### [NEW STEP: 2020.05.24]  Swarm expects dereplicated fasta files. We need to dereplicate the unified sequences file.
 		task $path/tools/swarm/swarm/bin/swarm -d 0 -t $paramsOfTable{'swarmThreads'} -w derep.fasta rna_SWARM_all_samples.fasta
-		task{	
-			sys rm rna_SWARM_all_samples.fasta
-			sys mv derep.fasta rna_SWARM_all_samples.fasta
-		}
+		wait
+		# sys rm rna_SWARM_all_samples.fasta
+		sys mv derep.fasta rna_SWARM_all_samples.fasta
+	}
 		
 		
 		
