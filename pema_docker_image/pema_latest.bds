@@ -128,22 +128,14 @@ if ( outputFiles.isEmpty() == true ) {
    outputPerSample.mkdir()
   }
 
-
-
-# Make all output directories 777
-
-
-
-
-
-
-
-
-
-
 # gene dependent directory
 genePath.chdir()																									
 paramsFirstAssignment{'gene'}.mkdir()														
+
+# Make all output (sub)directories having 777 permissions; ; the reason for this is that
+# in some cases permissions change in terms you cannot have access to the files and directories built
+# Make sure you run this command each time a new directory is createad
+sys chmod 777 $outputFilePath -R
 wait
 
 ##########################################################################################
@@ -205,6 +197,7 @@ if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
 		# if it is not, create a file with its name
 		cutadaptOutputDirectory.mkdir()
 		initialData.mkdir()
+		sys chmod 777 $outputFilePath -R
 		print "we made an output directory for cutadapt \n"
 	}	
 	
@@ -350,6 +343,7 @@ for ( string trimmed : finalTrimos ) {
 		
 		# going back to Trimo's output
 		trimoPath.chdir()
+		sys chmod 777 $outputFilePath -R
 		wait
 
 		# and I execute the BayesHammer algorithm that it is in SPAdes
@@ -456,7 +450,8 @@ spaPath.chdir() ;
 string[] merged = spaPath.dir() ;
 string unzip = "unzip" ;
 # we make a new directory named 'unzip'
-unzip.mkdir() ;															
+unzip.mkdir() ;
+sys chmod 777 $outputFilePath -R
 string unzipPath = "$spaPath/unzip" ;
 # and we remove the element 'unzip' from the list we made
 merged.remove("unzip")										
@@ -634,7 +629,8 @@ if ( paramsOfTable{'gene'} == 'gene_COI' ) {
 		algo.mkdir()
 	}		
 }
-
+# Again make everything 777
+sys chmod 777 $outputFilePath -R
 ###################################################################################################################
 #																												 
 #								  	 	CLUSTERING  												
