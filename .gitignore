@@ -10,7 +10,8 @@ createTreeTheEasyWay/
 # Ignore the R_libs directory
 R_libs/
 
-
-
 # Ignore old version of scripts
 scripts_OLD_VERSION/
+
+# Ignore Dockerfile in the repo's home directory; it is shown in the pema_docker_image directory
+/Dockerfile
