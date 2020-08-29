@@ -11,7 +11,11 @@ COPY pema_latest.bds .
 
 # make a source of the .bashrc file
 WORKDIR /root
+
 RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
+
+RUN export PATH=$PATH:/home/tools/BDS/.bds
+ENV PATH=$PATH:/home/tools/BDS/.bds
 
 # Set "home" as my working directory when a container starts
 WORKDIR /home

@@ -1773,7 +1773,7 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
 	# run the phyloseq script	
 	string phyloseqPath = outputFilePath + '/' + "phyloseq_output"
 	phyloseqPath.chdir()
-	sys cp $path/phyloseq_in_PEMA.R .
+	sys cp $outputPoint/phyloseq_in_PEMA.R .
 	wait
 	
 	sys /usr/bin/R-3.6.0/bin/Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
