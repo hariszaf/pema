@@ -698,9 +698,9 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
 		
 		wait
 		
-		sys mv all.otus.fasta rna_samples.otus.fa
+		sys mv all.otus.fasta rna_all_samples.otus.fa
 		sys mv all.otutab.txt rna_otutab.txt
-		sys cp 16S_otutab.txt rna_otutab_$paramsOfTable{'taxonomyFolderName'}.txt
+		sys cp rna_otutab.txt rna_otutab_$paramsOfTable{'taxonomyFolderName'}.txt
 		
 		wait
 		
