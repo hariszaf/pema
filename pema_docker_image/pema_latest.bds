@@ -141,7 +141,7 @@ wait
 
 ### [ADDED FEATURE : 2020.08.31 -->  Convert Illumina data to ENA format]
 if ( paramsFirstAssignment{'EnaData'} == 'No' ) {
-    sys bash $path/scripts/convertIllumunaRawDataToEnaFormat.sh $datapath
+    sys bash $path/scripts/convertIllumunaRawDataToEnaFormat.sh $dataPath
 }
 
 wait
