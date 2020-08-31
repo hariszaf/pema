@@ -1758,7 +1758,7 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
 		sys sed -i 's/:/_/g' otu_table.txt
 		
 		## add the metadata file in the phyloseq folder
-		sys cp $path/metadata.csv $outputFilePath/phyloseq_output	
+		sys cp $outputPoint/metadata.csv $outputFilePath/phyloseq_output	
 	}
 
 	string test2 = "aligned_otus.fasta.raxml.bestTree"
