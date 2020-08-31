@@ -11,6 +11,8 @@
 # The rest of the name is irrelevant. 
 
 
+
+# Keep the directory of the initial data in a variable
 directory=${1}
 
 # set the directoryPath the proper way no matter how the path was given by the user
@@ -35,8 +37,6 @@ for file in ./*
 do
 	gunzip "$file"
 done
-
-
 
 # convert them in the ENA format
 let counter=-1
@@ -90,10 +90,7 @@ done
 
 cat transformations.txt | sort | uniq > transformations_sort.txt
 rm transformations.txt ; mv transformations_sort.txt mapping_files_for_PEMA.txt
-#sed -i '1s/^/-------------------------------------------------\n/' mapping_files_for_PEMA.txt
 sed -i '1s/^/initial_label_from_sequencer\t\ena_format_label\n\n/' mapping_files_for_PEMA.txt
-
-
 
 
 # remove some temp files created and move the converted files to a new folder
@@ -109,5 +106,16 @@ gzip *
 # compress the initial files
 cd $directoryPath
 gzip *.fastq
+
+
+# Move initial data files out of the mydata directory
+mkdir initial_data
+mv *.fastq.gz initial_data
+mv initial_data ..
+mv rawDataInEnaFormat/* .
+rm -r rawDataInEnaFormat/
+
+
+
 
 
