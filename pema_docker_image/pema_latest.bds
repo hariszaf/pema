@@ -138,6 +138,15 @@ paramsFirstAssignment{'gene'}.mkdir()
 sys chmod 777 $outputFilePath -R
 wait
 
+
+### [ADDED FEATURE : 2020.08.31 -->  Convert Illumina data to ENA format]
+if ( paramsFirstAssignment{'EnaData'} == 'No' ) {
+    sys bash $path/scripts/convertIllumunaRawDataToEnaFormat.sh $datapath
+}
+
+wait
+
+
 ##########################################################################################
 #																					     #
 #	    	  	From this point, PEMA and its tools are about to start running         	 #
@@ -422,21 +431,21 @@ for ( string correctFile : correct )  {
 
 	wait
 	
-	# if i have sample names not in terms of Illumina and I need to use PANDAseq, i have to change the sample names in the rawdata as "ERR0001" for example.
-	if ( paramsSpadesMerging{'EnaData'} == 'No') {
-		uniqPath.chdir() 
-		sys bash  $path/scripts/prepareForPandaseq.sh $forwardFile $reverseFile	
-	}
+	# # if i have sample names not in terms of Illumina and I need to use PANDAseq, i have to change the sample names in the rawdata as "ERR0001" for example.
+	# if ( paramsSpadesMerging{'EnaData'} == 'No') {
+	# 	uniqPath.chdir() 
+	# 	sys bash  $path/scripts/prepareForPandaseq.sh $forwardFile $reverseFile	
+	# }
 	
 	# finally, we execute pandaseq algorithm for merging 
 	task $path/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 -A $paramsSpadesMerging{'pandaseqAlgorithm'} -a -B -T $paramsSpadesMerging{'pandaseqThreads'} -o $paramsSpadesMerging{'minoverlap'} -t $paramsSpadesMerging{'threshold'} $paramsSpadesMerging{'pandaseqMinlen'} $paramsSpadesMerging{'elimination'}  > $correctFile.merged.fastq.gz
 
 	wait
 
-	if ( paramsSpadesMerging{'EnaData'} == 'No') {
-		string mergedFile = correctFile + ".merged.fastq.gz"
-		sys $path/scripts/recoverSampleNames.sh $mergedFile
-	}
+	# if ( paramsSpadesMerging{'EnaData'} == 'No') {
+	# 	string mergedFile = correctFile + ".merged.fastq.gz"
+	# 	sys $path/scripts/recoverSampleNames.sh $mergedFile
+	# }
 
 	sys mv *.merged.fastq.gz $spaPath
 	bayesPath.chdir()
