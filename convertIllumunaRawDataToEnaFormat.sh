@@ -1,14 +1,12 @@
 #!/bin/bash
 
-# This is a script that converts the raw data file of Illumina sequencer, to the ENA format. 
+# This is a script that converts Illumina raw data file to the ENA format.
+# All sample files that are going to be used in PEM., they need to be in the ENA format.
 #
-# In case of P.E.M.A. the ENA format was used as a template.
-# All sample files that are going to be used in running P.E.M.A., they need to be in the ENA format.
+# This script will accomplish this task as long as your paired end raw data files have the following suffixes:
 #
-# This script will accomplish this task as long as your paired end raw data files end like this:
-#
-# forward read: "_1.fastq.gz"
-# reverese reads "_2.fastq.gz"
+# forward read:   "_R1_001.fastq.gz"
+# reverese reads: "_R2_001.fastq.gz"
 #
 # The rest of the name is irrelevant. 
 
@@ -65,22 +63,22 @@ do
     
 	sample="${sample:2}"
 	
-	if [[ $sample == *"_1.fastq"* ]]
+	if [[ $sample == *"_R1_001.fastq"* ]]
 	then
 		
 		echo sample_1 is: $sample
 		
-		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${sampleName}_1.fastq"
-		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/1"} else print $0}' half_"${sampleName}"\_1.fastq  > $directoryPath/ena_"${newName}"\_1.fastq 
+		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${sampleName}_R1_001.fastq"
+		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/1"} else print $0}' half_"${sampleName}"\_R1_001.fastq  > $directoryPath/ena_"${newName}"\_1.fastq 
 	fi
 	
-	if [[ $sample == *"_2.fastq"* ]]
+	if [[ $sample == *"_R2_001.fastq"* ]]
 	then
 
 		echo sample_2 is: $sample
 
-		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${newName}_2.fastq"
-		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/2"} else print $0}' half_"${newName}"\_2.fastq  > $directoryPath/ena_"${newName}"\_2.fastq
+		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${newName}_R2_001.fastq"
+		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/2"} else print $0}' half_"${newName}"\_R2_001.fastq  > $directoryPath/ena_"${newName}"\_2.fastq
 
 	fi
 
@@ -111,3 +109,5 @@ gzip *
 # compress the initial files
 cd $directoryPath
 gzip *.fastq
+
+
