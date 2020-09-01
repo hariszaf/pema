@@ -211,7 +211,7 @@ if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
 	}	
 	
 	wait
-	task /usr/bin/R-3.6.0/bin/Rscript $path/scripts/cutadaptITS.R $paramsTrimmoStep{'forwardITSPrimer'} $paramsTrimmoStep{'reverseITSPrimer'} $dataPath
+	task /usr/local/bin/Rscript $path/scripts/cutadaptITS.R $paramsTrimmoStep{'forwardITSPrimer'} $paramsTrimmoStep{'reverseITSPrimer'} $dataPath
 	
 	wait
 	
@@ -1785,7 +1785,7 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
 	sys cp $outputPoint/phyloseq_in_PEMA.R .
 	wait
 	
-	sys /usr/bin/R-3.6.0/bin/Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
+	sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
 
 	wait		
 }
