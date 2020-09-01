@@ -89,8 +89,8 @@ done
 
 
 cat transformations.txt | sort | uniq > transformations_sort.txt
-rm transformations.txt ; mv transformations_sort.txt mapping_files_for_PEMA.txt
-sed -i '1s/^/initial_label_from_sequencer\t\ena_format_label\n\n/' mapping_files_for_PEMA.txt
+rm transformations.txt ; mv transformations_sort.txt mapping_files_for_PEMA.tsv
+sed -i '1s/^/initial_label_from_sequencer\t\ena_format_label\n\n/' mapping_files_for_PEMA.tsv
 
 
 # remove some temp files created and move the converted files to a new folder
@@ -112,6 +112,7 @@ gzip *.fastq
 mkdir initial_data
 mv *.fastq.gz initial_data
 mv initial_data ..
+mv mapping_files_for_PEMA.tsv ..
 mv rawDataInEnaFormat/* .
 rm -r rawDataInEnaFormat/
 
