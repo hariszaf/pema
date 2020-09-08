@@ -864,8 +864,8 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
 		wait
 
 		task{	
-			sys rm inputFileForSwarm
-			sys mv derep.fasta inputFileForSwarm
+			sys rm $inputFileForSwarm
+			sys mv derep.fasta $inputFileForSwarm
 		}		
 		
 		wait		
