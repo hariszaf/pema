@@ -861,12 +861,14 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
 
 		##### [NEW STEP: 2020.05.24] : Swarm expects dereplicated fasta files. We need to dereplicate the unified sequences file.
 		task $path/tools/swarm/swarm/bin/swarm -d 0 -t $paramsOfTable{'swarmThreads'} -w derep.fasta inputFileForSwarm
+		wait
+
 		task{	
 			sys rm inputFileForSwarm
 			sys mv derep.fasta inputFileForSwarm
 		}		
 		
-		
+		wait		
 		
 		
 		
