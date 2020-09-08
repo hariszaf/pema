@@ -21,7 +21,7 @@ string{} readParameterFile(string parameter_file) {
    for ( string line : lines ) {
    
       # I need a map with parameteres as keys and their values as values, hence i do not care about lines starting with "#"
-      if ( line.startsWith("#") ) {   
+      if ( line.startsWith("#") ) {
       continue
    
       } else {
@@ -116,7 +116,7 @@ outputFilePath.chdir()
 string [] outputFiles = outputFilePath.dir()         
 
 # if that list is empty, then create the directories mentioned above
-if ( outputFiles.isEmpty() == true ) {                                                
+if ( outputFiles.isEmpty() == true ) {
    # create all the output files
    qualityControl.mkdir() ;
    trimmomatic.mkdir() ;
@@ -129,8 +129,8 @@ if ( outputFiles.isEmpty() == true ) {
   }
 
 # gene dependent directory
-genePath.chdir()                                                                           
-paramsFirstAssignment{'gene'}.mkdir()                                          
+genePath.chdir()
+paramsFirstAssignment{'gene'}.mkdir()
 
 # Make all output (sub)directories having 777 permissions; ; the reason for this is that
 # in some cases permissions change in terms you cannot have access to the files and directories built
@@ -201,7 +201,7 @@ if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
    dataPath.chdir()
    string cutadaptOutputDirectory = "cutadapt"
    string initialData = "initialData"
-   if ( cutadaptOutputDirectory.isDir() && initialData.isDir() ) {                                     
+   if ( cutadaptOutputDirectory.isDir() && initialData.isDir() ) {
       print " done that! \n" 
    } else {
       # if it is not, create a file with its name
@@ -228,23 +228,23 @@ if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
 ###########################    here ends the ITS - specific part  !!    #####################################
 
 # go to the folder which contains all the raw data and make a list (named 'data') with all the file names that you can find there
-string[] data = dataPath.dir()                                 
+string[] data = dataPath.dir()
   
 # set two variables readF and readR for the forward and reverse file of each sample  
-string readF                                                         
+string readF
 string readR
 int counter = 0
 
 for ( string file : data ) {
    
    # here's the trick! i need to tell which file is the forward and which is the reverese. Hence, i try to split a suffix. 
-   string check = file.split("_2\.fastq\.gz")[0]            
+   string check = file.split("_2\.fastq\.gz")[0]
 
    # if the split does occure then i know that i have the second file of each sample (reverse)
    # that is because the 'file' variable will always have a '.fastq.gz' suffix.
    # hence, if there is no split, 'file' and 'check'  variables are the same.
-   if ( file == check ) {                                             
-            readF = file                                                       
+   if ( file == check ) {
+            readF = file
             print("readF is: " + readF  +"\n")
             
             # if there is a split, then they are different
@@ -252,7 +252,7 @@ for ( string file : data ) {
                readR = file
                print("readR is: " + readR  +"\n")
          }
-                                    
+
    wait
 
    if ( readF.isEmpty() == false && readR.isEmpty() == false ) {
@@ -287,7 +287,8 @@ print "Trimmomatic  is done\n\n" ;
 #  let us make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
 path.chdir() ; trimoPath.chdir() ;
 if ( trimoPath.isEmpty() == false ) {
-   checkpoint "errorCorrection.chp"
+   string checkCor = outputPoint + "errorCorrection.chp"
+   checkpoint checkCor
 }
 
 parameterFilePath.chdir()
@@ -379,7 +380,8 @@ print("Error correction using BayesHammer is completed!" + "\n")
  
 #  let us make a checkpoint to start our pipeline from the  merging step!
 if ( bayesPath.isEmpty() == false ) {
-   checkpoint "mergingWithSpades.chp"
+   string checkMerge = outputPoint + "merging.chp"
+   checkpoint checkMerge
    }
 
 parameterFilePath.chdir()
@@ -480,7 +482,8 @@ print("Merging step by SPAdes is completed" +"\n")
 
 # we make a checkpoint to start our pipeline from the dereplication step!
 if ( spaPath.isEmpty() == false ) {
-checkpoint "dereplicationStep.chp"
+   string checkDerep = outputPoint + "dereplication.chp"
+   checkpoint checkDerep
 }
 
 parameterFilePath.chdir()
@@ -505,8 +508,9 @@ for ( string nodereplicate : unzips ) {
 }
 wait
 print("all the first steps are done! clustering is about to start!" +"\n")
- 
-checkpoint "tableStep.chp"
+
+string checkTableStep = outputPoint + "tableStep.chp"
+checkpoint checkTableStep 
 parameterFilePath.chdir()
 string k = "parameters.tsv"
 string{} paramsOfTable =  readParameterFile(k)
@@ -1006,7 +1010,8 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
 #                                                                                             
 ##############################################################################################################################
 
-checkpoint "taxonomyAssignment.chp"
+string checkTaxonomy = outputPoint + "taxonomyAssignment.chp"
+checkpoint checkTaxonomy 
 parameterFilePath.chdir()
 string l = "parameters.tsv"
 string{} paramsOfTaxonomy =  readParameterFile(l)
@@ -1667,8 +1672,8 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
    #string.readLines() 
 }      
 
-
-checkpoint "phyloseq.chp"
+string checkPhyloseq = outputPoint + "phyloseq.chp"
+checkpoint checkPhyloseq 
 parameterFilePath.chdir()
 string m = "parameters.tsv"
 string{} paramForPhyloseq = readParameterFile(m)
@@ -1806,9 +1811,7 @@ if ( paramForPhyloseq{'emptyCheckpoints'} == 'Yes' ) {
    string checkpointsDir = 'checkpoints_for_' + paramForPhyloseq{'outputFolderName'}
    outputFilePath.chdir()
    checkpointsDir.mkdir()
-   #parameterFilePath.chdir()
-   
-   path.chdir()
+   outputPoint.chdir()   
    sys mv *.chp $outputFilePath/$checkpointsDir
 }
 
