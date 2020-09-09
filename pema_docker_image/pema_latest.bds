@@ -179,7 +179,7 @@ print("FastQC is completed!" + "\n")
  # now i create a checkpoint and read again the parameters file.
  # this way if i change any of my parameters, i can do only the steps from here and after with the new ones.
 if ( qualityControl.isEmpty() == false ) {
-   string checkTrim = outputPoint + "trimming.chp"
+   string checkTrim = outputPoint + "/trimming.chp"
    checkpoint checkTrim
 }
 
@@ -287,7 +287,7 @@ print "Trimmomatic  is done\n\n" ;
 #  let us make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
 path.chdir() ; trimoPath.chdir() ;
 if ( trimoPath.isEmpty() == false ) {
-   string checkCor = outputPoint + "errorCorrection.chp"
+   string checkCor = outputPoint + "/errorCorrection.chp"
    checkpoint checkCor
 }
 
@@ -380,7 +380,7 @@ print("Error correction using BayesHammer is completed!" + "\n")
  
 #  let us make a checkpoint to start our pipeline from the  merging step!
 if ( bayesPath.isEmpty() == false ) {
-   string checkMerge = outputPoint + "merging.chp"
+   string checkMerge = outputPoint + "/merging.chp"
    checkpoint checkMerge
    }
 
@@ -482,7 +482,7 @@ print("Merging step by SPAdes is completed" +"\n")
 
 # we make a checkpoint to start our pipeline from the dereplication step!
 if ( spaPath.isEmpty() == false ) {
-   string checkDerep = outputPoint + "dereplication.chp"
+   string checkDerep = outputPoint + "/dereplication.chp"
    checkpoint checkDerep
 }
 
@@ -509,7 +509,7 @@ for ( string nodereplicate : unzips ) {
 wait
 print("all the first steps are done! clustering is about to start!" +"\n")
 
-string checkTableStep = outputPoint + "tableStep.chp"
+string checkTableStep = outputPoint + "/tableStep.chp"
 checkpoint checkTableStep 
 parameterFilePath.chdir()
 string k = "parameters.tsv"
@@ -1010,7 +1010,7 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
 #                                                                                             
 ##############################################################################################################################
 
-string checkTaxonomy = outputPoint + "taxonomyAssignment.chp"
+string checkTaxonomy = outputPoint + "/taxonomyAssignment.chp"
 checkpoint checkTaxonomy 
 parameterFilePath.chdir()
 string l = "parameters.tsv"
@@ -1672,7 +1672,7 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
    #string.readLines() 
 }      
 
-string checkPhyloseq = outputPoint + "phyloseq.chp"
+string checkPhyloseq = outputPoint + "/phyloseq.chp"
 checkpoint checkPhyloseq 
 parameterFilePath.chdir()
 string m = "parameters.tsv"
