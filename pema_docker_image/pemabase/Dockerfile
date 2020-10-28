@@ -90,8 +90,8 @@ RUN wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmoma
 # Download and install SPAdes
 WORKDIR /home/tools
 RUN mkdir SPAdes
-WORKDIR /home/tools/SPAdes
-RUN wget http://cab.spbu.ru/files/release3.13.0/SPAdes-3.13.0-Linux.tar.gz && tar -zxvf SPAdes-3.13.0-Linux.tar.gz && rm SPAdes-3.13.0-Linux.tar.gz
+#WORKDIR /home/tools/SPAdes
+#RUN wget http://cab.spbu.ru/files/release3.13.0/SPAdes-3.13.0-Linux.tar.gz && tar -zxvf SPAdes-3.13.0-Linux.tar.gz && rm SPAdes-3.13.0-Linux.tar.gz
 
 # Download and install PANDAseq
 WORKDIR /home/tools
