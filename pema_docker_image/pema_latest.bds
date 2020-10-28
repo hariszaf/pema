@@ -363,7 +363,7 @@ for ( string trimmed : finalTrimos ) {
       sys gzip --version
       print("readBayesF: " + readBayesF +"\n" + "and readBayesR: " + readBayesR + "\n" )
       
-      task $path/tools/SPAdes/SPAdes-3.13.0-Linux/bin/spades.py --only-error-correction --threads $paramsBayesHammerStep{'threadsTrimmomatic'} -o $bayesPath/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
+      task $path/tools/SPAdes/SPAdes-3.14.1/bin/spades.py --only-error-correction --threads $paramsBayesHammerStep{'threadsTrimmomatic'} -o $bayesPath/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
 
       wait
    
