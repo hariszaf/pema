@@ -1,5 +1,6 @@
 # Ignore the tools directory
 tools/
+pema_docker_image/pemabase/tools/
 
 # Ignore the backups directory
 backups/
