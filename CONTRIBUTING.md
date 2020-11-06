@@ -9,15 +9,15 @@ Feel free to contribute to this document as in the rest of the repo! :wink:
 ## Table of Contents
 
   * [Dependencies](#dependencies)
-  * [Fork `PEMA` repository to build your own repo](#fork-pema-repository-to-build-your-own-repo-)
-  * [Prepare to contribute!](#prepare-to-contribute!-)
+  * [Fork `PEMA` repository to build your own repo](#fork-pema-repository-to-build-your-own-repo)
+  * [Prepare to contribute!](#prepare-to-contribute)
     + [GitFlow workflow](#gitflow-workflow)
     + [Create new branch for your work](#create-new-branch-for-your-work)
     + [Verify your new branch](#verify-your-new-branch-)
-  * [Make your contributions on your branch](#make-your-contributions-on-your-branch-)
-  * [Pull request (PR) and the job is done](#pull-request--pr--and-the-job-is-done-)
+  * [Make your contributions on your branch](#make-your-contributions-on-your-branch)
+  * [Pull request (PR) and the job is done](#pull-request-pr-and-the-job-is-done)
   * [Review](#review-)
-  * [Acknowledgements](#acknowledgements-)
+  * [Acknowledgements](#acknowledgements)
 
    
 ## Dependencies
@@ -166,7 +166,7 @@ You can now go there and click "Compare and pull request" button or the "New pul
 
 Add title and description and click the "Create pull request" button.
 
-## Review 
+## Review
 
 After creating a pull request your code will be reviewed and if there are no objections and your contribution is valid, your changes will be merged.
 
@@ -177,7 +177,7 @@ Those changes will also be part of the same pull request.
 This procedure will be repeated until the code is ready for merging.
 
 
-## Acknowledgements 
+## Acknowledgements
 
 Contributing takes quite some time and energy so we thank you all for your effort and it is highy appreciated!
 
