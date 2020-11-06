@@ -178,7 +178,7 @@ This procedure will be repeated until the code is ready for merging.
 
 ## Acknowledgements
 
-Contributing takes quite some time and energy so we thank you all for your effort and it is highy appreciated!
+:tada::tada: Contributing takes quite some time and energy so we thank you all for your effort and it is highy appreciated! A list with all the PEMA contributors will be soon available! :tada::tada:
 
 
 
