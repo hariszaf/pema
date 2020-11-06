@@ -13,10 +13,9 @@ Feel free to contribute to this document as in the rest of the repo! :wink:
   * [Prepare to contribute!](#prepare-to-contribute)
     + [GitFlow workflow](#gitflow-workflow)
     + [Create new branch for your work](#create-new-branch-for-your-work)
-    + [Verify your new branch](#verify-your-new-branch-)
   * [Make your contributions on your branch](#make-your-contributions-on-your-branch)
   * [Pull request (PR) and the job is done](#pull-request-pr-and-the-job-is-done)
-  * [Review](#review-)
+  * [Review](#review)
   * [Acknowledgements](#acknowledgements)
 
    
