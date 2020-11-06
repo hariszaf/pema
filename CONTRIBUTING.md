@@ -1,4 +1,5 @@
-# Contributing to `PEMA`
+
+# Contribute to the `PEMA` repo!
 
 :rocket:  :metal: Thank you all for taking the time to contribute! :rocket:  :metal:
 
@@ -8,17 +9,17 @@ Feel free to contribute to this document as in the rest of the repo! :wink:
 ## Table of Contents
 
   * [Dependencies](#dependencies)
-  * [Fork PEMA repository to build your own repo](#fork-pema-repository-to-build-your-own-repo-)
-  * [Time for you to contribute!)](#time-for-you-to-contribute!-)
+  * [Fork `PEMA` repository to build your own repo](#fork-pema-repository-to-build-your-own-repo-)
+  * [Prepare to contribute!](#prepare-to-contribute!-)
     + [GitFlow workflow](#gitflow-workflow)
     + [Create new branch for your work](#create-new-branch-for-your-work)
-    + [Verify your new branch (optional)](#verify-your-new-branch--optional-)
-  * [Modify the branch (implement, implement, implement)](#modify-the-branch--implement--implement--implement-)
-    + [Tests](#tests)
-    + [Push](#push)
-  * [Pull request (the joy of sharing)](#pull-request--the-joy-of-sharing-)
-  * [Review (ok this is not an exam)](#review--ok-this-is-not-an-exam-)
-  
+    + [Verify your new branch](#verify-your-new-branch-)
+  * [Make your contributions on your branch](#make-your-contributions-on-your-branch-)
+  * [Pull request (PR) and the job is done](#pull-request--pr--and-the-job-is-done-)
+  * [Review](#review-)
+  * [Acknowledgements](#acknowledgements-)
+
+   
 ## Dependencies
 
 * `git` (see [Getting Started with Git](https://help.github.com/en/github/using-git/getting-started-with-git-and-github))
@@ -43,7 +44,7 @@ Now you may try to run current version of PEMA locally by making use of the [```
 
 
 
-## Fork PEMA repository to build your own repo
+## Fork `PEMA` repository to build your own repo
 
 Working directly in the original PEMA repository is not possible to you, therefore you should create your own fork. 
 
@@ -81,7 +82,7 @@ see commits
 
 You should be able to see exactly the same commits as in `pema` repository now.
 
-## Time for you to contribute!
+## Prepare to contribute!
 
 ### GitFlow workflow
 
@@ -136,8 +137,6 @@ Verify your new branch by running
 You can see your newly created remote branch also on GitHub on your fork repo, not in the initial PEMA repo! 
 
 
-
-
 ## Make your contributions on your branch
 
 Before contributiong to a library by adding a new feature, or a bugfix, 
@@ -150,8 +149,6 @@ you can see [here](https://github.com/hariszaf/pema/tree/master/singularity).
 
 It is your images that will be tested by the PEMA group to review your contribution. 
 
-
-### Push
 
 Now you can push your changes to the remote branch
 
