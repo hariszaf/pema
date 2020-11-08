@@ -130,7 +130,7 @@ Verify your new branch by running
 
 **Attention!**
 * Note that the `-u` switch also sets up the tracking of the remote branch. Your new branch now is now ready to contribute!
-* Note that without the `-u` switch you wouldn't see the tracking information for your new branch.
+* Note that without the `-u` switch you wouldn't see the tracking information for your new branch. You can verify that with ```git remote -v```.
 
 You can see your newly created remote branch also on GitHub on your fork repo, not in the initial PEMA repo! 
 
