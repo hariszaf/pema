@@ -77,7 +77,6 @@ clone your repository and checkout to the ```develop``` branch
 see commits
 
     git log
-    gitk
 
 You should be able to see exactly the same commits as in `pema` repository now.
 
