@@ -74,10 +74,23 @@ clone your repository and checkout to the ```develop``` branch
     git branch -vv
     git pull
 
-see commits
+Furthermore, in order to connect the the cloned repo to the original repo (upstream) do the following
+
+```git remote add upstream https://github.com/hariszaf/pema```
+
+Now you when you run ```git remote -v``` you should see this :
+
+```
+$ git remote -v
+> origin    https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)
+> origin    https://github.com/YOUR_USERNAME/YOUR_FORK.git (push)
+> upstream  https://github.com/hariszaf/pema (fetch)
+> upstream  https://github.com/hariszaf/pema (push)
+```
+
+See history of commits:
 
     git log
-    gitk
 
 You should be able to see exactly the same commits as in `pema` repository now.
 
@@ -131,6 +144,7 @@ Verify your new branch by running
 
 **Attention!**
 * Note that the `-u` switch also sets up the tracking of the remote branch. Your new branch now is now ready to contribute!
+
 * Note that without the `-u` switch you wouldn't see the tracking information for your new branch.
 
 You can see your newly created remote branch also on GitHub on your fork repo, not in the initial PEMA repo! 
@@ -174,6 +188,34 @@ If you see some comments under the pull request and/or under specific lines of y
 Those changes will also be part of the same pull request.
 
 This procedure will be repeated until the code is ready for merging.
+
+## Stayning in sync with PEMA
+
+In case you want to contribute again to PEMA you have to sync your cloned repository with the original repository and then push the changed to the forked repository in github.
+
+Run 
+
+```
+$ git remote -v
+> origin    https://github.com/YOUR_USERNAME/YOUR_FORK.git (fetch)
+> origin    https://github.com/YOUR_USERNAME/YOUR_FORK.git (push)
+> upstream  https://github.com/hariszaf/pema (fetch)
+> upstream  https://github.com/hariszaf/pema (push)
+```
+
+if the upstream part is missing run:
+
+```git remote add upstream https://github.com/hariszaf/pema```
+
+
+```git checkout develop```
+Move to the ```develop``` branch to fetch the changes.
+
+```git fetch upstream```
+this will download the changes from the PEMA repo. Afterwards you have to merge 
+
+```git merge upstream/develop```
+Now you will be synced. For more info see [here](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/syncing-a-fork) 
 
 
 ## Acknowledgements

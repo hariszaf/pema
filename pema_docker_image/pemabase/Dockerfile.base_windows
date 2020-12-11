@@ -1,0 +1,17 @@
+FROM hariszaf/pemabase:latest
+MAINTAINER Haris Zafeiropoulos haris-zaf@hcmr.gr
+
+
+# Install SPAdes from source code
+WORKDIR /home/tools/
+RUN rm -r SPAdes && mkdir SPAdes
+WORKDIR /home/tools/SPAdes
+RUN wget http://cab.spbu.ru/files/release3.14.1/SPAdes-3.14.1.tar.gz && tar -xzf SPAdes-3.14.1.tar.gz && cd SPAdes-3.14.1 && ./spades_compile.sh
+
+# make a source of the .bashrc file
+WORKDIR /root
+RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
+
+
+# Set "home" as my working directory when a container starts
+WORKDIR /home
