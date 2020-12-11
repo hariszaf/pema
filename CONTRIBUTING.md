@@ -144,7 +144,8 @@ Verify your new branch by running
 
 **Attention!**
 * Note that the `-u` switch also sets up the tracking of the remote branch. Your new branch now is now ready to contribute!
-* Note that without the `-u` switch you wouldn't see the tracking information for your new branch. You can verify that with ```git remote -v```.
+
+* Note that without the `-u` switch you wouldn't see the tracking information for your new branch.
 
 You can see your newly created remote branch also on GitHub on your fork repo, not in the initial PEMA repo! 
 
@@ -215,6 +216,7 @@ this will download the changes from the PEMA repo. Afterwards you have to merge
 
 ```git merge upstream/develop```
 Now you will be synced. For more info see [here](https://docs.github.com/en/free-pro-team@latest/github/collaborating-with-issues-and-pull-requests/syncing-a-fork) 
+
 
 ## Acknowledgements
 
