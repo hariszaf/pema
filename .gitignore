@@ -7,9 +7,6 @@ backups/
 # Ignore the create Tree directory
 createTreeTheEasyWay/
 
-# Ignore the R_libs directory
-R_libs/
-
 # Ignore old version of scripts
 scripts_OLD_VERSION/
 
