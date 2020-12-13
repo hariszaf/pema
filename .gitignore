@@ -4,9 +4,6 @@ tools/
 # Ignore the backups directory
 backups/
 
-# Ignore the create Tree directory
-createTreeTheEasyWay/
-
 # Ignore old version of scripts
 scripts_OLD_VERSION/
 
