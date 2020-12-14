@@ -177,6 +177,7 @@ COPY /tools/RDPTools/ ./
 
 ## If you need the PEMAbase container without this training, you shall mute the 2 previous commands.
 ## and run the following block of commands instead, i.e lines 181-195 (now muted).
+## For the following, check also on this tutorial: https://john-quensen.com/tutorials/tutorial-1/
 
 ## Get the dependencies, set the environment, download and install RDPClassifier
 #RUN apt-get install hmmer
