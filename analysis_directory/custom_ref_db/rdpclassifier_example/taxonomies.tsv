@@ -1,0 +1,8 @@
+Seq_ID	Kingdom	Phylum	Class	Order	Family	Genus	Species
+MIDSEQ1	Bacteria	Proteobacteria	Gammaproteobacteria	Pseudomonadales	Moraxellaceae	Acinetobacter	Acinetobacter_baumannii
+MIDSEQ2	Bacteria	Firmicutes	Bacilli	Bacillales	Bacillaceae	Bacillus	Bacillus_anthracis
+MIDSEQ3	Bacteria	Proteobacteria	Epsilonproteobacteria	Campylobacterales	Helicobacteraceae	Helicobacter	Helicobacter_pylori
+MIDSEQ4	Bacteria	Actinobacteria	Actinobacteria	Corynebacteriales	Mycobacteriaceae	Mycobacterium	Mycobacterium_tuberculosis
+MIDSEQ5	Bacteria	Proteobacteria	Gammaproteobacteria	Pseudomonadales	Pseudomonadaceae	Pseudomonas	Pseudomonas_aeruginosa
+MIDSEQ6	Bacteria	Spirochaetes	Spirochaetia	Spirochaetales	Spirochaetaceae	Treponema	Treponema_pallidum
+
