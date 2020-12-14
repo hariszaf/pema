@@ -1,12 +1,15 @@
+# This is the Dockerfile for building the base image for the PEMA workflow
+
 FROM ubuntu:16.04 
-MAINTAINER Haris Zafeiropoulos haris-zaf@hcmr.gr
+MAINTAINER Haris Zafeiropoulos \
+           haris-zaf@hcmr.gr
 
 
 #### Now I am about to build the PEMA base image. 
 #### When you are about to build the final image containing the PEMA.bds script, 
 #### just comment in the line 280 of this Dockerfile.
 
-## Here is all JAVA 11 !
+## Here we get JAVA versions 8 and 11 
 
 RUN rm -rf /var/lib/apt/lists/* && apt-get clean && apt-get update && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl ca-certificates \
@@ -29,10 +32,7 @@ ENV PATH="/opt/java/openjdk/bin:$PATH"
 ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport"
 RUN export JAVA_HOME
 
-
-##### testing fixing "core dump"
-
-RUN ulimit -c unlimited
+RUN ulimit -c unlimited             # testing fixing "core dump"
 
 #############################   This is where JAVA installation is completed!!   ######################################
 
@@ -100,38 +100,31 @@ WORKDIR /home/tools/PANDAseq
 RUN git clone http://github.com/neufeld/pandaseq.git && cd pandaseq && ./autogen.sh && ./configure --prefix="/home/tools/PANDAseq"&& make && make install
 RUN chmod -R +777 /home/tools/PANDAseq/pandaseq/.libs/ 
 
-# Install OBITools
+# Install OBITools // following the instructions described here: https://www.biostars.org/p/235898/
 WORKDIR /home/tools
-RUN apt-get update && apt-get install -y apt-transport-https
-RUN apt-get install -y cython3
-RUN apt-get install -y python-pip
+RUN apt-get update -y
+RUN apt-get install -y python-virtualenv
+RUN mkdir OBI && cd OBI && virtualenv OBI-env
+# get and extract the source
+RUN wget 'https://git.metabarcoding.org/obitools/obitools/repository/archive.tar.gz?ref=master'
+RUN tar -zxvf "archive.tar.gz?ref=master"
+# activate the virtual env
+WORKDIR /home/tools/OBI
+RUN /bin/bash -c "source OBI-env/bin/activate ; \
+ pip install sphinx==1.4.8 ; \
+ cd obitools-master-* ; \
+ python setup.py build ; \
+ python setup.py install ; \
+ deactivate"
 
-#RUN wget https://pythonhosted.org/OBITools/_downloads/get-obitools.py
-
-RUN wget https://git.metabarcoding.org/obitools/obitools/raw/master/get_obitools/get-obitools.py
-RUN python get-obitools.py && rm get-obitools.py
-RUN rm obitools
-
+# At this point the software should be installed within the OBI directory, just add the bin directory in your PATH
+# Add this line in your .bashrc to enable the OBITools
+RUN export PATH=${PATH}:"~/OBI/OBI-env/bin"
 
 # Download and install NCBI
 WORKDIR /home/tools
 RUN wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.8.1/ncbi-blast-2.8.1+-x64-linux.tar.gz && \
         tar -zxvf ncbi-blast-2.8.1+-x64-linux.tar.gz && rm ncbi-blast-2.8.1+-x64-linux.tar.gz
-
-# Download and install CREST & LCAClassifier
-# To do that, we first need to make through with "setuptools" Python package. We need a version until 33.1.1.
-WORKDIR /home/tools/CREST
-RUN apt-get remove -y --purge python-setuptools
-RUN pip install setuptools==33.1.1
-## there is a crucial issue with the CREST web-server. we make that work another way.
-## the true download commands are in the end of that script commented out. 
-
-# The true download commands for CREST:
-#RUN git clone https://github.com/lanzen/CREST.git 
-#RUN cd CREST/LCAClassifier && bash install.sh
-### Here what's happening: the SURVER of CREST has an issue and does not allow us to download silvadatabase!   For that... we will do it on our own! :P   In case they fix it, the upper connands should be executed instead of the following COPY, in order to get the latest versions of both the classifier and the databases!!
-COPY /tools/CREST/ ./																
-
 
 # Download and install PaPaRa software
 WORKDIR /home/tools
@@ -157,75 +150,65 @@ RUN git clone https://github.com/tingchenlab/CROP.git &&  cd CROP && make
 
 # Install of "locate" program that allows to find where is what on your container
 RUN apt-get install mlocate && updatedb
-
-## if i have R on my image already, i need to remove everything of it, so:
-RUN apt-get remove -y r-base-core
-
-## if i do NOT have any R version, i can skip the previous command
-RUN apt-get install -y gfortran
-RUN apt-get install -y build-essential
-RUN apt-get install -y fort77
-RUN apt-get install -y xorg-dev
-RUN apt-get install -y liblzma-dev libblas-dev gfortran
-RUN apt-get install -y gcc-multilib
-RUN apt-get install -y gobjc++
-RUN apt-get install -y aptitude
-RUN aptitude install -y libreadline-dev
-RUN apt-get install libbz2-dev
-
-RUN export CC=/usr/bin/gcc
-RUN export CXX=/usr/bin/g++
-RUN export FC=/usr/bin/gfortran
-RUN export PERL=/usr/bin/perl
-
-RUN apt-get install -y libpcre3-dev libpcre2-dev libpcre-ocaml-dev libghc-regex-pcre-dev
-
-
-
-# At last, get R!
-WORKDIR /home
-RUN apt-get install -y xorg-dev
-RUN wget https://ftp.cc.uoc.gr/mirrors/CRAN/src/base/R-3/R-3.6.0.tar.gz
-RUN tar -xf R-3.6.0.tar.gz
-WORKDIR /home/R-3.6.0
-RUN ./configure 
-RUN make
-RUN make install
-
-
-# some packages mendatory for phyloseq 
-RUN Rscript -e 'install.packages("vegan", repos="https://cran.rstudio.com")'
-#RUN Rscript -e 'install.packages("biom", repos="https://cran.rstudio.com")'
-
-
-# install R packages for PEMA to run all its features 
-RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")'
-RUN Rscript -e 'install.packages("tidyr", repos="https://cran.rstudio.com")'
-RUN Rscript -e 'install.packages("BiocManager", repos="https://cran.rstudio.com")'
-RUN Rscript -e 'install.packages("RColorBrewer", repos="https://cran.rstudio.com")'
-
-# download and install phyloseq
-#RUN Rscript -e "source('http://bioconductor.org/biocLite.R');biocLite('phyloseq')"
-RUN Rscript -e 'library(BiocManager); BiocManager::install("phyloseq")'
-
-# Install cutadapt (for the ITS marker gene case)
-# First I need to install pip3
 RUN apt update
 RUN apt install -y python3-pip
+
+# Install cutadapt (for the ITS marker gene case)
 RUN pip3 install cutadapt
-
-# Install R package required for cutadapt R script
 RUN apt-get install -y libjpeg-dev
-RUN Rscript -e 'library(BiocManager); BiocManager::install("ShortRead")'
+
+# Get the "setuptools" Python package. We need a version until 33.1.1.
+WORKDIR /app
+ADD . /app
+RUN set -xe \
+    && apt-get update \
+    && apt-get install -y python-pip
+
+RUN pip install --upgrade pip
+RUN apt-get remove -y --purge python-setuptools
+RUN pip install setuptools==33.1.1
+
+###############                  RDPTools - CLASSIFIER                  ##############
+
+# We have already trained the RDPClassifier with the MIDORI database (version: MIDORI_LONGEST_1.1)
+# So we copy our local version of RDPTools on the image:
+WORKDIR /home/tools/RDPTools
+COPY /tools/RDPTools/ ./
+
+## If you need the PEMAbase container without this training, you shall mute the 2 previous commands.
+## and run the following block of commands instead, i.e lines 181-195 (now muted).
+
+## Get the dependencies, set the environment, download and install RDPClassifier
+#RUN apt-get install hmmer
+#
+#ENV JAVA_HOME /usr/lib/jvm/java-8-openjdk-amd64 
+#ENV PATH="PATH=${JAVA_HOME}/bin:${PATH}"
+#RUN export JAVA_HOME
+#RUN export PATH
+#
+## Now go for getting the RDPClassifier
+#WORKDIR /usr/local
+#RUN git clone https://github.com/rdpstaff/RDPTools.git 
+#WORKDIR RDPTools
+#RUN git submodule init 
+#RUN git submodule update
+#RUN make
+
+##############                  RDPTools - CLASSIFIER                  ##############
 
 
-# Copy and paste the manually written scripts that PEMA needs
-#WORKDIR /home/scripts 
-#COPY /scripts/ ./
+################                  CREST  CLASSIFIER                  ################
 
-## Copy and paste the PEMA script!
-#WORKDIR /home
-#COPY PEMA_v1.bds .
+## On 2020.12.14 the CREST team fixed a crucial issue with the CREST web-server they used to have.
+## However, we copy the CREST we have locally to add the trainings we have already done on it on the PEMAbase image.
+WORKDIR /home/tools/CREST
+COPY /tools/CREST/ ./
+
+## If you need the PEMAbase container without these trainings, you shall run the 2 next commands (muted now) and mute the 2 previous ones.
+#RUN git clone https://github.com/lanzen/CREST.git 
+#RUN cd CREST/LCAClassifier && bash install.sh
+
+################                  CREST  CLASSIFIER                  ################
 
 # Copy and paste the manually the Easy Trees that PEMA needs for the phylogenetic taxonomy assignment
 WORKDIR /home/tools/createTreeTheEasyWay
@@ -257,17 +240,62 @@ WORKDIR /home/tools
 RUN wget https://ftp.gnu.org/gnu/gawk/gawk-4.2.1.tar.gz && tar -xvpzf gawk-4.2.1.tar.gz
 RUN rm gawk-4.2.1.tar.gz && cd gawk-4.2.1/ && ./configure && make && make install  
 
-# Copy and paste the Midori database
-WORKDIR /home/tools/midori
-COPY /tools/midori/ ./
 
-# Copy and install RDPTools
-WORKDIR /home/tools/RDPTools
-COPY /tools/RDPTools/ ./
+### DO WE NEED THIS ACTUALLY?????????????  I think not, once the new pema container is ready check if it actually works for the COI and if yes, remove the following lines
+## Copy and paste the Midori database
+#WORKDIR /home/tools/midori
+#COPY /tools/midori/ ./
 
-# Download and install RDPClassifier
-#WORKDIR /home/tools
-#RUN git clone https://github.com/rdpstaff/RDPTools.git && cd RDPTools/ && git submodule init && git submodule update && make
+## If i have R on my image already, i need to remove everything of it, so:
+RUN apt-get remove -y r-base-core
+
+## If i do NOT have any R version, i can skip the previous command
+RUN apt-get install -y gfortran
+RUN apt-get install -y build-essential
+RUN apt-get install -y fort77
+RUN apt-get install -y xorg-dev
+RUN apt-get install -y liblzma-dev libblas-dev gfortran
+RUN apt-get install -y gcc-multilib
+RUN apt-get install -y gobjc++
+RUN apt-get install -y aptitude
+RUN aptitude install -y libreadline-dev
+RUN apt-get install libbz2-dev
+
+RUN export CC=/usr/bin/gcc
+RUN export CXX=/usr/bin/g++
+RUN export FC=/usr/bin/gfortran
+RUN export PERL=/usr/bin/perl
+
+RUN apt-get install -y libpcre3-dev libpcre2-dev libpcre-ocaml-dev libghc-regex-pcre-dev
+
+# At last, get R!
+WORKDIR /home
+RUN apt-get install -y xorg-dev
+RUN wget https://ftp.cc.uoc.gr/mirrors/CRAN/src/base/R-3/R-3.6.0.tar.gz
+RUN tar -xf R-3.6.0.tar.gz
+WORKDIR /home/R-3.6.0
+RUN ./configure 
+RUN make
+RUN make install
+
+
+# some packages mendatory for phyloseq 
+RUN Rscript -e 'install.packages("vegan", repos="https://cran.rstudio.com")'
+#RUN Rscript -e 'install.packages("biom", repos="https://cran.rstudio.com")'
+
+
+# install R packages for PEMA to run all its features 
+RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")'
+RUN Rscript -e 'install.packages("tidyr", repos="https://cran.rstudio.com")'
+RUN Rscript -e 'install.packages("BiocManager", repos="https://cran.rstudio.com")'
+RUN Rscript -e 'install.packages("RColorBrewer", repos="https://cran.rstudio.com")'
+
+# download and install phyloseq
+#RUN Rscript -e "source('http://bioconductor.org/biocLite.R');biocLite('phyloseq')"
+RUN Rscript -e 'library(BiocManager); BiocManager::install("phyloseq")'
+
+# Install R package required for cutadapt R script
+RUN Rscript -e 'library(BiocManager); BiocManager::install("ShortRead")'
 
 
 ##############################################			 TRULY IMPORTANT COMMAND !!!!!			#######################################################
@@ -278,10 +306,9 @@ RUN echo "root:Docker!" | chpasswd
 
 # Download and install Big Data Script language (BDS) - in this Dockerfile, BDS 0.9999 is called, so JAVA 11 is NOT necessary
 WORKDIR /home/tools/BDS
-COPY /tools/bds_Linux.tgz ./
-RUN tar -xvzf bds_*.tgz 
+RUN wget https://github.com/pcingola/BigDataScript/blob/master/distro/bds_Linux.tgz?raw=true
+RUN tar -xvzf bds_Linux*
 RUN echo "export PATH=$PATH:/home/tools/BDS/.bds" >> /root/.bashrc
-RUN rm bds_Linux.tgz
 
 # Download and install RAxML-ng
 WORKDIR /
