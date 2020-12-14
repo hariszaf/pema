@@ -367,3 +367,22 @@ abskew	2
 emptyRawDataFile	Yes
 emptyCheckpoints	Yes
 #
+#
+###########################################################################################################
+#
+#               In - house (local) refererence database for the taxonoomy assignment step
+#
+###########################################################################################################
+# In case you would prefer to use a reference database of yours for the taxonomy step, PEMA will ask you for the 
+# files necessary to train each of the two classifiers supported. You need to provide those in the directory called
+# `local_ref_db` and depending on which classifier will train, the files have to be in a different format.
+# More specifically, if you are working with COI, then PEMA uses thes RDPClassifier and you need to provide a taxonomy
+# and a sequence file, as described here: https://john-quensen.com/tutorials/training-the-rdp-classifier/
+# If you are working with 16S, 18S or ITS then PEMA uses the CREST classifier for the taxonomy step
+# and you need to provide the corresponding two files as described at: https://github.com/lanzen/CREST
+# (see after the Output section).
+# As containers are lost when exit from one, you will have to train the classifier, every time you run a new PEMA container
+# If you are about to use a custom ref db, set the following parameter as 'Yes'. Otherwise, it must be set as 'No'.
+# The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
+custom_ref_db   No
+name_of_custom_db   myrefdb
