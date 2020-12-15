@@ -148,13 +148,43 @@ wait
 
 
 ##########################################################################################
-#                                                                    #
-#               From this point, PEMA and its tools are about to start running             #
-#                                                                   #
+#
+#               From this point, PEMA and its tools are about to start running
+#
 ##########################################################################################
 
+
+
+##############################################################################################
+# 0. check whether training of the classifier based on a local reference database is required
+##############################################################################################
+
+if ( paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
+
+    # Path for user's files 
+    string customDbFilesPath =  "/mnt/analysis/custom_ref_db"
+    
+    # Files
+    customDbFilesPath.chdir() ;
+    string taxonomyFile = customDbFilesPath + "/" + "*.tsv"
+    string sequenceFile = customDbFilesPath + "/" + "*.fasta"
+
+    if ( paramsFirstAssignment{'gene'} == 'gene_COI' ){
+
+        # Train the RDPClassifier using your custom COI ref db
+        sys bash $path/scripts/trainDbForRDPClassifier.sh taxonomyFile sequenceFile paramsFirstAssignment{'name_of_custom_db'}
+     
+    } else {
+     
+        # All markers genes but the COI, use the CREST algorithm for the taxonomy step. Here we train CREST
+        sys bash $path/scripts/trainDbForCREST.sh taxonomyFile sequenceFile paramsFirstAssignment{'name_of_custom_db'}
+
+    }
+}
+ 
+
 #########################################################################################
-#                        1. FastQC                                    #
+#                                 1. FastQC
 #########################################################################################
 
  # If there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
