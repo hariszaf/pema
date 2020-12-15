@@ -55,6 +55,10 @@ RUN apt-get update && \
 # Let "git" do as it wants for 15 times
 RUN git config --global credential.helper cache
 
+# Some necessary programs
+RUN apt-get update -y 
+RUN apt-get install --"yes" autotools-dev libtool flex bison cmake automake autoconf
+
 #####################################################################
 #####################################################################
 
@@ -91,7 +95,10 @@ RUN wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmoma
 WORKDIR /home/tools
 RUN mkdir SPAdes
 WORKDIR /home/tools/SPAdes
-RUN wget http://cab.spbu.ru/files/release3.13.0/SPAdes-3.13.0-Linux.tar.gz && tar -zxvf SPAdes-3.13.0-Linux.tar.gz && rm SPAdes-3.13.0-Linux.tar.gz
+#RUN wget http://cab.spbu.ru/files/release3.13.0/SPAdes-3.13.0-Linux.tar.gz && tar -zxvf SPAdes-3.13.0-Linux.tar.gz && rm SPAdes-3.13.0-Linux.tar.gz
+# 2020.12.14 Upgrade to SPAdes 3.14.0 and install from source code
+RUN wget http://cab.spbu.ru/files/release3.14.0/SPAdes-3.14.0.tar.gz  && tar -xzf SPAdes-3.14.0.tar.gz && cd SPAdes-3.14.0 && ./spades_compile.sh
+
 
 # Download and install PANDAseq
 WORKDIR /home/tools
@@ -136,7 +143,7 @@ RUN tar -zxvf papara_nt-2.5-static_x86_64.tar.gz && rm papara_nt-2.5-static_x86_
 WORKDIR /home/tools
 WORKDIR /home/tools/EPA-ng
 RUN git clone --recursive https://github.com/Pbdas/epa.git 
-RUN apt-get install --"yes" autotools-dev libtool flex bison cmake automake autoconf
+#RUN apt-get install --"yes" autotools-dev libtool flex bison cmake automake autoconf
 RUN cd epa && make
 
 # Download and install SWARM clustering algoritm
