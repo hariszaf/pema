@@ -1,15 +1,18 @@
 # This is the Dockerfile for building the base image for the PEMA workflow
 
+# To build the actual PEMA image, you may use this as a source, i.e FROM hariszaf/pemabase
+
+# You won't be able to run PEMA using this image by itself
+
+
+# Kernel and maintainer 
 FROM ubuntu:16.04 
 MAINTAINER Haris Zafeiropoulos \
            haris-zaf@hcmr.gr
 
+# Set the environment
 
-#### Now I am about to build the PEMA base image. 
-#### When you are about to build the final image containing the PEMA.bds script, 
-#### just comment in the line 280 of this Dockerfile.
-
-## Here we get JAVA versions 8 and 11 
+# Get JAVA versions 8 and 11 
 
 RUN rm -rf /var/lib/apt/lists/* && apt-get clean && apt-get update && apt-get upgrade -y \
     && apt-get install -y --no-install-recommends curl ca-certificates \
@@ -28,16 +31,13 @@ RUN  apt-get install -y openjdk-11-jdk
 ENV JAVA_HOME /usr/lib/jvm/java-11-oracle 
 ENV PATH="/opt/java/openjdk/bin:$PATH"
 
-
 ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport"
 RUN export JAVA_HOME
 
 RUN ulimit -c unlimited             # testing fixing "core dump"
 
-#############################   This is where JAVA installation is completed!!   ######################################
 
-
-## Some extras just in case
+# Some extras just in case
 RUN apt-get update && apt-get install -y ant && apt-get clean;
 RUN apt-get update && apt-get install ca-certificates-java && apt-get clean && update-ca-certificates -f;
 
@@ -59,17 +59,13 @@ RUN git config --global credential.helper cache
 RUN apt-get update -y 
 RUN apt-get install --"yes" autotools-dev libtool flex bison cmake automake autoconf
 
-#####################################################################
-#####################################################################
+#------------------------------------------------------------
 
-#  Now I start build on the PEMA part
+#  Building the PEMA-related part
 
 # Create a folder where all PEMA tools are gonna be
 RUN mkdir tools
 WORKDIR /home/tools
-
-
-### Downloading and installing all tools necessary
 
 # Download and install FastQC
 RUN mkdir fastqc
@@ -112,10 +108,10 @@ WORKDIR /home/tools
 RUN apt-get update -y
 RUN apt-get install -y python-virtualenv
 RUN mkdir OBI && cd OBI && virtualenv OBI-env
-# get and extract the source
+# Get and extract the source
 RUN wget 'https://git.metabarcoding.org/obitools/obitools/repository/archive.tar.gz?ref=master'
 RUN tar -zxvf "archive.tar.gz?ref=master"
-# activate the virtual env
+# Activate the virtual env
 WORKDIR /home/tools/OBI
 RUN /bin/bash -c "source OBI-env/bin/activate ; \
  pip install sphinx==1.4.8 ; \
@@ -175,6 +171,8 @@ RUN pip install --upgrade pip
 RUN apt-get remove -y --purge python-setuptools
 RUN pip install setuptools==33.1.1
 
+
+
 ###############                  RDPTools - CLASSIFIER                  ##############
 
 # We have already trained the RDPClassifier with the MIDORI database (version: MIDORI_LONGEST_1.1)
@@ -218,6 +216,8 @@ COPY /tools/CREST/ ./
 
 ################                  CREST  CLASSIFIER                  ################
 
+
+
 # Copy and paste the manually the Easy Trees that PEMA needs for the phylogenetic taxonomy assignment
 WORKDIR /home/tools/createTreeTheEasyWay
 COPY /createTreeTheEasyWay/ ./
@@ -249,15 +249,10 @@ RUN wget https://ftp.gnu.org/gnu/gawk/gawk-4.2.1.tar.gz && tar -xvpzf gawk-4.2.1
 RUN rm gawk-4.2.1.tar.gz && cd gawk-4.2.1/ && ./configure && make && make install  
 
 
-### DO WE NEED THIS ACTUALLY?????????????  I think not, once the new pema container is ready check if it actually works for the COI and if yes, remove the following lines
-## Copy and paste the Midori database
-#WORKDIR /home/tools/midori
-#COPY /tools/midori/ ./
-
-## If i have R on my image already, i need to remove everything of it, so:
+# Remove everything R-related:
 RUN apt-get remove -y r-base-core
 
-## If i do NOT have any R version, i can skip the previous command
+# Set the R environment
 RUN apt-get install -y gfortran
 RUN apt-get install -y build-essential
 RUN apt-get install -y fort77
@@ -287,18 +282,16 @@ RUN make
 RUN make install
 
 
-# some packages mendatory for phyloseq 
+# Packages mendatory for Phyloseq 
 RUN Rscript -e 'install.packages("vegan", repos="https://cran.rstudio.com")'
-#RUN Rscript -e 'install.packages("biom", repos="https://cran.rstudio.com")'
 
-
-# install R packages for PEMA to run all its features 
+# Install R packages for PEMA to run all its features 
 RUN Rscript -e 'install.packages("dplyr", repos="https://cran.rstudio.com")'
 RUN Rscript -e 'install.packages("tidyr", repos="https://cran.rstudio.com")'
 RUN Rscript -e 'install.packages("BiocManager", repos="https://cran.rstudio.com")'
 RUN Rscript -e 'install.packages("RColorBrewer", repos="https://cran.rstudio.com")'
 
-# download and install phyloseq
+# Download and install phyloseq
 #RUN Rscript -e "source('http://bioconductor.org/biocLite.R');biocLite('phyloseq')"
 RUN Rscript -e 'library(BiocManager); BiocManager::install("phyloseq")'
 
@@ -332,29 +325,28 @@ RUN cmake -DUSE_MPI=ON ..
 RUN make
 
 
-# make all needed for R
+# R necessary modifs
 WORKDIR /home
 RUN touch .Renviron
 RUN echo "export R_LIBS=/home/R_libs/" >> .Renviron
 COPY /R_libs/ .
 
-# we need MAFFT to align our OTUs
+# Get Mafft for alignment related tasks
 WORKDIR /home/tools
 RUN wget https://mafft.cbrc.jp/alignment/software/mafft_7.427-1_amd64.deb
 RUN dpkg -i mafft_7.427-1_amd64.deb
 
 
-##  fixing java
+# Fixing java
 RUN  apt-get install -y libhsdis0-fcml
 
-# make a source of the .bashrc file
+# Make a source of the .bashrc file
 WORKDIR /root
 RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
 
 
 # Set "home" as my working directory when a container starts
 WORKDIR /home
-
 
 
 ###################################################################
