@@ -9,11 +9,12 @@
 #########          FUNCTION IN ORDER TO READ parameters.tsv FILE EACH TIME      #############
 #############################################################################################
 
-# first of all, read the parameters' file and keep all of them in a map (map is a dictionary for BDS)
-# in order to be able to make run from checkpoints, we made a function in order to read the parameter's file all the time
+# First of all, read the parameters' file and keep all of them in a map (map is a dictionary for BDS)
+# In order to be able to make run from checkpoints, we made a function in order to read the parameter's file all the time
+
 string{} readParameterFile(string parameter_file) {
 
-#  each time i need to change..... 
+#  Each time i need to change..... 
    string parameters_file = parameter_file
    lines := parameters_file.readLines()
    string{} my_case
@@ -34,7 +35,7 @@ string{} readParameterFile(string parameter_file) {
       }
    }
    
-   # return the map 
+   # Return the map 
    return( my_case )                        
 }
 
@@ -1136,7 +1137,7 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'ge
       }
 
    # However, the user might needs to run against a custom (local) reference database              
-   } elif ( paramsOfTaxonomy{'custom_ref_db'} == 'Yes' ) {
+   } else if ( paramsOfTaxonomy{'custom_ref_db'} == 'Yes' ) {
 
       string algoCluster1 = paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'}
       string algo1 = algoCluster1.split('_')[1]

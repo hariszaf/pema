@@ -18,7 +18,7 @@
 #
 # Give in your each uniq experiment a NAME, so a single output file will be created for each of them 
 #
-outputFolderName	16S_final_test
+outputFolderName	test_16S_v.2.0.0
 #
 #
 # If the names of the samples under analysis are not in an ENA format (e.g "ERR1021912") but they are more like as
@@ -361,8 +361,8 @@ midori_version v_1
 # If you are about to use a custom ref db, set the following parameter as 'Yes'. Otherwise, it must be set as 'No'.
 # The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
 #
-custom_ref_db   No
-name_of_custom_db   myrefdb
+custom_ref_db	No
+name_of_custom_db	myrefdb
 #
 #
 #########################################################################################################
