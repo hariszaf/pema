@@ -1,4 +1,4 @@
-FROM hariszaf/pemabase:v.2.0.0
+FROM hariszaf/pemabase:v.2.0.1
 MAINTAINER Haris Zafeiropoulos haris-zaf@hcmr.gr
 
 # Copy and paste the manually written scripts that PEMA needs
