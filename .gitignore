@@ -9,3 +9,6 @@ scripts_OLD_VERSION/
 
 # Ignore Dockerfile in the repo's home directory; it is shown in the pema_docker_image directory
 /Dockerfile
+
+# Ignore all checkpoint files
+*.chp
