@@ -126,27 +126,29 @@ RUN pip install --upgrade pip
 RUN apt-get remove -y --purge python-setuptools
 RUN pip install setuptools==33.1.1
 
+
 # Install OBITools // following the instructions described here: https://www.biostars.org/p/235898/
 WORKDIR /home/tools
 RUN apt-get update -y
 RUN apt-get install -y python-virtualenv
-RUN mkdir OBI && cd OBI && virtualenv OBI-env
 
+RUN mkdir OBI 
 WORKDIR /home/tools/OBI
+ENV VIRTUAL_ENV=/home/tools/OBI/OBI-env
+RUN virtualenv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 RUN wget 'https://git.metabarcoding.org/obitools/obitools/repository/archive.tar.gz?ref=master'
 RUN tar -zxvf "archive.tar.gz?ref=master"
 
-CMD /bin/bash -c "source OBI-env/bin/activate"
 RUN pip install sphinx==1.4.8 
 RUN rm archive.tar.gz?ref=master ; mv obitools-master-* obitools-master
 WORKDIR /home/tools/OBI/obitools-master
 RUN python setup.py build 
 RUN python setup.py install
-CMD deactivate
 
-# At this point the software should be installed within the OBI directory, just add the bin directory in your PATH
-# Add this line in your .bashrc to enable the OBITools
 RUN export PATH=${PATH}:"~/OBI/OBI-env/bin"
+
 
 # Download and install NCBI
 WORKDIR /home/tools
