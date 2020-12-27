@@ -162,23 +162,29 @@ wait
 
 if ( paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
 
-    # Path for user's files 
-    string customDbFilesPath =  "/mnt/analysis/custom_ref_db"
+   # Path for user's files 
+   string customDbFilesPath =  "/mnt/analysis/custom_ref_db"
     
-    # Files
-    customDbFilesPath.chdir() ;
-    string taxonomyFile = customDbFilesPath + "/" + "*.tsv"
-    string sequenceFile = customDbFilesPath + "/" + "*.fasta"
 
-    if ( paramsFirstAssignment{'gene'} == 'gene_COI' ){
+   if ( paramsFirstAssignment{'gene'} == 'gene_COI' ){
 
-        # Train the RDPClassifier using your custom COI ref db
-        sys bash $path/scripts/trainDbForRDPClassifier.sh taxonomyFile sequenceFile paramsFirstAssignment{'name_of_custom_db'}
+      # Files
+      customDbFilesPath.chdir() ;
+      string taxonomyFile = customDbFilesPath + "/" + "*.tsv"
+      string sequenceFile = customDbFilesPath + "/" + "*.fasta"
+
+      # Train the RDPClassifier using your custom COI ref db
+      sys bash $path/scripts/trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $paramsFirstAssignment{'name_of_custom_db'}
      
     } else {
+       
+      # Files
+      customDbFilesPath.chdir() ;
+      string taxonomyFile = customDbFilesPath + "/" + "*.nds"
+      string sequenceFile = customDbFilesPath + "/" + "*.fasta"       
      
-        # All markers genes but the COI, use the CREST algorithm for the taxonomy step. Here we train CREST
-        sys bash $path/scripts/trainDbForCREST.sh taxonomyFile sequenceFile paramsFirstAssignment{'name_of_custom_db'}
+      # All markers genes but the COI, use the CREST algorithm for the taxonomy step. Here we train CREST
+      sys bash $path/scripts/trainDbForCREST.sh $taxonomyFile $sequenceFile $paramsFirstAssignment{'name_of_custom_db'}
 
     }
 }
@@ -534,7 +540,7 @@ string[] unzips = unzipPath.dir()
 string fileForDerepl
 for ( string nodereplicate : unzips ) {
    # now i execute OBITools
-   task $path/tools/OBITools-1.2.13/bin/obiuniq -m sample $nodereplicate > $derePath/dereplicate_$nodereplicate ;
+   task $path/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > $derePath/dereplicate_$nodereplicate ;
    wait
 }
 wait
@@ -995,10 +1001,6 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
       wait
 
 
-
-        ##### [NEW STEP: 2020.08.13] : Fix CROP bug. Run CROP with multiple CPUs as well
-
-
       ### calculate parameters for CROP clustering algorithm   
       croPath.chdir()
       string OMP_NUM_THREADS = paramsOfTable{'omp_num_threads'}
@@ -1012,8 +1014,6 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
       
       # run the CROP algorithm
       sys $path/tools/CROP/CROP/CROPLinux -i no_chim_COI_CROP_all_samples.fasta -o CROP_output -z $crop_params{'zeta'} -b $crop_params{'beta'} -e $crop_params{'epsilon'} || true
-      
-      
       
       
       ##### at last, we create an OTU table that comes after the CROP results. Again, we have an awk command in a bash script 
@@ -1146,6 +1146,7 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'ge
       string customDB = paramsOfTaxonomy{'name_of_custom_db'}
 
       # Firt the megablast
+      print("PEMA is about to get the .xml file for the case of CREST custom ref db!")
       task $path/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast -query rna_all_samples.otus.fa -db $path/tools/CREST/LCAClassifier/parts/flatdb/$paramsOfTaxonomy{'name_of_custom_db'}/$paramsOfTaxonomy{'name_of_custom_db'} -num_alignments 100 \
          -outfmt 5 -out $paramsOfTaxonomy{'name_of_custom_db'}_$paramsOfTaxonomy{'taxonomyFolderName'}.xml -num_threads $paramsOfTaxonomy{'vsearchThreads'}
       
@@ -1155,16 +1156,7 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'ge
       
    }
    
-
    # !!!!  The CREST algorithm has now provided the taxonomy assignments!!!!
-
-
-
-
-
-
-
-
 
    if ( paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'} == "algo_vsearch" ) {
       string taxonomyDirectory = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + 'vsearch' + '/' + paramsOfTaxonomy{'taxonomyFolderName'}
