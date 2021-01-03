@@ -1268,16 +1268,23 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_COI' || paramsOfTaxonomy{'gene'} == "ge
       ##  need to check on this... try this "-f filterbyconf: only outputs the results for major ranks as in fixrank,
       ##  results below the confidence cutoff were bin to a higher rank unclassified_node  db: outputs the seqname, trainset_no, tax_id, conf.
       
-      task java -Xmx64g -jar $path/tools/RDPTools/classifier.jar classify -t $path/tools/RDPTools/TRAIN/$paramsOfTaxonomy{'midori_version'}/rRNAClassifier.properties -o tax_assign_swarm_COI_temp.txt rdpClassifierInput.fasta
-      
+
+      if ( paramsOfTaxonomy{'custom_ref_db'} != 'Yes' ) {
+         task java -Xmx64g -jar $path/tools/RDPTools/classifier.jar classify -t $path/tools/RDPTools/TRAIN/$paramsOfTaxonomy{'midori_version'}/rRNAClassifier.properties -o tax_assign_swarm_COI_temp.txt rdpClassifierInput.fasta
+      } else {
+         task java -Xmx64g -jar $path/tools/RDPTools/classifier.jar classify -t $path/tools/RDPTools/TRAIN/$paramsOfTaxonomy{'name_of_custom_db'}/rRNAClassifier.properties -o tax_assign_swarm_COI_temp.txt rdpClassifierInput.fasta
+      }
+
       wait
    
-      task{
-         sys sed 's/.*root\t1.0\t//g' tax_assign_swarm_COI_temp.txt > taxonomies.txt
+      task {
+         sys awk -F "\t" '{print substr($0, index($0,$6)) }' tax_assign_swarm_COI_temp.txt > taxonomies_tmp.txt 
+         sys sed 's/Kingdom//g ; s/Phylum//g ; s/Class//g ; s/Order/g/ ; s/Family//g ; s/Genus//g ; s/Species//g' taxonomies_tmp.txt > taxonomies.txt
          sys awk '{print $1}' tax_assign_swarm_COI_temp.txt > ids.txt
          sys paste ids.txt taxonomies.txt > tax_assign_swarm_COI.txt
-         sys rm ids.txt taxonomies.txt tax_assign_swarm_COI_temp.txt
+         sys rm ids.txt taxonomies_tmp.txt taxonomies.txt tax_assign_swarm_COI_temp.txt
       }
+
       print 'RDPClassifier has ran as it should ' + "\n"
       
       swarmPath.chdir()
@@ -1356,12 +1363,9 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
    
    print 'I have made the file I need for the taxonomy assignment' + "\n"
    
-   ## run RDPClassifier 
+   ## Run RDPClassifier 
    croPath.chdir()
    task java -Xmx64g -jar $path/tools/RDPTools/classifier.jar classify -t $path/tools/RDPTools/TRAIN/$paramsOfTaxonomy{'midori_version'}/rRNAClassifier.properties -o taxonomy_from_rdpclassifer_COI_CROP.txt crop_for_rdpclassifier.fasta
-
-
-##### [NEW STEP: 2020.08.14] : Build final_table.tsv for the case of COI marker gene with CROP as clustering algorithm
 
    wait
 
@@ -1433,6 +1437,7 @@ wait
 # we check whether the output of the classifier is non-zero
 if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() != 0 ) {
    print ' we have a RDPClassifier output file to work with!!! '
+   
    bool debugCode = false
    
    string{} giveSampleAndTaxonomyGetSizeSum
