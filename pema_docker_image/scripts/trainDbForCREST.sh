@@ -20,12 +20,12 @@ echo "$name_of_custom_db = /home/tools/CREST/LCAClassifier/parts/flatdb/$name_of
 
 # 2. classifiy -d database-name env_custom.xml
 
-sed 's/\.//g ; s/-//g' $sequence_file |  tr "\t" "\n" | fold -w 80 > alignment_sequences_to_makeblastdb.fasta
+sed 's/\.//g ; s/-//g' $sequence_file |  tr "\t" "\n" | fold -w 80 > /home/tools/CREST/LCAClassifier/parts/flatdb/$name_of_custom_db/alignment_sequences_to_makeblastdb.fasta
 
 /home/tools/ncbi-blast-2.8.1+/bin/makeblastdb \
-    -in alignment_sequences_to_makeblastdb.fasta \
-    -title $name_of_custom_db \ 
-    -dbtype nucl \ 
-    -out /home/tools/CREST/LCAClassifier/parts/flatdb/$name_of_custom_db
+	-in alignment_sequences_to_makeblastdb.fasta \
+	-title $name_of_custom_db \
+	-dbtype nucl \
+	-out /home/tools/CREST/LCAClassifier/parts/flatdb/$name_of_custom_db/$name_of_custom_db
 
 rm alignment_sequences_to_makeblastdb.fasta
