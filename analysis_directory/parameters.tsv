@@ -2,6 +2,7 @@
 ################################   PEMA 's PARAMETERS   ####################################
 ############################################################################################
 #
+#    for version 2.0.1
 #
 # In this file there are all the parameters that need to be assigned every time PEMA is about to run!
 # The parameters we have here, are not the only parameters of the tools invoked by PEMA.
