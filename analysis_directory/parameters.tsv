@@ -338,9 +338,9 @@ abskew	2
 # Since PEMA v.2.0 both Midori and Midori2 are supported. The second version of Midori includes more than
 # 180.000 unique species and expands beyond Metazoa. However, the computational time needed increases to a
 # a great extent when Midori2 is the one selected. Choose wisely, especially in case you have a lot of query sequencies
-# If you want Midori2 for your analysis, replace "1" with "2" after the "v_" prefix.
+# If you want Midori2 for your analysis, replace "1" with "2" after the "midori_" prefix.
 #
-midori_version v_1
+midori_version	midori_1
 #
 #
 #########################################################################################################
