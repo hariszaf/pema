@@ -72,7 +72,7 @@ for (base in reverse_split) {
 ##########################################################################################
 
 # (let us hope) singularity version
-cutadapt <- "/usr/local/bin/cutadapt"
+cutadapt <- "/usr/bin/cutadapt"
 
 
 system2(cutadapt, args = "--version") # Run shell commands from R
