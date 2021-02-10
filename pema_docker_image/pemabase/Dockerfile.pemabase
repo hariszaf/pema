@@ -124,7 +124,9 @@ RUN set -xe \
 
 RUN pip install --upgrade pip
 RUN apt-get remove -y --purge python-setuptools
-RUN pip install setuptools==33.1.1
+RUN apt update
+RUN apt install -y python3-pip
+RUN pip3 install setuptools==33.1.1
 
 
 # Install OBITools // following the instructions described here: https://www.biostars.org/p/235898/
@@ -183,8 +185,8 @@ RUN git clone https://github.com/tingchenlab/CROP.git && \
 
 # Install of "locate" program that allows to find where is what on your container
 RUN apt-get install mlocate && updatedb
-RUN apt update
-RUN apt install -y python3-pip
+#RUN apt update
+#RUN apt install -y python3-pip
 
 # Install cutadapt (for the ITS marker gene case)
 RUN pip3 install cutadapt
@@ -362,6 +364,9 @@ RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
 # Set "home" as my working directory when a container starts
 WORKDIR /home
 
+# Change permissions on the Classifiers train - directories
+RUN chmod -R +777 /home/tools/RDPTools
+RUN chmod -R +777 /home/tools/CREST/LCAClassifier/parts/flatdb
 
 ###################################################################
 #													 			  #	
