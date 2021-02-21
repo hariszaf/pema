@@ -199,11 +199,11 @@ if ( paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
  dataPath.chdir() ; 
  sys if [ $(find "$dataPath" -name "TrimLog*") ] ; then  rm TrimLog* ; fi
 
-# make a copy of "parameters.tsv" file to the output folder.
-# this way the user will be able to get the parameters he used for analysis, anytime!
+# Make a copy of "parameters.tsv" file to the output folder.
+# This way the user will be able to get the parameters he used for analysis, anytime!
 sys cp $parameterFilePath/parameters.tsv $outputFilePath/parameters0f.$analysisName.tsv
 
-# now BLASTQC runs for all files
+# Now BLASTQC runs for all files
 string[] rawFiles = dataPath.dir()
 for ( string rawFile : rawFiles ) {
    print(rawFile)
@@ -213,8 +213,8 @@ wait
 print("FastQC is completed!" + "\n")
 
 
- # now i create a checkpoint and read again the parameters file.
- # this way if i change any of my parameters, i can do only the steps from here and after with the new ones.
+ # Create a checkpoint and read again the parameters file.
+ # This way if i change any of my parameters, i can do only the steps from here and after with the new ones.
 if ( qualityControl.isEmpty() == false ) {
    string checkTrim = outputPoint + "/trimming.chp"
    checkpoint checkTrim
@@ -241,7 +241,7 @@ if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
    if ( cutadaptOutputDirectory.isDir() && initialData.isDir() ) {
       print " done that! \n" 
    } else {
-      # if it is not, create a file with its name
+      # If it is not, create a file with its name
       cutadaptOutputDirectory.mkdir()
       initialData.mkdir()
       sys chmod 777 $outputFilePath -R
@@ -264,22 +264,22 @@ if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
 
 ###########################    here ends the ITS - specific part  !!    #####################################
 
-# go to the folder which contains all the raw data and make a list (named 'data') with all the file names that you can find there
+# Go to the folder which contains all the raw data and make a list (named 'data') with all the file names that you can find there
 string[] data = dataPath.dir()
   
-# set two variables readF and readR for the forward and reverse file of each sample  
+# Set two variables readF and readR for the forward and reverse file of each sample  
 string readF
 string readR
 int counter = 0
 
 for ( string file : data ) {
    
-   # here's the trick! i need to tell which file is the forward and which is the reverese. Hence, i try to split a suffix. 
+   # Here's the trick! i need to tell which file is the forward and which is the reverese. Hence, i try to split a suffix. 
    string check = file.split("_2\.fastq\.gz")[0]
 
-   # if the split does occure then i know that i have the second file of each sample (reverse)
-   # that is because the 'file' variable will always have a '.fastq.gz' suffix.
-   # hence, if there is no split, 'file' and 'check'  variables are the same.
+   # If the split does occure then i know that i have the second file of each sample (reverse)
+   # That is because the 'file' variable will always have a '.fastq.gz' suffix.
+   # Hence, if there is no split, 'file' and 'check'  variables are the same.
    if ( file == check ) {
             readF = file
             print("readF is: " + readF  +"\n")
@@ -321,7 +321,7 @@ wait
 print "Trimmomatic  is done\n\n" ;
 
 
-#  let us make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
+#  Make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
 path.chdir() ; trimoPath.chdir() ;
 if ( trimoPath.isEmpty() == false ) {
    string checkCor = outputPoint + "/errorCorrection.chp"
@@ -337,8 +337,8 @@ string{} paramsBayesHammerStep =  readParameterFile(h)
 #            3.  BayesHammer - error correction // SPAdes                     #
 ##########################################################################################
 
-# make a list with all the file names that there are in the folder with Trimmomatic's
-# output -- e.g: suffix : '2.fastq.gz.2U.fastq.gz' 
+# Make a list with all the file names that there are in the folder with Trimmomatic's
+# Output -- e.g: suffix : '2.fastq.gz.2U.fastq.gz' 
 trimoPath.chdir()
 
 sys if [ $(find "$trimoPath" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
@@ -346,13 +346,13 @@ sys if [ $(find "$trimoPath" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
 string[] trimos = trimoPath.dir()
  
 for (string file : trimos ) {
-   # we delete all the 'U.fastq.gz' files using the list we just made
+   # Delete all the 'U.fastq.gz' files using the list we just made
    if ( file.endsWith("U\.fastq\.gz") ) {
       file.delete()
    }
 }
 
-# and then we make a new list with the files that remained 
+# And then make a new list with the files that remained 
 string[] finalTrimos = trimoPath.dir()
 
 string readBayesF
@@ -363,7 +363,7 @@ wait
 
 for ( string trimmed : finalTrimos ) {
    
-   # as in Trimmomatic step, we need to know the forward and the reverse file
+   # As in Trimmomatic step, we need to know the forward and the reverse file
    string trimCheck = trimmed.split("_2\.fastq\.gz\.2P\.fastq.\gz")[0]
 
    if ( trimmed == trimCheck ) {
@@ -385,16 +385,16 @@ for ( string trimmed : finalTrimos ) {
          print("trimCheck: " + trimCheck + "\n" + "newDir: " + newDir + "\n")
       }
       
-      # working where the output of BayesHammer is located!
+      # Working where the output of BayesHammer is located!
       bayesPath.chdir() ; 
       newDir.mkdir() ;
       
-      # going back to Trimo's output
+      # Going back to Trimo's output
       trimoPath.chdir()
       sys chmod 777 $outputFilePath -R
       wait
 
-      # and I execute the BayesHammer algorithm that it is in SPAdes
+      # And execute the BayesHammer algorithm that it is in SPAdes
       
       sys which gzip
       sys gzip --version
@@ -404,7 +404,7 @@ for ( string trimmed : finalTrimos ) {
 
       wait
    
-      # clear all variables that are used in BayesHammer step in order to be re-used
+      # Clear all variables that are used in BayesHammer step in order to be re-used
       readBayesF = ''
       readBayesR = ''
       newFile = ''
@@ -415,7 +415,7 @@ for ( string trimmed : finalTrimos ) {
 wait
 print("Error correction using BayesHammer is completed!" + "\n") 
  
-#  let us make a checkpoint to start our pipeline from the  merging step!
+#  Make a checkpoint to start our pipeline from the  merging step!
 if ( bayesPath.isEmpty() == false ) {
    string checkMerge = outputPoint + "/merging.chp"
    checkpoint checkMerge
@@ -434,19 +434,19 @@ bayesPath.chdir()
 
 sys if [ $(find "$bayesPath" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
  
-# keep in a list all files that came from the BayesHammer algo leaving aside some stats file
-# make a list with all the folders that exist in Bayes Hammer output folder - only sample names (e.g. SRR1643855 ) 
+# Keep in a list all files that came from the BayesHammer algo leaving aside some stats file
+# Make a list with all the folders that exist in Bayes Hammer output folder - only sample names (e.g. SRR1643855 ) 
 string[] correct = bayesPath.dir()
 correct.remove("input_dataset.yaml") ;
 correct.remove( "params.txt" ) ;
 correct.remove("spades.log") ;
 correct.remove( "tmp")
 
-# we need to "create" the names of forward and reverse files each time
+# "Create" the names of forward and reverse files each time
 string baseName
 if ( paramsSpadesMerging{'maxInfo'} == 'Yes' ) {
    
-   # we keep as 'baseName' the prefix of every file that depends on whether  we had maxInfo or not
+   # Keep as 'baseName' the prefix of every file that depends on whether  we had maxInfo or not
    baseName = "filtered_max_"
 } else {
    baseName = "filtered_"
@@ -455,13 +455,13 @@ if ( paramsSpadesMerging{'maxInfo'} == 'Yes' ) {
 for ( string correctFile : correct )  {
 
    string uniqPath = bayesPath + '/' +  correctFile + '/' + 'corrected' ;
-   # we enter to the directory of a specific sample each time in the output folder of BayesHammer - previous step
+   # Enter to the directory of a specific sample each time in the output folder of BayesHammer - previous step
    uniqPath.chdir() ;                                                              
    
    sys /bin/gzip *.fastq
    
-   # in the corrected file of each sample there are two files - one for forward, one for reverse -
-   # and I make two variables with them
+   # In the corrected file of each sample there are two files - one for forward, one for reverse -
+   # Make two variables with them
    string forward = "_1.fastq.gz.1P.fastq.00.0_0.cor.fastq.gz"
    string reverse = "_2.fastq.gz.2P.fastq.00.0_0.cor.fastq.gz"
    string forwardFile= baseName + correctFile + forward ;
@@ -470,39 +470,29 @@ for ( string correctFile : correct )  {
    print(reverseFile + "\n")
 
    wait
-   
-   # # if i have sample names not in terms of Illumina and I need to use PANDAseq, i have to change the sample names in the rawdata as "ERR0001" for example.
-   # if ( paramsSpadesMerging{'EnaData'} == 'No') {
-   #    uniqPath.chdir() 
-   #    sys bash  $path/scripts/prepareForPandaseq.sh $forwardFile $reverseFile
-   # }
-   
-   # finally, we execute pandaseq algorithm for merging 
+      
+   # Execute pandaseq algorithm for merging 
    task $path/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 -A $paramsSpadesMerging{'pandaseqAlgorithm'} -a -B -T $paramsSpadesMerging{'pandaseqThreads'} -o $paramsSpadesMerging{'minoverlap'} -t $paramsSpadesMerging{'threshold'} $paramsSpadesMerging{'pandaseqMinlen'} $paramsSpadesMerging{'elimination'}  > $correctFile.merged.fastq.gz
 
    wait
-
-   # if ( paramsSpadesMerging{'EnaData'} == 'No') {
-   #    string mergedFile = correctFile + ".merged.fastq.gz"
-   #    sys $path/scripts/recoverSampleNames.sh $mergedFile
-   # }
 
    sys mv *.merged.fastq.gz $spaPath
    bayesPath.chdir()
 }
 wait
 
-# now that we have run pandaseq for merging for all our samples,
-# we unzip all my merged files in a new file named "unzip"
-# we go to the folder with the output of SPAdes and we make a list with its elements
+# Unzip all my merged files in a new file named "unzip"
+# Go to the folder with the output of SPAdes and make a list with its elements
 spaPath.chdir() ;
 string[] merged = spaPath.dir() ;
 string unzip = "unzip" ;
-# we make a new directory named 'unzip'
+
+# Make a new directory named 'unzip'
 unzip.mkdir() ;
 sys chmod 777 $outputFilePath -R
 string unzipPath = "$spaPath/unzip" ;
-# and we remove the element 'unzip' from the list we made
+
+# And remove the element 'unzip' from the list we made
 merged.remove("unzip")
 
 for ( string anyFile : merged ) {
@@ -517,7 +507,7 @@ wait
 
 print("Merging step by SPAdes is completed" +"\n")
 
-# we make a checkpoint to start our pipeline from the dereplication step!
+# Make a checkpoint to start our pipeline from the dereplication step!
 if ( spaPath.isEmpty() == false ) {
    string checkDerep = outputPoint + "/dereplication.chp"
    checkpoint checkDerep
@@ -539,7 +529,8 @@ string[] unzips = unzipPath.dir()
 
 string fileForDerepl
 for ( string nodereplicate : unzips ) {
-   # now i execute OBITools
+   
+   # Execute OBITools
    task $path/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > $derePath/dereplicate_$nodereplicate ;
    wait
 }
@@ -561,17 +552,21 @@ string{} paramsOfTable =  readParameterFile(k)
 derePath.chdir()
 sys if [ $(find "$derePath" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
 
-# we make a list with all the file names that exist in the folder with the dereplication-step output
+# Make a list with all the file names that exist in the folder with the dereplication-step output
 string[] dereplicates = derePath.dir()
  
 for ( string derepl : dereplicates ) {
-   # and we make some transforms in all these files
+   
+   # And some transforms in all these files
    task {
-      # we substitue both 'merged_sample...' amd ';' with '_' and nothing respectively
+
+      # Substitue both 'merged_sample...' amd ';' with '_' and nothing respectively
       sys sed 's/ merged_sample={}; count=/_/g ; s/;//g' $derepl > se.$derepl
-      # merge all lines of a fastq entry into one and only one line!
+      
+      # Merge all lines of a fastq entry into one and only one line!
       sys awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' se.$derepl > nospace.$derepl
-      # we turn all down- to upcases
+      
+      # Turn all down- to upcases
       sys cat nospace.$derepl | tr '[a-z]' '[A-Z]' > $linearPath/linearized.$derepl
    }
 }
@@ -580,10 +575,10 @@ wait
 derePath.chdir()
 sys rm se.* nospace.*
 
-# we go to the folder with the linearized data and make a list with all its contents  
+# Go to the folder with the linearized data and make a list with all its contents  
 linearPath.chdir()
 string[] linears = linearPath.dir()
-# we remove from these files some characteristic symbols
+# Remove from these files some characteristic symbols
 for ( string sample : linears ) {
    task{
        sys sed 's/\:\:\:/\:/g' $sample > $sample.f.fasta
@@ -596,15 +591,15 @@ linearPath.chdir()
 sys rm *.f.fasta
 wait
 
-# this command forces applications to use the default language for output, and forces sorting to be bytewise.  
+# This command forces applications to use the default language for output, and forces sorting to be bytewise.  
 sys export LC_ALL=C
 
 ######################################################################################################################################
-# here I read all the files I have made at once and run over them an awk command in which I set as record separator ">"
+# Read all the files made at once and run over them an awk command in which I set as record separator ">"
 # and as field separaton '_' or new line.
-# from the second line I make an array with the sample as keys and their abundances as value and anotherone with the otus
-# as keys and the sequnece asw value.
-# finally, I make a file in which in every line i have the amplicon name (sample) its abundance and its sequence.
+# From the second line, make an array with the sample as keys and their abundances as value and anotherone with the otus
+# as keys and the sequnece as value.
+# Finally, make a file in which in every line i have the amplicon name (sample) its abundance and its sequence.
 ######################################################################################################################################
 
 task cat *.g.fasta | awk 'BEGIN {RS = ">" ; FS = "[_\n]"} {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}} END {for (amplicon in sequences) {print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > $outputFilePath/all_samples.fasta
@@ -626,13 +621,12 @@ if ( paramsOfTable{'clusteringAlgoFor16S_18SrRNA'} == "algo_swarm" || paramsOfTa
 }
 
 ######################################################################################################################################
-## in the file 'final_all_samples.fasta' we now have all the reads from all our samples
-## and we are able to move on CLUSTERING - STEP
-## however, even if until now the procedure was the same no matter what gene we had,
-## we now have to choose between different paths depending on the gene and our needs 
+## In the file 'final_all_samples.fasta' you may find all the reads from all the samples
+## Up to now the procedure was the same no matter the marker gene,
+## From now on, different paths in the output directory are made depending on the gene and the parameters set 
 ######################################################################################################################################
 
-# depending on the marker gene and the grouping method selected, we make the right folders
+# Depending on the marker gene and the grouping method selected, we make the right folders
 genePath.chdir()
 if ( paramsOfTable{'gene'} == 'gene_COI' ) {
    string coiPath = genePath + '/' + 'gene_COI'
@@ -695,7 +689,7 @@ sys chmod 777 $outputFilePath -R
 ###################################################################################################################
 
 
-################   at first, cluster or "cluster" the reads into OTUs or ASVs correspondingly    #################
+################   At first, cluster or "cluster" the reads into OTUs or ASVs correspondingly    #################
 if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S' ) {
 
 #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -715,36 +709,36 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
       
       wait
 
-      ######################   here i execute the VSEARCH algorithms    #############################################
+      ######################  Execute the VSEARCH algorithms    #############################################
             
       vsearchPath16S.chdir()
       
-      # demultiplexing
+      # Demultiplexing
       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --threads $paramsOfTable{'vsearchThreads'} --derep_fulllength all_samples.fasta --minuniquesize 2 --sizein --sizeout --fasta_width 0 --uc all.derep.uc --output all.derep.fasta
       
       wait
       
-      # execute the first clustering step
+      # Execute the first clustering step
       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --threads $paramsOfTable{'vsearchThreads'} --cluster_size all.derep.fasta --id $paramsOfTable{'vsearchId'} --strand both --sizein --sizeout --fasta_width 0 --uc all.preclustered.uc --centroids all.preclustered.fasta
       
       wait
 
-      # chimera removal
+      # Chimera removal
       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --threads $paramsOfTable{'vsearchThreads'} --uchime_denovo all.preclustered.fasta --sizein --sizeout --fasta_width 0 --nonchimeras all.denovo.nonchimeras.fasta
       
       wait
 
-      # change an output file name
+      # Change an output file name
       sys mv all.denovo.nonchimeras.fasta all.ref.nonchimeras.fasta
       
-      # here are two perl scripts that are located in the "scripts" folder
+      # Here are two perl scripts that are located in the "scripts" folder
       task $path/scripts/map_vsearch.pl all.derep.fasta all.preclustered.uc all.ref.nonchimeras.fasta > all.nonchimeras.derep.fasta
       wait
    
       task $path/scripts/map_vsearch.pl all_samples.fasta all.derep.uc all.nonchimeras.derep.fasta > all.nonchimeras.fasta
       wait
 
-      # execute the second clustering step
+      # Execute the second clustering step
       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --threads $paramsOfTable{'vsearchThreads'} --cluster_size all.nonchimeras.fasta --id $paramsOfTable{'vsearchId'} --strand both --sizein --fasta_width 0 --uc all.clustered.uc --relabel Otu --centroids all.otus.fasta --otutabout all.otutab.txt
       
       wait
@@ -770,7 +764,7 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
       wait
 
       #####  SWARM   ####
-      ###### we build a contingency table for AMPLICONS  - here the awk.sh file is a bash script that you can find in the PEMA file
+      ###### Build a contingency table for AMPLICONS  - here the awk.sh file is a bash script that you can find in the PEMA file
       linearPath.chdir()
       
       task{
@@ -779,7 +773,7 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
          sys mv amplicon_contingency_table.csv  $swarmPath16S
       }
       wait
-      print 'the contigency table has been created successfully!' + "\n"
+      print 'The contigency table has been created successfully!' + "\n"
       
 
       ##### Run SWARM and then chimera removal
@@ -788,7 +782,7 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
       # Swarm expects dereplicated fasta files. We need to dereplicate the unified sequences file.
       task $path/tools/swarm/swarm/bin/swarm -d 0 -t $paramsOfTable{'swarmThreads'} -w derep.fasta rna_SWARM_all_samples.fasta
       wait
-      # sys rm rna_SWARM_all_samples.fasta
+
       sys mv derep.fasta rna_SWARM_all_samples.fasta
       
       
@@ -801,7 +795,7 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
       wait
       print('the swarm algorithm worked just fine!' + "\n")
       
-      # And now i handle its output in order to take it in the form i want to. turn lowcase to uppercase and substitute the '_' to 'size='
+      # Handling its output to get it in the required format. Turn lowcase to uppercase and substitute the '_' to 'size='
       task {
            sys cat SWARM_OTU_representatives_all_samples.fasta | tr '[a-z]' '[A-Z]' > upper.SWARM_OTU_representatives_all_samples.fasta
            sys sed 's/_/;size=/g' upper.SWARM_OTU_representatives_all_samples.fasta > true.SWARM_OTU_representatives_all_samples.fasta
@@ -828,12 +822,12 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
          }
       }      
       
-      ##### At last, we create an OTU table that comes after the SWARM results. Again, we have an awk command in a bash script 
+      ##### At last, create an OTU table that comes after the SWARM results. Again, we have an awk command in a bash script 
       swarmPath16S.chdir()
-      # sys mv $linearPath/amplicon_contingency_table_temp.csv $swarmPath16S
       wait
+      sys sed -i 's/:::/:/g; s/:0:0:0:0./0./g'  amplicon_contingency_table.csv
       sys bash $path/scripts/otuContingencyTableSwarm.sh
-      print('the contigency table with the found ASVs was just created!' + "\n")
+      print('The contigency table with the found ASVs was just created!' + "\n")
    }
 }   
 
@@ -843,7 +837,7 @@ if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S'
 ###################################################################################################################
 
 
-### in the COI case, we will have an IF statement for the two different clustering algos and THEN, after, we will do the taxonomy assignment!!!   
+### In the COI case, there is an IF statement for the two different clustering algos    
 
 if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS") {
    
@@ -861,8 +855,7 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
    }
    
    
-   ## in this case, there is not an algo that does both chimera removal and clustering, hence we have a 2 - step procedure
-   ## an kai stin arxi eixame pei prota chimera removal kai meta otu clustering, telika pame antistrofa
+   ## In this case, there is not an algo that does both chimera removal and clustering, hence we have a 2 - step procedure
 
    #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////   
    ###########################  ASVs inference by making use of the  SWARM algorithm   ###############################
@@ -878,7 +871,7 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
       sys cp final_all_samples.fasta $swarmPath/$allFiles
       wait
          
-      ###### we build a contingency table for AMPLICONS  - here the awk.sh file is a bash script that you can find in the PEMA file
+      #### Build a contingency table for AMPLICONS  - here the awk.sh file is a bash script that you can find in the PEMA file
       linearPath.chdir()
       
       task{
@@ -888,17 +881,14 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
       }
       wait
       
-      print 'the contigency table has been created successfully!' + "\n"
+      print 'The contigency table has been created successfully!' + "\n"
       
-      ##### Run SWARM and then chimera removal
+      #### Run SWARM and then chimera removal
       swarmPath.chdir()
       string inputFileForSwarm = geneName + "_SWARM_all_samples.fasta"
       wait
-      
-      
-      
 
-      ##### [NEW STEP: 2020.05.24] : Swarm expects dereplicated fasta files. We need to dereplicate the unified sequences file.
+      #### Swarm expects dereplicated fasta files. We need to dereplicate the unified sequences file.
       task $path/tools/swarm/swarm/bin/swarm -d 0 -t $paramsOfTable{'swarmThreads'} -w derep.fasta $inputFileForSwarm
       wait
 
@@ -909,18 +899,16 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
       
       wait      
       
-      
-      
-      ## here is the clustering step with SWARM algorithm    
+      #### Clustering step with SWARM algorithm    
       if ( paramsOfTable{'d'} == '1' ) {
          task $path/tools/swarm/swarm/bin/swarm -d 1 -f -t $paramsOfTable{'swarmThreads'} -s SWARM.stats -w SWARM_OTU_representatives_all_samples.fasta < $inputFileForSwarm > SWARM.swarms      
       } else {
          task $path/tools/swarm/swarm/bin/swarm -d $paramsOfTable{'d'} -t $paramsOfTable{'swarmThreads'} -s SWARM.stats -w SWARM_OTU_representatives_all_samples.fasta < $inputFileForSwarm > SWARM.swarms
       }
       wait
-      print('the swarm algorithm worked just fine!' + "\n")
+      print('The Swarm algorithm worked just fine!' + "\n")
       
-      # and now i handle its output in order to take it in the form i want to. turn lowcase to uppercase and substitute the '_' to 'size='
+      #### Handle its output in order to take it in the form i want to. turn lowcase to uppercase and substitute the '_' to 'size='
       task {
            sys cat SWARM_OTU_representatives_all_samples.fasta | tr '[a-z]' '[A-Z]' > upper.SWARM_OTU_representatives_all_samples.fasta
            sys sed 's/_/;size=/g' upper.SWARM_OTU_representatives_all_samples.fasta > true.SWARM_OTU_representatives_all_samples.fasta
@@ -932,7 +920,7 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
       wait
       print('sortbysize algorithm ran ok!' + "\n")
       
-      ## and the 'uchime3_denovo' is an algorithm for finding chimeras
+      ## And the 'uchime3_denovo' is an algorithm for finding chimeras
       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --uchime3_denovo SWARM_final_OTU_representative.fasta --nonchimeras SWARM_otu_no_chimera.fasta --abskew $paramsOfTable{'abskew'}
       wait
       print('the uchime3_denovo algorithm for finding chimeras just finished!' + "\n")
@@ -947,18 +935,16 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
          }
       }      
       
-      ##### At last, we create an OTU table that comes after the SWARM results. Again, we have an awk command in a bash script 
+      #### At last, we create an OTU table that comes after the SWARM results. Again, we have an awk command in a bash script 
       swarmPath.chdir()
       sys mv $linearPath/amplicon_contingency_table_temp.csv $swarmPath
       wait
-      # sys bash $path/scripts/createOtuContigencyTable.sh
 
       # If necessary, remove some not that nice things 
       sys sed -i 's/:::/:/g; s/:0:0:0:0./0./g'  amplicon_contingency_table.csv
       sys bash $path/scripts/otuContingencyTableSwarm.sh
       print('the contigency table with the found otus was just created!' + "\n")
    }
-   #### Here ends ths "if" statement of SWARM clustering   (   ATTENTION TO HAVE 1 TAB HERE !! )
 
    #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
    ##########################   Clustering to OTUs by making use of the CROP algorithm   #############################
@@ -970,7 +956,7 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
       
       
       ####   CROP    #####
-      ##  In this case we do chimera removal first and then we apply the clustering algorithm  ----  Until now (23/3) we think we prefer CROP over SWARM
+      ##  In this case chimera removal goes first and then we apply the clustering algorithm  ----  Until now (23/3) we think we prefer CROP over SWARM
       
       outputFilePath.chdir()
 
@@ -979,7 +965,7 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
       sys cp COI_CROP_all_samples.fasta $croPath
       wait
 
-      ###### We build a contingency table for AMPLICONS  - here the awk.sh file is a bash script that you can find in the PEMA file
+      #### Build a contingency table for AMPLICONS  - here the awk.sh file is a bash script that you can find in the PEMA file
       linearPath.chdir()
       
       task{
@@ -989,39 +975,39 @@ if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS"
       }
       wait
       
-      print 'the contigency table has been created successfully!' + "\n"
+      print 'The contigency table has been created successfully!' + "\n"
 
       croPath.chdir()
       
-      ### Chimera removal
+      #### Chimera removal
       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --uchime3_denovo COI_CROP_all_samples.fasta --nonchimeras no_chim_COI_CROP_all_samples.fasta --abskew $paramsOfTable{'abskew'}
       wait
 
 
-      ### Calculate parameters for CROP clustering algorithm   
+      #### Calculate parameters for CROP clustering algorithm   
       croPath.chdir()
       string OMP_NUM_THREADS = paramsOfTable{'omp_num_threads'}
       sys export OMP_NUM_THREADS=$OMP_NUM_THREADS
       sys bash $path/scripts/croParameters.sh
       wait
       
-      # Read the parameters estimated
+      #### Read the parameters estimated
       string param_file = "cropParameters.tsv"
       string{} crop_params = readParameterFile(param_file)
       
-      # Run the CROP algorithm
+      #### Run the CROP algorithm
       sys $path/tools/CROP/CROP/CROPLinux -i no_chim_COI_CROP_all_samples.fasta -o CROP_output -z $crop_params{'zeta'} -b $crop_params{'beta'} -e $crop_params{'epsilon'} || true
       
       
-      ##### At last, we create an OTU table that comes after the CROP results. Again, we have an awk command in a bash script 
+      #### At last, create an OTU table that comes after the CROP results. Again, we have an awk command in a bash script 
       croPath.chdir()
       sys mv $linearPath/amplicon_contingency_table_temp.csv $croPath
       wait
       
-      ### perform a script that will allow us to use the CROP output as it had SWARM's format
+      ### Perform a script that will allow us to use the CROP output as it had SWARM's format
       sys bash $path/scripts/cropOutputTranformations.sh
 
-      # if necessary, remove some not that nice things 
+      # If necessary, remove some not that nice things 
       sys sed -i 's/:::/:/g; s/:0:0:0:0./0./g'  amplicon_contingency_table.csv
       sys bash $path/scripts/otuContingencyTableSwarm.sh
       
@@ -1066,7 +1052,7 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'ge
       string assignmentPath16S = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + 'swarm'
       assignmentPath16S.chdir()
       
-      # run a script that will make all the changes needed for the SWARM output to run with LCAClassifier
+      # Run a script that will make all the changes needed for the SWARM output to run with LCAClassifier
       task bash $path/scripts/transformationsOnTable.sh
       
       wait
@@ -1081,11 +1067,9 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'ge
          wait
          print('No singletons file is fine' + "\n")      
       }
-      ###
       
       sys mv SWARM_otu_no_chimera.fasta rna_all_samples.otus.fa
       sys sed -i 's/;size=[0-9]*//g' rna_all_samples.otus.fa
-      
    }
       
    wait
@@ -1103,18 +1087,18 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'ge
          string assignmentPath16S2 = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + algo1
          assignmentPath16S2.chdir()
          
-         # First we use megablast algorithm of blastn for sequence identification, intra-species comparison                   
+         # First use megablast algorithm of blastn for sequence identification, intra-species comparison                   
          task $path/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast -query rna_all_samples.otus.fa -db $path/tools/CREST/LCAClassifier/parts/flatdb/silvamod/silvamod128.fasta \
             -num_alignments 100 -outfmt 5 -out rna_mysilvamod128_$paramsOfTaxonomy{'taxonomyFolderName'}.xml -num_threads $paramsOfTaxonomy{'vsearchThreads'}
          
          wait
          
-         # And then we use the classifier in order to get our assignment
+         # And then use the classifier in order to get our assignment
          task $path/tools/CREST/LCAClassifier/bin/classify -t rna_otutab_$paramsOfTaxonomy{'taxonomyFolderName'}.txt -o $paramsOfTaxonomy{'taxonomyFolderName'} rna_mysilvamod128_$paramsOfTaxonomy{'taxonomyFolderName'}.xml
          
          wait
          
-      # We follow the same steps for the case of the Silva 132    
+      # Follow the same steps for the case of the Silva 132    
       } else if ( paramsOfTaxonomy{'silvaVersion'} == 'silva_132' ) {
          
          string algoCluster1 = paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'}
@@ -1221,17 +1205,17 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'ge
    
    wait
    
-   # we remove the ref - msa - THIS IS A BUG OF EPA-ng !!!!
+   # Remove the ref - msa - THIS IS A BUG OF EPA-ng !!!!
    sys tail -n +1038 papara_alignment.default > papara_alignment.phy
    wait
 
-   # we convert our query msa to fasta format with a script we made because epa-ng can handle only fasta
+   # Convert our query msa to fasta format with a script we made because epa-ng can handle only fasta
    assignmentPath16S.chdir()
    task bash $path/scripts/convertPhylipToFasta.sh  papara_alignment.phy
    
    wait
          
-   # execute epa-ng algorithm (evolutinary placement) in order to get our phylogenetic-based taxonomy assignment, at last!
+   # Execute epa-ng algorithm (evolutinary placement) in order to get our phylogenetic-based taxonomy assignment, at last!
    task $path/tools/EPA-ng/epa/bin/epa-ng -s $path/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy.fasta -t $path/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree -q papara_alignment.fasta --model GTR{0.959447/2.52497/1.45842/1.06213/3.55143/1}+FU{0.237221/0.230211/0.294337/0.238231}+G4m{0.559838} # -w <output_dir>
    
    wait
@@ -1281,7 +1265,7 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_COI' || paramsOfTaxonomy{'gene'} == "ge
          sys cp SWARM_otu_no_chimera.fasta rdpClassifierInput.fasta
       }
    
-      ### I run RDPClassifier - train - step has already be done and as reference database we use MIDORI
+      ### Run RDPClassifier - train - step has already be done and as reference database we use MIDORI
       
       ##  need to check on this... try this "-f filterbyconf: only outputs the results for major ranks as in fixrank,
       ##  results below the confidence cutoff were bin to a higher rank unclassified_node  db: outputs the seqname, trainset_no, tax_id, conf.
@@ -1311,27 +1295,25 @@ if ( ( paramsOfTaxonomy{'gene'} == 'gene_COI' || paramsOfTaxonomy{'gene'} == "ge
       noSpaceFile.delete()
       wait
       
-      ## we keep in a new file, only the otus that have above  97% similartity with some species and in another just the uniq species
+      ## Keep in a new file, only the otus that have above  97% similartity with some species and in another just the uniq species
       swarmPath.chdir()
-      #sys bash $path/scripts/keepOnlyPerCentSimilartityForSwarm.sh
       print 'all the taxonomy assignment procedure for the SWARM case has been completed!'  + "\n"
       
       
       # Create a MOTU table as for the case of 16S
-      # We need to change the swarm output as we have removed some amplicons after the ASV inferring because of the chimera removal
+      # Change the swarm output as we have removed some amplicons after the ASV inferring because of the chimera removal
       task {
          sys bash $path/scripts/makeMotuTableForRDPClassifier.sh
          sys rm *_sorted
       }
       
-###   and now the big "IF" for the case of ITS
-###   we will use the CREST LCAClassifier for that.
+###   ITS case 
 
    } else if ( paramsOfTaxonomy{'gene'} == "gene_ITS" ) {
          
       swarmPath.chdir()
       
-      # run a script that will make all the changes needed for the SWARM output to run with LCAClassifier
+      # Run a script that will make all the changes needed for the SWARM output to run with LCAClassifier
       task bash $path/scripts/transformationsOnTable.sh
       
       wait
@@ -1366,7 +1348,7 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
    
    print 'The taxonomy assignment with the CROP output has STARTED! '
    
-   ## make a file where the sequence and the abundance of otus will be present 
+   ## Make a file where the sequence and the abundance of otus will be present 
    task {
         sys cat CROP_output.cluster.fasta | grep ">" > heads.txt
         sys sed 's/=[0-9]*/=/g' heads.txt > heads2.txt
@@ -1387,9 +1369,6 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
 
    wait
 
-   # croPath.chdir()
-   # sys bash $path/scripts/keepOnlyPerCentSimilartityForCrop.sh
-
    croPath.chdir()
    task {
       sys cp taxonomy_from_rdpclassifer_COI_CROP.txt tax_assign_swarm_COI.txt
@@ -1403,7 +1382,7 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
    string croPath = genePath + '/' + 'gene_ITS'  + '/' + 'CROP'
    croPath.chdir()
    
-   # run a script that will make all the changes needed for the SWARM output to run with LCAClassifier
+   # Run a script that will make all the changes needed for the SWARM output to run with LCAClassifier
    
    sys mv CROP_OTU_table.tsv SWARM_OTU_table.tsv
    task bash $path/scripts/transformationsOnTable.sh
@@ -1436,7 +1415,7 @@ string fileFromRdpClassifier
 string textFinal
 string perSampleTriples
 
-# make as variables the files that will be used and created, depending on the clustering algo
+# Make as variables the files that will be used and created, depending on the clustering algo
 if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_SWARM' ) {
    string swarmPath = genePath + '/' + 'gene_COI' +  '/' + 'SWARM'
    fileFromRdpClassifier = 'tax_assign_swarm_COI.txt'
@@ -1452,7 +1431,7 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && paramsOfTaxonomy{'clusteringAlg
 }
 wait
 
-# we check whether the output of the classifier is non-zero
+# Check whether the output of the classifier is non-zero
 if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() != 0 ) {
    print ' we have a RDPClassifier output file to work with!!! '
    
@@ -1487,7 +1466,7 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
 
       string thereIsMoreToRead = 'true'
 
-      #current triplet refers to e.g. "Eukaryota   superkingdom   1" columns with index 1,2,3
+      # Current triplet refers to e.g. "Eukaryota   superkingdom   1" columns with index 1,2,3
       int currentTripletStartColumn = 1                                                 #start parsing now from the 2nd column, ie. with index 1
       string assigned_taxo=""
       string assignmentConfidence=0
@@ -1500,8 +1479,8 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
             print "t1:" + currentTripletStartColumn + ":" + assigned_taxo + "\n"
          }
 
-         #columns with index 6, 9, 12,... are skipped
-         #read column with index 7, 10, 13...
+         # Columns with index 6, 9, 12,... are skipped
+         # Read column with index 7, 10, 13...
          assignmentConfidence = lineElements[currentTripletStartColumn + 2]
          print "the assigned taxo is " + assigned_taxo + "\n"
          print "assignmentConfidence is " + assignmentConfidence + "\n"
@@ -1509,12 +1488,12 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
          if ( debugCode ) {
             print "t2:" + currentTripletStartColumn +":" +assignmentConfidence + "\n"
          }
-         #if no next taxon triple follows return 
+         # If no next taxon triple follows return 
          int nextTripletConfidenceColumn = currentTripletStartColumn + 5 
          if ( debugCode ) {
             print "t3:" + currentTripletStartColumn + " index out of max "+ lineElements.size() - 1 +"\n"
          }
-         #inspect column with index 8, 11, 14... for existence
+         # Inspect column with index 8, 11, 14... for existence
          if ( nextTripletConfidenceColumn > lineElements.size() ) { 
             #the whole table has been read and the species level reached
             if ( debugCode ) {
@@ -1523,7 +1502,7 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
             thereIsMoreToRead = 'false'
             continue;
          }
-         #if the confience of the next taxon is below confidence return
+         # If the confience of the next taxon is below confidence return
          if ( lineElements[nextTripletConfidenceColumn] < 0.97 ) {
             if ( debugCode ) {
                print "t5:" + nextTripletConfidenceColumn + "\n"
@@ -1534,20 +1513,20 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
 
          currentTripletStartColumn = currentTripletStartColumn + 3 #move to next taxon triple
 
-      } #end of while to read taxa and confidence levels
+      } 
       
       if ( debugCode ) {
          print "TEST2\t "+ sample + "\t" + assigned_taxo + "\t" + assignmentConfidence + "\t" + size + "\n"
       }
    
-   #######################     till here, my code finds the taxon level   ####################################
+   #######################     Till here, my code finds the taxon level   ####################################
          
       sampleIdentifiers { sample } = 1;
       taxaNames { assigned_taxo } = 1;
       
       wait
          
-      #sum size to any previous size sum corresponding to SampleAndTaxonomy pair
+      # Sum size to any previous size sum corresponding to SampleAndTaxonomy pair
       if ( giveSampleAndTaxonomyGetSizeSum.hasKey(sample+'_SEP_'+assigned_taxo ) == 'true') {
          int newSum = giveSampleAndTaxonomyGetSizeSum { sample+'_SEP_'+assigned_taxo }.parseInt()
          print("size is " + size)
@@ -1561,7 +1540,7 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
       if ( debugCode ) {
          print "TEST3\t"+ sample+'_'+assigned_taxo + "-" + giveSampleAndTaxonomyGetSizeSum{ sample+'_'+assigned_taxo }  +"\n"
       }
-   } #end of each input file line
+   } 
    
    wait
    
@@ -1569,7 +1548,7 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
       print giveSampleAndTaxonomyGetSizeSum
    }
    
-   #print output based on the giveSampleAndTaxonomyGetSizeSum map
+   # Print output based on the giveSampleAndTaxonomyGetSizeSum map
    string sampleToPrint
    string sizeSumToPrint
    string taxonomyToPrint
@@ -1587,13 +1566,13 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
       print sampleIdentifiers
    }
    
-   ## double for-loop with all the sample id and taxa name possible combinations printing the real ones,
+   ## Double for-loop with all the sample id and taxa name possible combinations printing the real ones,
    ## the ones that have a value that is
    string sizeToPrintPerSample
    for (string sampleId : sampleIdentifiers.keys()) {
       for ( string currentTaxon : taxaNames.keys() ){
          
-         ## print only for the sample and taxonomy pairs that have a size
+         ## Print only for the sample and taxonomy pairs that have a size
          if ( giveSampleAndTaxonomyGetSizeSum.hasKey( sampleId+"_SEP_"+currentTaxon)) {
             sizeToPrintPerSample = giveSampleAndTaxonomyGetSizeSum { sampleId+"_SEP_"+currentTaxon }
             sys echo '$sampleId   $sizeToPrintPerSample   $currentTaxon' >>  $sampleId.$perSampleTriples
@@ -1603,7 +1582,7 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
    print 'i did just find with the tripltes! ' + "\n"
    wait
    
-   # finaly, make an OTU table only with the significant assignments (>97%)
+   # Finaly, make an OTU table only with the significant assignments (>97%)
    if ( paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_SWARM' ) {
       string swarmPath = genePath + '/' + 'gene_COI' +  '/' + 'SWARM'
       swarmPath.chdir()
@@ -1620,48 +1599,48 @@ if (  paramsOfTaxonomy{'gene'} == 'gene_COI'  && fileFromRdpClassifier.size() !=
 
 print ' At last! We now have the MOTU-table! :) ' + "\n"
 wait
-###################################     here ends 'make0tuTable' script  !!!    ###############################################
+##############################     Here ends the 'make0tuTable' script  !!!    ###############################################
 
 #////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 ##############################################################################################################################
-####  now, i have everything i need to, so I make files per sample in which i keep only the info I consider as valuable ! ####
+####                      make files per sample only with the info considered as valuable !                               ####
 ##############################################################################################################################
 
 bayesPath.chdir()
 string[] names = bayesPath.dir()
 outputPerSamplePath.chdir()
 
-# for each sample we make a folder with its name, in order to put PEMA's output concerning each of those
+# For each sample make a folder with its name, in order to put PEMA's output concerning each of those
 for ( string sample : names ) {
     sample.mkdir()
 }
 
 fastqcPath.chdir()
-# in 'samples' we make a list with all file names we find in fastqc output folder - that means for all the files
+# In 'samples' make a list with all file names we find in fastqc output folder - that means for all the files
 string[] samples = fastqcPath.dir()
 
-# we remove all .html files from our list
+# Remove all .html files from our list
 for (string file : samples ) {
    if ( file.endsWith(".html") ) {
       samples.remove(file)
    }
 }
 
-#set variables 
+# Set variables 
 string unzipfq 
 string sampleNoZip
 fastqcPath.chdir()
 
 for ( string sample : samples ) {
    
-   # we unzip the output of fastqc for each file
+   # Unzip the output of fastqc for each file
    task unzip $fastqcPath/$sample
    sampleNoZip = sample.split('.zip')[0]
    unzipfq = sample.split('_[0-9]_fastqc')[0]
    wait
    
-   # we copy two significant output files of FastQC to the sample's output folder
+   # Copy two significant output files of FastQC to the sample's output folder
    task{
       sys cp $fastqcPath/$sampleNoZip/Images/per_base_quality.png  $outputPerSamplePath/$unzipfq
       sys cp $fastqcPath/$sampleNoZip/summary.txt $outputPerSamplePath/$unzipfq
@@ -1719,7 +1698,7 @@ sys rm Richness2.tsv All_Cumulative2.tsv   Relative_Abundance2.tsv
 ###########################################################################################
 
 if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_SWARM' ){
-    #using string.readLines() i will create my otu table..
+
    string swarmPath = genePath + '/' + 'gene_COI' +  '/' + 'SWARM'
    print swarmPath + "\n"
    swarmPath.chdir()
@@ -1733,7 +1712,7 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
          sys mv $sample $outputPerSamplePath/$sampleId
       }
    }
-   # here, the number of the SPECIES that are found from all samples, are computed
+   # The number of the SPECIES that are found from all samples, are computed
    sys bash $path/scripts/uniqSpecies.sh
 }      
 
@@ -1752,10 +1731,6 @@ if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlg
          sys mv $sample $outputPerSamplePath/$sampleId
       }
    }
-   
-   # here, the number of the SPECIES that are found from all samples, are computed
-   #using string.readLines() i will create my otu table..  
-   #string.readLines() 
 }      
 
 string checkPhyloseq = outputPoint + "/phyloseq.chp"
@@ -1785,16 +1760,16 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
    string phyloseq_folder = 'phyloseq_output'
 
    outputFilePath.chdir()
-   # check if phyloseq-output folder has already been made from previous run
+   # Check if phyloseq-output folder has already been made from previous run
    if ( phyloseq_folder.isDir() ) {
       print 'a phyloseq-output folder has already been built\n'
       wait
    } else {
-      # create a folder where the input/output of phyloseq will be located
+      # Create a folder where the input/output of phyloseq will be located
       phyloseq_folder.mkdir()
    }   
    
-   # set the assignmentPath variable according to the marker gene chosen
+   # Set the assignmentPath variable according to the marker gene chosen
    string assignmentPath
    if ( paramForPhyloseq{'gene'} == 'gene_ITS' ) {
       string algoCluster = paramForPhyloseq{'clusteringAlgoForCOI_ITS'}
@@ -1813,13 +1788,13 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
       assignmentPath.chdir()
    }
    
-   ## if you want to use phyloseq functions that need a phylogenetic tree with the OTUs found, you need to build such a tree!
+   ## If you want to use phyloseq functions that need a phylogenetic tree with the OTUs found, you need to build such a tree!
    if ( paramForPhyloseq{'tree'} == 'Yes' ) {
       
       print("assingmentPath is:  " +  assignmentPath + '\n')
       assignmentPath.chdir()
       
-      ## at first, we align the sequences of the final OTUs using the MAFFT aligner
+      ## Align the sequences of the final OTUs using the MAFFT aligner
       task /usr/bin/mafft --auto --reorder --thread -1 Aligned_assignments.fasta > aligned_otus.fasta
       wait
       print 'mafft alignmnent has been concluded' + '\n'
@@ -1829,12 +1804,12 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
       sys mv aligned_otus.fasta.temp aligned_otus.fasta
       sys sed -i 's/:/_/g' aligned_otus.fasta
       
-      ## to get a nice tree, we will run the RAxML-ng "check" algorithm in the first place, in oder to check our MSA.
+      ## Run the RAxML-ng "check" algorithm in the first place, in oder to check our MSA.
       task $path/tools/raxml-ng/raxml-ng/bin/raxml-ng --check --msa aligned_otus.fasta --model GTR+G4 || true
       wait
       print 'The check of the alignment is done!' + '\n'
             
-      ## and then I create my tree using RAxML
+      ## Create my tree using RAxML
       string test = 'aligned_otus.fasta.raxml.reduced.phy'
       if ( test.exists() == 'true' ) {
          task $path/tools/raxml-ng/raxml-ng/bin/raxml-ng --all --msa-format PHYLIP --msa aligned_otus.fasta.raxml.reduced.phy --tree pars{$paramForPhyloseq{'parsTrees'}} --bs-trees $paramForPhyloseq{'bootstrapTrees'} --model GTR+G4 --threads $paramForPhyloseq{'raxmlThreads'} --force      
@@ -1850,17 +1825,17 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
       wait      
    }
          
-   ## finally, I have to copy all the necessary PEMA's output files, that phyloseq uses as input, to the phyloseq-output folder
+   ## Finally, copy all the necessary PEMA's output files, that phyloseq uses as input, to the phyloseq-output folder
    assignmentPath.chdir()
    task{
       
-      ## add the OTU-table found in the phyloseq folder and name it as the phyloseq script wants 
+      ## Add the OTU-table found in the phyloseq folder and name it as the phyloseq script wants 
       sys cp final_table.tsv $outputFilePath/phyloseq_output
       sys cd $outputFilePath/phyloseq_output
       sys mv final_table.tsv otu_table.txt
       sys sed -i 's/:/_/g' otu_table.txt
       
-      ## add the metadata file in the phyloseq folder
+      ## Add the metadata file in the phyloseq folder
       sys cp $outputPoint/metadata.csv $outputFilePath/phyloseq_output   
    }
 
@@ -1873,7 +1848,7 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
       }         
    }
    
-   # run the phyloseq script   
+   # Run the phyloseq script   
    string phyloseqPath = outputFilePath + '/' + "phyloseq_output"
    phyloseqPath.chdir()
    sys cp $outputPoint/phyloseq_in_PEMA.R .
@@ -1891,7 +1866,7 @@ if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhy
 ###################################################################################################################  
 
 
-###  make a file where i will move all the checkpoints
+###  Make a file where i will move all the checkpoints
 parameterFilePath.chdir() ;
 if ( paramForPhyloseq{'emptyCheckpoints'} == 'Yes' ) {
    string checkpointsDir = 'checkpoints_for_' + paramForPhyloseq{'outputFolderName'}
@@ -1900,17 +1875,6 @@ if ( paramForPhyloseq{'emptyCheckpoints'} == 'Yes' ) {
    outputPoint.chdir()   
    sys mv *.chp $outputFilePath/$checkpointsDir
 }
-
-# # keep only one OTU-table for every analysis in the case of the 16S marker gene and the alignment based taxonomy assignment method
-# if ( paramForPhyloseq{'gene'} == '16S' &&  paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' ) {
-# 
-#    string algoCluster = paramForPhyloseq{'clusteringAlgoFor16S_18SrRNA'}
-#    string algo = algoCluster.split('_')[1]   
-#    string assignmentPath = genePath + '/' + "gene_16S" + '/' + algo + '/' + paramForPhyloseq{'taxonomyFolderName'}
-#    assignmentPath.chdir()
-#    sys cd 
-#    sys mv 16S_otu_table.txt 16S_otutab_$paramForPhyloseq{'taxonomyFolderName'}.txt
-# }
 
 outputFilePath.chdir()
 print(" \n PEMA has come to an end! Let biology start! \n ")
