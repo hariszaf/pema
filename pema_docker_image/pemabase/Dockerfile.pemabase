@@ -25,11 +25,11 @@ RUN apt-get update
 RUN apt-get install -y software-properties-common
 RUN apt-get update
 
-RUN  add-apt-repository ppa:openjdk-r/ppa
-RUN  apt-get update -q
+RUN  add-apt-repository ppa:openjdk-r/ppa && apt-get update -q
+#RUN  apt-get update -q
 
-RUN apt-get install -y openjdk-8-jdk
-RUN  apt-get install -y openjdk-11-jdk
+RUN apt-get install -y openjdk-8-jdk && apt-get install -y openjdk-11-jdk
+#RUN  apt-get install -y openjdk-11-jdk
 
 ENV JAVA_HOME /usr/lib/jvm/java-11-oracle 
 ENV PATH="/opt/java/openjdk/bin:$PATH"
@@ -41,8 +41,14 @@ RUN export JAVA_HOME
 RUN ulimit -c unlimited             
 
 # Some extras just in case
-RUN apt-get update && apt-get install -y ant && apt-get clean;
-RUN apt-get update && apt-get install ca-certificates-java && apt-get clean && update-ca-certificates -f;
+RUN apt-get update && \
+	apt-get install -y ant && \
+	apt-get clean &&  \
+	apt-get update && \
+	apt-get install ca-certificates-java && \
+	apt-get clean && \
+	update-ca-certificates -f;
+#RUN apt-get update && apt-get install ca-certificates-java && apt-get clean && update-ca-certificates -f;
 
 # Install all necessary labs and programs to set up our Docker Image
 WORKDIR /home
@@ -79,23 +85,23 @@ RUN wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.
     chmod 755 fastqc
 
 # Download and install VSEARCH
-WORKDIR /home/tools
-RUN mkdir VSEARCH
+#WORKDIR /home/tools
+#RUN mkdir VSEARCH
 WORKDIR /home/tools/VSEARCH
 RUN wget https://github.com/torognes/vsearch/releases/download/v2.9.1/vsearch-2.9.1-linux-x86_64.tar.gz && \
     tar -zxvf vsearch-2.9.1-linux-x86_64.tar.gz && rm vsearch-2.9.1-linux-x86_64.tar.gz 
 
 # Download and install Trimmomatic
-WORKDIR /home/tools
-RUN mkdir Trimmomatic
+#WORKDIR /home/tools
+#RUN mkdir Trimmomatic
 WORKDIR /home/tools/Trimmomatic
 RUN wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.38.zip && \
     unzip Trimmomatic-0.38.zip && \
     rm Trimmomatic-0.38.zip
 
 # Download and install SPAdes
-WORKDIR /home/tools
-RUN mkdir SPAdes
+#WORKDIR /home/tools
+#RUN mkdir SPAdes
 WORKDIR /home/tools/SPAdes
 # 2020.12.14 Upgrade to SPAdes 3.14.0 and install from source code
 RUN wget http://cab.spbu.ru/files/release3.14.0/SPAdes-3.14.0.tar.gz  && \
@@ -104,8 +110,8 @@ RUN wget http://cab.spbu.ru/files/release3.14.0/SPAdes-3.14.0.tar.gz  && \
     ./spades_compile.sh
 
 # Download and install PANDAseq
-WORKDIR /home/tools
-RUN mkdir PANDAseq
+#WORKDIR /home/tools
+#RUN mkdir PANDAseq
 WORKDIR /home/tools/PANDAseq
 RUN git clone http://github.com/neufeld/pandaseq.git && \
     cd pandaseq && \
@@ -122,34 +128,33 @@ RUN set -xe \
     && apt-get update \
     && apt-get install -y python-pip
 
-RUN pip install --upgrade pip
-RUN apt-get remove -y --purge python-setuptools
-RUN apt update
-RUN apt install -y python3-pip
-RUN pip3 install setuptools==33.1.1
+RUN pip install --upgrade pip && \
+	apt-get remove -y --purge python-setuptools && \
+	apt update && \
+	apt install -y python3-pip && \
+	pip3 install setuptools==33.1.1
 
 
 # Install OBITools // following the instructions described here: https://www.biostars.org/p/235898/
 WORKDIR /home/tools
-RUN apt-get update -y
-RUN apt-get install -y python-virtualenv
+RUN apt-get update -y && \
+	apt-get install -y python-virtualenv
 
-RUN mkdir OBI 
+#RUN mkdir OBI 
 WORKDIR /home/tools/OBI
 ENV VIRTUAL_ENV=/home/tools/OBI/OBI-env
 RUN virtualenv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN wget 'https://git.metabarcoding.org/obitools/obitools/repository/archive.tar.gz?ref=master'
-RUN tar -zxvf "archive.tar.gz?ref=master"
+RUN wget 'https://git.metabarcoding.org/obitools/obitools/repository/archive.tar.gz?ref=master' && \
+	tar -zxvf "archive.tar.gz?ref=master"
 
-RUN pip install sphinx==1.4.8 
-RUN rm archive.tar.gz?ref=master ; mv obitools-master-* obitools-master
+RUN pip install sphinx==1.4.8 && \
+	rm archive.tar.gz?ref=master ; mv obitools-master-* obitools-master
 WORKDIR /home/tools/OBI/obitools-master
-RUN python setup.py build 
-RUN python setup.py install
-
-RUN export PATH=${PATH}:"~/OBI/OBI-env/bin"
+RUN python setup.py build && \
+	python setup.py install && \
+	export PATH=${PATH}:"~/OBI/OBI-env/bin"
 
 
 # Download and install NCBI
@@ -160,14 +165,14 @@ RUN wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.8.1/ncbi-blast-2.
 # Download and install PaPaRa software
 WORKDIR /home/tools
 WORKDIR /home/tools/PaPaRa
-RUN wget https://sco.h-its.org/exelixis/resource/download/software/papara_nt-2.5-static_x86_64.tar.gz
-RUN tar -zxvf papara_nt-2.5-static_x86_64.tar.gz && rm papara_nt-2.5-static_x86_64.tar.gz
+RUN wget https://sco.h-its.org/exelixis/resource/download/software/papara_nt-2.5-static_x86_64.tar.gz && \
+	tar -zxvf papara_nt-2.5-static_x86_64.tar.gz && rm papara_nt-2.5-static_x86_64.tar.gz
 
 # Download and install EPA-ng
-WORKDIR /home/tools
+#WORKDIR /home/tools
 WORKDIR /home/tools/EPA-ng
-RUN git clone --recursive https://github.com/Pbdas/epa.git 
-RUN cd epa && make
+RUN git clone --recursive https://github.com/Pbdas/epa.git && \
+	cd epa && make
 
 # Download and install SWARM clustering algoritm
 WORKDIR /home/tools/swarm
@@ -275,21 +280,21 @@ RUN rm gawk-4.2.1.tar.gz && \
 RUN apt-get remove -y r-base-core
 
 # Set the R environment
-RUN apt-get install -y gfortran
-RUN apt-get install -y build-essential
-RUN apt-get install -y fort77
-RUN apt-get install -y xorg-dev
-RUN apt-get install -y liblzma-dev libblas-dev gfortran
-RUN apt-get install -y gcc-multilib
-RUN apt-get install -y gobjc++
-RUN apt-get install -y aptitude
-RUN aptitude install -y libreadline-dev
-RUN apt-get install libbz2-dev
+RUN apt-get install -y gfortran && \
+	apt-get install -y build-essential && \
+	apt-get install -y fort77 && \
+	apt-get install -y xorg-dev && \
+	apt-get install -y liblzma-dev libblas-dev gfortran && \
+	apt-get install -y gcc-multilib && \
+	apt-get install -y gobjc++ && \
+	apt-get install -y aptitude && \
+	aptitude install -y libreadline-dev && \
+	apt-get install libbz2-dev
 
-RUN export CC=/usr/bin/gcc
-RUN export CXX=/usr/bin/g++
-RUN export FC=/usr/bin/gfortran
-RUN export PERL=/usr/bin/perl
+RUN export CC=/usr/bin/gcc && \
+	export CXX=/usr/bin/g++ && \
+	export FC=/usr/bin/gfortran && \
+	export PERL=/usr/bin/perl
 
 RUN apt-get install -y libpcre3-dev libpcre2-dev libpcre-ocaml-dev libghc-regex-pcre-dev
 
