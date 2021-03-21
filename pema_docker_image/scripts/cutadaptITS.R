@@ -75,7 +75,7 @@ for (base in reverse_split) {
 cutadapt <- "/usr/local/bin/cutadapt"
 
 
-system2(cutadapt, args = "--version") # Run shell commands from R
+system2(cutadapt3, args = "--version") # Run shell commands from R
 
 
 path <- data
