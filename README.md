@@ -326,7 +326,6 @@ And of course the container-based technologies:
 * Singularity - https://sylabs.io/singularity/
 
 
-
 # License
 PEMA is under the GNU GPLv3 license (for 3rd party components separate licenses apply).
 

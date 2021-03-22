@@ -1,0 +1,155 @@
+
+RAxML-NG v. 0.5.1b BETA released on 01.12.2017 by The Exelixis Lab.
+Authors: Alexey Kozlov, Alexandros Stamatakis, Diego Darriba, Tomas Flouri, Benoit Morel.
+Latest version: https://github.com/amkozlov/raxml-ng
+Questions/problems/suggestions? Please visit: https://groups.google.com/forum/#!forum/raxml
+
+WARNING: This is a BETA release, please use at your own risk!
+
+RAxML-NG was called as follows:
+
+/home/haris/metabar_pipeline/tools/raxml-ng/raxml-ng/bin/raxml-ng --msa /home/haris/metabar_pipeline/PEMA/tools/silva_132/for_placement/createTreeTheEasyWay/ref_msa_from_gappa.fasta --model GTR+G --prefix /home/haris/metabar_pipeline/PEMA/tools/silva_132/for_placement/createTreeTheEasyWay/raxml_easy_right_refmsa
+
+Analysis options:
+  run mode: ML tree search
+  start tree(s): random
+  random seed: 1530266638
+  tip-inner: ON
+  pattern compression: ON
+  per-rate scalers: OFF
+  site repeats: OFF
+  fast spr radius: AUTO
+  spr subtree cutoff: 1.000000
+  branch lengths: ML estimate (linked)
+  SIMD kernels: AVX2
+  parallelization: PTHREADS (20 threads)
+
+[00:00:00] Reading alignment from file: /home/haris/metabar_pipeline/PEMA/tools/silva_132/for_placement/createTreeTheEasyWay/ref_msa_from_gappa.fasta
+[00:00:00] Loaded alignment with 1036 taxa and 50000 sites
+
+WARNING: Fully undetermined columns found: 47711
+
+NOTE: Reduced alignment (with gap-only columns removed) was printed to:
+/mnt/homes/haris/metabar_pipeline/PEMA/tools/silva_132/for_placement/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy
+
+Alignment comprises 1 partitions and 1991 patterns
+
+Partition 0: noname
+Model: GTR+FO+G4m
+Alignment sites / patterns: 50000 / 1991
+Gaps: 38.24 %
+Invariant sites: 27.52 %
+
+
+[00:00:02] Generating random starting tree(s) with 1036 taxa
+[00:00:02] Data distribution: partitions/thread: 1-1, patterns/thread: 99-100
+
+WARNING: You are using too many threads (20) for your alignment with 1991 unique patterns.
+NOTE:    Please consider using 2 threads ('--threads 2' option) for the optimal performance.
+NOTE:    As a general rule-of-thumb, please assign at least 200-1000 alignment patterns per thread.
+
+Starting ML tree search with 1 distinct starting trees
+
+[00:00:02 -940132.879313] Initial branch length optimization
+[00:00:03 -830564.119684] Model parameter optimization (eps = 10.000000)
+[00:00:30 -800849.445815] AUTODETECT spr round 1 (radius: 5)
+[00:00:53 -707350.518088] AUTODETECT spr round 2 (radius: 10)
+[00:01:23 -590561.513967] AUTODETECT spr round 3 (radius: 15)
+[00:02:02 -538005.082147] AUTODETECT spr round 4 (radius: 20)
+[00:02:38 -517292.645515] AUTODETECT spr round 5 (radius: 25)
+[00:03:17 -515460.232833] SPR radius for FAST iterations: 25 (autodetect)
+[00:03:17 -515460.232833] Model parameter optimization (eps = 3.000000)
+[00:03:28 -513710.273437] FAST spr round 1 (radius: 25)
+[00:04:20 -482143.138760] FAST spr round 2 (radius: 25)
+[00:05:00 -480463.401218] FAST spr round 3 (radius: 25)
+[00:05:34 -480292.718061] FAST spr round 4 (radius: 25)
+[00:06:05 -480208.978641] FAST spr round 5 (radius: 25)
+[00:06:33 -480192.548192] FAST spr round 6 (radius: 25)
+[00:06:59 -480187.676609] FAST spr round 7 (radius: 25)
+[00:07:25 -480183.823699] FAST spr round 8 (radius: 25)
+[00:07:52 -480176.753037] FAST spr round 9 (radius: 25)
+[00:08:18 -480173.271162] FAST spr round 10 (radius: 25)
+[00:08:43 -480169.946551] FAST spr round 11 (radius: 25)
+[00:09:09 -480166.816993] FAST spr round 12 (radius: 25)
+[00:09:34 -480164.012291] FAST spr round 13 (radius: 25)
+[00:10:00 -480161.469979] FAST spr round 14 (radius: 25)
+[00:10:26 -480159.190155] FAST spr round 15 (radius: 25)
+[00:10:51 -480157.475045] FAST spr round 16 (radius: 25)
+[00:11:16 -480155.878413] FAST spr round 17 (radius: 25)
+[00:11:41 -480153.337027] FAST spr round 18 (radius: 25)
+[00:12:07 -480152.167170] FAST spr round 19 (radius: 25)
+[00:12:33 -480151.144576] FAST spr round 20 (radius: 25)
+[00:12:58 -480147.428432] FAST spr round 21 (radius: 25)
+[00:13:23 -480144.864771] FAST spr round 22 (radius: 25)
+[00:13:49 -480141.499989] FAST spr round 23 (radius: 25)
+[00:14:15 -480140.232326] FAST spr round 24 (radius: 25)
+[00:14:40 -480138.310120] FAST spr round 25 (radius: 25)
+[00:15:06 -480136.962904] FAST spr round 26 (radius: 25)
+[00:15:32 -480135.985041] FAST spr round 27 (radius: 25)
+[00:15:57 -480135.021210] FAST spr round 28 (radius: 25)
+[00:16:23 -480133.915703] FAST spr round 29 (radius: 25)
+[00:16:49 -480129.403135] FAST spr round 30 (radius: 25)
+[00:17:15 -480125.934518] FAST spr round 31 (radius: 25)
+[00:17:41 -480125.155853] FAST spr round 32 (radius: 25)
+[00:18:06 -480124.374706] FAST spr round 33 (radius: 25)
+[00:18:32 -480123.723231] FAST spr round 34 (radius: 25)
+[00:18:58 -480123.065751] FAST spr round 35 (radius: 25)
+[00:19:25 -480122.710048] FAST spr round 36 (radius: 25)
+[00:19:53 -480122.358732] FAST spr round 37 (radius: 25)
+[00:20:19 -480113.011208] FAST spr round 38 (radius: 25)
+[00:20:45 -480108.041250] FAST spr round 39 (radius: 25)
+[00:21:11 -480099.762219] FAST spr round 40 (radius: 25)
+[00:21:37 -480099.474823] FAST spr round 41 (radius: 25)
+[00:22:02 -480099.253062] FAST spr round 42 (radius: 25)
+[00:22:28 -480099.099289] FAST spr round 43 (radius: 25)
+[00:22:53 -480097.863573] FAST spr round 44 (radius: 25)
+[00:23:19 -480097.828805] Model parameter optimization (eps = 1.000000)
+[00:23:27 -480066.146856] SLOW spr round 1 (radius: 5)
+[00:24:19 -479908.909393] SLOW spr round 2 (radius: 5)
+[00:25:06 -479865.688413] SLOW spr round 3 (radius: 5)
+[00:25:49 -479860.513684] SLOW spr round 4 (radius: 5)
+[00:26:32 -479859.662883] SLOW spr round 5 (radius: 5)
+[00:27:14 -479859.346965] SLOW spr round 6 (radius: 5)
+[00:27:56 -479859.188894] SLOW spr round 7 (radius: 5)
+[00:28:38 -479859.050635] SLOW spr round 8 (radius: 5)
+[00:29:20 -479858.935545] SLOW spr round 9 (radius: 5)
+[00:30:01 -479858.319963] SLOW spr round 10 (radius: 5)
+[00:30:43 -479858.225039] SLOW spr round 11 (radius: 10)
+[00:31:23 -479858.225018] SLOW spr round 12 (radius: 15)
+[00:32:43 -479858.225017] SLOW spr round 13 (radius: 20)
+[00:34:39 -479847.933573] SLOW spr round 14 (radius: 5)
+[00:35:42 -479843.396236] SLOW spr round 15 (radius: 5)
+[00:36:35 -479842.321758] SLOW spr round 16 (radius: 5)
+[00:37:22 -479842.189214] SLOW spr round 17 (radius: 5)
+[00:38:07 -479841.975261] SLOW spr round 18 (radius: 5)
+[00:38:50 -479841.208477] SLOW spr round 19 (radius: 5)
+[00:39:32 -479841.094017] SLOW spr round 20 (radius: 5)
+[00:40:14 -479840.982435] SLOW spr round 21 (radius: 5)
+[00:40:56 -479840.566875] SLOW spr round 22 (radius: 5)
+[00:41:38 -479840.566869] SLOW spr round 23 (radius: 10)
+[00:42:18 -479840.566869] SLOW spr round 24 (radius: 15)
+[00:43:37 -479840.566869] SLOW spr round 25 (radius: 20)
+[00:45:32 -479840.566869] SLOW spr round 26 (radius: 25)
+[00:48:10 -479840.566869] Model parameter optimization (eps = 0.100000)
+
+[00:48:16] ML tree search #1, logLikelihood: -479838.682172
+
+
+Optimized model parameters:
+
+   Partition 0: noname
+   Rate heterogeneity: GAMMA (4 cats, mean),  alpha: 0.559838 (ML),  weights&rates: (0.250000,0.044945) (0.250000,0.289197) (0.250000,0.859360) (0.250000,2.806498) 
+   Base frequencies (ML): 0.237221 0.230211 0.294337 0.238231 
+   Substitution rates (ML): 0.959447 2.524972 1.458418 1.062133 3.551429 1.000000 
+
+Final LogLikelihood: -479838.682172
+
+Best ML tree saved to: /mnt/homes/haris/metabar_pipeline/PEMA/tools/silva_132/for_placement/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree
+Optimized model saved to: /mnt/homes/haris/metabar_pipeline/PEMA/tools/silva_132/for_placement/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestModel
+
+Execution log saved to: /mnt/homes/haris/metabar_pipeline/PEMA/tools/silva_132/for_placement/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.log
+
+Analysis started: 29-Jun-2018 13:03:58 / finished: 29-Jun-2018 13:52:14
+
+Elapsed time: 2896.070 seconds
+
