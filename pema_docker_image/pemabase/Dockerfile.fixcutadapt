@@ -1,7 +1,0 @@
-FROM hariszaf/pemabase:v.2.0.1
-MAINTAINER Haris Zafeiropoulos haris-zaf@hcmr.gr
-
-
-
-RUN pip3 uninstall cutadap
-RUN apt install python3-cutadapt
