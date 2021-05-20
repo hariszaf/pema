@@ -20,6 +20,8 @@
 -->
 
 [![Gitter](https://badges.gitter.im/pema-helpdesk/community.svg)](https://gitter.im/pema-helpdesk/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
 
 Table of Contents
 =================
