@@ -163,11 +163,12 @@ string adjustSeqs(string{} params, string{} globalVars){
    sys if [ $(find '$globalVars{'trimoPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
 
    string[] trimos = globalVars{'trimoPath'}.dir()
-   
-   for (string file : trimos ) {
-      # Delete all the 'U.fastq.gz' files using the list we just made
-      if ( file.endsWith('U\.fastq\.gz') ) {
-         file.delete()
+   wait
+   for (string filename : trimos ) {
+
+      # Delete all the "U.fastq.gz" files using the list we just made
+      if ( filename.endsWith("U\.fastq\.gz") ) {
+         filename.delete()
       }
    }
 
@@ -183,23 +184,25 @@ string adjustSeqs(string{} params, string{} globalVars){
    for ( string trimmed : finalTrimos ) {
       
       # As in Trimmomatic step, we need to know the forward and the reverse file
-      string trimCheck = trimmed.split('_2\.fastq\.gz\.2P\.fastq.\gz')[0]
+      string trimCheck = trimmed.split("_2\.fastq\.gz\.2P\.fastq.\gz")[0]
 
       if ( trimmed == trimCheck ) {
          readBayesF = trimmed
+         println('this is readBayesF:' + readBayesF)
          } else {
          readBayesR = trimmed
+         println('this is readBayesR:' + readBayesR)
          }
 
       if ( readBayesF.isEmpty() == false && readBayesR.isEmpty() == false ) {
          
          if ( params{'maxInfo'} == 'Yes' ) {
-            string newName = trimCheck.split('filtered\_max\_')
+            string newName = trimCheck.split("filtered\_max\_")
             newDir = newName.substr(3,13) ;
             println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
 
          } else if ( params{'maxInfo'} == 'No' ) {
-            string newName = trimCheck.split('filtered_')
+            string newName = trimCheck.split("filtered_")
             newDir = newName.substr(3,13) ;
             println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
          }
@@ -238,6 +241,8 @@ string adjustSeqs(string{} params, string{} globalVars){
       string checkMerge = globalVars{'outputPoint'} + '/merging.chp'
       checkpoint checkMerge
    }
+
+   wait
 
    return 'ok'
 
@@ -335,9 +340,44 @@ string merging(string{} params, string{} globalVars){
    string j = 'parameters.tsv'
    string{} paramsDereplication =  readParameterFile(j)
 
+   wait
+
    return 'ok'
 
 }
+
+# Function to dereplicate using OBITools 
+string{} obi_dereplicate(string{} params, string{} globalVars){
+
+   globalVars{'unzipPath'} = globalVars{'spaPath'} + '/unzip'
+
+   globalVars{'unzipPath'}.chdir()
+
+   sys if [ $(find '$globalVars{'unzipPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
+   string[] unzips = globalVars{'unzipPath'}.dir()
+
+   string fileForDerepl
+   for ( string nodereplicate : unzips ) {
+      
+      # Execute OBITools
+      task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > $globalVars{'derePath'}/dereplicate_$nodereplicate
+      wait
+   }
+   wait
+   println('All the first steps are done! clustering is about to start!')
+
+   string checkTableStep = globalVars{'outputPoint'} + "/tableStep.chp"
+   checkpoint checkTableStep 
+
+   wait
+
+   return globalVars
+
+}
+
+
+
+
 
 
 

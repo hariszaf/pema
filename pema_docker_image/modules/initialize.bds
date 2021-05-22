@@ -4,7 +4,8 @@
 # Overall notes: 
 # ---------------
 # 1. When you are writing in the bash framework, use single quotes by default; check for exceptions
-# 2. 
+# 2. Exception! Use double quotes for bds string functions, e.g bdsSting.split("<pattern>")
+#    or bdsSting.endsWith("<pattern>")
 
 
 # Function to build a map (==dictionary) out of the parameters.tsv file

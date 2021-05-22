@@ -72,14 +72,24 @@ merging(paramsSpadesMerging, globalVars)
 wait
 
 
+################################################################
+#          5. Dereplicate sequence samples                     #
+################################################################
 
+parameterFilePath.chdir()
+string j = "parameters.tsv"
+string{} paramsDereplication =  readParameterFile(j)
+wait
 
+if ( paramsDereplication{'clusteringAlgoFor16S_18SrRNA'} == 'algo_Swarm' || paramsDereplication{'clusteringAlgoForCOI_ITS'} == 'algo_Swarm' ) {
 
+   println("i am about to build this dude.")
 
+} else {
 
+   globalVars = obi_dereplicate(paramsDereplication, globalVars)
 
-
-
+}
 
 
 
