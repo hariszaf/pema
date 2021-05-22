@@ -21,8 +21,8 @@ string{} readParameterFile(string parameter_file) {
 
    for ( string line : lines ) {
    
-      # I need a map with parameteres as keys and their values as values, hence i do not care about lines starting with "#"
-      if ( line.startsWith("#") ) {
+      # I need a map with parameteres as keys and their values as values, hence i do not care about lines starting with '#'
+      if ( line.startsWith('#') ) {
       continue
    
       } else {
@@ -49,66 +49,66 @@ string{} initializeAnalysis(string{} params) {
    string{} globalVars
 
    # keep as a variable the path where PEMA is found
-   globalVars {"path"} = "/home"
+   globalVars{'path'} = '/home'
 
    # keep as a variable the path where the data are found
-   globalVars {"dataPath"} =  "/mnt/analysis/mydata" 
+   globalVars{'dataPath'} =  '/mnt/analysis/mydata' 
 
-   globalVars {"parameterFilePath"} = "/mnt/analysis/"
+   globalVars{'parameterFilePath'} = '/mnt/analysis/'
 
-   print "globalVars for dataPath:" + globalVars {"dataPath"} + "\n"
+   print 'globalVars for dataPath:' + globalVars{'dataPath'} + '\n'
 
    # PEMA will leave its output also in /mnt 
-   globalVars {"outputPoint"} = "/mnt/analysis"
+   globalVars{'outputPoint'} = '/mnt/analysis'
 
    # if there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
-   globalVars{"dataPath"}.chdir() ;
+   globalVars{'dataPath'}.chdir() ;
 
    # check if there is a TrimLog file and IF YES, then delete it
-   sys if [ $(find '$globalVars{'dataPath'}' -name "TrimLog*") ] ; then  rm TrimLog* ; fi          
-   # in case that PEMA run on macOS, then some ".DS_Store" files may appear; these need to be removed in every step of the way!
-   sys if [ $(find '$globalVars{'dataPath'}' -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
+   sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi          
+   # in case that PEMA run on macOS, then some '.DS_Store' files may appear; these need to be removed in every step of the way!
+   sys if [ $(find '$globalVars{'dataPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
 
    # I create a file where the pipeline's output will be saved
-   globalVars{"outputPoint"}.chdir()
+   globalVars{'outputPoint'}.chdir()
 
    # take the outut folder name as a variable 
-   globalVars {"analysisName"} = params{'outputFolderName'}
+   globalVars{'analysisName'} = params{'outputFolderName'}
 
    # here are all the directories as variables that i will use
-   globalVars {"qualityControl"}  = "1.quality_control"
-   globalVars {"trimmomatic"}     = "2.trimmomatic_output"
-   globalVars {"bayesHammer"}     = "3.correct_by_BayesHammer"
-   globalVars {"spades"}          = "4.merged_by_PANDAseq"
-   globalVars {"dereplicate"}     = "5.dereplicate_by_obiuniq"
-   globalVars {"linearized"}      = "6.linearized_files"
-   globalVars {"geneDependent"}   = "7.gene_dependent"
-   globalVars {"outputPerSample"} = "8.output_per_sample"
+   globalVars{'qualityControl'}  = '1.quality_control'
+   globalVars{'trimmomatic'}     = '2.trimmomatic_output'
+   globalVars{'bayesHammer'}     = '3.correct_by_BayesHammer'
+   globalVars{'spades'}          = '4.merged_by_PANDAseq'
+   globalVars{'dereplicate'}     = '5.dereplicate_by_obiuniq'
+   globalVars{'linearized'}      = '6.linearized_files'
+   globalVars{'geneDependent'}   = '7.gene_dependent'
+   globalVars{'outputPerSample'} = '8.output_per_sample'
 
    wait
 
    
    ## and all the paths for each of them
-   globalVars {"outputFilePath"}      = globalVars {"outputPoint"}    + "/" + params{'outputFolderName'}
-   globalVars {"fastqcPath"}          = globalVars {"outputFilePath"} + "/" + globalVars {"qualityControl"} 
-   globalVars {"trimoPath"}           = globalVars {"outputFilePath"} + "/" + globalVars {"trimmomatic"} 
-   globalVars {"bayesPath"}           = globalVars {"outputFilePath"} + "/" + globalVars {"bayesHammer"} 
-   globalVars {"spaPath"}             = globalVars {"outputFilePath"} + "/" + globalVars {"spades"} 
-   globalVars {"derePath"}            = globalVars {"outputFilePath"} + "/" + globalVars {"dereplicate"} 
-   globalVars {"linearPath"}          = globalVars {"outputFilePath"} + "/" + globalVars {"linearized"} 
-   globalVars {"genePath"}            = globalVars {"outputFilePath"} + "/" + globalVars {"geneDependent"} 
-   globalVars {"outputPerSamplePath"} = globalVars {"outputFilePath"} + "/" + globalVars {"outputPerSample"}
+   globalVars{'outputFilePath'}      = globalVars{'outputPoint'}    + '/' + params{'outputFolderName'}
+   globalVars{'fastqcPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'} 
+   globalVars{'trimoPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'trimmomatic'} 
+   globalVars{'bayesPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'bayesHammer'} 
+   globalVars{'spaPath'}             = globalVars{'outputFilePath'} + '/' + globalVars{'spades'} 
+   globalVars{'derePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'dereplicate'} 
+   globalVars{'linearPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'linearized'} 
+   globalVars{'genePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'geneDependent'} 
+   globalVars{'outputPerSamplePath'} = globalVars{'outputFilePath'} + '/' + globalVars{'outputPerSample'}
 
    wait
 
 
-   # Check if an output folder called with the same name as the one given in the "parameters" file, has already been created from previous runs
+   # Check if an output folder called with the same name as the one given in the 'parameters' file, has already been created from previous runs
    if ( params{'outputFolderName'}.isDir() ) {                                     
-      print "This ouput file already exists\n" 
+      print 'This ouput file already exists\n' 
    } else {
       # if it is not, create a file with its name
       params{'outputFolderName'}.mkdir()
-      print "A new output files was just created!\n"
+      print 'A new output files was just created!\n'
       # Make all output (sub)directories having 777 permissions; ; the reason for this is that
       # in some cases permissions change in terms you cannot have access to the files and directories built
       # Make sure you run this command each time a new directory is createad
@@ -118,33 +118,33 @@ string{} initializeAnalysis(string{} params) {
 
 
    # and create an output file for each pipeline step - if you run PEMA for the first time for a specific experiment
-   globalVars {"outputFilePath"}.chdir()
+   globalVars{'outputFilePath'}.chdir()
 
    # make a list with all the directory names that can be found in the output directory 
-   string[] outputFiles = globalVars{"outputFilePath"}.dir()         
+   string[] outputFiles = globalVars{'outputFilePath'}.dir()         
 
    # if that list is empty, then create the directories mentioned above
    if ( outputFiles.isEmpty() == true ) {
 
       # create all the output directories
-      globalVars {"qualityControl"}.mkdir()
-      globalVars {"trimmomatic"}.mkdir()
-      globalVars {"bayesHammer"}.mkdir()
-      globalVars {"spades"}.mkdir()
-      globalVars {"dereplicate"}.mkdir()
-      globalVars {"linearized"}.mkdir() 
-      globalVars {"geneDependent"}.mkdir()
-      globalVars {"outputPerSample"}.mkdir()
+      globalVars{'qualityControl'}.mkdir()
+      globalVars{'trimmomatic'}.mkdir()
+      globalVars{'bayesHammer'}.mkdir()
+      globalVars{'spades'}.mkdir()
+      globalVars{'dereplicate'}.mkdir()
+      globalVars{'linearized'}.mkdir() 
+      globalVars{'geneDependent'}.mkdir()
+      globalVars{'outputPerSample'}.mkdir()
    }
 
    # gene dependent directory
-   globalVars {"genePath"}.chdir()
+   globalVars{'genePath'}.chdir()
    params {'gene'}.mkdir()
 
 
    # Convert Illumina data to ENA format
    if ( params{'EnaData'} == 'No' ) {
-      sys bash $globalVars{"path"}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{"dataPath"}
+      sys bash $globalVars{'path'}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'}
    }
 
    return(globalVars)
