@@ -7,12 +7,7 @@
 # 2. 
 
 
-
-################################################################################
-#########           READ parameters.tsv FILE EACH TIME             #############
-################################################################################
-
-# Read the parameters' file and keep all of them in a map (map is a dictionary for BDS)
+# Function to build a map (==dictionary) out of the parameters.tsv file
 string{} readParameterFile(string parameter_file) {
 
    string parameters_file = parameter_file
@@ -36,30 +31,53 @@ string{} readParameterFile(string parameter_file) {
    }
    
    # return the map
-   return( my_case )                        
+   return(my_case)
+
 }
 
+# Function to train classifier based on a local reference database if required
+string{} trainClassifier(string{} params, string{} globalVars){
 
-################################################################################
-###############           INITIALIZE THE STUDY              ####################
-################################################################################
+   # Path for user's files 
+   globalVars{'customDbFilesPath'} =  "/mnt/analysis/custom_ref_db"
+   
 
+   if ( params{'gene'} == 'gene_COI' ){
+
+      # Files
+      globalVars{'customDbFilesPath'}.chdir() ;
+      string taxonomyFile = globalVars{'customDbFilesPath'} + "/" + "*.tsv"
+      string sequenceFile = globalVars{'customDbFilesPath'} + "/" + "*.fasta"
+
+      # Train the RDPClassifier using your custom COI ref db
+      sys bash $globalVars{'path'}/scripts/trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+   
+   } else {
+      
+      # Files
+      globalVars{'customDbFilesPath'}.chdir() ;
+      string taxonomyFile = globalVars{'customDbFilesPath'} + "/" + "*.nds"
+      string sequenceFile = globalVars{'customDbFilesPath'} + "/" + "*.fasta"       
+   
+      # All markers genes but the COI, use the CREST algorithm for the taxonomy step. Here we train CREST
+      sys bash $globalVars{'path'}/scripts/trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+
+   }
+
+   return globalVars
+
+}
+
+# Function to initialize a PEMA analysis
 string{} initializeAnalysis(string{} params) {
 
    string{} globalVars
 
-   # keep as a variable the path where PEMA is found
-   globalVars{'path'} = '/home'
-
-   # keep as a variable the path where the data are found
-   globalVars{'dataPath'} =  '/mnt/analysis/mydata' 
-
+   # Main paths
+   globalVars{'path'}              = '/home'
+   globalVars{'dataPath'}          = '/mnt/analysis/mydata' 
    globalVars{'parameterFilePath'} = '/mnt/analysis/'
-
-   print 'globalVars for dataPath:' + globalVars{'dataPath'} + '\n'
-
-   # PEMA will leave its output also in /mnt 
-   globalVars{'outputPoint'} = '/mnt/analysis'
+   globalVars{'outputPoint'}       = '/mnt/analysis'
 
    # if there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
    globalVars{'dataPath'}.chdir() ;
@@ -71,8 +89,6 @@ string{} initializeAnalysis(string{} params) {
 
    # I create a file where the pipeline's output will be saved
    globalVars{'outputPoint'}.chdir()
-
-   # take the outut folder name as a variable 
    globalVars{'analysisName'} = params{'outputFolderName'}
 
    # here are all the directories as variables that i will use
@@ -86,7 +102,6 @@ string{} initializeAnalysis(string{} params) {
    globalVars{'outputPerSample'} = '8.output_per_sample'
 
    wait
-
    
    ## and all the paths for each of them
    globalVars{'outputFilePath'}      = globalVars{'outputPoint'}    + '/' + params{'outputFolderName'}
@@ -104,18 +119,18 @@ string{} initializeAnalysis(string{} params) {
 
    # Check if an output folder called with the same name as the one given in the 'parameters' file, has already been created from previous runs
    if ( params{'outputFolderName'}.isDir() ) {                                     
-      print 'This ouput file already exists\n' 
+      println 'This ouput file already exists' 
+
    } else {
+      
       # if it is not, create a file with its name
       params{'outputFolderName'}.mkdir()
-      print 'A new output files was just created!\n'
+      println 'A new output files was just created!'
+
       # Make all output (sub)directories having 777 permissions; ; the reason for this is that
-      # in some cases permissions change in terms you cannot have access to the files and directories built
-      # Make sure you run this command each time a new directory is createad
       sys chmod 777 $globalVars{'outputFilePath'} -R
       wait
    }
-
 
    # and create an output file for each pipeline step - if you run PEMA for the first time for a specific experiment
    globalVars{'outputFilePath'}.chdir()
@@ -137,7 +152,7 @@ string{} initializeAnalysis(string{} params) {
       globalVars{'outputPerSample'}.mkdir()
    }
 
-   # gene dependent directory
+   # Gene dependent directory
    globalVars{'genePath'}.chdir()
    params {'gene'}.mkdir()
 
@@ -147,8 +162,11 @@ string{} initializeAnalysis(string{} params) {
       sys bash $globalVars{'path'}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'}
    }
 
+   # IMPORTANT! Module to train classifiers is enabled through this statement
+   if ( params{'custom_ref_db'} == 'Yes' ){
+      string{} globalVars = trainClassifier(params, globalVars)
+   }
+
    return(globalVars)
 }
-
-
 

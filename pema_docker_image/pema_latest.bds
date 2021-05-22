@@ -15,57 +15,43 @@ parameterFilePath.chdir()
 string f = "parameters.tsv"                           
 string{} paramsFirstAssignment =  readParameterFile(f)
 
-# Initialize the analysis environment
-string{} globalVars = initializeAnalysis(paramsFirstAssignment)
 
+###############################################################
+#                 0. Initialize analysis                      #
+###############################################################
+string{} globalVars = initializeAnalysis(paramsFirstAssignment)
 wait
 
-sys echo $globalVars{'outputFilePath'}
+
+###############################################################
+#                   1. Quality Control                        #
+###############################################################
+
+qualityControl(paramsFirstAssignment, globalVars)
+
+################################################################
+#                   2. Trimming                                #
+################################################################
+parameterFilePath.chdir()
+string g = "parameters.tsv"
+string{} paramsTrimmoStep =  readParameterFile(g)
+
+globalVars{'dataPath'}.chdir() ;
+
+# If ITS as marker gene, remove length variablity with cutadat
+if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
+   cutadaptForIts(paramsTrimmoStep, globalVars)
+}
 
 
-# ###############################################################
-# #                        1. FastQC                            #
-# ###############################################################
-
-quality_control(paramsFirstAssignment, globalVars)
 
 
-# ##########################################################################################
-# #                        2. Trimmomatic                                     #
-# ##########################################################################################
 
-# dataPath.chdir() ;
 
-# #################      step only for the case of the ITS marker gene      ##################
 
-# if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
-   
-#    dataPath.chdir()
-#    string cutadaptOutputDirectory = "cutadapt"
-#    string initialData = "initialData"
-#    if ( cutadaptOutputDirectory.isDir() && initialData.isDir() ) {
-#       print " done that! \n" 
-#    } else {
-#       # if it is not, create a file with its name
-#       cutadaptOutputDirectory.mkdir()
-#       initialData.mkdir()
-#       sys chmod 777 $outputFilePath -R
-#       print "we made an output directory for cutadapt \n"
-#    }   
-   
-#    wait
-#    task /usr/local/bin/Rscript $path/scripts/cutadaptITS.R $paramsTrimmoStep{'forwardITSPrimer'} $paramsTrimmoStep{'reverseITSPrimer'} $dataPath
-   
-#    wait
-   
-#    sys mv *.fastq.gz initialData
-#    sys mv $initialData $outputPoint/$analysisName
-#    sys mv cutadapt/* .
-#    sys rm -r cutadapt
-   
-#    wait
 
-# }
+
+
 
 # ###########################    here ends the ITS - specific part  !!    #####################################
 

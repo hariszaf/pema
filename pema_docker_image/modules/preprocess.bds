@@ -1,8 +1,8 @@
 #!/usr/bin/env bds
 
 
-
-string quality_control(string{} params, string{} globalVars) {
+# Function to run FASTQC
+string qualityControl(string{} params, string{} globalVars) {
 
    # If there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
    # I re-run this command because of FastQC and the way it reacts in multiple runs over the same folders
@@ -16,11 +16,11 @@ string quality_control(string{} params, string{} globalVars) {
    # now FASTQC runs for all files
    string[] rawFiles = globalVars{'dataPath'}.dir()
    for ( string rawFile : rawFiles ) {
-      print(rawFile)
+      println(rawFile)
       task $globalVars{'path'}/tools/fastqc/FastQC/fastqc --outdir $globalVars{'fastqcPath'}  $globalVars{'dataPath'}/$rawFile
    }
    wait
-   print('FastQC has been completed! \n')
+   println('FastQC has been completed!')
 
 
    # now i create a checkpoint and read again the parameters file.
@@ -34,11 +34,113 @@ string quality_control(string{} params, string{} globalVars) {
 
 }
 
+# Function to run CUTADAPT
+string cutadaptForIts(string{} params, string{} globalVars) {
+
+   globalVars{'dataPath'}.chdir()
+
+   string cutadaptOutputDirectory = "cutadapt"
+   string initialData = "initialData"
+
+   if ( cutadaptOutputDirectory.isDir() && initialData.isDir() ) {
+      println("A directory for the cutadapt output is already there.") 
+
+   } else {
+      cutadaptOutputDirectory.mkdir()
+      initialData.mkdir()
+      sys chmod 777 $globalVars{'outputFilePath'} -R
+      println("An output directory for cutadapt was just made.")
+   }   
+   
+   wait
+   task /usr/local/bin/Rscript $globalVars{'path'}/scripts/cutadaptITS.R $params{'forwardITSPrimer'} $params{'reverseITSPrimer'} $globalVars{'dataPath'}
+   
+   wait
+   
+   sys mv *.fastq.gz initialData
+   sys mv $initialData $globalVars{'outputPoint'}/$globalVars{'analysisName'}
+   sys mv cutadapt/* .
+   sys rm -r cutadapt
+   
+   wait
+
+   println 'Cutadapt has been completed successfully.'
+
+   return 'ok'
+
+}
+
+# Function to run TRIMMOMATIC
+string trimSeqs(string{} params, string{} globalVars){
+
+   # Mmake a list with all the file names on `mydata` dir
+   string[] data = globalVars{'dataPath'}.dir()
+   
+   # Set two variables readF and readR for the forward and reverse file of each sample  
+   string readF
+   string readR
+   int counter = 0
+
+   for ( string file : data ) {
+      
+      # Here's the trick! i need to tell which file is the forward and which is the reverese. Hence, i try to split a suffix. 
+      string check = file.split("_2\.fastq\.gz")[0]
+
+      # If the split does occure then i know that i have the second file of each sample (reverse)
+      # That is because the 'file' variable will always have a '.fastq.gz' suffix.
+      # Hence, if there is no split, 'file' and 'check'  variables are the same.
+      if ( file == check ) {
+               readF = file
+               println("readF is: " + readF)
+               
+               # if there is a split, then they are different
+               } else {
+                  readR = file
+                  println("readR is: " + readR)
+            }
+
+      wait
+
+      if ( readF.isEmpty() == false && readR.isEmpty() == false ) {
+
+         if ( params{'maxInfo'} == 'Yes' ) {
+
+            println("You hace selected Max INFO")
+            wait
+            task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads $params{'threadsTrimmomatic'} -trimlog TrimLog $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR $globalVars{'trimoPath'}/filtered_max_$readF.1P.fastq.gz $globalVars{'trimoPath'}/filtered_max_$readF.1U.fastq.gz $globalVars{'trimoPath'}/filtered_max_$readR.2P.fastq.gz $globalVars{'trimoPath'}/filtered_max_$readR.2U.fastq.gz ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} LEADING:$params{'leading'} TRAILING:$params{'trailing'} MAXINFO:$params{'targetLength'}:$params{'strictness'} MINLEN:$params{'minlen'}
+            wait
+            readF = ''
+            readR = ''
+
+            } else if ( params{'maxInfo'} == 'No' ) {
+
+                  print("You have selected no Max INFO" + "\n")
+
+                  task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads $params{'threadsTrimmomatic'} -trimlog TrimLog2 $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR $globalVars{'trimoPath'}/filtered_$readF.1P.fastq.gz $globalVars{'trimoPath'}/filtered_$readF.1U.fastq.gz $globalVars{'trimoPath'}/filtered_$readR.2P.fastq.gz $globalVars{'trimoPath'}/filtered_$readR.2U.fastq.gz ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} LEADING:$params{'leading'} TRAILING:$params{'trailing'}  MINLEN:$params{'minlen'}
+
+                  wait
+
+                  readF = ''
+                  readR = ''
+            }
+      }
+   }
+
+   wait
+   println("Trimmomatic  is done")
 
 
+   #  Make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
+   # globalVars{'path'}.chdir() ; 
+   globalVars{'trimoPath'}.chdir() ;
+   if ( globalVars{'trimoPath'}.isEmpty() == false ) {
+      string checkCor = globalVars{'outputPoint'} + "/errorCorrection.chp"
+      checkpoint checkCor
+   }
 
+   return 'ok'
 
-
+}
 
 
 
