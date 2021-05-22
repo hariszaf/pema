@@ -81,17 +81,21 @@ string j = "parameters.tsv"
 string{} paramsDereplication =  readParameterFile(j)
 wait
 
-if ( paramsDereplication{'clusteringAlgoFor16S_18SrRNA'} == 'algo_Swarm' || paramsDereplication{'clusteringAlgoForCOI_ITS'} == 'algo_Swarm' ) {
+if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
 
    println("i am about to build this dude.")
 
 } else {
 
-   globalVars = obi_dereplicate(paramsDereplication, globalVars)
+   globalVars = obiDereplicate(paramsDereplication, globalVars)
 
 }
 
+################################################################
+#      Build subdirectories according to the params file       #
+################################################################
 
+buildDirectories(paramsDereplication, globalVars)
 
 
 
@@ -103,23 +107,12 @@ if ( paramsDereplication{'clusteringAlgoFor16S_18SrRNA'} == 'algo_Swarm' || para
 # string{} paramsDereplication =  readParameterFile(j)
 
 
-# ##########################################################################################
-# #                    5. DEREPLICATE with OBITools !!                         #
-# ##########################################################################################
 
- 
-# unzipPath.chdir() ;
-# sys if [ $(find "$unzipPath" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
-# string[] unzips = unzipPath.dir()
 
-# string fileForDerepl
-# for ( string nodereplicate : unzips ) {
-#    # now i execute OBITools
-#    task $path/tools/OBITools-1.2.13/bin/obiuniq -m sample $nodereplicate > $derePath/dereplicate_$nodereplicate ;
-#    wait
-# }
-# wait
-# print("all the first steps are done! clustering is about to start!" +"\n")
+
+
+
+
 
 # string checkTableStep = outputPoint + "/tableStep.chp"
 # checkpoint checkTableStep 
@@ -207,57 +200,17 @@ if ( paramsDereplication{'clusteringAlgoFor16S_18SrRNA'} == 'algo_Swarm' || para
 # ## we now have to choose between different paths depending on the gene and our needs 
 # ######################################################################################################################################
 
-# # depending on the marker gene and the grouping method selected, we make the right folders
-# genePath.chdir()
-# if ( paramsOfTable{'gene'} == 'gene_COI' ) {
-#    string coiPath = genePath + '/' + 'gene_COI'
-#    coiPath.chdir()
-#    if ( paramsOfTable{'clusteringAlgoForCOI_ITS'}  == 'algo_CROP' ) {
-#       string algo = 'CROP'
-#       algo.mkdir()
-#    } else if ( paramsOfTable{'clusteringAlgoForCOI_ITS'} == 'algo_SWARM' ) {
-#       string algo = 'SWARM'
-#       algo.mkdir()
-#    }
-# } else if ( paramsOfTable{'gene'} == 'gene_16S' ) {
-#    print("my marker gene is 16S! \n")
-#    string sixteenPath = genePath + '/' + 'gene_16S'
-#    sixteenPath.chdir()
-   
-#    if ( paramsOfTable{'clusteringAlgoFor16S_18SrRNA'} == 'algo_swarm' ) {
-#       string algo = 'swarm'
-#       algo.mkdir()
-#    } else if ( paramsOfTable{'clusteringAlgoFor16S_18SrRNA'} == 'algo_vsearch' ) {
-#       string algo = 'vsearch'
-#       algo.mkdir()
-#    }
-# } else if ( paramsOfTable{'gene'} == 'gene_18S' ) {
-#    print("my marker gene is 18S! \n")
-#    string sixteenPath = genePath + '/' + 'gene_18S'
-#    sixteenPath.chdir()
-   
-#    if ( paramsOfTable{'clusteringAlgoFor16S_18SrRNA'} == 'algo_swarm' ) {
-#       string algo = 'swarm'
-#       algo.mkdir()
-#    } else if ( paramsOfTable{'clusteringAlgoFor16S_18SrRNA'} == 'algo_vsearch' ) {
-#       string algo = 'vsearch'
-#       algo.mkdir()
-#    }   
-# } else if ( paramsOfTable{'gene'} == 'gene_ITS' ) {
-#    print("my marker gene is ITS! \n")
-#    string itsPath = genePath + '/' + 'gene_ITS'
-#    itsPath.chdir()
-#    if ( paramsOfTable{'clusteringAlgoForCOI_ITS'}  == 'algo_CROP' ) {
-#       string algo = 'CROP'
-#       algo.mkdir()
-#    } else if ( paramsOfTable{'clusteringAlgoForCOI_ITS'} == 'algo_SWARM' ) {
-#       string algo = 'SWARM'
-#       algo.mkdir()
-#    }      
-# }
-# # Again make everything 777
-# sys chmod 777 $outputFilePath -R
-# ###################################################################################################################
+
+
+
+
+
+
+
+
+
+
+###################################################################################################################
 # #                                                                                     
 # #                                 CLUSTERING                                      
 # #                                                                                      

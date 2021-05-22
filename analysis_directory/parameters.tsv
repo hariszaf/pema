@@ -272,19 +272,12 @@ reverseITSPrimer	CTBTTVCCKCTTCACTCG
 #
 #
 # For the case of the 16S and 18S rRNA marker genes, you can either get an OTU-table using the VSEARCH algorithm
-# or you can get an ASV-table by taking advantage of the SWARM algorithm. Please fill in which of those
-# two, you prefere to run (write "swarm" or "vsearch" after algo_).
+# or you can get an ASV-table by taking advantage of the SWARM algorithm. 
+# If your marker gene is  COI or ITS, you can choose between 2 different approaches of clustering. 
+# Depending on which of them you choose you get either a robust output in a short time (Swarm) or a non-robust output (CROP) that requires quite much more time.
+# Please fill in accroding to your marker gene and needs (write "Swarm" or "vsearch" or "CROP" after algo_).
 #
-clusteringAlgoFor16S_18SrRNA	algo_vsearch
-#
-#
-# If your marker gene is  COI or ITS, you can choose between 2 different approaches of clustering. Depending on which of them you choose
-# you get either a robust output in a short time (SWARM)  or a non-robust output (CROP) that requires quite much more time.
-# CROP is a bayesian algorithm and that is why its output in non-robust.
-# By default, SWARM (v2.2.2) algorithm runs for the clustering.
-# You have to change in to 'CROP' if you want the CROP algorithm to do the clustering step.
-#
-clusteringAlgoForCOI_ITS	algo_SWARM
+clusteringAlgo	algo_vsearch
 #
 #
 # In case of SWARM, the user needs to speeecify the value of "d" parameter,
@@ -409,3 +402,4 @@ emptyRawDataFile	Yes
 emptyCheckpoints	Yes
 #
 #
+
