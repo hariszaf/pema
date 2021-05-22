@@ -32,11 +32,12 @@ qualityControl(paramsFirstAssignment, globalVars)
 ################################################################
 #                   2. Trimming                                #
 ################################################################
+
 parameterFilePath.chdir()
 string g = "parameters.tsv"
 string{} paramsTrimmoStep =  readParameterFile(g)
 
-globalVars{'dataPath'}.chdir() ;
+globalVars{'dataPath'}.chdir()
 
 # If ITS as marker gene, remove length variablity with cutadat
 if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
@@ -45,208 +46,47 @@ if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
 
 # Trim fastq files using Trimmomatic
 trimSeqs(paramsTrimmoStep, globalVars)
+wait
 
 
-
-
-
-
-
-
-# parameterFilePath.chdir()
-# string h = "parameters.tsv"
-# string{} paramsBayesHammerStep =  readParameterFile(h)
+################################################################
+#              3. Sequence adjustment                          #
+################################################################
+parameterFilePath.chdir()
+string h = "parameters.tsv"
+string{} paramsBayesHammerStep =  readParameterFile(h)
  
+adjustSeqs(paramsBayesHammerStep, globalVars)
+wait
 
-# ##########################################################################################
-# #            3.  BayesHammer - error correction // SPAdes                     #
-# ##########################################################################################
 
-# # make a list with all the file names that there are in the folder with Trimmomatic's
-# # output -- e.g: suffix : '2.fastq.gz.2U.fastq.gz' 
-# trimoPath.chdir()
+################################################################
+#          4. Merging the paired-end samples                   #
+################################################################
 
-# sys if [ $(find "$trimoPath" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
+parameterFilePath.chdir()
+string i = "parameters.tsv"
+string{} paramsSpadesMerging = readParameterFile(i)
 
-# string[] trimos = trimoPath.dir()
- 
-# for (string file : trimos ) {
-#    # we delete all the 'U.fastq.gz' files using the list we just made
-#    if ( file.endsWith("U\.fastq\.gz") ) {
-#       file.delete()
-#    }
-# }
+merging(paramsSpadesMerging, globalVars)
+wait
 
-# # and then we make a new list with the files that remained 
-# string[] finalTrimos = trimoPath.dir()
 
-# string readBayesF
-# string readBayesR
-# string newDir
-# string newFile
-# wait
 
-# for ( string trimmed : finalTrimos ) {
-   
-#    # as in Trimmomatic step, we need to know the forward and the reverse file
-#    string trimCheck = trimmed.split("_2\.fastq\.gz\.2P\.fastq.\gz")[0]
 
-#    if ( trimmed == trimCheck ) {
-#       readBayesF = trimmed
-#       } else {
-#       readBayesR = trimmed
-#       }
 
-#    if ( readBayesF.isEmpty() == false && readBayesR.isEmpty() == false ) {
-      
-#       if ( paramsBayesHammerStep{'maxInfo'} == 'Yes' ) {
-#          string newName = trimCheck.split("filtered\_max\_")
-#          newDir = newName.substr(3,13) ;
-#          print("trimCheck: " + trimCheck + "\n" + "newDir: " + newDir + "\n")
 
-#       } else if ( paramsBayesHammerStep{'maxInfo'} == 'No' ) {
-#          string newName = trimCheck.split("filtered_")
-#          newDir = newName.substr(3,13) ;
-#          print("trimCheck: " + trimCheck + "\n" + "newDir: " + newDir + "\n")
-#       }
-      
-#       # working where the output of BayesHammer is located!
-#       bayesPath.chdir() ; 
-#       newDir.mkdir() ;
-      
-#       # going back to Trimo's output
-#       trimoPath.chdir()
-#       sys chmod 777 $outputFilePath -R
-#       wait
 
-#       # and I execute the BayesHammer algorithm that it is in SPAdes
-      
-#       sys which gzip
-#       sys gzip --version
-#       print("readBayesF: " + readBayesF +"\n" + "and readBayesR: " + readBayesR + "\n" )
-      
-#       task $path/tools/SPAdes/SPAdes-3.13.0-Linux/bin/spades.py --only-error-correction --threads $paramsBayesHammerStep{'threadsTrimmomatic'} -o $bayesPath/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
 
-#       wait
-   
-#       # clear all variables that are used in BayesHammer step in order to be re-used
-#       readBayesF = ''
-#       readBayesR = ''
-#       newFile = ''
-#       newDir = ''
-#    }
-# }
 
-# wait
-# print("Error correction using BayesHammer is completed!" + "\n") 
- 
-# #  let us make a checkpoint to start our pipeline from the  merging step!
-# if ( bayesPath.isEmpty() == false ) {
-#    string checkMerge = outputPoint + "/merging.chp"
-#    checkpoint checkMerge
-#    }
 
-# parameterFilePath.chdir()
-# string i = "parameters.tsv"
-# string{} paramsSpadesMerging =  readParameterFile(i)
- 
 
-# ##########################################################################################
-# #                4. PANDAseq - merging/overlapping                                #
-# ##########################################################################################
 
-# bayesPath.chdir()
 
-# sys if [ $(find "$bayesPath" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
- 
-# # keep in a list all files that came from the BayesHammer algo leaving aside some stats file
-# # make a list with all the folders that exist in Bayes Hammer output folder - only sample names (e.g. SRR1643855 ) 
-# string[] correct = bayesPath.dir()
-# correct.remove("input_dataset.yaml") ;
-# correct.remove( "params.txt" ) ;
-# correct.remove("spades.log") ;
-# correct.remove( "tmp")
 
-# # we need to "create" the names of forward and reverse files each time
-# string baseName
-# if ( paramsSpadesMerging{'maxInfo'} == 'Yes' ) {
-   
-#    # we keep as 'baseName' the prefix of every file that depends on whether  we had maxInfo or not
-#    baseName = "filtered_max_"
-# } else {
-#    baseName = "filtered_"
-# }
- 
-# for ( string correctFile : correct )  {
 
-#    string uniqPath = bayesPath + '/' +  correctFile + '/' + 'corrected' ;
-#    # we enter to the directory of a specific sample each time in the output folder of BayesHammer - previous step
-#    uniqPath.chdir() ;                                                              
-   
-#    sys /bin/gzip *.fastq
-   
-#    # in the corrected file of each sample there are two files - one for forward, one for reverse -
-#    # and I make two variables with them
-#    string forward = "_1.fastq.gz.1P.fastq.00.0_0.cor.fastq.gz"
-#    string reverse = "_2.fastq.gz.2P.fastq.00.0_0.cor.fastq.gz"
-#    string forwardFile= baseName + correctFile + forward ;
-#    print(forwardFile + "\n")
-#    string reverseFile = baseName + correctFile + reverse ;
-#    print(reverseFile + "\n")
 
-#    wait
-   
-#    # # if i have sample names not in terms of Illumina and I need to use PANDAseq, i have to change the sample names in the rawdata as "ERR0001" for example.
-#    # if ( paramsSpadesMerging{'EnaData'} == 'No') {
-#    #    uniqPath.chdir() 
-#    #    sys bash  $path/scripts/prepareForPandaseq.sh $forwardFile $reverseFile
-#    # }
-   
-#    # finally, we execute pandaseq algorithm for merging 
-#    task $path/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 -A $paramsSpadesMerging{'pandaseqAlgorithm'} -a -B -T $paramsSpadesMerging{'pandaseqThreads'} -o $paramsSpadesMerging{'minoverlap'} -t $paramsSpadesMerging{'threshold'} $paramsSpadesMerging{'pandaseqMinlen'} $paramsSpadesMerging{'elimination'}  > $correctFile.merged.fastq.gz
 
-#    wait
-
-#    # if ( paramsSpadesMerging{'EnaData'} == 'No') {
-#    #    string mergedFile = correctFile + ".merged.fastq.gz"
-#    #    sys $path/scripts/recoverSampleNames.sh $mergedFile
-#    # }
-
-#    sys mv *.merged.fastq.gz $spaPath
-#    bayesPath.chdir()
-# }
-# wait
-
-# # now that we have run pandaseq for merging for all our samples,
-# # we unzip all my merged files in a new file named "unzip"
-# # we go to the folder with the output of SPAdes and we make a list with its elements
-# spaPath.chdir() ;
-# string[] merged = spaPath.dir() ;
-# string unzip = "unzip" ;
-# # we make a new directory named 'unzip'
-# unzip.mkdir() ;
-# sys chmod 777 $outputFilePath -R
-# string unzipPath = "$spaPath/unzip" ;
-# # and we remove the element 'unzip' from the list we made
-# merged.remove("unzip")
-
-# for ( string anyFile : merged ) {
-#    sys cp $anyFile $unzipPath
-#    unzipPath.chdir() ;
-#    string newFile = anyFile.baseName(".gz")
-#    sys mv $anyFile $newFile
-#    spaPath.chdir()
-# }
-
-# wait
-
-# print("Merging step by SPAdes is completed" +"\n")
-
-# # we make a checkpoint to start our pipeline from the dereplication step!
-# if ( spaPath.isEmpty() == false ) {
-#    string checkDerep = outputPoint + "/dereplication.chp"
-#    checkpoint checkDerep
-# }
 
 # parameterFilePath.chdir()
 # string j = "parameters.tsv"
