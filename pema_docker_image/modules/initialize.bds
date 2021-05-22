@@ -93,14 +93,14 @@ string{} initializeAnalysis(string{} params) {
    globalVars{'analysisName'} = params{'outputFolderName'}
 
    # here are all the directories as variables that i will use
-   globalVars{'qualityControl'}  = '1.quality_control'
-   globalVars{'trimmomatic'}     = '2.trimmomatic_output'
-   globalVars{'bayesHammer'}     = '3.correct_by_BayesHammer'
-   globalVars{'spades'}          = '4.merged_by_PANDAseq'
-   globalVars{'dereplicate'}     = '5.dereplicate_by_obiuniq'
-   globalVars{'linearized'}      = '6.linearized_files'
-   globalVars{'geneDependent'}   = '7.gene_dependent'
-   globalVars{'outputPerSample'} = '8.output_per_sample'
+   globalVars{'qualityControl'}  = '1.qualityControl'
+   globalVars{'trimmomatic'}     = '2.trimmingSequences'
+   globalVars{'bayesHammer'}     = '3.adjustingSequnces'
+   globalVars{'spades'}          = '4.mergingPairedEndFiles'
+   globalVars{'dereplicate'}     = '5.dereplicateSamples'
+   globalVars{'linearized'}      = '6.linearizedSequences'
+   globalVars{'geneDependent'}   = '7.mainOutput'
+   globalVars{'outputPerSample'} = '8.outputPerSample'
 
    wait
    
