@@ -1,6 +1,13 @@
 #!/usr/bin/env bds
 
 
+# Overall notes: 
+# ---------------
+# 1. When you are writing in the bash framework, use single quotes by default; check for exceptions
+# 2. 
+
+
+
 ################################################################################
 #########           READ parameters.tsv FILE EACH TIME             #############
 ################################################################################
@@ -42,22 +49,23 @@ string{} initializeAnalysis(string{} params) {
    string{} globalVars
 
    # keep as a variable the path where PEMA is found
-   globalVars { "path" } = "/home"
+   globalVars {"path"} = "/home"
 
    # keep as a variable the path where the data are found
-   globalVars { "dataPath" } =  "/mnt/analysis/mydata" 
+   globalVars {"dataPath"} =  "/mnt/analysis/mydata" 
 
-   print "globalVars for dataPath:" + globalVars { "dataPath" } + "\n"
+   print "globalVars for dataPath:" + globalVars {"dataPath"} + "\n"
 
    # PEMA will leave its output also in /mnt 
    globalVars { "outputPoint" } = "/mnt/analysis"
 
    # if there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
-   globalVars { "dataPath" }.chdir() ;
+   globalVars {"dataPath"}.chdir() ;
+
    # check if there is a TrimLog file and IF YES, then delete it
-   sys if [ $(find "$globalVars { "dataPath" }" -name "TrimLog*") ] ; then  rm TrimLog* ; fi          
+   sys if [ $(find '$globalVars{'dataPath'}' -name "TrimLog*") ] ; then  rm TrimLog* ; fi          
    # in case that PEMA run on macOS, then some ".DS_Store" files may appear; these need to be removed in every step of the way!
-   sys if [ $(find "$globalVars { "dataPath" }" -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
+   sys if [ $(find '$globalVars{'dataPath'}' -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
 
    # I create a file where the pipeline's output will be saved
    globalVars { "outputPoint" }.chdir()
@@ -102,7 +110,7 @@ string{} initializeAnalysis(string{} params) {
       # Make all output (sub)directories having 777 permissions; ; the reason for this is that
       # in some cases permissions change in terms you cannot have access to the files and directories built
       # Make sure you run this command each time a new directory is createad
-      # sys chmod 777 $globalVars {"outputFilePath"} -R
+      sys chmod 777 $globalVars {'outputFilePath'} -R
       wait
    }
 
