@@ -107,7 +107,14 @@ string trimSeqs(string{} params, string{} globalVars){
 
             println("You hace selected Max INFO")
             wait
-            task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads $params{'threadsTrimmomatic'} -trimlog TrimLog $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR $globalVars{'trimoPath'}/filtered_max_$readF.1P.fastq.gz $globalVars{'trimoPath'}/filtered_max_$readF.1U.fastq.gz $globalVars{'trimoPath'}/filtered_max_$readR.2P.fastq.gz $globalVars{'trimoPath'}/filtered_max_$readR.2U.fastq.gz ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} LEADING:$params{'leading'} TRAILING:$params{'trailing'} MAXINFO:$params{'targetLength'}:$params{'strictness'} MINLEN:$params{'minlen'}
+            task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+            -threads $params{'threadsTrimmomatic'} \
+            -trimlog TrimLog $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR $globalVars{'trimoPath'}/filtered_max_$readF.1P.fastq.gz \
+            $globalVars{'trimoPath'}/filtered_max_$readF.1U.fastq.gz \
+            $globalVars{'trimoPath'}/filtered_max_$readR.2P.fastq.gz \
+            $globalVars{'trimoPath'}/filtered_max_$readR.2U.fastq.gz \
+            ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
+            LEADING:$params{'leading'} TRAILING:$params{'trailing'} MAXINFO:$params{'targetLength'}:$params{'strictness'} MINLEN:$params{'minlen'}
             wait
             readF = ''
             readR = ''
@@ -116,7 +123,11 @@ string trimSeqs(string{} params, string{} globalVars){
 
                   print("You have selected no Max INFO" + "\n")
 
-                  task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads $params{'threadsTrimmomatic'} -trimlog TrimLog2 $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR $globalVars{'trimoPath'}/filtered_$readF.1P.fastq.gz $globalVars{'trimoPath'}/filtered_$readF.1U.fastq.gz $globalVars{'trimoPath'}/filtered_$readR.2P.fastq.gz $globalVars{'trimoPath'}/filtered_$readR.2U.fastq.gz ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} LEADING:$params{'leading'} TRAILING:$params{'trailing'}  MINLEN:$params{'minlen'}
+                  task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+                  -threads $params{'threadsTrimmomatic'} \
+                  -trimlog TrimLog2 $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR $globalVars{'trimoPath'}/filtered_$readF.1P.fastq.gz $globalVars{'trimoPath'}/filtered_$readF.1U.fastq.gz $globalVars{'trimoPath'}/filtered_$readR.2P.fastq.gz $globalVars{'trimoPath'}/filtered_$readR.2U.fastq.gz \
+                  ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
+                  LEADING:$params{'leading'} TRAILING:$params{'trailing'}  MINLEN:$params{'minlen'}
 
                   wait
 

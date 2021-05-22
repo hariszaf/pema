@@ -43,6 +43,8 @@ if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
    cutadaptForIts(paramsTrimmoStep, globalVars)
 }
 
+# Trim fastq files using Trimmomatic
+trimSeqs(paramsTrimmoStep, globalVars)
 
 
 
@@ -50,74 +52,6 @@ if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
 
 
 
-
-
-
-# ###########################    here ends the ITS - specific part  !!    #####################################
-
-# # go to the folder which contains all the raw data and make a list (named 'data') with all the file names that you can find there
-# string[] data = dataPath.dir()
-  
-# # set two variables readF and readR for the forward and reverse file of each sample  
-# string readF
-# string readR
-# int counter = 0
-
-# for ( string file : data ) {
-   
-#    # here's the trick! i need to tell which file is the forward and which is the reverese. Hence, i try to split a suffix. 
-#    string check = file.split("_2\.fastq\.gz")[0]
-
-#    # if the split does occure then i know that i have the second file of each sample (reverse)
-#    # that is because the 'file' variable will always have a '.fastq.gz' suffix.
-#    # hence, if there is no split, 'file' and 'check'  variables are the same.
-#    if ( file == check ) {
-#             readF = file
-#             print("readF is: " + readF  +"\n")
-            
-#             # if there is a split, then they are different
-#             } else {
-#                readR = file
-#                print("readR is: " + readR  +"\n")
-#          }
-
-#    wait
-
-#    if ( readF.isEmpty() == false && readR.isEmpty() == false ) {
-
-#       if ( paramsTrimmoStep{'maxInfo'} == 'Yes' ) {
-
-#          print("You hace selected Max INFO" + "\n")
-#          wait
-#          task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $path/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads $paramsTrimmoStep{'threadsTrimmomatic'} -trimlog TrimLog $dataPath/$readF $dataPath/$readR $trimoPath/filtered_max_$readF.1P.fastq.gz $trimoPath/filtered_max_$readF.1U.fastq.gz $trimoPath/filtered_max_$readR.2P.fastq.gz $trimoPath/filtered_max_$readR.2U.fastq.gz ILLUMINACLIP:/$path/tools/Trimmomatic/Trimmomatic-0.38/adapters/$paramsTrimmoStep{'adapters'}:$paramsTrimmoStep{'seedMismatches'}:$paramsTrimmoStep{'palindromeClipThreshold'}:$paramsTrimmoStep{'simpleClipThreshold'} LEADING:$paramsTrimmoStep{'leading'} TRAILING:$paramsTrimmoStep{'trailing'} MAXINFO:$paramsTrimmoStep{'targetLength'}:$paramsTrimmoStep{'strictness'} MINLEN:$paramsTrimmoStep{'minlen'}
-#          wait
-#          readF = ''
-#          readR = ''
-
-#          } else if ( paramsTrimmoStep{'maxInfo'} == 'No' ) {
-
-#                print("You have selected no Max INFO" + "\n")
-
-#                task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $path/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE -threads $paramsTrimmoStep{'threadsTrimmomatic'} -trimlog TrimLog2 $dataPath/$readF $dataPath/$readR $trimoPath/filtered_$readF.1P.fastq.gz $trimoPath/filtered_$readF.1U.fastq.gz $trimoPath/filtered_$readR.2P.fastq.gz $trimoPath/filtered_$readR.2U.fastq.gz ILLUMINACLIP:/$path/tools/Trimmomatic/Trimmomatic-0.38/adapters/$paramsTrimmoStep{'adapters'}:$paramsTrimmoStep{'seedMismatches'}:$paramsTrimmoStep{'palindromeClipThreshold'}:$paramsTrimmoStep{'simpleClipThreshold'} LEADING:$paramsFirstAssignment{'leading'} TRAILING:$paramsTrimmoStep{'trailing'}  MINLEN:$paramsTrimmoStep{'minlen'}
-
-#                wait
-
-#                readF = ''
-#                readR = ''
-#          }
-#    }
-# }
-
-# wait
-# print "Trimmomatic  is done\n\n" ;
-
-
-# #  let us make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
-# path.chdir() ; trimoPath.chdir() ;
-# if ( trimoPath.isEmpty() == false ) {
-#    string checkCor = outputPoint + "/errorCorrection.chp"
-#    checkpoint checkCor
-# }
 
 # parameterFilePath.chdir()
 # string h = "parameters.tsv"
