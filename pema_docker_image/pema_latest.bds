@@ -6,6 +6,7 @@
 # This script is meant for the Singularity image version of P.E.M.A.
 
 include "modules/initialize"
+include "modules/preprocess"
 
 
 # Read parameters file for the first time! 

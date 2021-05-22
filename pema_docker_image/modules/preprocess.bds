@@ -6,7 +6,7 @@ string quality_control(string{} params, string{} globalVars) {
 
    # If there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
    # I re-run this command because of FastQC and the way it reacts in multiple runs over the same folders
-   params{'dataPath'}.chdir() ; 
+   globalVars{'dataPath'}.chdir() ; 
    sys if [ $(find '$globalVars{'dataPath'}' -name "TrimLog*") ] ; then  rm TrimLog* ; fi
 
    # make a copy of "parameters.tsv" file to the output folder.
