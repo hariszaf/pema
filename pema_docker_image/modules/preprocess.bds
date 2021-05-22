@@ -1,0 +1,47 @@
+#!/usr/bin/env bds
+
+
+
+string quality_control(string{} params, string{} globalVars) {
+
+   # If there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
+   # I re-run this command because of FastQC and the way it reacts in multiple runs over the same folders
+   params{'dataPath'}.chdir() ; 
+   sys if [ $(find '$globalVars{'dataPath'}' -name "TrimLog*") ] ; then  rm TrimLog* ; fi
+
+   # make a copy of "parameters.tsv" file to the output folder.
+   # this way the user will be able to get the parameters he used for analysis, anytime!
+   sys cp $globalVars{'parameterFilePath'}/parameters.tsv $globalVars{'outputFilePath'}/parameters0f.$globalVars{'analysisName'}.tsv
+
+   # # now BLASTQC runs for all files
+   # string[] rawFiles = dataPath.dir()
+   # for ( string rawFile : rawFiles ) {
+   #    print(rawFile)
+   #    task $path/tools/fastqc/FastQC/fastqc --outdir $fastqcPath  $dataPath/$rawFile
+   # }
+   # wait
+   # print("FastQC is completed!" + "\n")
+
+
+   # # now i create a checkpoint and read again the parameters file.
+   # # this way if i change any of my parameters, i can do only the steps from here and after with the new ones.
+   # if ( qualityControl.isEmpty() == false ) {
+   #    string checkTrim = outputPoint + "/trimming.chp"
+   #    checkpoint checkTrim
+   # }
+
+   return 'ok'
+
+}
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,10 +1,11 @@
 #!/usr/bin/env bds
+
 # This is P.E.M.A!  A metabarcoding pipenline for environmental DNA samples.
 # Author: Haris Zafeiropoulos 
 # date: 2017-2018
 # This script is meant for the Singularity image version of P.E.M.A.
 
-include "functions"
+include "modules/initialize"
 
 
 # Read parameters file for the first time! 
@@ -18,7 +19,7 @@ string{} globalVars = initializeAnalysis(paramsFirstAssignment)
 
 wait
 
-# sys echo $globalVars {"outputFilePath"}
+sys echo $globalVars{'outputFilePath'}
 
 
 # ##########################################################################################
@@ -60,6 +61,9 @@ wait
 # parameterFilePath.chdir()
 # string g = "parameters.tsv"
 # string{} paramsTrimmoStep =  readParameterFile(g)
+
+
+quality_control(paramsFirstAssignment, globalVars)
 
 
 # ##########################################################################################

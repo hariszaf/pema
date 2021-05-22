@@ -54,13 +54,15 @@ string{} initializeAnalysis(string{} params) {
    # keep as a variable the path where the data are found
    globalVars {"dataPath"} =  "/mnt/analysis/mydata" 
 
+   globalVars {"parameterFilePath"} = "/mnt/analysis/"
+
    print "globalVars for dataPath:" + globalVars {"dataPath"} + "\n"
 
    # PEMA will leave its output also in /mnt 
-   globalVars { "outputPoint" } = "/mnt/analysis"
+   globalVars {"outputPoint"} = "/mnt/analysis"
 
    # if there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
-   globalVars {"dataPath"}.chdir() ;
+   globalVars{"dataPath"}.chdir() ;
 
    # check if there is a TrimLog file and IF YES, then delete it
    sys if [ $(find '$globalVars{'dataPath'}' -name "TrimLog*") ] ; then  rm TrimLog* ; fi          
@@ -68,10 +70,10 @@ string{} initializeAnalysis(string{} params) {
    sys if [ $(find '$globalVars{'dataPath'}' -name "*.DS_Store*") ] ; then  rm .*[DS_]* ; fi
 
    # I create a file where the pipeline's output will be saved
-   globalVars { "outputPoint" }.chdir()
+   globalVars{"outputPoint"}.chdir()
 
    # take the outut folder name as a variable 
-   string analysisName = params{'outputFolderName'}
+   globalVars {"analysisName"} = params{'outputFolderName'}
 
    # here are all the directories as variables that i will use
    globalVars {"qualityControl"}  = "1.quality_control"
@@ -110,7 +112,7 @@ string{} initializeAnalysis(string{} params) {
       # Make all output (sub)directories having 777 permissions; ; the reason for this is that
       # in some cases permissions change in terms you cannot have access to the files and directories built
       # Make sure you run this command each time a new directory is createad
-      sys chmod 777 $globalVars {'outputFilePath'} -R
+      sys chmod 777 $globalVars{'outputFilePath'} -R
       wait
    }
 
@@ -142,7 +144,7 @@ string{} initializeAnalysis(string{} params) {
 
    # Convert Illumina data to ENA format
    if ( params{'EnaData'} == 'No' ) {
-      sys bash $globalVars{ "path" }/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{ "dataPath" }
+      sys bash $globalVars{"path"}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{"dataPath"}
    }
 
    return(globalVars)
