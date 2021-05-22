@@ -84,7 +84,7 @@ string{} initializeAnalysis(string{} params) {
    globalVars{'dataPath'}.chdir() ;
 
    # check if there is a TrimLog file and IF YES, then delete it
-   sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi          
+   sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi 
    # in case that PEMA run on macOS, then some '.DS_Store' files may appear; these need to be removed in every step of the way!
    sys if [ $(find '$globalVars{'dataPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
 

@@ -107,14 +107,17 @@ string trimSeqs(string{} params, string{} globalVars){
 
             println('You hace selected Max INFO')
             wait
-            task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
-            -threads $params{'threadsTrimmomatic'} \
-            -trimlog TrimLog $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR $globalVars{'trimoPath'}/filtered_max_$readF.1P.fastq.gz \
-            $globalVars{'trimoPath'}/filtered_max_$readF.1U.fastq.gz \
-            $globalVars{'trimoPath'}/filtered_max_$readR.2P.fastq.gz \
-            $globalVars{'trimoPath'}/filtered_max_$readR.2U.fastq.gz \
-            ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
-            LEADING:$params{'leading'} TRAILING:$params{'trailing'} MAXINFO:$params{'targetLength'}:$params{'strictness'} MINLEN:$params{'minlen'}
+            task /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
+               -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+               -threads $params{'threadsTrimmomatic'} \
+               -trimlog TrimLog $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
+               $globalVars{'trimoPath'}/filtered_max_$readF.1P.fastq.gz \
+               $globalVars{'trimoPath'}/filtered_max_$readF.1U.fastq.gz \
+               $globalVars{'trimoPath'}/filtered_max_$readR.2P.fastq.gz \
+               $globalVars{'trimoPath'}/filtered_max_$readR.2U.fastq.gz \
+               ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
+               LEADING:$params{'leading'} TRAILING:$params{'trailing'} MAXINFO:$params{'targetLength'}:$params{'strictness'} MINLEN:$params{'minlen'}
+            
             wait
             readF = ''
             readR = ''
@@ -123,11 +126,16 @@ string trimSeqs(string{} params, string{} globalVars){
 
                   print('You have selected no Max INFO' + '\n')
 
-                  task /usr/lib/jvm/java-8-openjdk-amd64/bin/java -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
-                  -threads $params{'threadsTrimmomatic'} \
-                  -trimlog TrimLog2 $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR $globalVars{'trimoPath'}/filtered_$readF.1P.fastq.gz $globalVars{'trimoPath'}/filtered_$readF.1U.fastq.gz $globalVars{'trimoPath'}/filtered_$readR.2P.fastq.gz $globalVars{'trimoPath'}/filtered_$readR.2U.fastq.gz \
-                  ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
-                  LEADING:$params{'leading'} TRAILING:$params{'trailing'}  MINLEN:$params{'minlen'}
+                  task /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
+                     -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+                     -threads $params{'threadsTrimmomatic'} \
+                     -trimlog TrimLog2 $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
+                     $globalVars{'trimoPath'}/filtered_$readF.1P.fastq.gz \
+                     $globalVars{'trimoPath'}/filtered_$readF.1U.fastq.gz \
+                     $globalVars{'trimoPath'}/filtered_$readR.2P.fastq.gz \
+                     $globalVars{'trimoPath'}/filtered_$readR.2U.fastq.gz \
+                     ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
+                     LEADING:$params{'leading'} TRAILING:$params{'trailing'}  MINLEN:$params{'minlen'}
 
                   wait
 
@@ -220,9 +228,12 @@ string adjustSeqs(string{} params, string{} globalVars){
          
          sys which gzip
          sys gzip --version
+         
          println('readBayesF: ' + readBayesF +'\n' + 'and readBayesR: ' + readBayesR)
          
-         task $globalVars{'path'}/tools/SPAdes/SPAdes-3.14.0/bin/spades.py --only-error-correction --threads $params{'threadsTrimmomatic'} -o $globalVars{'bayesPath'}/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
+         task $globalVars{'path'}/tools/SPAdes/SPAdes-3.14.0/bin/spades.py --only-error-correction \
+            --threads $params{'threadsTrimmomatic'} \
+            -o $globalVars{'bayesPath'}/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
 
          wait
       
@@ -233,6 +244,8 @@ string adjustSeqs(string{} params, string{} globalVars){
          newDir = ''
       }
    }
+
+   wait
 
    println('Adjusting sequences using the BayesHammer algorithm of SPAdes has been completed.')
 
@@ -276,9 +289,13 @@ string merging(string{} params, string{} globalVars){
    for ( string correctFile : correct )  {
 
       string uniqPath = globalVars{'bayesPath'} + '/' +  correctFile + '/' + 'corrected' ;
+
       # Enter to the directory of a specific sample each time in the output folder of BayesHammer - previous step
-      uniqPath.chdir() ;                                                              
-      
+      uniqPath.chdir()
+
+      # In case of re-running, delete the .gz files as they cannot be over-written
+      sys if [[ $(find '$uniqPath' -name '*.gz') ]] ; then  rm *gz ; fi    
+
       sys /bin/gzip *.fastq
       
       # In the corrected file of each sample there are two files - one for forward, one for reverse -
@@ -294,8 +311,8 @@ string merging(string{} params, string{} globalVars){
          
       # Execute pandaseq algorithm for merging 
       task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
-      -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
-      -t $params{'threshold'} $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq.gz
+         -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
+         -t $params{'threshold'} $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq.gz
 
       wait
 
@@ -360,16 +377,13 @@ string{} obiDereplicate(string{} params, string{} globalVars){
    for ( string nodereplicate : unzips ) {
       
       # Execute OBITools
-      task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > $globalVars{'derePath'}/dereplicate_$nodereplicate
+      task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > \
+         $globalVars{'derePath'}/dereplicate_$nodereplicate
+      
       wait
    }
    wait
    println('All the first steps are done! clustering is about to start!')
-
-   string checkTableStep = globalVars{'outputPoint'} + "/tableStep.chp"
-   checkpoint checkTableStep 
-
-   wait
 
    return globalVars
 
@@ -457,7 +471,70 @@ string buildDirectories(string{} params, string{} globalVars){
 
 # }
 
+# Function to merge all samples in one; it goes with the obiDereplicate() function
+string mergeFilesNonSwarm(string{} params, string{} globalVars){
 
+   globalVars{'derePath'}.chdir()
+   sys if [ $(find '$globalVars{'derePath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
+
+   # we make a list with all the file names that exist in the folder with the dereplication-step output
+   string[] dereplicates = globalVars{'derePath'}.dir()
+   
+   for ( string derepl : dereplicates ) {
+      
+      task {
+         # we substitue both 'merged_sample...' amd ';' with '_' and nothing respectively
+         sys sed 's/ merged_sample={}; count=/_/g ; s/;//g' $derepl > se.$derepl
+         # merge all lines of a fastq entry into one and only one line!
+         sys awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' se.$derepl > nospace.$derepl
+         # we turn all down- to upcases
+         sys cat nospace.$derepl | tr '[a-z]' '[A-Z]' > $globalVars{'linearPath'}/linearized.$derepl
+      }
+   }
+   wait
+
+   globalVars{'derePath'}.chdir()
+   sys rm se.* nospace.*
+
+   # we go to the folder with the linearized data and make a list with all its contents  
+   globalVars{'linearPath'}.chdir()
+   string[] linears = globalVars{'linearPath'}.dir()
+   # we remove from these files some characteristic symbols
+   for ( string sample : linears ) {
+      task{
+         sys sed 's/\:\:\:/\:/g' $sample > $sample.f.fasta
+         sys sed 's/\:0\:0\:0\://' $sample.f.fasta > $sample.g.fasta
+         }
+   }
+   wait
+   
+   globalVars{'linearPath'}.chdir()
+   sys rm *.f.fasta
+   wait
+
+   # this command forces applications to use the default language for output, and forces sorting to be bytewise.  
+   sys export LC_ALL=C
+
+   ######################################################################################################################################
+   # here I read all the files I have made at once and run over them an awk command in which I set as record separator ">"
+   # and as field separaton '_' or new line.
+   # from the second line I make an array with the sample as keys and their abundances as value and anotherone with the otus
+   # as keys and the sequnece asw value.
+   # finally, I make a file in which in every line i have the amplicon name (sample) its abundance and its sequence.
+   ######################################################################################################################################
+
+   task cat *.g.fasta | awk 'BEGIN {RS = ">" ; FS = "[_\n]"} {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}} END {for (amplicon in sequences) {print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > $globalVars{'outputFilePath'}/all_samples.fasta
+
+   wait   
+
+   task awk '/N/{n=2}; n {n--; next}; 1' < $globalVars{'outputFilePath'}/all_samples.fasta  > $globalVars{'outputFilePath'}/final_all_samples.fasta
+
+   wait
+   sys rm *.g.fasta
+
+   return 'ok'
+
+}
 
 
 

@@ -7,6 +7,7 @@
 
 include "modules/initialize"
 include "modules/preprocess"
+include "modules/clustering"
 
 
 # Read parameters file for the first time! 
@@ -89,6 +90,10 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
 
    globalVars = obiDereplicate(paramsDereplication, globalVars)
 
+   wait
+
+   mergeFilesNonSwarm(paramsDereplication, globalVars)
+
 }
 
 ################################################################
@@ -98,13 +103,33 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
 buildDirectories(paramsDereplication, globalVars)
 
 
+string checkTableStep = globalVars{'outputPoint'} + "/tableStep.chp"
+checkpoint checkTableStep
+
+################################################################
+#           6. OTUs clustering / ASVs inference                #
+################################################################
+ 
+parameterFilePath.chdir()
+string k = "parameters.tsv"
+string{} paramsOfTable =  readParameterFile(k)
+
+if ( paramsDereplication{'clusteringAlgo'} == 'algo_vsearch' ) {
+
+   clusteringVsearch(paramsOfTable, globalVars)
+
+}
 
 
 
 
-# parameterFilePath.chdir()
-# string j = "parameters.tsv"
-# string{} paramsDereplication =  readParameterFile(j)
+
+
+
+
+
+
+
 
 
 
@@ -193,7 +218,7 @@ buildDirectories(paramsDereplication, globalVars)
 #    }
 # }
 
-# ######################################################################################################################################
+######################################################################################################################################
 # ## in the file 'final_all_samples.fasta' we now have all the reads from all our samples
 # ## and we are able to move on CLUSTERING - STEP
 # ## however, even if until now the procedure was the same no matter what gene we had,
