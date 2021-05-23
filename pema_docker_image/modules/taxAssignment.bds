@@ -148,22 +148,13 @@ string swarmPostCrest() {
 
 string rdpAssign(string{} params, string{} globalVars) {
 
-   # string swarmPath = genePath + '/' + gene +  '/' + 'SWARM'
-   # swarmPath.chdir()
+   println('RDPClassifier is about to start assigning your grouped sequences.')
+
    globalVars{'assignmentPath'}.chdir()
 
    if ( params{'gene'} == "gene_COI" ) {
 
-
-      # sys cp all_sequences_grouped.fa rdpClassifierInput.fasta
-      
-   
-      # if (paramsOfTaxonomy{'custom_ref_db'} != 'Yes') {
       task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'midori_version'}/rRNAClassifier.properties -o tax_assign_swarm_temp.txt all_sequences_grouped.fa
-
-   # } else {
-   #    task java -Xmx64g -jar $path/tools/RDPTools/classifier.jar classify -t $path/tools/RDPTools/TRAIN/$paramsOfTaxonomy{'name_of_custom_db'}/rRNAClassifier.properties -o tax_assign_swarm_COI_temp.txt rdpClassifierInput.fasta
-   # }
 
       wait
    
@@ -176,17 +167,6 @@ string rdpAssign(string{} params, string{} globalVars) {
       }
 
       println('RDPClassifier has ran as it should ')
-      
-      # swarmPath.chdir()
-      # string noSpaceFile = 'nospace_swarm.fasta'
-
-      # noSpaceFile.delete()
-      # wait
-      
-      # ## Keep in a new file, only the otus that have above  97% similartity with some species and in another just the uniq species
-      # swarmPath.chdir()
-      println('all the taxonomy assignment procedure for the SWARM case has been completed!')
-      
       
       # Create a MOTU table as for the case of 16S
       # Change the swarm output as we have removed some amplicons after the ASV inferring because of the chimera removal

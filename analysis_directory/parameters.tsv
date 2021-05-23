@@ -285,7 +285,7 @@ clusteringAlgo	algo_Swarm
 # will be grouped if they hav e integer (or less) differences. This is swarm's most important
 # parameter
 #
-d	1
+d	7
 #
 #
 # when using the option --fastidious (-f), define the minimum mass of a large ASV. 
