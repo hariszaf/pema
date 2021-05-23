@@ -19,7 +19,7 @@
 #
 # Give in your each uniq experiment a NAME, so a single output file will be created for each of them 
 #
-outputFolderName	test_16S_Swarm
+outputFolderName	test_COI_swarm
 #
 #
 # If the names of the samples under analysis are not in an ENA format (e.g "ERR1021912") but they are more like as
@@ -219,7 +219,7 @@ vsearchId	0.95
 # taxonomy assignment. By default, the pipeline runs for 16S. Substitute with 'COI' if COI is your marker gene
 # write it down after the underscore (_) - do not erase the udenrscore!!
 #
-gene	gene_16S
+gene	gene_COI
 #
 #
 ##########################################################################################################
@@ -402,4 +402,6 @@ emptyRawDataFile	Yes
 emptyCheckpoints	Yes
 #
 #
-
+# Classifier to use
+classifierAlgo	RDPClassifier
+#

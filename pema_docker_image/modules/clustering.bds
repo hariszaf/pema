@@ -1,7 +1,7 @@
 #!/usr/bin/env bds
 
 # Function to get OTUs using the VSEARCH algorithm
-string{} clusteringVsearch(string{} params, string{} globalVars) {
+string clusteringVsearch(string{} params, string{} globalVars) {
 
       
       #### Prepare files
@@ -72,7 +72,7 @@ string{} clusteringVsearch(string{} params, string{} globalVars) {
       
       wait
       
-      sys mv all.otus.fasta all_samples.otus.fa
+      sys mv all.otus.fasta all_sequences_grouped.fa
       # sys mv all.otutab.txt otutab.txt
       # sys cp otutab.txt allTab_$params{'taxonomyFolderName'}.tsv
       sys mv all.otutab.txt allTab_$params{'taxonomyFolderName'}.tsv
@@ -81,22 +81,23 @@ string{} clusteringVsearch(string{} params, string{} globalVars) {
       
       println("OTU clustering using the VSEARCH algorithm has been completed.")
 
-   return globalVars
+   return 'ok'
 
 }
 
 
-string{} clusteringSwarm(string{} params, string{} globalVars) {
+string clusteringSwarm(string{} params, string{} globalVars) {
 
 
    #### Prepare files
    globalVars{'outputFilePath'}.chdir()
-   globalVars{'swarmPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'Swarm'
-   task cp all_samples.fasta $globalVars{'swarmPath'}/all_samples.fasta
+   # globalVars{'swarmPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'Swarm'
+   task cp all_samples.fasta $globalVars{'assignmentPath'}/all_samples.fasta
 
    wait
 
-   globalVars{'swarmPath'}.chdir()
+   # globalVars{'swarmPath'}.chdir()
+   globalVars{'assignmentPath'}.chdir()
    int d_param = params{'d'}.parseInt()
 
    # Here is the clustering step with SWARM algorithm
@@ -115,27 +116,25 @@ string{} clusteringSwarm(string{} params, string{} globalVars) {
    # Build the ASVs contingency table 
    sys mv ../../../amplicon_contingency_table.tsv .
    sys bash $globalVars{'path'}/scripts/createOtuContingencyTable.sh
-   sys if [ $(find '$globalVars{'swarmPath'}' -name 'all_samples.otus.fa') ] ; then  rm *gz ; fi
-   sys ln -s asvs_representatives_all_samples.fasta all_samples.otus.fa
 
    println('The contigency table with the found ASVs was created successfully.')
 
 
+   ## Singletons may be removed or not
+   if ( params{'removeSingletons'} == 'Yes' ){
 
-   # ## Singletons may be removed or not
-   # if ( paramsOfTaxonomy{'removeSingletons'} == 'Yes' ){
-   #    sys bash $path/scripts/removeSingletons.sh
-   #    wait
-   #    sys bash $path/scripts/fromLinearToMultiLinesFasta.sh
-   #    wait
-   #    print('No singletons file is fine' + "\n")      
-   # }   
+      sys cp asvs_representatives_all_samples.fasta asvs_repr_with_singletons.fasta
+      sys sed '/\<size=[1,2]\>/,+1 d' asvs_representatives_all_samples.fasta > no_singletons.fasta
+      sys mv no_singletons.fasta asvs_representatives_all_samples.fasta
+      println('Singletons have been removed')     
+   }   
+
+   sys if [ $(find '$globalVars{'assignmentPath'}' -name 'all_sequences_grouped.fa') ] ; then  rm *gz ; fi
+   sys ln -s asvs_representatives_all_samples.fasta all_sequences_grouped.fa
 
 
-
-
-
-   if ( params{'classifierAlgo'} == 'CREST' ) {
+   # According to the Clustering step to come, we need to implement some transformations
+   if ( params{'classifierAlgo'} == 'CREST' && params{'gene'} != 'gene_COI' ) {
 
       println('Build CREST input once Swarm has been completed')
 
@@ -143,15 +142,18 @@ string{} clusteringSwarm(string{} params, string{} globalVars) {
       wait 
       sys mv allTab.tsv allTab_$params{'taxonomyFolderName'}.tsv
 
-   } else {
 
-      println('not here yet')
+   } else if ( params{'classifierAlgo'} == 'CREST' && params{'gene'} != 'gene_COI' ) {
+
+      println('You have selected CREST classifier and your marker gene is COI. Pema does not support this combination.')
+
+   } else if (params{'classifierAlgo'} == 'RDPClassifier') {
+
+      println('make neccessary steps to run RDPClassifier')
 
    }
 
-
-
-   return globalVars
+   return 'ok'
 
 }
 

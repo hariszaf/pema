@@ -8,10 +8,11 @@ string crestAssign(string{} params, string{} globalVars) {
 
       if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
 
-         string algoCluster1 = params{'clusteringAlgo'}
-         string algo1 = algoCluster1.split('_')[1]
-         string assignmentVsearch = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + algo1
-         assignmentVsearch.chdir()
+         # string algoCluster1 = params{'clusteringAlgo'}
+         # string algo1 = algoCluster1.split('_')[1]
+         # string assignmentPath = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + algo1
+         # assignmentPath.chdir()
+         globalVars{'assignmentPath'}.chdir()
 
 
          if ( params{'taxonomyFolderName'}.isDir() ){
@@ -25,7 +26,7 @@ string crestAssign(string{} params, string{} globalVars) {
             # First use megablast algorithm of blastn for sequence identification, intra-species comparison                   
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
                -task megablast \
-               -query all_samples.otus.fa \
+               -query all_sequences_grouped.fa \
                -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silvamod/silvamod128.fasta \
                -num_alignments 100 \
                -outfmt 5 \
@@ -46,7 +47,7 @@ string crestAssign(string{} params, string{} globalVars) {
                
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
                -task megablast \
-               -query all_samples.otus.fa \
+               -query all_sequences_grouped.fa \
                -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silva132/silva132 \
                -num_alignments 100 \
                -outfmt 5 \
@@ -83,17 +84,18 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    ## getting this tree in  $path/tools/silva_132/for_placement
    ## in order to get our PHYLOGENY based taxonomy assignment we make use of EPA - NG // last version of Evolutionary Placement Algorithm
    
-   string assignmentPath16S = ''
 
-   if ( params{'clusteringAlgo'} == "algo_vsearch" ) {
-      string assignmentPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'vsearch'
-      assignmentPath16S.chdir()
+   # string assignmentPath16S = ''
+   # if ( params{'clusteringAlgo'} == "algo_vsearch" ) {
+   #    string assignmentPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'vsearch'
+   #    assignmentPath16S.chdir()
       
-   } else if ( params{'clusteringAlgo'} == "algo_swarm" ) {
-      string assignmentPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'swarm'
-      assignmentPath16S.chdir()
-      sys cp otu_no_chimera.fasta all_samples.otus.fa
-   }
+   # } else if ( params{'clusteringAlgo'} == "algo_swarm" ) {
+   #    string assignmentPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'swarm'
+   #    assignmentPath16S.chdir()
+   #    sys cp otu_no_chimera.fasta all_sequences_grouped.fa
+   # }
+   globalVars{'assignmentPath'}.chdir()
    
    wait
    
@@ -101,7 +103,7 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    task $globalVars{'path'}/tools/PaPaRa/papara_static_x86_64 \
       -t $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree \
       -s $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy \
-      -q all_samples.otus.fa -r #-j 4
+      -q all_sequences_grouped.fa -r #-j 4
    
    wait
    
@@ -142,6 +144,60 @@ string swarmPostCrest() {
    return 'ok'
 }
 
+
+
+string rdpAssign(string{} params, string{} globalVars) {
+
+   # string swarmPath = genePath + '/' + gene +  '/' + 'SWARM'
+   # swarmPath.chdir()
+   globalVars{'assignmentPath'}.chdir()
+
+   if ( params{'gene'} == "gene_COI" ) {
+
+
+      # sys cp all_sequences_grouped.fa rdpClassifierInput.fasta
+      
+   
+      # if (paramsOfTaxonomy{'custom_ref_db'} != 'Yes') {
+      task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'midori_version'}/rRNAClassifier.properties -o tax_assign_swarm_temp.txt all_sequences_grouped.fa
+
+   # } else {
+   #    task java -Xmx64g -jar $path/tools/RDPTools/classifier.jar classify -t $path/tools/RDPTools/TRAIN/$paramsOfTaxonomy{'name_of_custom_db'}/rRNAClassifier.properties -o tax_assign_swarm_COI_temp.txt rdpClassifierInput.fasta
+   # }
+
+      wait
+   
+      task {
+         sys awk -F "\t" '{print substr($0, index($0,$6)) }' tax_assign_swarm_temp.txt > taxonomies_tmp.txt 
+         sys sed 's/Kingdom//g ; s/Phylum//g ; s/Class//g ; s/Order/g/ ; s/Family//g ; s/Genus//g ; s/Species//g' taxonomies_tmp.txt > taxonomies.txt
+         sys awk '{print $1}' tax_assign_swarm_temp.txt > ids.txt
+         sys paste ids.txt taxonomies.txt > tax_assign_swarm.txt
+         sys rm ids.txt taxonomies_tmp.txt taxonomies.txt tax_assign_swarm_temp.txt
+      }
+
+      println('RDPClassifier has ran as it should ')
+      
+      # swarmPath.chdir()
+      # string noSpaceFile = 'nospace_swarm.fasta'
+
+      # noSpaceFile.delete()
+      # wait
+      
+      # ## Keep in a new file, only the otus that have above  97% similartity with some species and in another just the uniq species
+      # swarmPath.chdir()
+      println('all the taxonomy assignment procedure for the SWARM case has been completed!')
+      
+      
+      # Create a MOTU table as for the case of 16S
+      # Change the swarm output as we have removed some amplicons after the ASV inferring because of the chimera removal
+      task {
+         sys bash $globalVars{'path'}/scripts/makeMotuTableForRDPClassifier.sh
+         sys rm *_sorted
+      }
+
+   }
+   return 'ok'
+}
 
 
 

@@ -169,6 +169,11 @@ string{} initializeAnalysis(string{} params) {
       string{} globalVars = trainClassifier(params, globalVars)
    }
 
+   # Taxonomy assignment path
+   string algoCluster1 = params{'clusteringAlgo'}
+   string algo1 = algoCluster1.split('_')[1]
+   globalVars{'assignmentPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + algo1
+
    return(globalVars)
 }
 
@@ -186,7 +191,7 @@ string buildDirectories(string{} params, string{} globalVars){
          string algo = 'crop'
          algo.mkdir()
       } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'swarm'
+         string algo = 'Swarm'
          algo.mkdir()
       }
 
