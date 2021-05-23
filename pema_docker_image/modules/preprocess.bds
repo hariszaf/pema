@@ -393,7 +393,6 @@ string{} obiDereplicate(string{} params, string{} globalVars){
 # Function to build directories according to user's input
 string buildDirectories(string{} params, string{} globalVars){
 
-
    globalVars{'genePath'}.chdir()
 
    if ( params{'gene'} == 'gene_COI' ) {
@@ -402,10 +401,10 @@ string buildDirectories(string{} params, string{} globalVars){
       coiPath.chdir()
 
       if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
-         string algo = 'CROP'
+         string algo = 'crop'
          algo.mkdir()
       } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'SWARM'
+         string algo = 'swarm'
          algo.mkdir()
       }
 
@@ -420,7 +419,7 @@ string buildDirectories(string{} params, string{} globalVars){
       } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
          string algo = 'vsearch'
          algo.mkdir()
-      }
+      } 
 
    } else if ( params{'gene'} == 'gene_18S' ) {
       println('Marker gene under study 18S.')
@@ -433,7 +432,7 @@ string buildDirectories(string{} params, string{} globalVars){
       } else if ( params{'clusteringAlgoFor16S_18SrRNA'} == 'algo_vsearch' ) {
          string algo = 'vsearch'
          algo.mkdir()
-      }   
+      } 
 
    } else if ( params{'gene'} == 'gene_ITS' ) {
       println('My marker gene is ITS.')
@@ -441,10 +440,26 @@ string buildDirectories(string{} params, string{} globalVars){
       itsPath.chdir()
 
       if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
-         string algo = 'CROP'
+         string algo = 'crop'
          algo.mkdir()
       } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'SWARM'
+         string algo = 'swarm'
+         algo.mkdir()
+      } 
+
+   } else if ( params{'gene'} == 'gene_other' ) {
+      println('My marker gene is not among the 4 PEMA supports by default.')
+      string newMarkerGenePath = globalVars{'genePath'} + '/' + 'gene_new'
+      newMarkerGenePath.chdir()
+
+      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
+         string algo = 'crop'
+         algo.mkdir()
+      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
+         string algo = 'swarm'
+         algo.mkdir()
+      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
+         string algo = 'vsearch'
          algo.mkdir()
       }      
    }

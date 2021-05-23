@@ -103,8 +103,8 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
 buildDirectories(paramsDereplication, globalVars)
 
 
-string checkTableStep = globalVars{'outputPoint'} + "/tableStep.chp"
-checkpoint checkTableStep
+string clustering = globalVars{'outputPoint'} + "/clustering.chp"
+checkpoint clustering
 
 ################################################################
 #           6. OTUs clustering / ASVs inference                #
@@ -120,13 +120,34 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_vsearch' ) {
 
 }
 
+string taxAssign = globalVars{'outputPoint'} + "/taxAssign.chp"
+checkpoint taxAssign
 
+################################################################
+#                7. Taxonomic assignment                       #
+################################################################
 
+parameterFilePath.chdir()
+string l = "parameters.tsv"
+string{} paramsForTaxAssign =  readParameterFile(l)
 
+if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
+   if ( paramsForTaxAssign{'gene'} == 'gene_16S' || paramsForTaxAssign{'gene'} == 'gene_18S' || paramsForTaxAssign{'gene'} == 'gene_ITS') {
 
+      if (paramsForTaxAssign{'taxonomyAssignmentMethod'} != 'phylogeny') {
 
+         crestAssign(paramsForTaxAssign, globalVars)
 
+      } else {
+         
+         phylogenyAssign(paramsForTaxAssign, globalVars)
+
+      }
+
+   }
+
+}
 
 
 
@@ -241,74 +262,6 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_vsearch' ) {
 # #                                                                                      
 # ###################################################################################################################
 
-
-
-# ###################################################################################################################
-# ####################################     16S/18S rRNA marker gene case     ########################################
-# ###################################################################################################################
-
-
-# ################   at first, cluster or "cluster" the reads into OTUs or ASVs correspondingly    #################
-# if  ( paramsOfTable{'gene'} == 'gene_16S' || paramsOfTable{'gene'} == 'gene_18S' ) {
-
-# #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-# #######################   Here is "vsearch" for the 16S marker gene    #####################################
-# #\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\
-
-#    if  ( paramsOfTable{'clusteringAlgoFor16S_18SrRNA'} == 'algo_vsearch' ) {
-      
-#       print " my marker gene is 16S or 18S and I am about to use vsearch to get OTUs \n "
-      
-#       wait
-      
-#       #### Prepare files
-#       outputFilePath.chdir()
-#       string vsearchPath16S = genePath + '/' + paramsOfTable{'gene'} +  '/' + 'vsearch'
-#       task sed 's/_/;size=/g' final_all_samples.fasta > $vsearchPath16S/all_samples.fasta
-      
-#       wait
-
-#       ######################   here i execute the VSEARCH algorithms    #############################################
-            
-#       vsearchPath16S.chdir()
-      
-#       # demultiplexing
-#       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --threads $paramsOfTable{'vsearchThreads'} --derep_fulllength all_samples.fasta --minuniquesize 2 --sizein --sizeout --fasta_width 0 --uc all.derep.uc --output all.derep.fasta
-      
-#       wait
-      
-#       # execute the first clustering step
-#       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --threads $paramsOfTable{'vsearchThreads'} --cluster_size all.derep.fasta --id $paramsOfTable{'vsearchId'} --strand both --sizein --sizeout --fasta_width 0 --uc all.preclustered.uc --centroids all.preclustered.fasta
-      
-#       wait
-
-#       # chimera removal
-#       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --threads $paramsOfTable{'vsearchThreads'} --uchime_denovo all.preclustered.fasta --sizein --sizeout --fasta_width 0 --nonchimeras all.denovo.nonchimeras.fasta
-      
-#       wait
-
-#       # change an output file name
-#       sys mv all.denovo.nonchimeras.fasta all.ref.nonchimeras.fasta
-      
-#       # here are two perl scripts that are located in the "scripts" folder
-#       task $path/scripts/map_vsearch.pl all.derep.fasta all.preclustered.uc all.ref.nonchimeras.fasta > all.nonchimeras.derep.fasta
-#       wait
-   
-#       task $path/scripts/map_vsearch.pl all_samples.fasta all.derep.uc all.nonchimeras.derep.fasta > all.nonchimeras.fasta
-#       wait
-
-#       # execute the second clustering step
-#       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --threads $paramsOfTable{'vsearchThreads'} --cluster_size all.nonchimeras.fasta --id $paramsOfTable{'vsearchId'} --strand both --sizein --fasta_width 0 --uc all.clustered.uc --relabel Otu --centroids all.otus.fasta --otutabout all.otutab.txt
-      
-#       wait
-      
-#       sys mv all.otus.fasta rna_all_samples.otus.fa
-#       sys mv all.otutab.txt rna_otutab.txt
-#       sys cp rna_otutab.txt rna_otutab_$paramsOfTable{'taxonomyFolderName'}.txt
-      
-#       wait
-      
-#       print(" vsearch for 16S/18S marker gene is done! \n")
 
 # #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 # ############################   Here is  "swarm"  for the 16S/18S marker gene    #######################################
@@ -697,60 +650,7 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_vsearch' ) {
 #       sys cp rna_otutab_* final_table.tsv
 #    }
 
-# ####################################################################################################
-# ## what about another way for taxonomy assignment for the case of the 16S marker gene?             #
-# ## here is the phylogeny-based approach that PEMA supports,  using RAxML-ng and SILVA (v.128)      #
-# ####################################################################################################
 
-# } else if ( paramsOfTaxonomy{'gene'} == 'gene_16S' && paramsOfTaxonomy{'taxonomyAssignmentMethod'} == 'phylogeny' ) {
-   
-#    ## we need a REFERENCE TREE which we generated it from SILVA database with the aid of GAPPA.
-#    ## we used GAPPA in order to keep only 10.000 taxa from SILVA.
-#    ## we then used RAXML - NG which it returnerd us our REF TREE - you can find the corresponding script for
-#    ## getting this tree in  $path/tools/silva_132/for_placement
-#    ## in order to get our PHYLOGENY based taxonomy assignment we make use of EPA - NG // last version of Evolutionary Placement Algorithm
-   
-#    string assignmentPath16S = ''
-
-#    if ( paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'} == "algo_vsearh" ) {
-#       string assignmentPath16S = genePath + '/' + 'gene_16S' +  '/' + "vsearch"
-      
-#    } else if ( paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'} == "algo_swarm" ) {
-#       string assignmentPath16S = genePath + '/' + 'gene_16S' +  '/' + 'swarm'
-#       assignmentPath16S.chdir()
-#       sys cp SWARM_otu_no_chimera.fasta 16S_all_samples.otus.fa
-#    }
-   
-#    wait
-   
-#    assignmentPath16S.chdir()
-   
-#    # PaPaRa returns a msa of our queries that has taken into account info from our ref tree 
-#    task $path/tools/PaPaRa/papara_static_x86_64 -t $path/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree -s $path/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy -q 16S_all_samples.otus.fa -r  #-j 4
-   
-#    wait
-   
-#    # we remove the ref - msa - THIS IS A BUG OF EPA-ng !!!!
-#    sys tail -n +1038 papara_alignment.default > papara_alignment.phy
-#    wait
-
-#    # we convert our query msa to fasta format with a script we made because epa-ng can handle only fasta
-#    assignmentPath16S.chdir()
-#    task bash $path/scripts/convertPhylipToFasta.sh  papara_alignment.phy
-   
-#    wait
-         
-#    # execute epa-ng algorithm (evolutinary placement) in order to get our phylogenetic-based taxonomy assignment, at last!
-#    task $path/tools/EPA-ng/epa/bin/epa-ng -s $path/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy.fasta -t $path/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree -q papara_alignment.fasta --model GTR{0.959447/2.52497/1.45842/1.06213/3.55143/1}+FU{0.237221/0.230211/0.294337/0.238231}+G4m{0.559838} # -w <output_dir>
-   
-#    wait
-#    print("phylogenetic based taxonomy assignemnt worked fine!")
-
-#    string assignFolder="16S_taxon_assign_phylogeny_assignment"
-#    assignmentPath16S.chdir()
-#    assignFolder.mkdir()
-#    sys mv epa* $assignFolder
-# }
 
 # #######################################################################################################
 # ###################     Taxonomy assignment for the COI and the ITS marker genes    ###################

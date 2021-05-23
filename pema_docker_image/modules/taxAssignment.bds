@@ -1,0 +1,139 @@
+#!/usr/bin/env bds
+
+# Function to run the CREST classifier 
+string crestAssign(string{} params, string{} globalVars) {
+
+   if ( params{'custom_ref_db'} != 'Yes') {
+
+
+      if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
+
+         string algoCluster1 = params{'clusteringAlgo'}
+         string algo1 = algoCluster1.split('_')[1]
+         string assignmentVsearch = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + algo1
+         assignmentVsearch.chdir()
+
+
+         if ( params{'taxonomyFolderName'}.isDir() ){
+            int previousRandomNumber = randInt( 100 )
+            sys mv $params{'taxonomyFolderName'} old.$previousRandomNumber.$params{'taxonomyFolderName'}
+         }
+
+      
+         if ( params{'silvaVersion'} == 'silva_128' ) { 
+
+            # First use megablast algorithm of blastn for sequence identification, intra-species comparison                   
+            task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
+               -task megablast \
+               -query rna_all_samples.otus.fa \
+               -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silvamod/silvamod128.fasta \
+               -num_alignments 100 \
+               -outfmt 5 \
+               -out rna_mysilvamod128_$params{'taxonomyFolderName'}.xml \
+               -num_threads $params{'vsearchThreads'}
+            
+            wait
+            
+            # And then use the classifier in order to get our assignment
+            task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
+               -t rna_otutab_$params{'taxonomyFolderName'}.txt \
+               -o $params{'taxonomyFolderName'} rna_mysilvamod128_$params{'taxonomyFolderName'}.xml
+            
+            wait
+            
+         # Follow the same steps for the case of the Silva 132    
+         } else if ( params{'silvaVersion'} == 'silva_132' ) {
+               
+            task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
+               -task megablast \
+               -query rna_all_samples.otus.fa \
+               -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silva132/silva132 \
+               -num_alignments 100 \
+               -outfmt 5 \
+               -out rna_mysilvamod132_$params{'taxonomyFolderName'}.xml \
+               -num_threads $params{'vsearchThreads'}
+            
+            wait
+            
+            task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
+               -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
+               -d silva132 \
+               -t rna_otutab_$params{'taxonomyFolderName'}.txt \
+               -o $params{'taxonomyFolderName'} rna_mysilvamod132_$params{'taxonomyFolderName'}.xml
+            
+            wait      
+         }
+
+      } else {
+
+         println("one step at a time dude.")
+      }
+   }
+
+   return 'ok'
+
+}
+
+
+string phylogenyAssign(string{} params, string{} globalVars) {
+
+   ## we need a REFERENCE TREE which we generated it from SILVA database with the aid of GAPPA.
+   ## we used GAPPA in order to keep only 10.000 taxa from SILVA.
+   ## we then used RAXML - NG which it returnerd us our REF TREE - you can find the corresponding script for
+   ## getting this tree in  $path/tools/silva_132/for_placement
+   ## in order to get our PHYLOGENY based taxonomy assignment we make use of EPA - NG // last version of Evolutionary Placement Algorithm
+   
+   string assignmentPath16S = ''
+
+   if ( params{'clusteringAlgo'} == "algo_vsearch" ) {
+      string assignmentPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'vsearch'
+      assignmentPath16S.chdir()
+      
+   } else if ( params{'clusteringAlgo'} == "algo_swarm" ) {
+      string assignmentPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'swarm'
+      assignmentPath16S.chdir()
+      sys cp SWARM_otu_no_chimera.fasta rna_all_samples.otus.fa
+   }
+   
+   wait
+   
+   # PaPaRa returns a msa of our queries that has taken into account info from our ref tree 
+   task $globalVars{'path'}/tools/PaPaRa/papara_static_x86_64 \
+      -t $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree \
+      -s $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy \
+      -q rna_all_samples.otus.fa -r #-j 4
+   
+   wait
+   
+   # Remove the ref - msa - THIS IS A BUG OF EPA-ng !!!!
+   sys tail -n +1038 papara_alignment.default > papara_alignment.phy
+   wait
+
+   # Convert our query msa to fasta format with a script we made because epa-ng can handle only fasta
+   task bash $globalVars{'path'}/scripts/convertPhylipToFasta.sh  papara_alignment.phy
+   
+   wait
+         
+   # Execute epa-ng algorithm (evolutinary placement) in order to get our phylogenetic-based taxonomy assignment, at last!
+   task $globalVars{'path'}/tools/EPA-ng/epa/bin/epa-ng \
+      -s $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy.fasta \
+      -t $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree \
+      -q papara_alignment.fasta \
+      --model GTR{0.959447/2.52497/1.45842/1.06213/3.55143/1}+FU{0.237221/0.230211/0.294337/0.238231}+G4m{0.559838} # -w <output_dir>
+   
+   wait
+
+   string assignFolder="16S_taxon_assign_phylogeny_assignment"
+   assignFolder.mkdir()
+   sys mv epa* $assignFolder
+
+   println("Phylogenetic based taxonomy assignemnt has been completed.")
+
+   return 'ok'
+
+}
+
+
+
+
+

@@ -231,7 +231,7 @@ gene	gene_16S
 # An alignment based taxonomy assignment - set as 'alignment' -  which is based on SILVA and CREST (version 3.0).
 # However, you can also get a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In that case, a reference tree we created is being used as well as the RAxML 
 #
-taxonomyAssignmentMethod	alignment
+taxonomyAssignmentMethod	phylogeny
 #
 #
 # I you choose phylogeny based taxonomy assignment, then you ll need to rum PaPaRa.
