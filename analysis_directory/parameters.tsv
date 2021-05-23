@@ -19,7 +19,7 @@
 #
 # Give in your each uniq experiment a NAME, so a single output file will be created for each of them 
 #
-outputFolderName	test_16S_v.2.0.0
+outputFolderName	test_16S_Swarm
 #
 #
 # If the names of the samples under analysis are not in an ENA format (e.g "ERR1021912") but they are more like as
@@ -231,7 +231,7 @@ gene	gene_16S
 # An alignment based taxonomy assignment - set as 'alignment' -  which is based on SILVA and CREST (version 3.0).
 # However, you can also get a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In that case, a reference tree we created is being used as well as the RAxML 
 #
-taxonomyAssignmentMethod	phylogeny
+taxonomyAssignmentMethod	alignment
 #
 #
 # I you choose phylogeny based taxonomy assignment, then you ll need to rum PaPaRa.
@@ -277,7 +277,7 @@ reverseITSPrimer	CTBTTVCCKCTTCACTCG
 # Depending on which of them you choose you get either a robust output in a short time (Swarm) or a non-robust output (CROP) that requires quite much more time.
 # Please fill in accroding to your marker gene and needs (write "Swarm" or "vsearch" or "CROP" after algo_).
 #
-clusteringAlgo	algo_vsearch
+clusteringAlgo	algo_Swarm
 #
 #
 # In case of SWARM, the user needs to speeecify the value of "d" parameter,
@@ -285,7 +285,7 @@ clusteringAlgo	algo_vsearch
 # will be grouped if they hav e integer (or less) differences. This is swarm's most important
 # parameter
 #
-d	20
+d	1
 #
 #
 # when using the option --fastidious (-f), define the minimum mass of a large ASV. 

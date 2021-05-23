@@ -390,101 +390,18 @@ string{} obiDereplicate(string{} params, string{} globalVars){
 }
 
 
-# Function to build directories according to user's input
-string buildDirectories(string{} params, string{} globalVars){
+# Function to dereplicate using AWK commands and scripts
+string swarmDereplicate(string{} params, string{} globalVars){
 
-   globalVars{'genePath'}.chdir()
+   globalVars{'unzipPath'}.chdir()
 
-   if ( params{'gene'} == 'gene_COI' ) {
-      println('Marker gene under study COI.')
-      string coiPath = globalVars{'genePath'} + '/' + 'gene_COI'
-      coiPath.chdir()
+   sys bash $globalVars{'path'}/scripts/dereplicateSwarm.sh
 
-      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
-         string algo = 'crop'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'swarm'
-         algo.mkdir()
-      }
-
-   } else if ( params{'gene'} == 'gene_16S' ) {
-      println('Marker gene under study 16S.')
-      string sixteenPath = globalVars{'genePath'} + '/' + 'gene_16S'
-      sixteenPath.chdir()
-      
-      if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'swarm'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
-         string algo = 'vsearch'
-         algo.mkdir()
-      } 
-
-   } else if ( params{'gene'} == 'gene_18S' ) {
-      println('Marker gene under study 18S.')
-      string sixteenPath = globalVars{'genePath'} + '/' + 'gene_18S'
-      sixteenPath.chdir()
-      
-      if ( params{'clusteringAlgoFor16S_18SrRNA'} == 'algo_Swarm' ) {
-         string algo = 'swarm'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgoFor16S_18SrRNA'} == 'algo_vsearch' ) {
-         string algo = 'vsearch'
-         algo.mkdir()
-      } 
-
-   } else if ( params{'gene'} == 'gene_ITS' ) {
-      println('My marker gene is ITS.')
-      string itsPath = globalVars{'genePath'} + '/' + 'gene_ITS'
-      itsPath.chdir()
-
-      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
-         string algo = 'crop'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'swarm'
-         algo.mkdir()
-      } 
-
-   } else if ( params{'gene'} == 'gene_other' ) {
-      println('My marker gene is not among the 4 PEMA supports by default.')
-      string newMarkerGenePath = globalVars{'genePath'} + '/' + 'gene_new'
-      newMarkerGenePath.chdir()
-
-      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
-         string algo = 'crop'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'swarm'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
-         string algo = 'vsearch'
-         algo.mkdir()
-      }      
-   }
-   # Again make everything 777
-   sys chmod 777 $globalVars{'outputFilePath'} -R
+   println('Sample files have been dereplicated and a contingency table for the amplicons has been built.')
 
    return 'ok'
 
 }
-
-
-# # Function to dereplicate using AWK commands and scripts
-# string swarmDereplicate(string{} params, string{} globalVars){
-
-#    globalVars{'unzipPath'}.chdir()
-
-
-#    task for file in $(ls); do awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' $file > $file.linearized.fasta ; done
-
-
-#    # task for file in $(ls | grep fasta); do  grep -v "^>" $file |grep -v [^ACGTacgt] | sort -d | uniq -c | while read abundance sequence ; do     hash=$(printf "${sequence}" | sha1sum);     hash=${hash:0:40};     printf ">%s_%d_%s\n" "${hash}" "${abundance}" "${sequence}"; done | sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > $file._dereplicated.fasta ; done
-
-#    return 'ok'
-
-# }
 
 # Function to merge all samples in one; it goes with the obiDereplicate() function
 string mergeFilesNonSwarm(string{} params, string{} globalVars){

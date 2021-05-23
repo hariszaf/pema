@@ -8,6 +8,7 @@
 include "modules/initialize"
 include "modules/preprocess"
 include "modules/clustering"
+include "modules/taxAssignment"
 
 
 # Read parameters file for the first time! 
@@ -77,6 +78,12 @@ wait
 #          5. Dereplicate sequence samples                     #
 ################################################################
 
+################################################################
+#      Build subdirectories according to the params file       #
+################################################################
+
+buildDirectories(paramsDereplication, globalVars)
+
 parameterFilePath.chdir()
 string j = "parameters.tsv"
 string{} paramsDereplication =  readParameterFile(j)
@@ -84,7 +91,9 @@ wait
 
 if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
 
-   println("i am about to build this dude.")
+   println('Pema is at the dereplication step; this may take a while.')
+   swarmDereplicate(paramsDereplication, globalVars)
+
 
 } else {
 
@@ -95,12 +104,6 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
    mergeFilesNonSwarm(paramsDereplication, globalVars)
 
 }
-
-################################################################
-#      Build subdirectories according to the params file       #
-################################################################
-
-buildDirectories(paramsDereplication, globalVars)
 
 
 string clustering = globalVars{'outputPoint'} + "/clustering.chp"
@@ -116,7 +119,11 @@ string{} paramsOfTable =  readParameterFile(k)
 
 if ( paramsDereplication{'clusteringAlgo'} == 'algo_vsearch' ) {
 
-   clusteringVsearch(paramsOfTable, globalVars)
+   globalVars = clusteringVsearch(paramsOfTable, globalVars)
+
+} else if (paramsDereplication{'clusteringAlgo'} == 'algo_Swarm') {
+
+   globalVars = clusteringSwarm(paramsOfTable, globalVars)
 
 }
 

@@ -114,6 +114,7 @@ string{} initializeAnalysis(string{} params) {
    globalVars{'linearPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'linearized'} 
    globalVars{'genePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'geneDependent'} 
    globalVars{'outputPerSamplePath'} = globalVars{'outputFilePath'} + '/' + globalVars{'outputPerSample'}
+   globalVars{'unzipPath'}           = globalVars{'spaPath'} + '/' + 'unzip'
 
    wait
 
@@ -155,7 +156,7 @@ string{} initializeAnalysis(string{} params) {
 
    # Gene dependent directory
    globalVars{'genePath'}.chdir()
-   params {'gene'}.mkdir()
+   params{'gene'}.mkdir()
 
 
    # Convert Illumina data to ENA format
@@ -171,3 +172,82 @@ string{} initializeAnalysis(string{} params) {
    return(globalVars)
 }
 
+# Function to build directories according to user's input
+string buildDirectories(string{} params, string{} globalVars){
+
+   globalVars{'genePath'}.chdir()
+
+   if ( params{'gene'} == 'gene_COI' ) {
+      println('Marker gene under study COI.')
+      string coiPath = globalVars{'genePath'} + '/' + 'gene_COI'
+      coiPath.chdir()
+
+      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
+         string algo = 'crop'
+         algo.mkdir()
+      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
+         string algo = 'swarm'
+         algo.mkdir()
+      }
+
+   } else if ( params{'gene'} == 'gene_16S' ) {
+      println('Marker gene under study 16S.')
+      string sixteenPath = globalVars{'genePath'} + '/' + 'gene_16S'
+      sixteenPath.chdir()
+      
+      if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
+         string algo = 'Swarm'
+         algo.mkdir()
+      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
+         string algo = 'vsearch'
+         algo.mkdir()
+      } 
+
+   } else if ( params{'gene'} == 'gene_18S' ) {
+      println('Marker gene under study 18S.')
+      string sixteenPath = globalVars{'genePath'} + '/' + 'gene_18S'
+      sixteenPath.chdir()
+      
+      if ( params{'clusteringAlgoFor16S_18SrRNA'} == 'algo_Swarm' ) {
+         string algo = 'Swarm'
+         algo.mkdir()
+      } else if ( params{'clusteringAlgoFor16S_18SrRNA'} == 'algo_vsearch' ) {
+         string algo = 'vsearch'
+         algo.mkdir()
+      } 
+
+   } else if ( params{'gene'} == 'gene_ITS' ) {
+      println('My marker gene is ITS.')
+      string itsPath = globalVars{'genePath'} + '/' + 'gene_ITS'
+      itsPath.chdir()
+
+      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
+         string algo = 'crop'
+         algo.mkdir()
+      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
+         string algo = 'Swarm'
+         algo.mkdir()
+      } 
+
+   } else if ( params{'gene'} == 'gene_other' ) {
+      println('My marker gene is not among the 4 PEMA supports by default.')
+      string newMarkerGenePath = globalVars{'genePath'} + '/' + 'gene_new'
+      newMarkerGenePath.chdir()
+
+      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
+         string algo = 'crop'
+         algo.mkdir()
+      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
+         string algo = 'Swarm'
+         algo.mkdir()
+      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
+         string algo = 'vsearch'
+         algo.mkdir()
+      }      
+   }
+   # Again make everything 777
+   sys chmod 777 $globalVars{'outputFilePath'} -R
+
+   return 'ok'
+
+}

@@ -1,19 +1,19 @@
 #!/usr/bin/env bds
 
 # Function to get OTUs using the VSEARCH algorithm
-string clusteringVsearch(string{} params, string{} globalVars) {
+string{} clusteringVsearch(string{} params, string{} globalVars) {
 
       
       #### Prepare files
       globalVars{'outputFilePath'}.chdir()
-      string vsearchPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'vsearch'
-      task sed 's/_/;size=/g' final_all_samples.fasta > $vsearchPath16S/all_samples.fasta
+      globalVars{'vsearchPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'vsearch'
+      task sed 's/_/;size=/g' final_all_samples.fasta > $globalVars{'vsearchPath'}/all_samples.fasta
       
       wait
 
       ######################  Execute the VSEARCH algorithms    #############################################
             
-      vsearchPath16S.chdir()
+      globalVars{'vsearchPath'}.chdir()
       
       # Demultiplexing
       task $globalVars{'path'}/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch \
@@ -72,15 +72,123 @@ string clusteringVsearch(string{} params, string{} globalVars) {
       
       wait
       
-      sys mv all.otus.fasta rna_all_samples.otus.fa
-      sys mv all.otutab.txt rna_otutab.txt
-      sys cp rna_otutab.txt rna_otutab_$params{'taxonomyFolderName'}.txt
+      sys mv all.otus.fasta all_samples.otus.fa
+      sys mv all.otutab.txt otutab.txt
+      sys cp otutab.txt otutab_$params{'taxonomyFolderName'}.txt
       
       wait
       
       println("OTU clustering using the VSEARCH algorithm has been completed.")
 
-   return 'ok'
+   return globalVars
 
 }
 
+
+string{} clusteringSwarm(string{} params, string{} globalVars) {
+
+
+   #### Prepare files
+   globalVars{'outputFilePath'}.chdir()
+   globalVars{'swarmPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'Swarm'
+   task cp all_samples.fasta $globalVars{'swarmPath'}/all_samples.fasta
+   wait
+
+
+   globalVars{'swarmPath'}.chdir()
+   
+   
+   int d_param = params{'d'}.parseInt()
+
+
+   # Here is the clustering step with SWARM algorithm
+   if ( d_param == 1 ) {
+
+      swarmDefault(params, globalVars)
+      
+
+   } else if (  d_param >= 5  ) {
+
+      task $globalVars{'path'}/tools/swarm/swarm/bin/swarm -d $params{'d'} \
+      -t $params{'swarmThreads'} -s asvs.stats \
+      -w asvs_representatives_all_samples.fasta < all_samples.fasta > asvs.swarms
+
+   } else {
+
+      task $globalVars{'path'}/tools/swarm/swarm/bin/swarm -d $params{'d'} \
+      -t $params{'swarmThreads'} -s asvs.stats \
+      -w asvs_representatives_all_samples.fasta < all_samples.fasta > asvs.swarms
+
+   }
+
+   wait
+   println('ASVs inference using the Swarm algorithm has been completed')
+   
+   # Build the ASVs contingency table 
+   sys mv ../../../amplicon_contingency_table.tsv .
+   sys bash $globalVars{'path'}/scripts/createOtuContingencyTable.sh
+   println('The contigency table with the found ASVs was created successfully!')
+
+   return globalVars
+
+}
+
+
+
+
+
+ string swarmDefault(string{} params, string{} globalVars) {
+
+   task $globalVars{'path'}/tools/swarm/swarm/bin/swarm -d 1 -f -b $params{'boundary'} \
+      -t $params{'swarmThreads'} \
+      -s asvs_tmp.stats \
+      -w asvs_representatives_all_samples_tmp.fasta < all_samples.fasta > asvs_tmp.swarms
+
+   wait
+
+   # Remove chimeras
+   task{
+      sys sed 's/_/;size=/g' asvs_representatives_all_samples_tmp.fasta > tmp
+      sys rm asvs_representatives_all_samples_tmp.fasta
+      sys mv tmp asvs_representatives_all_samples_tmp.fasta
+   }
+
+   wait
+
+   task $globalVars{'path'}/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch \
+      --threads $params{'vsearchThreads'} \
+      --uchime_denovo asvs_representatives_all_samples_tmp.fasta \
+      --sizein --sizeout --fasta_width 0 \
+      --nonchimeras all.denovo.nonchimeras.fasta
+
+   wait
+
+   # Run swarm using d = 0 to sync the .stats and .swarms files 
+   task {
+      sys sed 's/;size=/_/g' all.denovo.nonchimeras.fasta > tmp 
+      sys rm all.denovo.nonchimeras.fasta
+      sys mv tmp all.denovo.nonchimeras.fasta
+   }
+
+   wait
+
+   task $globalVars{'path'}/tools/swarm/swarm/bin/swarm -d 0 -t $params{'swarmThreads'} -s asvs.stats -w asvs_representatives_all_samples.fasta < all.denovo.nonchimeras.fasta > asvs.swarms
+
+   wait
+
+   sys rm asvs_representatives_all_samples_tmp.fasta asvs_tmp*
+
+   return 'ok'
+
+}  
+
+
+string swarmSmallValues(string{} params, string{} globalVars){
+
+   return 'ok'
+}
+
+string swarmGreatValues(string{} params, string{} globalVars){
+
+   return 'ok'
+}
