@@ -25,19 +25,19 @@ string crestAssign(string{} params, string{} globalVars) {
             # First use megablast algorithm of blastn for sequence identification, intra-species comparison                   
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
                -task megablast \
-               -query rna_all_samples.otus.fa \
+               -query all_samples.otus.fa \
                -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silvamod/silvamod128.fasta \
                -num_alignments 100 \
                -outfmt 5 \
-               -out rna_mysilvamod128_$params{'taxonomyFolderName'}.xml \
+               -out mysilvamod128_$params{'taxonomyFolderName'}.xml \
                -num_threads $params{'vsearchThreads'}
             
             wait
             
             # And then use the classifier in order to get our assignment
             task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
-               -t rna_otutab_$params{'taxonomyFolderName'}.txt \
-               -o $params{'taxonomyFolderName'} rna_mysilvamod128_$params{'taxonomyFolderName'}.xml
+               -t allTab_$params{'taxonomyFolderName'}.tsv \
+               -o $params{'taxonomyFolderName'} mysilvamod128_$params{'taxonomyFolderName'}.xml
             
             wait
             
@@ -46,11 +46,11 @@ string crestAssign(string{} params, string{} globalVars) {
                
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
                -task megablast \
-               -query rna_all_samples.otus.fa \
+               -query all_samples.otus.fa \
                -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silva132/silva132 \
                -num_alignments 100 \
                -outfmt 5 \
-               -out rna_mysilvamod132_$params{'taxonomyFolderName'}.xml \
+               -out mysilvamod132_$params{'taxonomyFolderName'}.xml \
                -num_threads $params{'vsearchThreads'}
             
             wait
@@ -58,15 +58,15 @@ string crestAssign(string{} params, string{} globalVars) {
             task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
                -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
                -d silva132 \
-               -t rna_otutab_$params{'taxonomyFolderName'}.txt \
-               -o $params{'taxonomyFolderName'} rna_mysilvamod132_$params{'taxonomyFolderName'}.xml
+               -t allTab_$params{'taxonomyFolderName'}.tsv \
+               -o $params{'taxonomyFolderName'} mysilvamod132_$params{'taxonomyFolderName'}.xml
             
             wait      
          }
 
       } else {
 
-         println("one step at a time dude.")
+         println("one step at a time dude. this is for the ITS case.")
       }
    }
 
@@ -92,7 +92,7 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    } else if ( params{'clusteringAlgo'} == "algo_swarm" ) {
       string assignmentPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'swarm'
       assignmentPath16S.chdir()
-      sys cp SWARM_otu_no_chimera.fasta rna_all_samples.otus.fa
+      sys cp otu_no_chimera.fasta all_samples.otus.fa
    }
    
    wait
@@ -101,7 +101,7 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    task $globalVars{'path'}/tools/PaPaRa/papara_static_x86_64 \
       -t $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree \
       -s $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy \
-      -q rna_all_samples.otus.fa -r #-j 4
+      -q all_samples.otus.fa -r #-j 4
    
    wait
    
@@ -131,6 +131,15 @@ string phylogenyAssign(string{} params, string{} globalVars) {
 
    return 'ok'
 
+}
+
+
+
+string swarmPostCrest() {
+
+
+
+   return 'ok'
 }
 
 

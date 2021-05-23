@@ -82,7 +82,7 @@ wait
 #      Build subdirectories according to the params file       #
 ################################################################
 
-buildDirectories(paramsDereplication, globalVars)
+buildDirectories(paramsSpadesMerging, globalVars)
 
 parameterFilePath.chdir()
 string j = "parameters.tsv"
