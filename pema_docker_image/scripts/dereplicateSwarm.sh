@@ -4,21 +4,16 @@
 # You may find more about that on the following GitHub Wiki page:
 #  https://github.com/torognes/swarm/wiki/
 
-
-
-
+# Linearize sequences 
 for file in $(ls); 
 do 
    awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' $file \
    > ../../6.linearizedSequences/$file.linearized.fasta ; 
 done
 
-
 cd ../../6.linearizedSequences/
 
-
 # Dereplication at the sample level
-
 for file in $(ls | grep linearized.fasta); 
 do  
    grep -v "^>" $file | \
@@ -34,10 +29,7 @@ done
 
 
 cd ../5.dereplicateSamples/
-
-
 rename.ul .linearized.fasta._dereplicated.fasta "" *_dereplicated.fasta
-
 
 for f in * ; do mv -- "$f" "linearized.dereplicate_$f" ; done
 
@@ -51,8 +43,6 @@ awk 'BEGIN {RS = ">" ; FS = "[_\n]"}
          print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | \
 sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | \
 sed -e 's/\_/\n/2' > ../all_samples.fasta
-
-
 
 
 # HOPEFULLY WE WON'T NEED THIS - IF WE DO WE NEED TO REMOVE SEQS FROM FILES TOO
@@ -101,11 +91,5 @@ awk 'BEGIN {FS = "[>_]"}
                }
                printf "\t%d\n", amplicons[amplicon]
           }}' linearized.dereplicate* > ../amplicon_contingency_table.tsv
-
-
-
-
-
-
 
 

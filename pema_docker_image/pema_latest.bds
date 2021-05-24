@@ -119,11 +119,11 @@ string{} paramsOfTable =  readParameterFile(k)
 
 if ( paramsDereplication{'clusteringAlgo'} == 'algo_vsearch' ) {
 
-   globalVars = clusteringVsearch(paramsOfTable, globalVars)
+   clusteringVsearch(paramsOfTable, globalVars)
 
 } else if (paramsDereplication{'clusteringAlgo'} == 'algo_Swarm') {
 
-   globalVars = clusteringSwarm(paramsOfTable, globalVars)
+   clusteringSwarm(paramsOfTable, globalVars)
 
 }
 
