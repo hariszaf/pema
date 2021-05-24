@@ -36,43 +36,12 @@ string{} readParameterFile(string parameter_file) {
 
 }
 
-# Function to train classifier based on a local reference database if required
-string{} trainClassifier(string{} params, string{} globalVars){
-
-   # Path for user's files 
-   globalVars{'customDbFilesPath'} =  "/mnt/analysis/custom_ref_db"
-   
-
-   if ( params{'gene'} == 'gene_COI' ){
-
-      # Files
-      globalVars{'customDbFilesPath'}.chdir() ;
-      string taxonomyFile = globalVars{'customDbFilesPath'} + "/" + "*.tsv"
-      string sequenceFile = globalVars{'customDbFilesPath'} + "/" + "*.fasta"
-
-      # Train the RDPClassifier using your custom COI ref db
-      sys bash $globalVars{'path'}/scripts/trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
-   
-   } else {
-      
-      # Files
-      globalVars{'customDbFilesPath'}.chdir() ;
-      string taxonomyFile = globalVars{'customDbFilesPath'} + "/" + "*.nds"
-      string sequenceFile = globalVars{'customDbFilesPath'} + "/" + "*.fasta"       
-   
-      # All markers genes but the COI, use the CREST algorithm for the taxonomy step. Here we train CREST
-      sys bash $globalVars{'path'}/scripts/trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
-
-   }
-
-   return globalVars
-
-}
-
 # Function to initialize a PEMA analysis
 string{} initializeAnalysis(string{} params) {
 
    string{} globalVars
+
+   wait
 
    # Main paths
    globalVars{'path'}              = '/home'
@@ -80,19 +49,24 @@ string{} initializeAnalysis(string{} params) {
    globalVars{'parameterFilePath'} = '/mnt/analysis/'
    globalVars{'outputPoint'}       = '/mnt/analysis'
 
-   # if there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
+   wait
+
+   # If there are Trimlogs in the rawData file, PEMA does not run as it should. 
+   # Hence, we remove them if there are any!
    globalVars{'dataPath'}.chdir() ;
 
-   # check if there is a TrimLog file and IF YES, then delete it
+   # Check if there is a TrimLog file and IF YES, then delete it
    sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi 
-   # in case that PEMA run on macOS, then some '.DS_Store' files may appear; these need to be removed in every step of the way!
+
+   # In case that PEMA run on macOS, then some '.DS_Store' files may appear; 
+   # these need to be removed in every step of the way!
    sys if [ $(find '$globalVars{'dataPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
 
    # I create a file where the pipeline's output will be saved
    globalVars{'outputPoint'}.chdir()
    globalVars{'analysisName'} = params{'outputFolderName'}
 
-   # here are all the directories as variables that i will use
+   # Here are all the directories as variables that i will use
    globalVars{'qualityControl'}  = '1.qualityControl'
    globalVars{'trimmomatic'}     = '2.trimmingSequences'
    globalVars{'bayesHammer'}     = '3.adjustingSequnces'
@@ -118,8 +92,8 @@ string{} initializeAnalysis(string{} params) {
 
    wait
 
-
-   # Check if an output folder called with the same name as the one given in the 'parameters' file, has already been created from previous runs
+   # Check if an output folder called with the same name as the one given in the 'parameters' file, 
+   # has already been created from previous runs
    if ( params{'outputFolderName'}.isDir() ) {                                     
       println 'This ouput file already exists' 
 
@@ -127,23 +101,23 @@ string{} initializeAnalysis(string{} params) {
       
       # if it is not, create a file with its name
       params{'outputFolderName'}.mkdir()
-      println 'A new output files was just created!'
+      println('A new output files was just created!')
 
       # Make all output (sub)directories having 777 permissions; ; the reason for this is that
       sys chmod 777 $globalVars{'outputFilePath'} -R
       wait
    }
 
-   # and create an output file for each pipeline step - if you run PEMA for the first time for a specific experiment
+   # And create an output file for each pipeline step - if you run PEMA for the first time for a specific experiment
    globalVars{'outputFilePath'}.chdir()
 
-   # make a list with all the directory names that can be found in the output directory 
+   # Make a list with all the directory names that can be found in the output directory 
    string[] outputFiles = globalVars{'outputFilePath'}.dir()         
 
-   # if that list is empty, then create the directories mentioned above
+   # If that list is empty, then create the directories mentioned above
    if ( outputFiles.isEmpty() == true ) {
 
-      # create all the output directories
+      # Create all the output directories
       globalVars{'qualityControl'}.mkdir()
       globalVars{'trimmomatic'}.mkdir()
       globalVars{'bayesHammer'}.mkdir()
@@ -164,10 +138,10 @@ string{} initializeAnalysis(string{} params) {
       sys bash $globalVars{'path'}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'}
    }
 
-   # IMPORTANT! Module to train classifiers is enabled through this statement
-   if ( params{'custom_ref_db'} == 'Yes' ){
-      string{} globalVars = trainClassifier(params, globalVars)
-   }
+   # # IMPORTANT! Module to train classifiers is enabled through this statement
+   # if ( params{'custom_ref_db'} == 'Yes' ){
+   #    string{} globalVars = trainClassifier(params, globalVars)
+   # }
 
    # Taxonomy assignment path
    string algoCluster1 = params{'clusteringAlgo'}
@@ -254,5 +228,51 @@ string buildDirectories(string{} params, string{} globalVars){
    sys chmod 777 $globalVars{'outputFilePath'} -R
 
    return 'ok'
+
+}
+
+
+# Function to train classifier based on a local reference database if required
+string{} trainClassifier(string{} params, string{} globalVars){
+
+   globalVars{'customDbFilesPath'} = '/mnt/analysis/custom_ref_db'
+   globalVars{'customDbFilesPath'}.chdir() ;
+
+   if ( params{'classifierAlgo'} == 'RDPClassifier' ) {
+
+      # Path for user's files 
+      globalVars{'myCustomDbInPema'}  = globalVars{'path'} + '/tools/RDPTools/TRAIN'
+      string checkIfAlreadyTrained = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
+
+      # Check if RDPClassifier has already been trained with this custom DB
+      if ( checkIfAlreadyTrained.isDir() ) {
+
+         println('The RDPClassifier has been already trained with this custom db. Pema will proceed using that.')
+
+      # If not, train it! 
+      } else {
+
+         string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.tsv'
+         string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
+
+         # Train the RDPClassifier using your custom COI ref db
+         sys bash $globalVars{'path'}/scripts/trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+
+      }
+   
+   } else if ( params{'classifierAlgo'} == 'CREST' ) {
+      
+      # Files
+      globalVars{'customDbFilesPath'}.chdir() ;
+      string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.nds'
+      string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'       
+   
+      # All markers genes but the COI, use the CREST algorithm for the taxonomy step. 
+      # Here we train CREST
+      sys bash $globalVars{'path'}/scripts/trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+
+   }
+
+   return globalVars
 
 }

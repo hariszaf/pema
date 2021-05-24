@@ -24,6 +24,15 @@ string{} paramsFirstAssignment =  readParameterFile(f)
 string{} globalVars = initializeAnalysis(paramsFirstAssignment)
 wait
 
+# IMPORTANT! Module to train classifiers is enabled through this statement
+if ( paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
+   
+   string{} initGlobalVars = globalVars
+   wait
+   string{} globalVars = trainClassifier(paramsFirstAssignment, initGlobalVars)
+   
+}
+wait
 
 ###############################################################
 #                   1. Quality Control                        #
@@ -161,6 +170,20 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
       }
    }
 
+} else {
+
+   if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+
+      rdpAssign(paramsForTaxAssign, globalVars)
+
+   } else if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+
+
+   } else {
+
+      println('The classifier you chose is not available in the Pema framework.')
+   }
+
 }
 
 
@@ -176,36 +199,6 @@ println('Pema has been completed successfully. Enjoy your results! :) ')
 
 
 
-# string checkTableStep = outputPoint + "/tableStep.chp"
-# checkpoint checkTableStep 
-# parameterFilePath.chdir()
-# string k = "parameters.tsv"
-# string{} paramsOfTable =  readParameterFile(k)
-
-
-
-
- ###################################################################################################################
-# ########################        COI & ITS ( MOTU clustering - ASV inference )         #############################
-# ###################################################################################################################
-
-
-# ### in the COI case, we will have an IF statement for the two different clustering algos and THEN, after, we will do the taxonomy assignment!!!   
-
-# if  ( paramsOfTable{'gene'} == 'gene_COI' || paramsOfTable{'gene'} == "gene_ITS") {
-   
-#    string gene = ''
-#    string geneName = ''
-   
-#    if ( paramsOfTable{'gene'} == "gene_COI" ) {
-#       gene = "gene_COI"
-#       geneName = "COI"
-#       print 'my marker gene is COI' + "\n"
-#    } else if ( paramsOfTable{'gene'} == "gene_ITS") {
-#       gene = "gene_ITS"
-#       geneName = "ITS"
-#       print 'my marker gene is ITS' + "\n"
-#    }
    
    
 #    ## in this case, there is not an algo that does both chimera removal and clustering, hence we have a 2 - step procedure
@@ -401,92 +394,6 @@ println('Pema has been completed successfully. Enjoy your results! :) ')
 # ##############################     Taxonomy Assignment 16S     ########################################
 # #######################################################################################################
 
-# ### for the taxonomy assignment in the case of the 16S marker gene, we have 2 options (alignment & phylogeny based)
-# ### hence, PEMA performs what the user chose, according to the clustering algorithm setting as well
-
-# ### taxonomy assignment using CREST and SILVA database  (alignment based) for the 16S marker gene   ###
-
-# if ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'gene_18S' ) && paramsOfTaxonomy{'taxonomyAssignmentMethod'} == 'alignment' ) {
-   
-#    string assignmentPath16S = ''
-   
-#    if ( paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'} == "algo_vsearh" ) {
-#       string assignmentPath16S = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + 'vsearch'
-#       print("assignmentPath16S is : " + assignmentPath16S + "\n")
-#       assignmentPath16S.chdir()
-            
-#    } else if ( paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'} == "algo_swarm" ) {      
-#       string assignmentPath16S = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + 'swarm'
-#       assignmentPath16S.chdir()
-      
-#       # run a script that will make all the changes needed for the SWARM output to run with LCAClassifier
-#       task bash $path/scripts/transformationsOnTable.sh
-      
-#       wait
-      
-#       sys mv SWARM_OTU_table.tsv rna_otutab_$paramsOfTaxonomy{'taxonomyFolderName'}.txt 
-      
-#       ## Singletons may be removed or not
-#       if ( paramsOfTaxonomy{'removeSingletons'} == 'Yes' ){
-#          sys bash $path/scripts/removeSingletons.sh
-#          wait
-#          sys bash $path/scripts/fromLinearToMultiLinesFasta.sh
-#          wait
-#          print('No singletons file is fine' + "\n")      
-#       }
-#       ###
-      
-#       sys mv SWARM_otu_no_chimera.fasta rna_all_samples.otus.fa
-#       sys sed -i 's/;size=[0-9]*//g' rna_all_samples.otus.fa
-      
-#    }
-      
-#    wait
-
-#    if ( paramsOfTaxonomy{'silvaVersion'} == 'silva_128' ) {
-      
-#       string algoCluster1 = paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'}
-#       string algo1 = algoCluster1.split('_')[1]
-#       string assignmentPath16S2 = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + algo1
-#       assignmentPath16S2.chdir()
-#       # first we use megablast algorithm of blastn for sequence identification, intra-species comparison                   
-#       task $path/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast -query rna_all_samples.otus.fa -db $path/tools/CREST/LCAClassifier/parts/flatdb/silvamod/silvamod128.fasta -num_alignments 100 -outfmt 5 -out rna_mysilvamod128_$paramsOfTaxonomy{'taxonomyFolderName'}.xml -num_threads $paramsOfTaxonomy{'vsearchThreads'}
-      
-#       wait
-      
-#       # and then we use the classifier in order to get our assignment
-#       task $path/tools/CREST/LCAClassifier/bin/classify -t rna_otutab_$paramsOfTaxonomy{'taxonomyFolderName'}.txt -o $paramsOfTaxonomy{'taxonomyFolderName'} rna_mysilvamod128_$paramsOfTaxonomy{'taxonomyFolderName'}.xml
-      
-#       wait
-      
-#    # we follow the same steps for the case of the Silva 132    
-#    } else if ( paramsOfTaxonomy{'silvaVersion'} == 'silva_132' ) {
-      
-#       string algoCluster1 = paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'}
-#       string algo1 = algoCluster1.split('_')[1]
-#       string assignmentPath16S2 = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + algo1
-#       assignmentPath16S2.chdir()
-   
-#       task $path/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast -query rna_all_samples.otus.fa -db $path/tools/CREST/LCAClassifier/parts/flatdb/silva132/silva132 -num_alignments 100 -outfmt 5 -out rna_mysilvamod132_$paramsOfTaxonomy{'taxonomyFolderName'}.xml -num_threads $paramsOfTaxonomy{'vsearchThreads'}
-      
-#       wait
-      
-#       task $path/tools/CREST/LCAClassifier/bin/classify -c $path/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf -d silva132 -t rna_otutab_$paramsOfTaxonomy{'taxonomyFolderName'}.txt -o $paramsOfTaxonomy{'taxonomyFolderName'} rna_mysilvamod132_$paramsOfTaxonomy{'taxonomyFolderName'}.xml
-      
-#       wait      
-#    }
-
-#    if ( paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'} == "algo_vsearch" ) {
-#       string taxonomyDirectory = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + 'vsearch' + '/' + paramsOfTaxonomy{'taxonomyFolderName'}
-#       print("taxononomyDirectory is :   " + taxonomyDirectory + "\n")
-#       taxonomyDirectory.chdir()
-#       sys cp rna_otutab_* final_table.tsv
-            
-#    } else if ( paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'} == "algo_swarm" ) {
-#       string taxonomyDirectory = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + 'swarm' + '/' + paramsOfTaxonomy{'taxonomyFolderName'}
-#       taxonomyDirectory.chdir()
-#       sys cp rna_otutab_* final_table.tsv
-#    }
 
 
 
@@ -497,72 +404,6 @@ println('Pema has been completed successfully. Enjoy your results! :) ')
 
 # #\\\\\\\\\\\\\\ \\\\\\\\      When SWARM has been used for ASVs inferring  /////////////////////////////
 
-
-# if ( ( paramsOfTaxonomy{'gene'} == 'gene_COI' || paramsOfTaxonomy{'gene'} == "gene_ITS") &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_SWARM' ) {
-   
-#    string gene = ''
-#    if ( paramsOfTaxonomy{'gene'} == "gene_COI" ) {
-#       gene = "gene_COI"
-#    } else {
-#       gene = "gene_ITS"
-#    }
-   
-#    string swarmPath = genePath + '/' + gene +  '/' + 'SWARM'
-#    swarmPath.chdir()
-
-#    if ( paramsOfTaxonomy{'gene'} == "gene_COI" ) {
-
-#       ### I remove all  new lines and make each sequence an one and only line kai kano oli tin allilouxia mia grammi
-#       task awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' SWARM_otu_no_chimera.fasta > nospace_swarm.fasta
-#       wait
-#       print('nospace_swarm is fine!' +"\n")
-   
-#       ### Remove all singletons in case the user wants
-#       if ( paramsOfTaxonomy{'removeSingletons'} == 'Yes' ) {
-#          sys bash $path/scripts/removeSingletons.sh
-#          wait
-#          sys cp no_singletons.fasta rdpClassifierInput.fasta
-#          print('No singletons file is fine' + "\n")
-         
-#       } else {
-#          sys cp SWARM_otu_no_chimera.fasta rdpClassifierInput.fasta
-#       }
-   
-#       ### I run RDPClassifier - train - step has already be done and as reference database we use MIDORI
-      
-#       ##  need to check on this... try this "-f filterbyconf: only outputs the results for major ranks as in fixrank,
-#       ##  results below the confidence cutoff were bin to a higher rank unclassified_node  db: outputs the seqname, trainset_no, tax_id, conf.
-      
-#       task java -Xmx64g -jar $path/tools/RDPTools/classifier.jar classify -t $path/tools/RDPTools/TRAIN/rRNAClassifier.properties -o tax_assign_swarm_COI_temp.txt rdpClassifierInput.fasta
-      
-#       wait
-   
-#       task{
-#          sys sed 's/.*root\t1.0\t//g' tax_assign_swarm_COI_temp.txt > taxonomies.txt
-#          sys awk '{print $1}' tax_assign_swarm_COI_temp.txt > ids.txt
-#          sys paste ids.txt taxonomies.txt > tax_assign_swarm_COI.txt
-#          sys rm ids.txt taxonomies.txt tax_assign_swarm_COI_temp.txt
-#       }
-#       print 'RDPClassifier has ran as it should ' + "\n"
-      
-#       swarmPath.chdir()
-#       string noSpaceFile = 'nospace_swarm.fasta'
-
-#       noSpaceFile.delete()
-#       wait
-      
-#       ## we keep in a new file, only the otus that have above  97% similartity with some species and in another just the uniq species
-#       swarmPath.chdir()
-#       #sys bash $path/scripts/keepOnlyPerCentSimilartityForSwarm.sh
-#       print 'all the taxonomy assignment procedure for the SWARM case has been completed!'  + "\n"
-      
-      
-#       # Create a MOTU table as for the case of 16S
-#       # We need to change the swarm output as we have removed some amplicons after the ASV inferring because of the chimera removal
-#       task {
-#          sys bash $path/scripts/makeMotuTableForRDPClassifier.sh
-#          sys rm *_sorted
-#       }
       
 # ###   and now the big "IF" for the case of ITS
 # ###   we will use the CREST LCAClassifier for that.
@@ -866,6 +707,15 @@ println('Pema has been completed successfully. Enjoy your results! :) ')
 
 # #////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+
+
+
+
+
+
+
+
+
 # ##############################################################################################################################
 # ####  now, i have everything i need to, so I make files per sample in which i keep only the info I consider as valuable ! ####
 # ##############################################################################################################################
@@ -1007,130 +857,7 @@ println('Pema has been completed successfully. Enjoy your results! :) ')
 # string{} paramForPhyloseq = readParameterFile(m)
 
 
-# ###################################################################################################################
-# #                                                                        
-# #                              phyloseq time!!!                                   
-# #                                                                        
-# ###################################################################################################################
 
-# # In order to get a phyloseq analysis, a phylogenetic tree for the OTUs found, needs to be made. 
-# # For that purpose, PEMA creates a Multiple Sequence Alignment (MSA) using the MAFFT algorithm
-# # Then, using RAxML the tree is being built.
-
-# # Finally, the user has to provide PEMA with a "metadata.csv" file. This needs to be in the analysis folder, along with parameters.tsv
-
-# # Pay attention!
-# # You need to fulfill the variable with the silva version, into the "phyloseq_in_PEMA.R" file as well, in order to get the phyloseq analysis. 
-
-# if ( paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' &&  paramForPhyloseq{'phyloseq'} == 'Yes' ) {
-   
-#    string phyloseq_folder = 'phyloseq_output'
-
-#    outputFilePath.chdir()
-#    # check if phyloseq-output folder has already been made from previous run
-#    if ( phyloseq_folder.isDir() ) {
-#       print 'a phyloseq-output folder has already been built\n'
-#       wait
-#    } else {
-#       # create a folder where the input/output of phyloseq will be located
-#       phyloseq_folder.mkdir()
-#    }   
-   
-#    # set the assignmentPath variable according to the marker gene chosen
-#    string assignmentPath
-#    if ( paramForPhyloseq{'gene'} == 'gene_ITS' ) {
-#       string algoCluster = paramForPhyloseq{'clusteringAlgoForCOI_ITS'}
-#       string algo = algoCluster.split('_')[1]
-#       assignmentPath = genePath + '/' + paramForPhyloseq{'gene'}  + '/' + algo + '/' + paramForPhyloseq{'taxonomyFolderName'}
-#    } else if ( paramForPhyloseq{'gene'} == 'gene_COI' ) {
-#       string algoCluster = paramForPhyloseq{'clusteringAlgoForCOI_ITS'}
-#       string algo = algoCluster.split('_')[1]
-#       assignmentPath = genePath + '/' + paramForPhyloseq{'gene'}  + '/' + algo
-#       assignmentPath.chdir()
-#       sys bash $path/scripts/makePhyloseqForCoiCase.sh
-#    } else {
-#       string algoCluster = paramForPhyloseq{'clusteringAlgoFor16S_18SrRNA'}
-#       string algo = algoCluster.split('_')[1]
-#       assignmentPath = genePath + '/' + paramForPhyloseq{'gene'}  + '/' + algo + '/' + paramForPhyloseq{'taxonomyFolderName'}
-#       assignmentPath.chdir()
-#    }
-   
-#    ## if you want to use phyloseq functions that need a phylogenetic tree with the OTUs found, you need to build such a tree!
-#    if ( paramForPhyloseq{'tree'} == 'Yes' ) {
-      
-#       print("assingmentPath is:  " +  assignmentPath + '\n')
-#       assignmentPath.chdir()
-      
-#       ## at first, we align the sequences of the final OTUs using the MAFFT aligner
-#       task /usr/bin/mafft --auto --reorder --thread -1 Aligned_assignments.fasta > aligned_otus.fasta
-#       wait
-#       print 'mafft alignmnent has been concluded' + '\n'
-      
-#       sys awk '{ if (substr($1,1,1) ~ /^>/ ) {print $1} else {print $0} }' aligned_otus.fasta > aligned_otus.fasta.temp
-#       sys rm aligned_otus.fasta
-#       sys mv aligned_otus.fasta.temp aligned_otus.fasta
-#       sys sed -i 's/:/_/g' aligned_otus.fasta
-      
-#       ## to get a nice tree, we will run the RAxML-ng "check" algorithm in the first place, in oder to check our MSA.
-#       task $path/tools/raxml-ng/raxml-ng/bin/raxml-ng --check --msa aligned_otus.fasta --model GTR+G4 || true
-#       wait
-#       print 'The check of the alignment is done!' + '\n'
-            
-#       ## and then I create my tree using RAxML
-#       string test = 'aligned_otus.fasta.raxml.reduced.phy'
-#       if ( test.exists() == 'true' ) {
-#          task $path/tools/raxml-ng/raxml-ng/bin/raxml-ng --all --msa-format PHYLIP --msa aligned_otus.fasta.raxml.reduced.phy --tree pars{$paramForPhyloseq{'parsTrees'}} --bs-trees $paramForPhyloseq{'bootstrapTrees'} --model GTR+G4 --threads $paramForPhyloseq{'raxmlThreads'} --force      
-#          wait
-#          sys mv aligned_otus.fasta.raxml.reduced.phy.raxml.bestTree aligned_otus.fasta.raxml.bestTree
-         
-#       } else {
-#          print 'The mafft alignment was good for raxml-ng' + '\n'
-#          task $path/tools/raxml-ng/raxml-ng/bin/raxml-ng --all --msa-format FASTA --msa aligned_otus.fasta --tree pars{$paramForPhyloseq{'parsTrees'}} --bs-trees $paramForPhyloseq{'bootstrapTrees'} --model GTR+G4 --threads $paramForPhyloseq{'raxmlThreads'} --force
-
-#          wait   
-#       }
-#       wait      
-#    }
-         
-#    ## finally, I have to copy all the necessary PEMA's output files, that phyloseq uses as input, to the phyloseq-output folder
-#    assignmentPath.chdir()
-#    task{
-      
-#       ## add the OTU-table found in the phyloseq folder and name it as the phyloseq script wants 
-#       sys cp final_table.tsv $outputFilePath/phyloseq_output
-#       sys cd $outputFilePath/phyloseq_output
-#       sys mv final_table.tsv otu_table.txt
-#       sys sed -i 's/:/_/g' otu_table.txt
-      
-#       ## add the metadata file in the phyloseq folder
-#       sys cp $outputPoint/metadata.csv $outputFilePath/phyloseq_output   
-#    }
-
-#    string test2 = "aligned_otus.fasta.raxml.bestTree"
-#    if ( test2.exists() == 'true' ) {
-#       task{
-#          sys cp aligned_otus.fasta.raxml.bestTree $outputFilePath/phyloseq_output
-#          sys cd $outputFilePath/phyloseq_output
-#          sys mv aligned_otus.fasta.raxml.bestTree OTUs_tree.tre   
-#       }         
-#    }
-   
-#    # run the phyloseq script   
-#    string phyloseqPath = outputFilePath + '/' + "phyloseq_output"
-#    phyloseqPath.chdir()
-#    sys cp $outputPoint/phyloseq_in_PEMA.R .
-#    wait
-   
-#    sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $paramForPhyloseq{'gene'} $paramForPhyloseq{'silvaVersion'}
-
-#    wait      
-# }
-
-# ###################################################################################################################
-# #                                                                                      
-# #                          phyloseq has been concluded                                    
-# #                                                                                      
-# ###################################################################################################################  
 
 
 # ###  make a file where i will move all the checkpoints
