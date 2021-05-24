@@ -19,7 +19,7 @@
 #
 # Give in your each uniq experiment a NAME, so a single output file will be created for each of them 
 #
-outputFolderName	test_COI_swarm
+outputFolderName	test_COI_swarm_from_new_image
 #
 #
 # If the names of the samples under analysis are not in an ENA format (e.g "ERR1021912") but they are more like as

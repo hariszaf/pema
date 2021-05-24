@@ -11,7 +11,14 @@ while read line; do awk -F "\t" '{print $2}' | xargs -I {} grep {} taxonomies.tx
 sed -i '1 i\Classification' taxonomies_sorted.txt
 
 
-awk '{ print substr($0, index($0,$3)) }' asvs_contingency_table.tsv  | awk 'BEGIN {OFS="\t"} NF{NF-=1};1' | sed 's/linearized.dereplicate_//g ; s/.merged.fastq//g'  > TMP
+# awk '{ print substr($0, index($0,$3)) }' asvs_contingency_table.tsv  | awk 'BEGIN {OFS="\t"} NF{NF-=1};1' | sed 's/linearized.dereplicate_//g ; s/.merged.fastq//g'  > TMP
+
+
+awk 'BEGIN {OFS="\t"} {for(i=3;i<=NF;i++){printf "%s ", $i}; printf "\n"}' asvs_contingency_table.tsv > tml
+awk 'BEGIN {FS=" "}{OFS="\t"} NF{NF-=1};1' tml > tnl
+sed 's/linearized.dereplicate_//g ; s/.merged.fastq//g' tnl > TMP
+
+rm tml tnl
 
 awk -F "\t" '{print $1}' asvs_contingency_table.tsv | sed -e 's/^/Otu/ ; s/OtuOTU/OTU_id/' > otus
 
