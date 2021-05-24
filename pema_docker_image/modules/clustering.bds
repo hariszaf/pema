@@ -129,7 +129,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
       println('Singletons have been removed')     
    }   
 
-   sys if [ $(find '$globalVars{'assignmentPath'}' -name 'all_sequences_grouped.fa') ] ; then  rm *gz ; fi
+   sys if [ $(find '$globalVars{'assignmentPath'}' -name 'all_sequences_grouped.fa') ] ; then  rm all_sequences_grouped.fa ; fi
    sys ln -s asvs_representatives_all_samples.fasta all_sequences_grouped.fa
 
 

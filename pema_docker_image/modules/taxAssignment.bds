@@ -154,16 +154,16 @@ string rdpAssign(string{} params, string{} globalVars) {
 
    if ( params{'gene'} == "gene_COI" ) {
 
-      task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'midori_version'}/rRNAClassifier.properties -o tax_assign_swarm_temp.txt all_sequences_grouped.fa
+      task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'midori_version'}/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
 
       wait
    
       task {
-         sys awk -F "\t" '{print substr($0, index($0,$6)) }' tax_assign_swarm_temp.txt > taxonomies_tmp.txt 
+         sys awk -F "\t" '{print substr($0, index($0,$6)) }' tax_assign_temp.txt > taxonomies_tmp.txt 
          sys sed 's/Kingdom//g ; s/Phylum//g ; s/Class//g ; s/Order/g/ ; s/Family//g ; s/Genus//g ; s/Species//g' taxonomies_tmp.txt > taxonomies.txt
-         sys awk '{print $1}' tax_assign_swarm_temp.txt > ids.txt
-         sys paste ids.txt taxonomies.txt > tax_assign_swarm.txt
-         sys rm ids.txt taxonomies_tmp.txt taxonomies.txt tax_assign_swarm_temp.txt
+         sys awk '{print $1}' tax_assign_temp.txt > ids.txt
+         sys paste ids.txt taxonomies.txt > tax_assignments.tsv
+         sys rm ids.txt taxonomies_tmp.txt taxonomies.txt tax_assign_temp.txt
       }
 
       println('RDPClassifier has ran as it should ')
@@ -172,7 +172,6 @@ string rdpAssign(string{} params, string{} globalVars) {
       # Change the swarm output as we have removed some amplicons after the ASV inferring because of the chimera removal
       task {
          sys bash $globalVars{'path'}/scripts/makeMotuTableForRDPClassifier.sh
-         sys rm *_sorted
       }
 
    }

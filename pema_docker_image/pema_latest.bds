@@ -164,6 +164,8 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 }
 
 
+println('Pema has been completed successfully. Enjoy your results! :) ')
+
 
 
 
