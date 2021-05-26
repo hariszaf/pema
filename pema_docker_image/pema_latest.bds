@@ -154,9 +154,11 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
 
       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
-         println('Pema cannot support this option. It will use CREST instead and the relative parameter will change accordingly.')
+
+         println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
 
          globalVars{'classifierAlgo'} = 'CREST'
+
       }
 
 
@@ -173,6 +175,14 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
    } else {
 
       if ( paramsForTaxAssign{'gene'} == 'gene_COI' ) {
+
+         if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+
+            println('Pema cannot run COI data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
+
+            globalVars{'classifierAlgo'} = 'RDPClassifier'
+
+         }
 
          rdpAssign(paramsForTaxAssign, globalVars)
 
@@ -216,122 +226,29 @@ if ( paramsForCA{'phyloseq'} == 'Yes') {
 
 wait
 
-println('Pema has been completed successfully. Enjoy your results! :) ')
+################################################################
+#                Pema has been concluded                      #
+################################################################
+
+###  Make a file where i will move all the checkpoints
+parameterFilePath.chdir() ;
+if ( paramsForCA{'emptyCheckpoints'} == 'Yes' ) {
+   string checkpointsDir = 'checkpoints_for_' + paramsForCA{'outputFolderName'}
+   globalVars{'outputFilePath'}.chdir()
+   checkpointsDir.mkdir()
+   globalVars{'outputPoint'}.chdir()   
+   sys mv *.chp $globalVars{'outputFilePath'}/$checkpointsDir
+}
 
 
-
-
-
-
-
-
+println('----------------------------------------------------------')
+println('Pema has been completed successfully. Let biology start!')
+println('Thanks for using Pema.')
 
 
 
    
-   
-#    ## in this case, there is not an algo that does both chimera removal and clustering, hence we have a 2 - step procedure
-#    ## an kai stin arxi eixame pei prota chimera removal kai meta otu clustering, telika pame antistrofa
-
-#    #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////   
-#    ###########################  ASVs inference by making use of the  SWARM algorithm   ###############################
-#    #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-   
-#    if ( paramsOfTable{'clusteringAlgoForCOI_ITS'} == 'algo_SWARM' ) {
-      
-#       #### Prepare files
-#       outputFilePath.chdir()
-#       string swarmPath = genePath + '/' + gene + '/' + 'SWARM'
-#       string allFiles = geneName + "_SWARM_all_samples.fasta"
-   
-#       sys cp final_all_samples.fasta $swarmPath/$allFiles
-#       wait
-         
-#       ###### we build a contingency table for AMPLICONS  - here the awk.sh file is a bash script that you can find in the PEMA file
-#       linearPath.chdir()
-      
-#       task{
-#          sys bash $path/scripts/createContigencyTable.sh
-#          sys sed 's/linearized.dereplicate_//g; s/.merged.fastq//g' amplicon_contingency_table_temp.csv > amplicon_contingency_table.csv
-#          sys mv amplicon_contingency_table.csv $swarmPath
-#       }
-#       wait
-      
-#       print 'the contigency table has been created successfully!' + "\n"
-      
-#       ##### Run SWARM and then chimera removal
-#       swarmPath.chdir()
-#       string inputFileForSwarm = geneName + "_SWARM_all_samples.fasta"
-#       wait
-      
-      
-      
-
-#       ##### [NEW STEP: 2020.05.24] : Swarm expects dereplicated fasta files. We need to dereplicate the unified sequences file.
-#       task $path/tools/swarm/swarm/bin/swarm -d 0 -t $paramsOfTable{'swarmThreads'} -w derep.fasta $inputFileForSwarm
-#       wait
-
-#       task{   
-#          sys rm $inputFileForSwarm
-#          sys mv derep.fasta $inputFileForSwarm
-#       }      
-      
-#       wait      
-      
-      
-      
-#       ## here is the clustering step with SWARM algorithm    
-#       if ( paramsOfTable{'d'} == '1' ) {
-#          task $path/tools/swarm/swarm/bin/swarm -d 1 -f -t $paramsOfTable{'swarmThreads'} -s SWARM.stats -w SWARM_OTU_representatives_all_samples.fasta < $inputFileForSwarm > SWARM.swarms      
-#       } else {
-#          task $path/tools/swarm/swarm/bin/swarm -d $paramsOfTable{'d'} -t $paramsOfTable{'swarmThreads'} -s SWARM.stats -w SWARM_OTU_representatives_all_samples.fasta < $inputFileForSwarm > SWARM.swarms
-#       }
-#       wait
-#       print('the swarm algorithm worked just fine!' + "\n")
-      
-#       # and now i handle its output in order to take it in the form i want to. turn lowcase to uppercase and substitute the '_' to 'size='
-#       task {
-#            sys cat SWARM_OTU_representatives_all_samples.fasta | tr '[a-z]' '[A-Z]' > upper.SWARM_OTU_representatives_all_samples.fasta
-#            sys sed 's/_/;size=/g' upper.SWARM_OTU_representatives_all_samples.fasta > true.SWARM_OTU_representatives_all_samples.fasta
-#       }
-#       wait
-      
-#       ## 'sortbysize' is an algorithm for sorting by size (abundance)
-#       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --sortbysize true.SWARM_OTU_representatives_all_samples.fasta --output SWARM_final_OTU_representative.fasta
-#       wait
-#       print('sortbysize algorithm ran ok!' + "\n")
-      
-#       ## and the 'uchime3_denovo' is an algorithm for finding chimeras
-#       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --uchime3_denovo SWARM_final_OTU_representative.fasta --nonchimeras SWARM_otu_no_chimera.fasta --abskew $paramsOfTable{'abskew'}
-#       wait
-#       print('the uchime3_denovo algorithm for finding chimeras just finished!' + "\n")
-
-#       string[] swarmInterFIles = swarmPath.dir()
-#       for (string file : swarmInterFIles ) {
-#          if ( file.startsWith('upper') ) {
-#             file.delete()
-#          }
-#          if  ( file.startsWith('true') ) {
-#             file.delete()
-#          }
-#       }      
-      
-#       ##### at last, we create an OTU table that comes after the SWARM results. Again, we have an awk command in a bash script 
-#       swarmPath.chdir()
-#       sys mv $linearPath/amplicon_contingency_table_temp.csv $swarmPath
-#       wait
-#       # sys bash $path/scripts/createOtuContigencyTable.sh
-
-#       # if necessary, remove some not that nice things 
-#       sys sed -i 's/:::/:/g; s/:0:0:0:0./0./g'  amplicon_contingency_table.csv
-#       sys bash $path/scripts/otuContingencyTableSwarm.sh
-#       print('the contigency table with the found otus was just created!' + "\n")
-#    }
-#    #### here ends ths "if" statement of SWARM clustering   (   ATTENTION TO HAVE 1 TAB HERE !! )
-
-#    #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-#    ##########################   Clustering to OTUs by making use of the CROP algorithm   #############################
-#    #//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+# / Clustering to OTUs by making use of the CROP algorithm   ///////////
    
 #    if ( paramsOfTable{'clusteringAlgoForCOI_ITS'} == 'algo_CROP' ) {
       
@@ -430,42 +347,6 @@ println('Pema has been completed successfully. Enjoy your results! :) ')
 # ###################     Taxonomy assignment for the COI and the ITS marker genes    ###################
 # #######################################################################################################
 
-
-# #\\\\\\\\\\\\\\ \\\\\\\\      When SWARM has been used for ASVs inferring  /////////////////////////////
-
-      
-# ###   and now the big "IF" for the case of ITS
-# ###   we will use the CREST LCAClassifier for that.
-
-#    } else if ( paramsOfTaxonomy{'gene'} == "gene_ITS" ) {
-         
-#       swarmPath.chdir()
-      
-#       # run a script that will make all the changes needed for the SWARM output to run with LCAClassifier
-#       task bash $path/scripts/transformationsOnTable.sh
-      
-#       wait
-
-#       sys mv SWARM_OTU_table.tsv ITS_otutab_$paramsOfTaxonomy{'taxonomyFolderName'}.txt 
-#       sys mv SWARM_otu_no_chimera.fasta ITS_all_samples.otus.fa
-#       sys sed -i 's/;size=[0-9]*//g' ITS_all_samples.otus.fa
-
-      
-#       task $path/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast -query ITS_all_samples.otus.fa -db $path/tools/CREST/LCAClassifier/parts/flatdb/unite/unite.fasta -num_alignments 100 -outfmt 5 -out ITS_myunitemod.xml -num_threads $paramsOfTaxonomy{'vsearchThreads'}
-
-#       wait
-         
-#       task $path/tools/CREST/LCAClassifier/bin/classify -c $path/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf -d unite -t ITS_otutab_$paramsOfTaxonomy{'taxonomyFolderName'}.txt -o $paramsOfTaxonomy{'taxonomyFolderName'} ITS_myunitemod.xml
-      
-#       wait
-      
-#       string taxonomyDirectoryITS = genePath + '/' + paramsOfTaxonomy{'gene'} +  '/' + 'SWARM' + '/' + paramsOfTaxonomy{'taxonomyFolderName'}
-#       taxonomyDirectoryITS.chdir()
-#       sys cp ITS_otutab_* final_table.tsv
-#    }      
-# }
-
-# wait
 
 # #\\\\\\\\\\\\\\ \\\\\\\\      When CROP has been used for OTUs clustering  /////////////////////////////
 

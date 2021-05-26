@@ -92,7 +92,12 @@ string clusteringSwarm(string{} params, string{} globalVars) {
    #### Prepare files
    globalVars{'outputFilePath'}.chdir()
    # globalVars{'swarmPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'Swarm'
-   task cp all_samples.fasta $globalVars{'assignmentPath'}/all_samples.fasta
+   task {
+      
+      sys cp all_samples.fasta $globalVars{'assignmentPath'}/all_samples.fasta
+      sys rm all_samples.fasta
+   }
+
 
    wait
 
@@ -129,19 +134,34 @@ string clusteringSwarm(string{} params, string{} globalVars) {
       println('Singletons have been removed')     
    }   
 
-   sys if [ $(find '$globalVars{'assignmentPath'}' -name 'all_sequences_grouped.fa') ] ; then  rm all_sequences_grouped.fa ; fi
-   sys ln -s asvs_representatives_all_samples.fasta all_sequences_grouped.fa
+   # Check if this is a second analysis to remove files not needed and make links to others 
+   task {
+      
+      sys if [ $(find '$globalVars{'assignmentPath'}' -name 'all_sequences_grouped.fa') ] ; then  rm all_sequences_grouped.fa ; fi
 
+      sys ln -s asvs_representatives_all_samples.fasta all_sequences_grouped.fa
+   
+   }
+
+   wait
 
    # According to the Clustering step to come, we need to implement some transformations
    if ( params{'classifierAlgo'} == 'CREST' && params{'gene'} != 'gene_COI' ) {
 
       println('Build CREST input once Swarm has been completed')
+      println('Transformations on the Swarm output to align to the CREST input are about to be implemented.')
 
       sys bash $globalVars{'path'}/scripts/buildAllTableFile.sh
+      
       wait 
-      sys mv allTab.tsv allTab_$params{'taxonomyFolderName'}.tsv
 
+      task{
+         sys python3 $globalVars{'path'}/scripts/makeInteger.py
+         sys mv allTab.tsv allTab_$params{'taxonomyFolderName'}.tsv
+         sys mv allTab_temp.tsv  allTab_$params{'taxonomyFolderName'}.tsv
+      }
+
+      wait
 
    } else if ( params{'classifierAlgo'} == 'CREST' && params{'gene'} != 'gene_COI' ) {
 
@@ -161,7 +181,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
 
 
 
- string swarmMinValues(string{} params, string{} globalVars) {
+string swarmMinValues(string{} params, string{} globalVars) {
 
    int d_param = params{'d'}.parseInt()
    

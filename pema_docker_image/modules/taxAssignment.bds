@@ -65,7 +65,12 @@ string crestAssign(string{} params, string{} globalVars) {
             wait      
          }
 
-         sys mv $params{'taxonomyFolderName'}/allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/finalTable.tsv
+         task {
+            sys mv $params{'taxonomyFolderName'}/allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/finalTable.tsv
+            sys sed -i 's/classification/Classification/g' $params{'taxonomyFolderName'}/finalTable.tsv
+         }
+         wait
+
 
       } else {
 
@@ -93,17 +98,6 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    ## getting this tree in  $path/tools/silva_132/for_placement
    ## in order to get our PHYLOGENY based taxonomy assignment we make use of EPA - NG // last version of Evolutionary Placement Algorithm
    
-
-   # string assignmentPath16S = ''
-   # if ( params{'clusteringAlgo'} == "algo_vsearch" ) {
-   #    string assignmentPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'vsearch'
-   #    assignmentPath16S.chdir()
-      
-   # } else if ( params{'clusteringAlgo'} == "algo_swarm" ) {
-   #    string assignmentPath16S = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'swarm'
-   #    assignmentPath16S.chdir()
-   #    sys cp otu_no_chimera.fasta all_sequences_grouped.fa
-   # }
    globalVars{'assignmentPath'}.chdir()
    
    wait
@@ -145,7 +139,6 @@ string phylogenyAssign(string{} params, string{} globalVars) {
 }
 
 
-
 string rdpBuildingTable(string{} params, string{} globalVars) {
 
    task {
@@ -170,7 +163,6 @@ string rdpBuildingTable(string{} params, string{} globalVars) {
 
    return 'ok'
 }
-
 
 
 string rdpAssign(string{} params, string{} globalVars) {
@@ -217,6 +209,9 @@ string rdpAssign(string{} params, string{} globalVars) {
    return 'ok'
 
 }
+
+
+
 
 
 
