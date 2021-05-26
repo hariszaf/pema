@@ -151,14 +151,12 @@ string clusteringSwarm(string{} params, string{} globalVars) {
       println('Build CREST input once Swarm has been completed')
       println('Transformations on the Swarm output to align to the CREST input are about to be implemented.')
 
-      sys bash $globalVars{'path'}/scripts/buildAllTableFile.sh
-      
-      wait 
 
-      task{
-         sys python3 $globalVars{'path'}/scripts/makeInteger.py
+      task {
+
+         sys bash $globalVars{'path'}/scripts/buildAllTableFile.sh
+     
          sys mv allTab.tsv allTab_$params{'taxonomyFolderName'}.tsv
-         sys mv allTab_temp.tsv  allTab_$params{'taxonomyFolderName'}.tsv
       }
 
       wait

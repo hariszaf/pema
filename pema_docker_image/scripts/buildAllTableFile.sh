@@ -9,6 +9,8 @@ awk -F '\t' '{print $1}' asvs_contingency_table.tsv | sed 's/^\([0-9].*\)/Otu\1/
 
 head -1 asvs_contingency_table.tsv | awk 'BEGIN {OFS = "\t"}{for(i=3;i<=NF-1;++i) printf $i"\t"}' |  sed 's/linearized.dereplicate_//g ; s/.merged.fastq//g' > header 
 
+sed -i 's/\t$//' header
+
 while read line; do grep -v OTU |  awk -v b=2 'BEGIN{FS=OFS="\t"}{OFMT = "%.0f"} {for (i=b;i<=NF;i++) printf "%d%s", $i, (i<NF ? OFS : ORS)}' > OUTPUT_t ;done < tmp
 
 awk 'BEGIN {OFS="\t"} NF{NF-=1};1' OUTPUT_t > OUTPUT
