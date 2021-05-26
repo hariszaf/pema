@@ -36,5 +36,5 @@ cat asvs_representatives_all_samples.fasta | grep -v ">" > seqs
 
 paste -d \\n otus seqs  > asvs_representatives_all_samples.fasta
 
-rm pairs otus seqs 
+rm otus seqs 
 

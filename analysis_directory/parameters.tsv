@@ -19,7 +19,7 @@
 #
 # Give in your each uniq experiment a NAME, so a single output file will be created for each of them 
 #
-outputFolderName	test_COI_swarm
+outputFolderName	test_16S
 #
 #
 # If the names of the samples under analysis are not in an ENA format (e.g "ERR1021912") but they are more like as
@@ -219,7 +219,7 @@ vsearchId	0.95
 # taxonomy assignment. By default, the pipeline runs for 16S. Substitute with 'COI' if COI is your marker gene
 # write it down after the underscore (_) - do not erase the udenrscore!!
 #
-gene	gene_COI
+gene	gene_16S
 #
 #
 ##########################################################################################################
@@ -277,7 +277,7 @@ reverseITSPrimer	CTBTTVCCKCTTCACTCG
 # Depending on which of them you choose you get either a robust output in a short time (Swarm) or a non-robust output (CROP) that requires quite much more time.
 # Please fill in accroding to your marker gene and needs (write "Swarm" or "vsearch" or "CROP" after algo_).
 #
-clusteringAlgo	algo_Swarm
+clusteringAlgo	algo_vsearch
 #
 #
 # In case of SWARM, the user needs to speeecify the value of "d" parameter,
@@ -369,13 +369,13 @@ name_of_custom_db	partialCustomdb
 # In order to do that, PEMA needs an MSA that it is returned by the MAFFT (v7.427) aligner and a phylogeny tree of the OTUs found which is built by the RAxML-ng algorithm.
 # Please remember that in order to use phyloseq a "metadata.tsv" file is necessary to be part of your anaylis folder. 
 #
-phyloseq	No
+phyloseq	Yes
 #
 #
 # The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees.
 # Do you want to create such a tree with your OTUs? In case you build this once, you can use it as many times as you want.
 #
-tree	No
+tree	Yes
 #
 # In case you are about to use the phyloseq option, then a phylogeny tree has to be built. Hence, PEMA invokes the RAxML-ng algorithm
 # which is able to run in more than one threads. Please set the number of threads RAxML is able to use.

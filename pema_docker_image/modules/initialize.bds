@@ -148,6 +148,9 @@ string{} initializeAnalysis(string{} params) {
    string algo1 = algoCluster1.split('_')[1]
    globalVars{'assignmentPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + algo1
 
+   # Keep the classifer as a global var so you can change it if needed
+   globalVars{'classifierAlgo'} = params{'classifierAlgo'}
+
    return(globalVars)
 }
 
