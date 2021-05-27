@@ -2,16 +2,17 @@
 
 name: GitlabSync
 
-# Controls when the action will run. 
-on:
-  - push
-  - delete
-  
-#   # Triggers the workflow on push or pull request events but only for the master branch
-#   push:
-#     branches: [ master ]
-#   pull_request:
-#     branches: [ master ]
+# # Controls when the action will run. 
+# on:
+#   - push
+#   - delete
+
+on: 
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master, rearchitecturing ] 
+  pull_request:
+    branches: [ master, rearchitecturing ]
 
 #   # Allows you to run this workflow manually from the Actions tab
 #   workflow_dispatch:
