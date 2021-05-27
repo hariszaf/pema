@@ -462,7 +462,9 @@ string mergeFilesNonSwarm(string{} params, string{} globalVars){
    task awk '/N/{n=2}; n {n--; next}; 1' < $globalVars{'outputFilePath'}/all_samples.fasta  > $globalVars{'outputFilePath'}/final_all_samples.fasta
 
    wait
-   sys rm *.g.fasta
+   sys rm *.g.fasta 
+   
+   sys rm $globalVars{'outputFilePath'}/all_samples.fasta
 
    return 'ok'
 
