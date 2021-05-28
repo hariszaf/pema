@@ -47,8 +47,7 @@ theme_set(theme_bw())
 
 
 #import the OTU table (or else biotic data)
-file.rename("otu_table.txt","final_table.tsv")
-biotic <- read.csv("final_table.tsv", sep = "\t", header=TRUE, row.names = 1) 
+biotic <- read.csv("finalTable.tsv", sep = "\t", header=TRUE, row.names = 1) 
 
 #import the tree of the OTUs
 testTree <- "OTUs_tree.tre"
@@ -59,39 +58,39 @@ if (file.exists(testTree)) {
 }
 
 
-#Create taxonomy table from the classification column of the biotic data
+#Create taxonomy table from the Classification column of the biotic data
 
 if (markerGene == 'gene_16S' || markerGene == 'gene_18S') {
 	if (silvaVersion == 'silva_132') {
 	  # Silva 132
-	  taxonomy <- select(biotic, classification)
+	  taxonomy <- select(biotic, Classification)
 	  colnames <- c("Root", "Domain", "Phylum", "Class", "Order", "Family", "Genus", "Species")
-	  taxonomy <- separate(taxonomy, classification, colnames, sep = ";", remove = TRUE,
+	  taxonomy <- separate(taxonomy, Classification, colnames, sep = ";", remove = TRUE,
 						   convert = FALSE, extra = "warn", fill = "warn")
 	  getPalette = colorRampPalette(brewer.pal(8, "Set2"))
 	  
 	} else if (silvaVersion == 'silva_128') {
 	  # Silva 128
-	  taxonomy <- select(biotic, classification)
+	  taxonomy <- select(biotic, Classification)
 	  colnames <- c("Root", "Domain", "Superkingdom", "Superphylum", "Phylum", "Class", "Order", "Family", "Genus", "Species")
-	  taxonomy <- separate(taxonomy, classification, colnames, sep = ";", remove = TRUE,
+	  taxonomy <- separate(taxonomy, Classification, colnames, sep = ";", remove = TRUE,
 							   convert = FALSE, extra = "warn", fill = "warn")
 	  getPalette = colorRampPalette(brewer.pal(10, "Set2"))
 	}	
 	
 } else if (markerGene == 'gene_ITS') {
     # UNITE database
-	taxonomy <- select(biotic, classification)
+	taxonomy <- select(biotic, Classification)
 	colnames <- c("Root", "Superkingdom", "Subgroup", "Kingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
-	taxonomy <- separate(taxonomy, classification, colnames, sep = ";", remove = TRUE,
+	taxonomy <- separate(taxonomy, Classification, colnames, sep = ";", remove = TRUE,
 						 convert = FALSE, extra = "warn", fill = "warn")
 	getPalette = colorRampPalette(brewer.pal(10, "Set2"))
 	
 } else if (markerGene == 'gene_COI') {
 	# MIDORI database
-	taxonomy <- select(biotic, classification)
+	taxonomy <- select(biotic, Classification)
 	colnames <- c("Superkingdom", "Phylum", "Class", "Order", "Family", "Genus", "Species")
-	taxonomy <- separate(taxonomy, classification, colnames, sep = ";", remove = TRUE,
+	taxonomy <- separate(taxonomy, Classification, colnames, sep = ";", remove = TRUE,
 						 convert = FALSE, extra = "warn", fill = "warn")
 	getPalette = colorRampPalette(brewer.pal(7, "Set2"))
 }
@@ -106,8 +105,8 @@ taxonomy_matrix[y] <- "Unknown"
 # prepare the object for the phyloseq object
 TAX = tax_table(taxonomy_matrix)
 
-#remove classification column from biotic data
-biotic <- select(biotic, -classification)
+#remove Classification column from biotic data
+biotic <- select(biotic, -Classification)
 #convert the biotic data from data frame to matrix
 biotic_matrix <- as.matrix(biotic)
 
