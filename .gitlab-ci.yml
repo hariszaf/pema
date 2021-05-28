@@ -1,0 +1,35 @@
+image:
+  name: quay.io/singularity/singularity:v3.7.3
+  entrypoint: ["/bin/sh", "-c"]
+
+build:
+  script:
+     - /bin/bash .gitlabci/build.sh Singularity
+
+      # step 1. build the container!
+      # You can add any other sregistry push commands here, and specify a client
+      # (and make sure your define the encrypted environment credentials in gitlab
+      # to push to your storage locations of choice
+
+     - mkdir -p build && cp *.sif build
+     - mkdir -p build && cp Singularity* build
+
+      # Step 2. Take a look at "artifacts" below and add the paths you want added
+      # You can also add the entire build folder. You can also upload to storage
+      # clients defined by sregistry, here are some examples
+      # https://singularityhub.github.io/sregistry-cli/clients
+      # Environment variables must be defined in CI encrypted secrets/settings
+      # https://code.stanford.edu/help/ci/variables/README#variables).
+      #- /bin/bash build.sh --uri collection/container --cli google-storage Singularity
+      #- /bin/bash build.sh --uri collection/container --cli google-drive Singularity
+      #- /bin/bash build.sh --uri collection/container --cli globus Singularity
+      #- /bin/bash build.sh --uri collection/container --cli registry Singularity
+
+  # This is where you can save job artifacts
+  # https://docs.gitlab.com/ee/user/project/pipelines/job_artifacts.html
+  # You can specify the path to containers or the build folder to save.
+  # Don't forget to save your recipes too!
+  artifacts:
+      paths:
+        - build/Singularity.sif
+        - build/Singularity
