@@ -1,0 +1,140 @@
+#!/usr/bin/env bds
+
+# In order to get a phyloseq analysis, a phylogenetic tree for the OTUs found, needs to be made. 
+# For that purpose, PEMA creates a Multiple Sequence Alignment (MSA) using the MAFFT algorithm
+# Then, using RAxML the tree is being built.
+
+# Finally, the user has to provide PEMA with a "metadata.csv" file. This needs to be in the analysis folder, along with parameters.tsv
+
+# Pay attention!
+# You need to fulfill the variable with the silva version, into the "phyloseq_in_PEMA.R" file as well, in order to get the phyloseq analysis. 
+
+
+string communityAnalysis(string{} params, string{} globalVars) {
+
+
+   if ( params{'taxonomyAssignmentMethod'} == 'alignment' &&  params{'phyloseq'} == 'Yes' ) {
+      
+      string phyloseq_folder = 'phyloseqOutput'
+
+      globalVars{'outputFilePath'}.chdir()
+
+      # Check if phyloseq-output folder has already been made from previous run
+      if ( phyloseq_folder.isDir() ) {
+         println('A phyloseq-output folder has already been built')
+         wait
+      } else {
+
+         # Create a folder where the input/output of phyloseq will be located
+         phyloseq_folder.mkdir()
+      }
+      
+      # Get path where the input files for phyloseq are located
+      if ( globalVars{'classifierAlgo'} == 'CREST' ) {
+
+         globalVars{'phyloPath'} = globalVars{'assignmentPath'} + '/' + params{'taxonomyFolderName'}
+
+      } else {
+
+         globalVars{'phyloPath'} = globalVars{'assignmentPath'} 
+      }
+
+      wait
+
+      globalVars{'phyloPath'}.chdir()
+
+      println('This is the phyloPath var: ' +globalVars{'phyloPath'})
+
+
+      
+      ## Phyloseq functions that need a phylogenetic tree with the OTUs found, need a tree!
+      if ( params{'tree'} == 'Yes' ) {
+         
+         ## at first, we align the sequences of the final OTUs using the MAFFT aligner
+         task /usr/bin/mafft --auto --reorder --thread -1 Aligned_assignments.fasta > aligned_otus.fasta
+         wait
+
+         println('mafft alignmnent has been concluded')
+ 
+         task {
+            sys awk '{ if (substr($1,1,1) ~ /^>/ ) {print $1} else {print $0} }' aligned_otus.fasta > aligned_otus.fasta.temp
+   
+            sys rm aligned_otus.fasta
+            sys mv aligned_otus.fasta.temp aligned_otus.fasta
+            sys sed -i 's/:/_/g' aligned_otus.fasta
+         }
+
+         wait 
+
+         ## Run RAxML-ng to "check" algorithm to check our MSA.
+         task $globalVars{'path'}/tools/raxml-ng/raxml-ng/bin/raxml-ng --check --msa aligned_otus.fasta --model GTR+G4 || true
+         wait
+
+         println('The check of the alignment is done!')
+               
+         ## and then create a tree using RAxML-ng again
+         string test = 'aligned_otus.fasta.raxml.reduced.phy'
+         if ( test.exists() == 'true' ) {
+            task $globalVars{'path'}/tools/raxml-ng/raxml-ng/bin/raxml-ng \
+               --all --msa-format PHYLIP \
+               --msa aligned_otus.fasta.raxml.reduced.phy \
+               --tree pars{$params{'parsTrees'}} \
+               --bs-trees $params{'bootstrapTrees'} \
+               --model GTR+G4 \
+               --threads $params{'raxmlThreads'} --force      
+            wait
+            sys mv aligned_otus.fasta.raxml.reduced.phy.raxml.bestTree aligned_otus.fasta.raxml.bestTree
+            
+         } else {
+
+            println('The mafft alignment was good for raxml-ng')
+            task $globalVars{'path'}/tools/raxml-ng/raxml-ng/bin/raxml-ng --all \
+               --msa-format FASTA \
+               --msa aligned_otus.fasta \
+               --tree pars{$params{'parsTrees'}} \
+               --bs-trees $params{'bootstrapTrees'} \
+               --model GTR+G4 \
+               --threads $params{'raxmlThreads'} --force
+
+            wait   
+         }
+         wait      
+      }
+            
+      ## finally, I have to copy all the necessary PEMA's output files, that phyloseq uses as input, to the phyloseq-output folder
+      globalVars{'phyloPath'}.chdir()
+      task{
+         
+         ## add the OTU-table found in the phyloseq folder and name it as the phyloseq script wants 
+         sys cp finalTable.tsv $globalVars{'outputFilePath'}/phyloseqOutput
+         sys cd $globalVars{'outputFilePath'}/phyloseqOutput
+         # sys mv finalTable.tsv otu_table.txt
+         sys sed -i 's/:/_/g' finalTable.tsv
+         
+         ## add the metadata file in the phyloseq folder
+         sys cp $globalVars{'outputPoint'}/metadata.csv $globalVars{'outputFilePath'}/phyloseqOutput   
+      }
+
+      string test2 = "aligned_otus.fasta.raxml.bestTree"
+      if ( test2.exists() == 'true' ) {
+         task{
+            sys cp aligned_otus.fasta.raxml.bestTree $globalVars{'outputFilePath'}/phyloseqOutput
+            sys cd $globalVars{'outputFilePath'}/phyloseqOutput
+            sys mv aligned_otus.fasta.raxml.bestTree OTUs_tree.tre   
+         }         
+      }
+      
+      # run the phyloseq script   
+      string phyloseqPath = globalVars{'outputFilePath'} + '/' + "phyloseqOutput"
+      phyloseqPath.chdir()
+      sys cp $globalVars{'outputPoint'}/phyloseq_in_PEMA.R .
+      wait
+      
+      sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $params{'gene'} $params{'silvaVersion'}
+
+      wait      
+   }
+
+   return 'ok'
+
+}
