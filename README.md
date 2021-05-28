@@ -19,6 +19,10 @@
 ```
 -->
 
+[![Gitter](https://badges.gitter.im/pema-helpdesk/community.svg)](https://gitter.im/pema-helpdesk/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+
 Table of Contents
 =================
 
@@ -326,10 +330,17 @@ And of course the container-based technologies:
 * Singularity - https://sylabs.io/singularity/
 
 
-
 # License
 PEMA is under the GNU GPLv3 license (for 3rd party components separate licenses apply).
 
 # Citation
 Haris Zafeiropoulos, Ha Quoc Viet, Katerina Vasileiadou, Antonis Potirakis, Christos Arvanitidis, Pantelis Topalis, Christina Pavloudi, Evangelos Pafilis, PEMA: a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S ribosomal RNA, ITS, and COI marker genes, GigaScience, Volume 9, Issue 3, March 2020, giaa022, https://doi.org/10.1093/gigascience/giaa022
 
+<<<<<<< HEAD
+
+
+<!---  check for syncing     -->
+
+=======
+<!-- test sync on rearch --> 
+>>>>>>> rearchitecturing
