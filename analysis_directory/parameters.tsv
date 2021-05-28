@@ -2,15 +2,15 @@
 ################################   PEMA 's PARAMETERS   ####################################
 ############################################################################################
 #
-#    for version 2.0.1
+#    for version 2.1.3
 #
-# In this file there are all the parameters that need to be assigned every time PEMA is about to run!
-# The parameters we have here, are not the only parameters of the tools invoked by PEMA.
-# Hence, we encourage you the most to study the manual of each tool and make them as good as possible for your specific experiment.
-# In the link next to each tool, you can find further information about its parameters. 
+# In this file there are all the parameters that need to be assigned every time PEMA is 
+# about to run! The parameters we have here, are not the only parameters of the tools 
+# invoked by PEMA. Hence, we encourage you the most to study the manual of each tool and 
+# make them as good as possible for your specific experiment.
 #
 # ATTENTION!
-# From each variable you have to leave EXACTLY ONE (1) TAB and then fill the parameter as you wish. 
+# From each variable you have to leave EXACTLY ONE (1) TAB and then fill in the parameter. 
 #
 #
 ############################################################################################
@@ -19,12 +19,11 @@
 #
 # Give in your each uniq experiment a NAME, so a single output file will be created for each of them 
 #
-outputFolderName	test_16S_v.2.0.0
+outputFolderName	test_Swarm_16S
 #
 #
-# If the names of the samples under analysis are not in an ENA format (e.g "ERR1021912") but they are more like as
-# the Illumina sequencer returned them (e.g "FdCor_1.fast.gz") PEMA might has a problem in dealing with them.
-# We strongly suggest you to use the "convertIllumunaRawDataToEnaFormat.sh" script you can find in the GitHub repository of PEMA
+# PEMA needs the names of the samples to be as in ENA format (e.g "ERR1021912") but 
+# they are more like as the Illumina sequencer returned them (e.g "FdCor_1.fast.gz") 
 # In order to change the names of your samples as they should be.
 # Otherwise, you need to set the "EnaData" variable as 'No'.  
 EnaData	Yes
@@ -272,19 +271,12 @@ reverseITSPrimer	CTBTTVCCKCTTCACTCG
 #
 #
 # For the case of the 16S and 18S rRNA marker genes, you can either get an OTU-table using the VSEARCH algorithm
-# or you can get an ASV-table by taking advantage of the SWARM algorithm. Please fill in which of those
-# two, you prefere to run (write "swarm" or "vsearch" after algo_).
+# or you can get an ASV-table by taking advantage of the SWARM algorithm. 
+# If your marker gene is  COI or ITS, you can choose between 2 different approaches of clustering. 
+# Depending on which of them you choose you get either a robust output in a short time (Swarm) or a non-robust output (CROP) that requires quite much more time.
+# Please fill in accroding to your marker gene and needs (write "Swarm" or "vsearch" or "CROP" after algo_).
 #
-clusteringAlgoFor16S_18SrRNA	algo_vsearch
-#
-#
-# If your marker gene is  COI or ITS, you can choose between 2 different approaches of clustering. Depending on which of them you choose
-# you get either a robust output in a short time (SWARM)  or a non-robust output (CROP) that requires quite much more time.
-# CROP is a bayesian algorithm and that is why its output in non-robust.
-# By default, SWARM (v2.2.2) algorithm runs for the clustering.
-# You have to change in to 'CROP' if you want the CROP algorithm to do the clustering step.
-#
-clusteringAlgoForCOI_ITS	algo_SWARM
+clusteringAlgo	algo_Swarm
 #
 #
 # In case of SWARM, the user needs to speeecify the value of "d" parameter,
@@ -292,7 +284,7 @@ clusteringAlgoForCOI_ITS	algo_SWARM
 # will be grouped if they hav e integer (or less) differences. This is swarm's most important
 # parameter
 #
-d	20
+d	15
 #
 #
 # when using the option --fastidious (-f), define the minimum mass of a large ASV. 
@@ -363,7 +355,7 @@ midori_version	midori_1
 # The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
 #
 custom_ref_db	No
-name_of_custom_db	myrefdb
+name_of_custom_db	partialCustomdb
 #
 #
 #########################################################################################################
@@ -376,13 +368,13 @@ name_of_custom_db	myrefdb
 # In order to do that, PEMA needs an MSA that it is returned by the MAFFT (v7.427) aligner and a phylogeny tree of the OTUs found which is built by the RAxML-ng algorithm.
 # Please remember that in order to use phyloseq a "metadata.tsv" file is necessary to be part of your anaylis folder. 
 #
-phyloseq	No
+phyloseq	Yes
 #
 #
 # The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees.
 # Do you want to create such a tree with your OTUs? In case you build this once, you can use it as many times as you want.
 #
-tree	No
+tree	Yes
 #
 # In case you are about to use the phyloseq option, then a phylogeny tree has to be built. Hence, PEMA invokes the RAxML-ng algorithm
 # which is able to run in more than one threads. Please set the number of threads RAxML is able to use.
@@ -408,4 +400,7 @@ bootstrapTrees	1
 emptyRawDataFile	Yes
 emptyCheckpoints	Yes
 #
+#
+# Classifier to use
+classifierAlgo	CREST
 #
