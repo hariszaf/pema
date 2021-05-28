@@ -1,0 +1,6 @@
+import("vegan")
+import("ape")
+importFrom("matrixStats", "rowMins")
+importFrom("stats", "as.dist", "as.formula")
+
+exportPattern("^[[:alpha:]]+")

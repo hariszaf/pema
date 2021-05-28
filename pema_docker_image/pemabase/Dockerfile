@@ -212,7 +212,8 @@ RUN Rscript -e 'library(BiocManager); BiocManager::install("phyloseq")'
 # First I need to install pip3
 RUN apt update
 RUN apt install -y python3-pip
-RUN pip3 install cutadapt
+#RUN pip3 install cutadapt
+RUN apt install python3-cutadapt
 
 # Install R package required for cutadapt R script
 RUN apt-get install -y libjpeg-dev

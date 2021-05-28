@@ -1,0 +1,13 @@
+GUniFrac                Generalized UniFrac distances for comparing
+                        microbial communities.
+GUniFrac-package        Generalized UniFrac distance for comparing
+                        microbial communities.
+PermanovaG              Permutational multivariate analysis of variance
+                        using multiple distance matrices
+Rarefy                  Rarefy the OTU table to an equal sequencing
+                        depth
+throat.meta             Meta data of the throat microbiome samples.
+throat.otu.tab          OTU count table from 16S sequencing of the
+                        throat microbiome samples.
+throat.tree             UPGMA tree of the OTUs from 16S sequencing of
+                        the throat microbiome samples.
