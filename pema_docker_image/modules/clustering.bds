@@ -85,7 +85,7 @@ string clusteringVsearch(string{} params, string{} globalVars) {
 
 }
 
-
+# Function to get ASVs using the Swarm v2 algorithm
 string clusteringSwarm(string{} params, string{} globalVars) {
 
 
@@ -161,7 +161,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
 
       wait
 
-   } else if ( params{'classifierAlgo'} == 'CREST' && params{'gene'} != 'gene_COI' ) {
+   } else if ( params{'classifierAlgo'} == 'CREST' && params{'gene'} == 'gene_COI' ) {
 
       println('You have selected CREST classifier and your marker gene is COI. Pema does not support this combination.')
 
@@ -174,9 +174,6 @@ string clusteringSwarm(string{} params, string{} globalVars) {
    return 'ok'
 
 }
-
-
-
 
 
 string swarmMinValues(string{} params, string{} globalVars) {
@@ -236,7 +233,6 @@ string swarmMinValues(string{} params, string{} globalVars) {
 
 }  
 
-
 # In this case, chimera removal goes before the ASVs inference
 string swarmMaxValues(string{} params, string{} globalVars){
 
@@ -275,7 +271,11 @@ string swarmMaxValues(string{} params, string{} globalVars){
 }
 
 
-
+# Function to get OTUs using the Bayesian algorithm CROP; this will take significant more time
+string clusteringCrop(string{} params, string{} globalVars){
+   println('this is crop')
+   return 'ok'
+}
 
 
 
