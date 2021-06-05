@@ -11,8 +11,8 @@ echo "export WORKDIR=$WORKDIR" >> $SINGULARITY_ENVIRONMENT
 mkdir -p $WORKDIR
 
 # Exports needed
-echo "export PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/lib/jvm/java-11-openjdk-amd64/bin:/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/tools/BDS/.bds" >> $SINGULARITY_ENVIRONMENT 
-echo "export PATH=$PATH:/bin/gzip" >> ~/.bashrc 
+echo "export PATH=/usr/lib/jvm/java-8-openjdk-amd64/bin:/usr/lib/jvm/java-11-openjdk-amd64/bin:/opt/java/openjdk/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/home/tools/BDS/.bds:/bin/gzip" >> $SINGULARITY_ENVIRONMENT 
+#echo "export PATH=$PATH:/bin/gzip" >> ~/.bashrc 
 
 # Set basecommnad; run PEMA analysis
 %runscript
