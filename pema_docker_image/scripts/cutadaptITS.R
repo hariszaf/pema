@@ -72,11 +72,7 @@ for (base in reverse_split) {
 ##########################################################################################
 
 # (let us hope) singularity version
-<<<<<<< HEAD
 cutadapt <- "/usr/bin/cutadapt3"
-=======
-cutadapt <- "/usr/bin/cutadapt"
->>>>>>> local_ref_db
 
 
 system2(cutadapt, args = "--version") # Run shell commands from R
@@ -119,7 +115,7 @@ R2.flags <- paste("-G", REV, "-A", FWD.RC)
 
 # Run Cutadapt
 for(i in seq_along(fnFs)) {
-  system2(cutadapt, args = c(R1.flags, R2.flags, "-n", 2, "-j", 0,     # -n 2 required to remove FWD and REV from reads
+  system2(cutadapt, args = c(R1.flags, R2.flags, "-n", 2,     # -n 2 required to remove FWD and REV from reads
                              "-o", fnFs.cut[i], "-p", fnRs.cut[i],     # output files
                              fnFs[i], fnRs[i]))                        # input files
 }

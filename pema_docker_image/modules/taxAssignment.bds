@@ -72,9 +72,32 @@ string crestAssign(string{} params, string{} globalVars) {
          wait
 
 
-      } else {
+      } else if (params{'gene'}  == 'gene_ITS') {
 
-         println("one step at a time dude. this is for the ITS case.")
+         globalVars{'assignmentPath'}.chdir()
+
+         task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast \
+            -query all_sequences_grouped.fa \
+            -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/unite/unite.fasta \
+            -num_alignments 100 -outfmt 5 \
+            -out unite_$params{'taxonomyFolderName'}.xml \
+            -num_threads $params{'vsearchThreads'}
+
+         wait
+            
+         task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
+            -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
+            -d unite \
+            -t allTab_$params{'taxonomyFolderName'}.tsv \
+            -o $params{'taxonomyFolderName'} unite_$params{'taxonomyFolderName'}.xml
+         
+         wait
+         
+         task {
+            sys mv $params{'taxonomyFolderName'}/allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/finalTable.tsv
+            sys sed -i 's/classification/Classification/g' $params{'taxonomyFolderName'}/finalTable.tsv
+         }
+         wait
       }
 
    } else {
