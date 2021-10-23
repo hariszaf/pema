@@ -12,13 +12,6 @@
 #### For any troubles you may have when running PEMA or for any potential improvevments you would like to suggest, please share on the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community).
 
 
-
-<!---
-```diff
-[//]---------  **This is still a BETA version!**    ---------
-```
--->
-
 [![Gitter](https://badges.gitter.im/pema-helpdesk/community.svg)](https://gitter.im/pema-helpdesk/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
@@ -48,11 +41,14 @@ Table of Contents
 
 
 ```diff
-+ convertion of the Illumina raw data is now implemented in the framework of PEMA
-+ PEMA now supports 2 extra marker genes, 18S rRNA and ITS. 
-+ PEMA is now available for macOS!
-+ for anything feel free to contact me at: haris-zaf@hcmr.gr
+- SingularityHub is out of order. To get the latest PEMA version as a Singularity image, you may visit:
+- https://gitlab.com/microbactions/pema-singularity-images
 ```
+
+
+<!-- ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=hariszaf&show_icons=true&theme=onedark) -->
+<!-- [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=hariszaf&repo=pema)](https://github.com/hariszaf/pema) -->
+
 
 <!---  ################   FIRST CHAPTER     ########################          -->
 
