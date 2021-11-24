@@ -1,6 +1,7 @@
 FROM hariszaf/pemabase:v.2.0.1
 MAINTAINER Haris Zafeiropoulos haris-zaf@hcmr.gr
 
+
 # Copy and paste the manually written scripts that PEMA needs
 WORKDIR /home/scripts
 COPY /scripts/ ./
@@ -14,9 +15,8 @@ RUN chmod -R +777 /home/modules
 WORKDIR /home
 COPY pema_latest.bds .
 
-## make a source of the .bashrc file
+## Make a source of the .bashrc file
 WORKDIR /root
-
 RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
 
 RUN export PATH=$PATH:/home/tools/BDS/.bds
@@ -25,5 +25,10 @@ ENV PATH=$PATH:/home/tools/BDS/.bds
 RUN pip3 uninstall --yes  cutadapt
 RUN apt install python3-cutadapt
 
+
+# Set user's settings
+
 # Set "home" as my working directory when a container starts
 WORKDIR /home
+#USER ubuntu
+
