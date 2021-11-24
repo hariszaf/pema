@@ -401,6 +401,15 @@ emptyRawDataFile	Yes
 emptyCheckpoints	Yes
 #
 #
-# Classifier to use
+# Classifier to use, parameter values ("CREST","phylogeny","RDPClassifier")
+# If you are about to use a version of Silva db, or Unite db or a custom db that you have prepared
+# the required files accordingly 
+# (see https://hariszaf.github.io/pema_documentation/training_crest_classifier/), 
+# you may set this parameter as "CREST".
+# In case you are running 16S data and you would like a phylogeny based taxonomy assignment, 
+# you may set this parametera as "phylogeny"
+# In case you are about to use a version of Midori or a custom db for which you have prepared the 
+# required files (see https://hariszaf.github.io/pema_documentation/training_rdpclassifier/) you 
+# may set this parameter as "RDPClassifier"
 classifierAlgo	CREST
 #
