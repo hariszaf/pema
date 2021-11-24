@@ -9,6 +9,7 @@ include "modules/initialize"
 include "modules/preprocess"
 include "modules/clustering"
 include "modules/taxAssignment"
+include "modules/postAssignment"
 include "modules/phyloseq"
 
 
@@ -232,6 +233,14 @@ wait
 
 ###  Make a file where i will move all the checkpoints
 parameterFilePath.chdir() ;
+
+perSampleGeneral(paramsForCA, globalVars)
+
+if ( paramsForCA{'classifierAlgo'} == 'CREST') {
+    CrestPerSample(paramsForCA, globalVars)
+}
+
+
 if ( paramsForCA{'emptyCheckpoints'} == 'Yes' ) {
    string checkpointsDir = 'checkpoints_for_' + paramsForCA{'outputFolderName'}
    globalVars{'outputFilePath'}.chdir()
@@ -323,21 +332,6 @@ println('Thanks for using Pema.')
 #    }
 # }
 
-# #############################################################################################################################
-# #                                                                                                                   
-# #                                Taxonomy Assignment       
-# #                                                                                             
-# ##############################################################################################################################
-
-# string checkTaxonomy = outputPoint + "/taxonomyAssignment.chp"
-# checkpoint checkTaxonomy 
-# parameterFilePath.chdir()
-# string l = "parameters.tsv"
-# string{} paramsOfTaxonomy =  readParameterFile(l)
-
-# #######################################################################################################
-# ##############################     Taxonomy Assignment 16S     ########################################
-# #######################################################################################################
 
 
 
@@ -430,98 +424,6 @@ println('Thanks for using Pema.')
 
 
 
-
-
-
-# ##############################################################################################################################
-# ####  now, i have everything i need to, so I make files per sample in which i keep only the info I consider as valuable ! ####
-# ##############################################################################################################################
-
-# bayesPath.chdir()
-# string[] names = bayesPath.dir()
-# outputPerSamplePath.chdir()
-
-# # for each sample we make a folder with its name, in order to put PEMA's output concerning each of those
-# for ( string sample : names ) {
-#     sample.mkdir()
-# }
-
-# fastqcPath.chdir()
-# # in 'samples' we make a list with all file names we find in fastqc output folder - that means for all the files
-# string[] samples = fastqcPath.dir()
-
-# # we remove all .html files from our list
-# for (string file : samples ) {
-#    if ( file.endsWith(".html") ) {
-#       samples.remove(file)
-#    }
-# }
-
-# #set variables 
-# string unzipfq 
-# string sampleNoZip
-# fastqcPath.chdir()
-
-# for ( string sample : samples ) {
-   
-#    # we unzip the output of fastqc for each file
-#    task unzip $fastqcPath/$sample
-#    sampleNoZip = sample.split('.zip')[0]
-#    unzipfq = sample.split('_[0-9]_fastqc')[0]
-#    wait
-   
-#    # we copy two significant output files of FastQC to the sample's output folder
-#    task{
-#       sys cp $fastqcPath/$sampleNoZip/Images/per_base_quality.png  $outputPerSamplePath/$unzipfq
-#       sys cp $fastqcPath/$sampleNoZip/summary.txt $outputPerSamplePath/$unzipfq
-#    }
-#    wait
-#    unzipfq = ''
-# }
-# wait
-
-# ########################################################################################################
-# ############      making output per sample for 16S marker gene & alignment based assignment   ##########
-# #########################################################################################################
-
-# genePath.chdir()
-# if  ( ( paramsOfTaxonomy{'gene'} == 'gene_16S' || paramsOfTaxonomy{'gene'} == 'gene_18S' )  &&  paramsOfTaxonomy{'taxonomyAssignmentMethod'} == 'alignment') {
-   
-#    string assignmentPathRNA
-   
-#    if ( paramsOfTaxonomy{'clusteringAlgoFor16S_18SrRNA'} == 'algo_vsearch' ) {
-#       assignmentPathRNA = genePath + '/' + paramsOfTaxonomy{'gene'} + '/' + 'vsearch' + '/'  + paramsOfTaxonomy{'taxonomyFolderName'}
-#    } else {
-#       assignmentPathRNA = genePath + '/' + paramsOfTaxonomy{'gene'} + '/' + 'swarm' + '/'  + paramsOfTaxonomy{'taxonomyFolderName'}
-#    }
-#    assignmentPathRNA.chdir()
-   
-#    task {
-#    sys sed "s/ /''/g" Richness.tsv > Richness2.tsv 
-#    sys sed "s/ /''/g" All_Cumulative.tsv > All_Cumulative2.tsv 
-#    sys sed "s/ /''/g" Relative_Abundance.tsv > Relative_Abundance2.tsv 
-#    }
-# wait
-
-# for ( string sample : names ) {
-
-#    wait
-#    sys awk '{print $2, $3, $sample}' Richness2.tsv > Richneness_$sample.tsv
-#    sys awk '{print $2, $3, $sample}' All_Cumulative2.tsv > All_Cumulative_$sample.tsv
-#    sys awk '{print $2, $3, $sample}' Relative_Abundance2.tsv > Relative_Abundance_$sample.tsv
-#    sys awk '{print $sample}' All_Cumulative2.tsv > All_Cumulative_only_int_$sample.tsv
-#    sys awk '{print $sample}' Relative_Abundance2.tsv > Relative_Abundance_only_int_$sample.tsv
-#    wait
-   
-#    sys paste -d ' ' Richneness_$sample.tsv All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv > profile_$sample.tsv
-#    wait
-#    sys rm All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv
-#    wait
-#    sys mv profile_$sample.tsv Richneness_$sample.tsv  All_Cumulative_$sample.tsv  Relative_Abundance_$sample.tsv $outputPerSamplePath/$sample
-# }
-
-# sys rm Richness2.tsv All_Cumulative2.tsv   Relative_Abundance2.tsv 
-# }
 
 # ###########################################################################################
 # ##################      making output per sample for COI marker gene     ##################
