@@ -112,7 +112,7 @@ string crestAssign(string{} params, string{} globalVars) {
 
 }
 
-
+# Function to get the phylogeny based taxonomy assignmnent in case of the 16S marker gene
 string phylogenyAssign(string{} params, string{} globalVars) {
 
    ## we need a REFERENCE TREE which we generated it from SILVA database with the aid of GAPPA.
@@ -161,7 +161,7 @@ string phylogenyAssign(string{} params, string{} globalVars) {
 
 }
 
-
+# Function to build the OTU or the ASV table once the RDP classifier has been used
 string rdpBuildingTable(string{} params, string{} globalVars) {
 
    task {
@@ -187,7 +187,7 @@ string rdpBuildingTable(string{} params, string{} globalVars) {
    return 'ok'
 }
 
-
+# Use the RDP Classifier with a database among Midori 1 and 2 or a custom one. 
 string rdpAssign(string{} params, string{} globalVars) {
 
    println('RDPClassifier is about to start assigning your grouped sequences.')
