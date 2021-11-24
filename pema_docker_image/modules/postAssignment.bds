@@ -1,0 +1,92 @@
+#!/usr/bin/env bds
+
+
+string perSampleGeneral(string{} params, string{} globalVars) {
+
+    globalVars{'bayesPath'}.chdir()
+    string[] names = globalVars{'bayesPath'}.dir()
+
+
+    # for each sample we make a folder with its name, in order to put PEMA's output concerning each of those
+    for ( string sample : names ) {
+        sample.mkdir()
+    }
+
+    # in 'samples' we make a list with all file names we find in fastqc output folder - that means for all the files
+    globalVars{'fastqcPath'}.chdir()
+    string[] samples = globalVars{'fastqcPath'}.dir()
+
+    # we remove all .html files from our list
+    for (string file : samples ) {
+        if ( file.endsWith(".html") ) {
+            samples.remove(file)
+        }
+    }
+
+    #set variables 
+    string unzipfq 
+    string sampleNoZip
+    globalVars{'fastqcPath'}.chdir()
+
+    for ( string sample : samples ) {
+    
+        # we unzip the output of fastqc for each file
+        task unzip $globalVars{'fastqcPath'}/$sample
+        sampleNoZip = sample.split('.zip')[0]
+        unzipfq     = sample.split('_[0-9]_fastqc')[0]
+        wait
+        
+        # we copy two significant output files of FastQC to the sample's output folder
+        task{
+            sys cp $globalVars{'fastqcPath'}/$sampleNoZip/Images/per_base_quality.png  $globalVars{'outputPerSamplePath'}/$unzipfq
+            sys cp $globalVars{'fastqcPath'}/$sampleNoZip/summary.txt $globalVars{'outputPerSamplePath'}/$unzipfq
+        }
+        wait
+        unzipfq = ''
+    }
+    wait
+}
+
+
+
+# Function to run the CREST classifier 
+string CrestPerSample(string{} params, string{} globalVars) {
+
+    if  ( ( paramsOfTaxonomy{'gene'} != 'COI' )  &&  paramsOfTaxonomy{'taxonomyAssignmentMethod'} == 'alignment') {
+
+        globalVars{'bayesPath'}.chdir()
+        string[] names = globalVars{'bayesPath'}.dir()
+        globalVars{'assignmentPath'}.chdir()
+        
+        task {
+            sys sed "s/ /''/g" Richness.tsv > Richness2.tsv 
+            sys sed "s/ /''/g" All_Cumulative.tsv > All_Cumulative2.tsv 
+            sys sed "s/ /''/g" Relative_Abundance.tsv > Relative_Abundance2.tsv 
+        }
+        wait
+
+        for ( string sample : names ) {
+
+            wait
+            sys awk '{print $2, $3, $sample}' Richness2.tsv > Richneness_$sample.tsv
+            sys awk '{print $2, $3, $sample}' All_Cumulative2.tsv > All_Cumulative_$sample.tsv
+            sys awk '{print $2, $3, $sample}' Relative_Abundance2.tsv > Relative_Abundance_$sample.tsv
+            sys awk '{print $sample}' All_Cumulative2.tsv > All_Cumulative_only_int_$sample.tsv
+            sys awk '{print $sample}' Relative_Abundance2.tsv > Relative_Abundance_only_int_$sample.tsv
+            wait
+            
+            sys paste -d ' ' Richneness_$sample.tsv All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv > profile_$sample.tsv
+            wait
+
+            sys rm All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv
+            wait
+
+            sys mv profile_$sample.tsv Richneness_$sample.tsv  All_Cumulative_$sample.tsv  Relative_Abundance_$sample.tsv $outputPerSamplePath/$sample
+        }
+
+        sys rm Richness2.tsv All_Cumulative2.tsv Relative_Abundance2.tsv 
+    } else {
+        println("It is not an actual CREST based taxonomy assignment that was performed. Your parameters are not in line.")
+    }
+}
+
