@@ -239,11 +239,11 @@ wait
 parameterFilePath.chdir() ;
 
 perSampleGeneral(paramsForCA, globalVars)
-
+wait
 if ( paramsForCA{'classifierAlgo'} == 'CREST') {
     CrestPerSample(paramsForCA, globalVars)
 }
-
+wait
 
 if ( paramsForCA{'emptyCheckpoints'} == 'Yes' ) {
    string checkpointsDir = 'checkpoints_for_' + paramsForCA{'outputFolderName'}
@@ -252,7 +252,7 @@ if ( paramsForCA{'emptyCheckpoints'} == 'Yes' ) {
    globalVars{'outputPoint'}.chdir()   
    sys mv *.chp $globalVars{'outputFilePath'}/$checkpointsDir
 }
-
+wait
 
 # sys chmod -R 766 $paramsForCA{'outputFolderName'}
 println('----------------------------------------------------------')
