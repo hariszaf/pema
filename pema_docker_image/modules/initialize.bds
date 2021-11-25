@@ -190,10 +190,10 @@ string buildDirectories(string{} params, string{} globalVars){
       string sixteenPath = globalVars{'genePath'} + '/' + 'gene_18S'
       sixteenPath.chdir()
       
-      if ( params{'clusteringAlgoFor16S_18SrRNA'} == 'algo_Swarm' ) {
+      if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
          string algo = 'Swarm'
          algo.mkdir()
-      } else if ( params{'clusteringAlgoFor16S_18SrRNA'} == 'algo_vsearch' ) {
+      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
          string algo = 'vsearch'
          algo.mkdir()
       } 
