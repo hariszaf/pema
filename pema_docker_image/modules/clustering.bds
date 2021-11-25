@@ -91,7 +91,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
 
    #### Prepare files
    globalVars{'outputFilePath'}.chdir()
-   # globalVars{'swarmPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + 'Swarm'
+
    task {
       
       sys cp all_samples.fasta $globalVars{'assignmentPath'}/all_samples.fasta
