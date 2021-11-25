@@ -51,7 +51,7 @@ string perSampleGeneral(string{} params, string{} globalVars) {
 
 
 
-# Function to run the CREST classifier 
+# Function to build the per sample profiles in case of CREST
 string CrestPerSample(string{} params, string{} globalVars) {
 
     if  ( ( params{'gene'} != 'COI' )  &&  params{'taxonomyAssignmentMethod'} == 'alignment') {
@@ -62,23 +62,26 @@ string CrestPerSample(string{} params, string{} globalVars) {
         finalAssignDir.chdir()
         
         task {
-            sys sed "s/ /''/g" Richness.tsv > Richness2.tsv 
-            sys sed "s/ /''/g" All_Cumulative.tsv > All_Cumulative2.tsv 
-            sys sed "s/ /''/g" Relative_Abundance.tsv > Relative_Abundance2.tsv 
+            sys sed "s/ /_/g" Richness.tsv > Richness2.tsv 
+            sys sed "s/ /_/g" All_Cumulative.tsv > All_Cumulative2.tsv 
+            sys sed "s/ /_/g" Relative_Abundance.tsv > Relative_Abundance2.tsv 
         }
         wait
 
+        counter := 3
         for ( string sample : names ) {
 
+            counter += 1
+
             wait
-            sys awk '{print $2, $3, $sample}' Richness2.tsv > Richneness_$sample.tsv
-            sys awk '{print $2, $3, $sample}' All_Cumulative2.tsv > All_Cumulative_$sample.tsv
-            sys awk '{print $2, $3, $sample}' Relative_Abundance2.tsv > Relative_Abundance_$sample.tsv
-            sys awk '{print $sample}' All_Cumulative2.tsv > All_Cumulative_only_int_$sample.tsv
-            sys awk '{print $sample}' Relative_Abundance2.tsv > Relative_Abundance_only_int_$sample.tsv
+            sys awk -v col = $counter '{print $2 "\t" $3 "\t" $((col)) }' Richness2.tsv           > Richneness_$sample.tsv
+            sys awk -v col = $counter '{print $2 "\t" $3 "\t" $((col)) }' All_Cumulative2.tsv     > All_Cumulative_$sample.tsv
+            sys awk -v col = $counter '{print $2 "\t" $3 "\t" $((col)) }' Relative_Abundance2.tsv > Relative_Abundance_$sample.tsv
+            sys awk -v col = $counter '{print $((col))                 }' All_Cumulative2.tsv     > All_Cumulative_only_int_$sample.tsv
+            sys awk -v col = $counter '{print $((col))                 }' Relative_Abundance2.tsv > Relative_Abundance_only_int_$sample.tsv
             wait
             
-            sys paste -d ' ' Richneness_$sample.tsv All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv > profile_$sample.tsv
+            sys paste -d "\t" Richneness_$sample.tsv All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv > profile_$sample.tsv
             wait
 
             sys rm All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv
@@ -94,4 +97,64 @@ string CrestPerSample(string{} params, string{} globalVars) {
 
     return 'ok'
 }
+
+
+
+
+
+# Function to build the per sample profiles in case of RDPClassifier
+# string RDPClassifierPerSample(string{} params, string{} globalVars) {
+
+
+#     if  ( params{'gene'} == 'gene_COI' &&  params{'clusteringAlgo'} == 'algo_Swarm' ){
+#         #using string.readLines() i will create my otu table..
+#     string swarmPath = genePath + '/' + 'gene_COI' +  '/' + 'SWARM'
+#     print swarmPath + "\n"
+#     swarmPath.chdir()
+#     string[] allSamplesList
+#     string[] allContainsOfSwarm = swarmPath.dir()
+#     for ( string sample : allContainsOfSwarm ) {
+#         print "sample is " + sample + "\n"
+#         if ( sample.endsWith('.finalTriplesPerSampleFromSwarmClustering.txt') == true  ) {
+#             string sampleId = sample.split('.finalTriplesPerSampleFromSwarmClustering.txt')[0]
+#             print "sample is " + sampleId + "\n"
+#             sys mv $sample $outputPerSamplePath/$sampleId
+#         }
+#     }
+#     # here, the number of the SPECIES that are found from all samples, are computed
+#     sys bash $path/scripts/uniqSpecies.sh
+#     }      
+
+
+
+
+#     return 'ok'
+# }
+
+
+# if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_CROP' ){
+#    print ' EDO EINAI POU XOUME TO KENAKI MAS TO TELEUTAIO.....' +"\n"
+#    string cropPath = genePath + '/' + 'gene_COI' +  '/' + 'CROP'
+#    print cropPath + "\n"
+#    cropPath.chdir()
+#    string[] allSamplesList
+#    string[] allContainsOfCrop = cropPath.dir()
+#    for ( string sample : allContainsOfCrop ) {
+#       print "sample is " + sample + "\n"
+#       if ( sample.endsWith('.finalTriplesFromCropClustering.txt') == true  ) {
+#          string sampleId = sample.split('.finalTriplesFromCropClustering.txt')[0]
+#          print "sample is " + sampleId + "\n"
+#          sys mv $sample $outputPerSamplePath/$sampleId
+#       }
+#    }
+   
+#    # here, the number of the SPECIES that are found from all samples, are computed
+#    #using string.readLines() i will create my otu table..  
+#    #string.readLines() 
+# }      
+
+
+
+
+
 
