@@ -30,5 +30,4 @@ RUN apt install python3-cutadapt
 
 # Set "home" as my working directory when a container starts
 WORKDIR /home
-#USER ubuntu
 
