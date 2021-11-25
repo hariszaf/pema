@@ -138,6 +138,7 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_vsearch' ) {
 
 }
 
+println("The OTUs clustering / ASVs inference step has been completed.")
 string taxAssign = globalVars{'outputPoint'} + "/taxAssign.chp"
 checkpoint taxAssign
 
@@ -166,10 +167,12 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
       if (paramsForTaxAssign{'taxonomyAssignmentMethod'} != 'phylogeny') {
 
          crestAssign(paramsForTaxAssign, globalVars)
+         println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
 
       } else {
          
          phylogenyAssign(paramsForTaxAssign, globalVars)
+         println("Phylogeny based taxonomy assignment has been completed.")
 
       }
 
@@ -186,11 +189,12 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
          }
 
          rdpAssign(paramsForTaxAssign, globalVars)
+         println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
 
       }
    }
 
-} else {
+} else if ( paramsForTaxAssign{'custom_ref_db'} == 'Yes') {
 
    if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
 
@@ -205,7 +209,7 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
    }
 
 }
-
+println("The taxonomy assignment step has been completed.")
 
 string communAnal = globalVars{'outputPoint'} + "/communAnal.chp"
 checkpoint communAnal
@@ -250,7 +254,7 @@ if ( paramsForCA{'emptyCheckpoints'} == 'Yes' ) {
 }
 
 
-sys chmod -R 766 $paramsForCA{'outputFolderName'}
+# sys chmod -R 766 $paramsForCA{'outputFolderName'}
 println('----------------------------------------------------------')
 println('Pema has been completed successfully. Let biology start!')
 println('Thanks for using Pema.')
