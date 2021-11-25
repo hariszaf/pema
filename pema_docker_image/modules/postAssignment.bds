@@ -6,8 +6,8 @@ string perSampleGeneral(string{} params, string{} globalVars) {
     globalVars{'bayesPath'}.chdir()
     string[] names = globalVars{'bayesPath'}.dir()
 
-
     # for each sample we make a folder with its name, in order to put PEMA's output concerning each of those
+    globalVars{'outputPerSamplePath'}.chdir()
     for ( string sample : names ) {
         sample.mkdir()
     }
@@ -15,7 +15,7 @@ string perSampleGeneral(string{} params, string{} globalVars) {
     # in 'samples' we make a list with all file names we find in fastqc output folder - that means for all the files
     globalVars{'fastqcPath'}.chdir()
     string[] samples = globalVars{'fastqcPath'}.dir()
-
+    
     # we remove all .html files from our list
     for (string file : samples ) {
         if ( file.endsWith(".html") ) {
@@ -45,6 +45,8 @@ string perSampleGeneral(string{} params, string{} globalVars) {
         unzipfq = ''
     }
     wait
+
+    return 'ok'
 }
 
 
@@ -52,11 +54,12 @@ string perSampleGeneral(string{} params, string{} globalVars) {
 # Function to run the CREST classifier 
 string CrestPerSample(string{} params, string{} globalVars) {
 
-    if  ( ( paramsOfTaxonomy{'gene'} != 'COI' )  &&  paramsOfTaxonomy{'taxonomyAssignmentMethod'} == 'alignment') {
+    if  ( ( params{'gene'} != 'COI' )  &&  params{'taxonomyAssignmentMethod'} == 'alignment') {
 
         globalVars{'bayesPath'}.chdir()
         string[] names = globalVars{'bayesPath'}.dir()
-        globalVars{'assignmentPath'}.chdir()
+        string finalAssignDir = globalVars{'assignmentPath'} + '/' + params{'taxonomyFolderName'}
+        finalAssignDir.chdir()
         
         task {
             sys sed "s/ /''/g" Richness.tsv > Richness2.tsv 
@@ -81,12 +84,14 @@ string CrestPerSample(string{} params, string{} globalVars) {
             sys rm All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv
             wait
 
-            sys mv profile_$sample.tsv Richneness_$sample.tsv  All_Cumulative_$sample.tsv  Relative_Abundance_$sample.tsv $outputPerSamplePath/$sample
+            sys mv profile_$sample.tsv Richneness_$sample.tsv  All_Cumulative_$sample.tsv  Relative_Abundance_$sample.tsv $globalVars{'outputPerSamplePath'}/$sample
         }
 
         sys rm Richness2.tsv All_Cumulative2.tsv Relative_Abundance2.tsv 
     } else {
         println("It is not an actual CREST based taxonomy assignment that was performed. Your parameters are not in line.")
     }
+
+    return 'ok'
 }
 
