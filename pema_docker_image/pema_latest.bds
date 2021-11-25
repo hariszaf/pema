@@ -250,6 +250,7 @@ if ( paramsForCA{'emptyCheckpoints'} == 'Yes' ) {
 }
 
 
+sys chmod -R 766 $paramsForCA{'outputFolderName'}
 println('----------------------------------------------------------')
 println('Pema has been completed successfully. Let biology start!')
 println('Thanks for using Pema.')
