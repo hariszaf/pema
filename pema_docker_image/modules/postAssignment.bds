@@ -114,34 +114,28 @@ string CrestPerSample(string{} params, string{} globalVars) {
 
 
 
-# Function to build the per sample profiles in case of RDPClassifier
-# string RDPClassifierPerSample(string{} params, string{} globalVars) {
+## Function to build the per sample profiles in case of RDPClassifier
+string RDPClassifierPerSample(string{} params, string{} globalVars) {
 
+    if  ( params{'gene'} == 'gene_COI' &&  params{'clusteringAlgo'} == 'algo_Swarm' ){
 
-#     if  ( params{'gene'} == 'gene_COI' &&  params{'clusteringAlgo'} == 'algo_Swarm' ){
-#         #using string.readLines() i will create my otu table..
-#     string swarmPath = genePath + '/' + 'gene_COI' +  '/' + 'SWARM'
-#     print swarmPath + "\n"
-#     swarmPath.chdir()
-#     string[] allSamplesList
-#     string[] allContainsOfSwarm = swarmPath.dir()
-#     for ( string sample : allContainsOfSwarm ) {
-#         print "sample is " + sample + "\n"
-#         if ( sample.endsWith('.finalTriplesPerSampleFromSwarmClustering.txt') == true  ) {
-#             string sampleId = sample.split('.finalTriplesPerSampleFromSwarmClustering.txt')[0]
-#             print "sample is " + sampleId + "\n"
-#             sys mv $sample $outputPerSamplePath/$sampleId
-#         }
-#     }
-#     # here, the number of the SPECIES that are found from all samples, are computed
-#     sys bash $path/scripts/uniqSpecies.sh
-#     }      
+        globalVars{'bayesPath'}.chdir()
+        string[] sampleNames = globalVars{'bayesPath'}.dir()
+        
+        globalVars{'assignmentPath'}.chdir()
 
-
-
-
-#     return 'ok'
-# }
+        for ( string sample : sampleNames ) {
+            
+            sys bash $globalVars{'path'}/scripts/getColumnFromRDPFinalTable.sh $sample
+            sys mv profile_$sample.tsv $globalVars{'outputPerSamplePath'}/$sample
+            
+        }
+    
+    } else {
+        println("That was not the case..")
+    }
+    return 'ok'
+}
 
 
 # if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_CROP' ){
