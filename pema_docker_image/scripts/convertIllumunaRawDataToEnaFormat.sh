@@ -1,15 +1,16 @@
 #!/bin/bash
 
-# This is a script that converts Illumina raw data file to the ENA format.
-# All sample files that are going to be used in PEM., they need to be in the ENA format.
-#
-# This script will accomplish this task as long as your paired end raw data files have the following suffixes:
-#
-# forward read:   "_R1_001.fastq.gz"
-# reverese reads: "_R2_001.fastq.gz"
-#
-# The rest of the name is irrelevant. 
+'''
+Aim:    This script converts Illumina raw data file to the ENA format.
+        All sample files that are going to be used in PEM., they need to be in the ENA format.
 
+Usage:  This script will accomplish this task as long as your paired end raw data files have the following suffixes:
+        forward read:   "_R1_001.fastq.gz"
+        reverese reads: "_R2_001.fastq.gz"
+        The rest of the name is irrelevant. 
+
+Author: Haris Zafeiropoulos
+'''
 
 
 # Keep the directory of the initial data in a variable
