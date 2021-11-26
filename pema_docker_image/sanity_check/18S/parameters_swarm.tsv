@@ -29,6 +29,12 @@ outputFolderName	test_18S_swarm
 EnaData	Yes
 #
 #
+# Each sequencer has a special combination of letters with which all its reads start with
+# For example MiSeq has "@M0". Please provide this pattern to PEMA to convert your data to the ENA 
+# format. If you do not know that, you can either google it or gunzip a fastq.gz files of yours and provide
+# the letatters between the "@" and the first ":" characters.
+sequencerPrefix M0
+#
 #############################################################
 #################   fastqc (v0.11.8)    #####################
 #############################################################
