@@ -254,7 +254,6 @@ if ( paramsForCA{'emptyCheckpoints'} == 'Yes' ) {
 }
 wait
 
-# sys chmod -R 766 $paramsForCA{'outputFolderName'}
 println('----------------------------------------------------------')
 println('Pema has been completed successfully. Let biology start!')
 println('Thanks for using Pema.')
@@ -295,12 +294,6 @@ println('Thanks for using Pema.')
 #       ### chimera removal
 #       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --uchime3_denovo COI_CROP_all_samples.fasta --nonchimeras no_chim_COI_CROP_all_samples.fasta --abskew $paramsOfTable{'abskew'}
 #       wait
-
-
-
-#         ##### [NEW STEP: 2020.08.13] : Fix CROP bug. Run CROP with multiple CPUs as well
-
-
 #       ### calculate parameters for CROP clustering algorithm   
 #       croPath.chdir()
 #       string OMP_NUM_THREADS = paramsOfTable{'omp_num_threads'}
@@ -314,10 +307,7 @@ println('Thanks for using Pema.')
       
 #       # run the CROP algorithm
 #       sys $path/tools/CROP/CROP/CROPLinux -i no_chim_COI_CROP_all_samples.fasta -o CROP_output -z $crop_params{'zeta'} -b $crop_params{'beta'} -e $crop_params{'epsilon'} || true
-      
-      
-      
-      
+            
 #       ##### at last, we create an OTU table that comes after the CROP results. Again, we have an awk command in a bash script 
 #       croPath.chdir()
 #       sys mv $linearPath/amplicon_contingency_table_temp.csv $croPath
@@ -375,7 +365,7 @@ println('Thanks for using Pema.')
 #    task java -Xmx64g -jar $path/tools/RDPTools/classifier.jar classify -t $path/tools/RDPTools/TRAIN/rRNAClassifier.properties -o taxonomy_from_rdpclassifer_COI_CROP.txt crop_for_rdpclassifier.fasta
 
 
-# ##### [NEW STEP: 2020.08.14] : Build final_table.tsv for the case of COI marker gene with CROP as clustering algorithm
+#   ## Build final_table.tsv for the case of COI marker gene with CROP as clustering algorithm
 
 #    wait
 
@@ -421,15 +411,6 @@ println('Thanks for using Pema.')
 
 
 # 
-
-
-
-
-
-
-
-
-
 # ###########################################################################################
 # ##################      making output per sample for COI marker gene     ##################
 # ###########################################################################################
