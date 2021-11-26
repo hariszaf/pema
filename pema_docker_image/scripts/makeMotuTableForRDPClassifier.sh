@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Script to process the output of the RDPClassifier and
-# build an ASVs or OTUs table
+# build an ASVs table
 
 sed 's/[A-Z]*.*;size=[0-9]*//g ; s/superkingdom//g ; s/phylum//g ; s/class//g ; s/order//g ; s/family//g ; s/genus//g ; s/species//g' tax_assignments.tsv > almost
 sed 's/\t//g ; s/[0-9]\.[0-9]*/;/g ; s/.$// ; s/_[0-9]*/\t/g' almost > taxonomies.txt
@@ -21,12 +21,12 @@ sed 's/linearized.dereplicate_//g ; s/.merged.fastq//g' tnl > TMP
 
 rm tml tnl
 
-awk -F "\t" '{print $2}' asvs_contingency_table.tsv | sed -e 's/^/Otu/ ; s/OtuOTU/OTU_id/' > otus
+awk -F "\t" '{print "ASV_"$1 ":" $2}' asvs_contingency_table.tsv | sed -e 's/ASV_ASV/ASV_number/' > asvs
 
 
-paste -d "\t" otus TMP taxonomies_sorted.txt > finalTable.tsv
+paste -d "\t" asvs TMP taxonomies_sorted.txt > finalTable.tsv
 
-rm otus TMP taxonomies_sorted.txt almost
+rm asvs TMP taxonomies_sorted.txt almost
 
 
 

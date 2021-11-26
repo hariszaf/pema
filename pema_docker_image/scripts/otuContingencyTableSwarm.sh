@@ -1,12 +1,12 @@
 STATS="SWARM.stats"
 SWARMS="SWARM.swarms"
 AMPLICON_TABLE="amplicon_contingency_table.csv"
-OTU_TABLE="SWARM_OTU_table.tsv"
+ASV_TABLE="SWARM_ASV_table.tsv"
 
 # Header
-echo -e "OTU\t$(head -n 1 "${AMPLICON_TABLE}")" > "${OTU_TABLE}"
+echo -e "ASV\t$(head -n 1 "${AMPLICON_TABLE}")" > "${ASV_TABLE}"
 
-# Compute "per sample abundance" for each OTU
+# Compute "per sample abundance" for each ASV
 awk -v SWARM="${SWARMS}" \
     -v TABLE="${AMPLICON_TABLE}" \
     'BEGIN {FS = " "
@@ -19,11 +19,11 @@ awk -v SWARM="${SWARMS}" \
             }
            }
 
-     {# Parse the stat file (OTUs sorted by decreasing abundance)
+     {# Parse the stat file (ASVs sorted by decreasing abundance)
       seed = $3 "_" $4
-      n = split(swarms[seed], OTU, "[ _]")
+      n = split(swarms[seed], ASV, "[ _]")
       for (i = 1; i < n; i = i + 2) {
-          s = split(table[OTU[i]], abundances, "\t")
+          s = split(table[ASV[i]], abundances, "\t")
           for (j = 1; j < s; j++) {
               samples[j] += abundances[j+1]
           }
@@ -34,4 +34,4 @@ awk -v SWARM="${SWARMS}" \
       }
      printf "\n"
      delete samples
-     }' "${STATS}" >> "${OTU_TABLE}"
+     }' "${STATS}" >> "${ASV_TABLE}"

@@ -6,9 +6,9 @@ AMPLICON_TABLE="amplicon_contingency_table.tsv"
 ASV_TABLE="asvs_contingency_table.tsv"
 
 # Header
-echo -e "OTU\t$(head -n 1 "${AMPLICON_TABLE}")" > "${ASV_TABLE}"
+echo -e "ASV\t$(head -n 1 "${AMPLICON_TABLE}")" > "${ASV_TABLE}"
 
-# Compute "per sample abundance" for each OTU
+# Compute "per sample abundance" for each ASV
 awk -v SWARM="${SWARMS}" \
    -v TABLE="${AMPLICON_TABLE}" \
    'BEGIN {FS = " "
@@ -21,16 +21,16 @@ awk -v SWARM="${SWARMS}" \
            }
           }
 
-    {# Parse the stat file (OTUs sorted by decreasing abundance)
+    {# Parse the stat file (ASVs sorted by decreasing abundance)
      seed = $3"_"$4      
-     n = split(swarms[seed], OTU, "[ _]");
+     n = split(swarms[seed], ASV, "[ _]");
 
      for (i = 1; i < n; i = i + 2) {
-         sample_otu = OTU[i]
-         #gsub(/:0:0:0:/, "", sample_otu )
-         #gsub(/:::/, ":", sample_otu )
+         sample_ASV = ASV[i]
+         #gsub(/:0:0:0:/, "", sample_ASV )
+         #gsub(/:::/, ":", sample_ASV )
    
-         s = split(table[ sample_otu  ], abundances, "\t")
+         s = split(table[ sample_ASV ], abundances, "\t")
          for (j = 1; j < s; j++) {
              samples[j] += abundances[j+1]
          } 
