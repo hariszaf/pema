@@ -242,6 +242,8 @@ perSampleGeneral(paramsForCA, globalVars)
 wait
 if ( paramsForCA{'classifierAlgo'} == 'CREST') {
     CrestPerSample(paramsForCA, globalVars)
+} else if ( paramsForCA{'classifierAlgo'} == 'RDPClassifier') {
+    RDPClassifierPerSample(paramsForCA, globalVars)
 }
 wait
 
