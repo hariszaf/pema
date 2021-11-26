@@ -1,6 +1,6 @@
+# Aim   : Build an OTU table based on the Swarm output
 # 
-# 
-# Usage: PROBABLY NOT NEEDED
+# Usage : PROBABLY NOT NEEDED
 # 
 # Author: Frédéric Mahé
 

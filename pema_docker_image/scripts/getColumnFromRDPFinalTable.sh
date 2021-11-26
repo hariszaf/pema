@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-#Aim:    Script to extract a single column from the finalTable.tsv file 
+# Aim:    Script to extract a single column from the finalTable.tsv file 
 #         in cases that the RDPClassifier has been used, to build per sample profiles.
 
 # Usage:  script needs a sample name as an argument and it needs to be run from 

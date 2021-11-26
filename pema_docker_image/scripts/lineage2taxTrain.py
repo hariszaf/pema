@@ -1,12 +1,22 @@
 #!/usr/bin/env python
 
-#Benli Chai, June 24, 2016
+'''
+Aim:    This script is required when user asks for a custom db to be used
+        along with the CREST. 
+        It converts a taxonomy in tab-delimited file containing the taxonomic hierarchical
+        structure to RDP Classifier taxonomy training file
+        For more about this task, you may check
+        here: https://hariszaf.github.io/pema_documentation/training_crest_classifier/
+        
+        Approach: Each taxon is uniquely identified by the combination of its tax id and depth from 
+                  the root rank, its attributes comprise: name, parent taxid, and level of depth from the root rank. 
 
-# used to convert a taxonomy in tab-delimited file containing the taxonomic hierarchical
-# structure to RDP Classifier taxonomy training file
+Usage:  The script is invoked by the trainForCREST.sh 
+        script of PEMA (see at /scripts).
 
-# Approach:each taxon is uniquely identified by the combination of its tax id and depth from the root rank,
-# its attributes comprise: name, parent taxid, and level of depth from the root rank. 
+
+Author: Benli Chai
+'''
 
 import sys, string
 if not len(sys.argv) == 2:

@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Usage: PROBABLY NOT NEEDED
+
 
 awk '{$1=""; print $0}' SWARM_OTU_table.tsv >  temp_SWARM_otu_table.tsv
 rm SWARM_OTU_table.tsv

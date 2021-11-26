@@ -1,7 +1,13 @@
 #!/bin/bash
 
-# Script to process the output of the RDPClassifier and
+# Aim: Script to process the output of the RDPClassifier and
 # build an ASVs table
+# 
+# Usage : This script is invoked when the RDPClassifier 
+#         has been selected by the user, as part of the
+#         rdpBuildingTable() function of the taxAssinment module of PEMA
+# 
+# Author: Haris Zafeiropoulos
 
 sed 's/[A-Z]*.*;size=[0-9]*//g ; s/superkingdom//g ; s/phylum//g ; s/class//g ; s/order//g ; s/family//g ; s/genus//g ; s/species//g' tax_assignments.tsv > almost
 sed 's/\t//g ; s/[0-9]\.[0-9]*/;/g ; s/.$// ; s/_[0-9]*/\t/g' almost > taxonomies.txt

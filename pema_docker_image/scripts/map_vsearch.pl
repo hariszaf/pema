@@ -1,5 +1,12 @@
 #!/usr/bin/perl -w                                                              
 
+# Aim    : Extract filtered fasta sequences used by the main script.
+# 
+# Usage  : This script is invoked by PEMA each time that the vsearch algorithm
+#          has been selected for the OTU clustering step; see module step, clusteringVsearch() function
+# 
+# Author : Torbjørn Rognes, see at https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline#example-scripts
+
 use warnings;
 use strict;
 
