@@ -408,5 +408,5 @@ emptyCheckpoints	Yes
 #
 #
 # Classifier to use
-classifierAlgo	RCDClassifier
+classifierAlgo	RDPClassifier
 #
