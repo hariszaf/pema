@@ -135,7 +135,7 @@ string{} initializeAnalysis(string{} params) {
 
    # Convert Illumina data to ENA format
    if ( params{'EnaData'} == 'No' ) {
-      sys bash $globalVars{'path'}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'}
+      sys bash $globalVars{'path'}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
    }
 
    # # IMPORTANT! Module to train classifiers is enabled through this statement
