@@ -74,20 +74,23 @@ string CrestPerSample(string{} params, string{} globalVars) {
             counter += 1
 
             wait
-            sys awk -v col = $counter '{print $2 "\t" $3 "\t" $((col)) }' Richness2.tsv           > Richneness_$sample.tsv
-            sys awk -v col = $counter '{print $2 "\t" $3 "\t" $((col)) }' All_Cumulative2.tsv     > All_Cumulative_$sample.tsv
-            sys awk -v col = $counter '{print $2 "\t" $3 "\t" $((col)) }' Relative_Abundance2.tsv > Relative_Abundance_$sample.tsv
-            sys awk -v col = $counter '{print $((col))                 }' All_Cumulative2.tsv     > All_Cumulative_only_int_$sample.tsv
-            sys awk -v col = $counter '{print $((col))                 }' Relative_Abundance2.tsv > Relative_Abundance_only_int_$sample.tsv
+            sys awk -v col=$counter '{print $2 "\t" $3 "\t" $((col)) }' Richness2.tsv           > Richness_$sample.tsv
+            sys sed -i "s/$sample/Richness/g" Richness_$sample.tsv
+            sys awk -v col=$counter '{print $2 "\t" $3 "\t" $((col)) }' All_Cumulative2.tsv     > All_Cumulative_$sample.tsv
+            sys awk -v col=$counter '{print $2 "\t" $3 "\t" $((col)) }' Relative_Abundance2.tsv > Relative_Abundance_$sample.tsv
+            sys awk -v col=$counter '{print $((col))                 }' All_Cumulative2.tsv     > All_Cumulative_only_int_$sample.tsv
+            sys sed -i "s/$sample/Cumulative/g" All_Cumulative_only_int_$sample.tsv
+            sys awk -v col=$counter '{print $((col))                 }' Relative_Abundance2.tsv > Relative_Abundance_only_int_$sample.tsv
+            sys sed -i "s/$sample/Relative_abundance/g" Relative_Abundance_only_int_$sample.tsv
             wait
             
-            sys paste -d "\t" Richneness_$sample.tsv All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv > profile_$sample.tsv
+            sys paste -d "\t" Richness_$sample.tsv All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv > profile_$sample.tsv
             wait
 
             sys rm All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv
             wait
 
-            sys mv profile_$sample.tsv Richneness_$sample.tsv  All_Cumulative_$sample.tsv  Relative_Abundance_$sample.tsv $globalVars{'outputPerSamplePath'}/$sample
+            sys mv profile_$sample.tsv Richness_$sample.tsv  All_Cumulative_$sample.tsv  Relative_Abundance_$sample.tsv $globalVars{'outputPerSamplePath'}/$sample
         }
 
         sys rm Richness2.tsv All_Cumulative2.tsv Relative_Abundance2.tsv 
