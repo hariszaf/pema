@@ -1,5 +1,25 @@
 #!/bin/bash
 
+# Aim: The "stats" table obtained once Swarm v2 was complteted
+#      gives for each ASV:
+#        1. the total abundance, 
+#        2. the number of unique amplicons in the OTU, 
+#        3. the name and the abundance of the most abundant amplicon in the OTU (i.e. the seed), and 
+#        4. the number of low abundant amplicons (abundance = 1) in the ASV.
+
+#       The sorted ASVs, can be used along with the amplicon
+#       contingency table to produce a new ASV contingency table.
+#       That table will indicate for each ASV the number of time
+#       elements of that ASV (i.e. amplicons) have been seen in 
+#       each sample (columns).
+#
+# Usage: PEMA invokes this script every time Swarm v2 has been asked for by the user,
+#        once Swarm has been completed, in the clusteringSwarm function of the clustering module.
+# 
+# Authors: Frédéric Mahé, edited by Haris Zafeiropoulos
+#           initial script available at: 
+#           https://github.com/torognes/swarm/wiki/Working-with-several-samples#produce-a-contingency-table-for-otus
+
 STATS="asvs.stats"
 SWARMS="asvs.swarms"
 AMPLICON_TABLE="amplicon_contingency_table.tsv"

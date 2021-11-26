@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#
+# Usage: PROBABLY NOT NEEDED
+#
+# Author: Haris Zafeiropoulos
 
 read fileToConvert
 phy_file=$(cat $fileToConvert)

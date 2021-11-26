@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Usage: PROBABLY NOT NEEDED
+
 merged_read=${1}
 
 sample=${merged_read::-16}

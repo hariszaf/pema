@@ -1,5 +1,16 @@
 #!/bin/bash
 
+# Aim:  This script merges the sequences of all samples 
+#       is a single file and updates the amplicon 
+#       abundances accordingly
+#  
+# Usage: PROBABLY NOT NEEDED 
+# 
+# Authors: Frédéric Mahé, edited by Haris Zafeiropoulos
+#           initial script available at: 
+#           https://github.com/torognes/swarm/wiki/Working-with-several-samples#produce-a-contingency-table-for-amplicons
+
+
 awk \
 'BEGIN {FS = "[>_]"  }    
 ## Parse the sample files

@@ -1,3 +1,9 @@
+# 
+# 
+# Usage: PROBABLY NOT NEEDED
+# 
+# Author: Frédéric Mahé
+
 STATS="SWARM.stats"
 SWARMS="SWARM.swarms"
 AMPLICON_TABLE="amplicon_contingency_table.csv"

@@ -1,5 +1,11 @@
 #!/bin/bash
 
+# Aim: This has the same scope as the createOtuContingencyTable.sh
+# 
+# Usage: PROBABLY NOT NEEDED
+# 
+# Authors: Haris Zafeiropoulos, Evangelos Pafilis
+
 cp finalTriplesFromSwarmClustering.txt finalTriplesFromSwarmClustering.tsv 
 
 sed -e "s/\s\{3,\}/\t/g" finalTriplesFromSwarmClustering.tsv > temporaryOTU.tsv
