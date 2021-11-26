@@ -245,7 +245,7 @@ string{} trainClassifier(string{} params, string{} globalVars){
 
       # Path for user's files 
       globalVars{'myCustomDbInPema'}  = globalVars{'path'} + '/tools/RDPTools/TRAIN'
-      string checkIfAlreadyTrained = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
+      string checkIfAlreadyTrained    = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
 
       # Check if RDPClassifier has already been trained with this custom DB
       if ( checkIfAlreadyTrained.isDir() ) {
