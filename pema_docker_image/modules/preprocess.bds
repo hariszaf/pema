@@ -396,7 +396,8 @@ string{} obiDereplicate(string{} params, string{} globalVars){
     string fileForDerepl
     for ( string nodereplicate : unzips ) {
         
-        # Execute OBITools
+        # Execute OBITools - when new pemabase available: 
+        # /home/obi3-env/bin/obi uniq
         task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > \
             $globalVars{'derePath'}/dereplicate_$nodereplicate
         
