@@ -102,6 +102,7 @@ Currently, RDPTools support:
 CREST supports: 
     - Silva 128
     - Silva 132
+    - Silva 138 [Integrated in 2021 Dec]: 119,525 unique taxa out of 510,508
 
 > IMPORTANT NOTE! In case you would be intrested in contributing to the PEMA 
     project, you need to download and unzip these tarballs in your PEMA repository
