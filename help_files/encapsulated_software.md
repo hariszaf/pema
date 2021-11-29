@@ -5,9 +5,10 @@ System dependecies, building an image based on Ubuntu 16.04
 
 ## Dependencies
 
-| Dependency           |
+| Dependency           |            |
 |----------------------|
-| software-properties-common | 
+| ant                  | 
+| software-properties-common | -----|
 | openjdk-8-jdk              |
 | openjdk-11-jdk             |
 | wget                       |
@@ -41,10 +42,10 @@ System dependecies, building an image based on Ubuntu 16.04
 | libblas-dev                |
 | gcc-multilib               |
 | gobjc++                    |
-| aptitude                   |
+| aptitude                   | 0.7.4  |
 | libreadline-dev            |
-| cmake                      |
-| curl                 |       
+| cmake                      | 3.5.1  |
+| curl                       | 7.47.0 |      
 
 
 
@@ -83,7 +84,26 @@ System dependecies, building an image based on Ubuntu 16.04
 | ShortRead    |
 |              |
 |              |
-|              |
-|              |
 
+
+
+## Databases 
+
+To facilitate updating reference databases, a Zenodo repository has been 
+created to version RDPTools and CREST classifiers, along with their training 
+files. 
+
+You may find this repo [here]().
+
+Currently, RDPTools support: 
+    - Midori 1
+    - Midori 2
+
+CREST supports: 
+    - Silva 128
+    - Silva 132
+
+> IMPORTANT NOTE! In case you would be intrested in contributing to the PEMA 
+    project, you need to download and unzip these tarballs in your PEMA repository
+    as described in the [pemabase Dockerfile](https://zenodo.org/record/5734317#.YaTg4HvP1hE).
 
