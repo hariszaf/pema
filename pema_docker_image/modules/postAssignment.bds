@@ -138,29 +138,27 @@ string RDPClassifierPerSample(string{} params, string{} globalVars) {
 }
 
 
-# if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_CROP' ){
-#    print ' EDO EINAI POU XOUME TO KENAKI MAS TO TELEUTAIO.....' +"\n"
-#    string cropPath = genePath + '/' + 'gene_COI' +  '/' + 'CROP'
-#    print cropPath + "\n"
-#    cropPath.chdir()
-#    string[] allSamplesList
-#    string[] allContainsOfCrop = cropPath.dir()
-#    for ( string sample : allContainsOfCrop ) {
-#       print "sample is " + sample + "\n"
-#       if ( sample.endsWith('.finalTriplesFromCropClustering.txt') == true  ) {
-#          string sampleId = sample.split('.finalTriplesFromCropClustering.txt')[0]
-#          print "sample is " + sampleId + "\n"
-#          sys mv $sample $outputPerSamplePath/$sampleId
-#       }
-#    }
-   
-#    # here, the number of the SPECIES that are found from all samples, are computed
-#    #using string.readLines() i will create my otu table..  
-#    #string.readLines() 
-# }      
 
 
 
+# Get NCBI Taxonomy Id for the taxonomies found in the finalTable.tsv file
+string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
 
+    # Move to dir of finaTable.tsv
+    if (globalVars{'classifierAlgo'} == "CREST") {
+
+        string finalPath = globalVars{'assignmentPath'} + params{'taxonomyFolderName'}
+        finalPath.chdir()
+
+    } else {
+
+        globalVars{'assignmentPath'}.chdir()
+    }
+    
+    sys python $globalVars{'path'}/scripts/getNCBITaxonomyIds.py
+
+    wait
+
+}
 
 
