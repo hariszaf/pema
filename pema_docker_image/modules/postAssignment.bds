@@ -159,6 +159,8 @@ string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
 
     wait
 
+    return 'ok'
+
 }
 
 
