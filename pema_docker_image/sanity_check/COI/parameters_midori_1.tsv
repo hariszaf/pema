@@ -364,6 +364,12 @@ custom_ref_db	No
 name_of_custom_db	partialCustomdb
 #
 #
+#######################################################################################################
+#
+# In case you would like to link the OTU/ASV assignment to its closest NCBI Taxonomy Id
+# set the following parameter as `Yes`
+getNCBITaxId	Yes
+#  
 #########################################################################################################
 #
 #		the following parameters is only for the case that the Phyloseq R package is about to run
