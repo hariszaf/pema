@@ -357,6 +357,15 @@ COPY /R_libs/ .
 # Fixing java
 RUN  apt-get install -y libhsdis0-fcml
 
+
+# Install ncbi-taxonomist Python software
+RUN pip install ncbi-taxonomist && \
+    echo "export PATH=${PATH}:$HOME/.local/bin" >> ~/.bashrc
+
+# Install super conveninet jq library to handle json output of ncbi-taxonomist
+# For more about this library, you may see here: https://stedolan.github.io/jq/
+RUN apt-get install -y jq
+
 # Make a source of the .bashrc file
 WORKDIR /root
 RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
