@@ -52,7 +52,7 @@ and you will get the same info.
 | RDPTools**     | v 2.5   | https://github.com/rdpstaff/RDPTools                                                           |
 | raxml-ng       | v. 1.1.0| https://github.com/amkozlov/raxml-ng                                                           |
 
-* OBITools are now in version 3. It seems like all previous versions are hard to get. PEMA has kept this `1.2.13` version 
+\* OBITools are now in version 3. It seems like all previous versions are hard to get. PEMA has kept this `1.2.13` version 
 precompiled in a [zenodo repo](https://zenodo.org/record/5745272#.YaefgnvP0UE).
 
 ** CREST and RDPTools classifiers have been also precompiled and can be found in the PEMA [zenodo repo](https://zenodo.org/record/5745272#.YaefgnvP0UE).
