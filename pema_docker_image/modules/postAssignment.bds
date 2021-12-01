@@ -147,7 +147,7 @@ string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
     # Move to dir of finaTable.tsv
     if (globalVars{'classifierAlgo'} == "CREST") {
 
-        string finalPath = globalVars{'assignmentPath'} + params{'taxonomyFolderName'}
+        string finalPath = globalVars{'assignmentPath'} + "/" + params{'taxonomyFolderName'}
         finalPath.chdir()
 
     } else {
