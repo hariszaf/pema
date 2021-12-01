@@ -58,7 +58,7 @@ string cutadaptForIts(string{} params, string{} globalVars) {
     wait
     
     sys mv *.fastq.gz initialData
-    sys mv $initialData $globalVars{'outputPoint'}/$globalVars{'analysisName'}
+    sys mv $initialData ../  #$globalVars{'outputPoint'}/$globalVars{'analysisName'}
     sys mv cutadapt/* .
     sys rm -r cutadapt
     
