@@ -73,6 +73,9 @@ PEMA currently uses `R-3.6.0`
 | `phyloseq`     | 1.30.0  |
 | `ShortRead`    | 1.44.3  |
 
+Since `pema:v.2.1.4`, to check the R and the R packages versions on the PEMA version you are running, 
+you may have a look in the `pema_R_packages.tsv` file you will find under the `/home` directory. 
+
 
 ## Databases 
 
