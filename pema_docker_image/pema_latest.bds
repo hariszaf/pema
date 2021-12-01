@@ -263,6 +263,18 @@ if ( paramsForCA{'emptyCheckpoints'} == 'Yes' ) {
 }
 wait
 
+if ( paramsForCA{'gene'} == 'gene_ITS' ) {
+
+    globalVars{'dataPath'}.chdir()
+    
+    sys mkdir cutadapt 
+    sys mv *fastq.gz data_after_cutadapt/
+    sys data_after_cutadapt/ ..
+
+    sys mv ../initialData/* .
+    sys rmdir ../initialData
+
+}
 println('----------------------------------------------------------')
 println('Pema has been completed successfully. Let biology start!')
 println('Thanks for using Pema.')
