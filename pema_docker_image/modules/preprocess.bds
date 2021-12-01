@@ -231,7 +231,7 @@ string adjustSeqs(string{} params, string{} globalVars){
             
             println('readBayesF: ' + readBayesF +'\n' + 'and readBayesR: ' + readBayesR)
             
-            task $globalVars{'path'}/tools/SPAdes/SPAdes-3.14.0/bin/spades.py --only-error-correction \
+            task $globalVars{'path'}/tools/SPAdes/SPAdes-3.13.0-Linux/bin/spades.py --only-error-correction \
                 --threads $params{'threadsTrimmomatic'} \
                 -o $globalVars{'bayesPath'}/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
 

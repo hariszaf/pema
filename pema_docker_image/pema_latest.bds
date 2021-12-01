@@ -211,6 +211,13 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 }
 println("The taxonomy assignment step has been completed.")
 
+if ( paramsForTaxAssign{'getNCBITaxId'} == 'Yes'){
+
+    ncbiTaxonomyMapping(paramsForTaxAssign, globalVars)
+
+    println("The assignments on the finalTable.tsv file have been linked to NCBI Taxonomy ids.")
+}
+
 string communAnal = globalVars{'outputPoint'} + "/communAnal.chp"
 checkpoint communAnal
 

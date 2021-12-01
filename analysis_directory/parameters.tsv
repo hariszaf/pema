@@ -362,12 +362,17 @@ midori_version	midori_1
 custom_ref_db	No
 name_of_custom_db	partialCustomdb
 #
+#######################################################################################################
 #
-#########################################################################################################
+# In case you would like to link the OTU/ASV assignment to its closest NCBI Taxonomy Id
+# set the following parameter as `Yes`
+getNCBITaxId  No
+#  
+######################################################################################################
 #
-#		the following parameters is only for the case that the Phyloseq R package is about to run
+# The following parameters is only for the case that the Phyloseq R package is about to run
 #
-#########################################################################################################
+######################################################################################################
 #
 # If wish to use Phyloseq in order to analyse your returned data then set the following  parameter 'phyloseq' with 'Yes'.
 # In order to do that, PEMA needs an MSA that it is returned by the MAFFT (v7.427) aligner and a phylogeny tree of the OTUs found which is built by the RAxML-ng algorithm.
@@ -418,3 +423,5 @@ emptyCheckpoints	Yes
 # may set this parameter as "RDPClassifier"
 classifierAlgo	CREST
 #
+# 
+# 
