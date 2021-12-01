@@ -19,7 +19,7 @@
 #
 # Give in your each uniq experiment a NAME, so a single output file will be created for each of them 
 #
-outputFolderName	test_Swarm_16S
+outputFolderName	test_Swarm_ITS
 #
 #
 # PEMA needs the names of the samples to be as in ENA format (e.g "ERR1021912") but 
@@ -223,7 +223,7 @@ vsearchId	0.95
 # taxonomy assignment. By default, the pipeline runs for 16S. Substitute with 'COI' if COI is your marker gene
 # write it down after the underscore (_) - do not erase the udenrscore!!
 #
-gene	gene_16S
+gene	gene_ITS
 #
 #
 ##########################################################################################################
@@ -289,7 +289,7 @@ clusteringAlgo	algo_Swarm
 # will be grouped if they hav e integer (or less) differences. This is swarm's most important
 # parameter
 #
-d	15
+d	12
 #
 #
 # when using the option --fastidious (-f), define the minimum mass of a large ASV. 
@@ -303,7 +303,7 @@ boundary	3
 #
 # You also need to set the number of threads that Swarm is able to use
 #
-swarmThreads	20
+swarmThreads	8
 #
 #
 ## SWARM tends to create a great numebr of ASVs, especially when d takes a low value. 
@@ -366,7 +366,7 @@ name_of_custom_db	partialCustomdb
 #
 # In case you would like to link the OTU/ASV assignment to its closest NCBI Taxonomy Id
 # set the following parameter as `Yes`
-getNCBITaxId  No
+getNCBITaxId	Yes
 #  
 ######################################################################################################
 #
@@ -378,7 +378,7 @@ getNCBITaxId  No
 # In order to do that, PEMA needs an MSA that it is returned by the MAFFT (v7.427) aligner and a phylogeny tree of the OTUs found which is built by the RAxML-ng algorithm.
 # Please remember that in order to use phyloseq a "metadata.tsv" file is necessary to be part of your anaylis folder. 
 #
-phyloseq	Yes
+phyloseq	No
 #
 #
 # The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees.
