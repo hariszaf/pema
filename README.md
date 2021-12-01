@@ -83,6 +83,13 @@ On the following chapters, you can find how to install PEMA both in Docker and S
 
 Running PEMA is exactly **the same** procedure in both of those cases. 
 
+Since PEMA v.2.1.4, to see what is your PEMA version you may run
+
+```
+docker inspect hariszaf/pema:v.2.1.4-1 |  jq -r '.[0].Config.Labels'
+```
+In case `jq` is not installed, you may remove the command after `|` and search for 
+the labels in the `inspect` output. 
 
 
 <!---  ################   NEXT CHAPTER     ########################          -->
@@ -299,7 +306,7 @@ PEMA uses a series of tools, datasets as well as Big Data Script language. We th
 The tools & databases that PEMA uses are: 
 * BigDataScript programming language - https://pcingola.github.io/BigDataScript/
 * FASTQC - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
-* Τrimmomatic - http://www.usadellab.org/cms/?page=trimmomatic
+* Trimmomatic - http://www.usadellab.org/cms/?page=trimmomatic
 * Cutadapt - https://cutadapt.readthedocs.io/en/stable/
 * BayesHammer - included in SPAdes - http://cab.spbu.ru/software/spades/
 * PANDAseq - https://github.com/neufeld/pandaseq
