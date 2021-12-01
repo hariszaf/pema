@@ -5,52 +5,32 @@ System dependecies, building an image based on Ubuntu 16.04
 
 ## Dependencies
 
-| Dependency                 | Version / notes |
-|----------------------------|-----------------|
-| bds                        | 0.99999p (build 2018-01-03 10:35) |
-| ant                        |         |
-| software-properties-common |        |
-| openjdk-8-jdk              |        |
-| openjdk-11-jdk             | 11.0.11+9 |
-| wget                       | 1.17.1 |
-| bzip2                      | 1.0.6  |
-| libbz2-dev                 |        |
-| liblzma-dev                |        |
-| libcurl4-openssl-dev       |        |
-| ca-certificates            |        |
-| libglib2.0-0               |        |
-| libxext6                   |        |
-| libsm6                     |        |
-| libxrender1                |        |
-| mono-mcs                   |        |
-| git                        | 2.7.4  |
-| mercurial                  |        |
-| subversion                 |        |
-| unzip                      | 6.00   |
-| autoconf                   | 2.69   |
-| autogen                    | 5.18.7 |
-| libtool                    |        |
-| gcc                        | 5.4.0  |
-| zlib1g-dev                 |        |
-| ca-certificates-java       |        |
-| libjpeg-dev                |        |
-| pip                        | 21.1.3 |
-| R                          | 3.6.0  |
-| xorg-dev                   |        |
-| build-essential            |        |
-| gfortran                   | 5.4.0  |
-| fort77                     |        |
-| libblas-dev                |        |
-| gcc-multilib               |        |
-| gobjc++                    |        |
-| aptitude                   | 0.7.4  |
-| libreadline-dev            |        |
-| cmake                      | 3.5.1  |
-| curl                       | 7.47.0 |      
+For an overview of the PEMA Docker image dependencies, since version `v.2.1.4`,  
+you may initiate a PEMA container, for example by running 
+```
+docker run --rm -it hariszaf/pema:v.2.1.4
+```
+and have a look at the `pema_environment.tsv` file that you will find unde the `/home` folder. 
 
+Here are the first lines of that file:
+```bash
+Desired=Unknown/Install/Remove/Purge/Hold
+| Status=Not/Inst/Conf-files/Unpacked/halF-conf/Half-inst/trig-aWait/Trig-pend
+|/ Err?=(none)/Reinst-required (Status,Err: uppercase=bad)
+||/ Name                                Version                               Architecture Description
++++-===================================-=====================================-============-===============================================================================
+ii  adduser                             3.113+nmu3ubuntu4                     all          add and remove users and groups
+ii  ant                                 1.9.6-1ubuntu1.1                      all          Java based build tool like make
+ii  ant-optional                        1.9.6-1ubuntu1.1                      all          Java based build tool like make - optional libraries
+ii  apt           
+```
 
+For any previous versions, you may run:
+```bash
+dpkg --list
+```
 
-
+and you will get the same info. 
 
 ## Software versions
 
@@ -65,25 +45,33 @@ System dependecies, building an image based on Ubuntu 16.04
 | vsearch        | v2.9.1  | https://github.com/torognes/vsearch/releases/download/v2.9.1/vsearch-2.9.1-linux-x86_64.tar.gz |
 | FastQC         | v0.11.8 | https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.8.zip                   |
 | cutadapt3      | 1.9.1   | https://cutadapt.readthedocs.io/en/stable/                                                     |
-| MAFFT          | v7.427  |                                                                                                |
-| OBITools       | 1.2.13  |                                                                                                |
-| ncbi-taxonomist| 1.2.1   |                                                                                                | 
-| CREST          | 3.0     |                                                                                                |
-| RDPTools       |         |                                                                                                |
+| MAFFT          | v7.427  | https://mafft.cbrc.jp/alignment/software/                                                      |
+| OBITools*      | 1.2.13  | https://pythonhosted.org/OBITools/welcome.html                                                 |
+| ncbi-taxonomist| 1.2.1   | https://ncbi-taxonomist.readthedocs.io/en/latest/index.html                                    | 
+| CREST**        | 3.0     | https://github.com/lanzen/CREST                                                                |
+| RDPTools**     | v 2.5   | https://github.com/rdpstaff/RDPTools                                                           |
+| raxml-ng       | v. 1.1.0| https://github.com/amkozlov/raxml-ng                                                           |
 
- 
+* OBITools are now in version 3. It seems like all previous versions are hard to get. PEMA has kept this `1.2.13` version 
+precompiled in a [zenodo repo](https://zenodo.org/record/5745272#.YaefgnvP0UE).
+
+** CREST and RDPTools classifiers have been also precompiled and can be found in the PEMA [zenodo repo](https://zenodo.org/record/5745272#.YaefgnvP0UE).
+   In case that new databases are about to be added in PEMA image, these will be integrated in the relative directories. 
+
+
 ## R packages
 
-| package      |
-|--------------|
-| vegan        |
-| dplyr        |
-| tidyr        |
-| BiocManager  |
-| RColorBrewer |
-| phyloseq     |
-| ShortRead    |
+PEMA currently uses `R-3.6.0`
 
+| Package        | Version |
+|----------------|---------|
+| `vegan`        |  2.5-7  |
+| `dplyr`        |  1.0.7  |
+| `tidyr`        |  1.1.4  |
+| `BiocManager`  | 1.30.16 |
+| `RColorBrewer` | 1.1.2   |
+| `phyloseq`     | 1.30.0  |
+| `ShortRead`    | 1.44.3  |
 
 
 ## Databases 
@@ -101,8 +89,8 @@ Currently, RDPTools support:
 CREST supports: 
     - Silva 128
     - Silva 132
-    - [Silva 138](https://www.arb-silva.de/no_cache/download/archive/release_138_1/Exports/) [Integrated in 2021 Dec]: 119,525 unique taxa out of 510,508 (SSURef_NR99_tax_silva_full_align_trunc.fasta.gz)
-    - [PR2 v.4.14.0](https://github.com/pr2database/pr2database/releases/tag/v4.14.0) [Integrated in 2021 Dec]: 
+    <!-- - [Silva 138](https://www.arb-silva.de/no_cache/download/archive/release_138_1/Exports/) [Integrated in 2021 Dec]: 119,525 unique taxa out of 510,508 (SSURef_NR99_tax_silva_full_align_trunc.fasta.gz)
+    - [PR2 v.4.14.0](https://github.com/pr2database/pr2database/releases/tag/v4.14.0) [Integrated in 2021 Dec]:  -->
 
 > IMPORTANT NOTE! In case you would be intrested in contributing to the PEMA 
     project, you need to download and unzip these tarballs in your PEMA repository

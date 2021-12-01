@@ -37,3 +37,14 @@ ENV PATH=$PATH:/home/tools/BDS/.bds
 WORKDIR /home
 RUN rm *tar.gz Miniconda3-latest-Linux-x86_64.sh &&\ 
     dpkg --list > pema_environment.tsv
+
+RUN echo "R version running on PEMA" > pema_R_packages.tsv ; Rscript -e 'R.version'   >> pema_R_packages.tsv && \
+    echo  "\n---------------------------------------\n"  >> pema_R_packages.tsv  && \
+    echo  "\nR package along with its version: \n"       >> pema_R_packages.tsv  && \
+    echo  "dplyr"          >> pema_R_packages.tsv ; Rscript -e 'packageVersion("dplyr")' >> pema_R_packages.tsv && \
+    echo  "\nvegan"        >> pema_R_packages.tsv ; Rscript -e 'packageVersion("vegan")' >> pema_R_packages.tsv && \
+    echo  "\ntidyr"        >> pema_R_packages.tsv ; Rscript -e 'packageVersion("tidyr")' >> pema_R_packages.tsv && \
+    echo  "\nBiocManager"  >> pema_R_packages.tsv ; Rscript -e 'packageVersion("BiocManager")' >> pema_R_packages.tsv && \
+    echo  "\nRColorBrewer" >> pema_R_packages.tsv ; Rscript -e 'packageVersion("RColorBrewer")' >> pema_R_packages.tsv && \
+    echo  "\nphyloseq"     >> pema_R_packages.tsv ; Rscript -e 'packageVersion("phyloseq")' >> pema_R_packages.tsv && \
+    echo  "\nShortRead"    >> pema_R_packages.tsv ; Rscript -e 'packageVersion("ShortRead")' >> pema_R_packages.tsv
