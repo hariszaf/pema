@@ -26,6 +26,7 @@ for line in final_table:
         for entry in range(len(taxa_levels)-1, 0, -1): 
 
             level = taxa_levels[entry]
+            level = level.replace("_", " ")
 
             print("this is my level:\t" + level)
 
@@ -41,7 +42,7 @@ for line in final_table:
 
                     if match != "":
                         ncbi_id = match
-                        final_table_ncbiIds.write(line[:-1] + "\t" + level + ":" + ncbi_id)
+                        final_table_ncbiIds.write(line[:-1] + "\t" + level + ":" + ncbi_id + "\n")
                         break
 
                 else:
@@ -51,12 +52,18 @@ for line in final_table:
 
                     time.sleep(1)
 
+                    output = str(output)
+                    output = output[2:]
+                    output = output[:-1]
+
                     if output != "":
+
+                        output = output[:-2]
 
                         if " " not in output:
 
                             ncbi_id = output 
-                            final_table_ncbiIds.write(line[:-1] + "\t" + level + ":" + ncbi_id)
+                            final_table_ncbiIds.write(line[:-1] + "\t" + level + ":" + ncbi_id + "\n")
 
                             taxa_ncbiIds[level] = ncbi_id
                             break
