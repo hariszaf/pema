@@ -206,12 +206,14 @@ string adjustSeqs(string{} params, string{} globalVars){
             
             if ( params{'maxInfo'} == 'Yes' ) {
                 string newName = trimCheck.split("filtered\_max\_")
-                newDir = newName.substr(3,13) ;
+                println(">>>> HERE IS A NEWNAME:  " + newName)
+                newDir = newName.substr(3, newName.length()-1) ;
+               #  newDir = newName.split("")
                 println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
 
             } else if ( params{'maxInfo'} == 'No' ) {
                 string newName = trimCheck.split("filtered_")
-                newDir = newName.substr(3,13) ;
+                newDir = newName.substr(3, newName.length()-1) ;
                 println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
             }
             
@@ -225,10 +227,6 @@ string adjustSeqs(string{} params, string{} globalVars){
             wait
 
             # And execute the BayesHammer algorithm that it is in SPAdes
-            
-            sys which gzip
-            sys gzip --version
-            
             println('readBayesF: ' + readBayesF +'\n' + 'and readBayesR: ' + readBayesR)
             
             task $globalVars{'path'}/tools/SPAdes/SPAdes-3.13.0-Linux/bin/spades.py --only-error-correction \
@@ -236,7 +234,7 @@ string adjustSeqs(string{} params, string{} globalVars){
                 -o $globalVars{'bayesPath'}/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
 
             wait
-        
+
             # Clear all variables that are used in BayesHammer step in order to be re-used
             readBayesF = ''
             readBayesR = ''
@@ -296,26 +294,64 @@ string merging(string{} params, string{} globalVars){
         # In case of re-running, delete the .gz files as they cannot be over-written
         sys if [[ $(find '$uniqPath' -name '*.gz') ]] ; then  rm *gz ; fi     
 
-        sys /bin/gzip *.fastq
-        
+
         # In the corrected file of each sample there are two files - one for forward, one for reverse -
         # Make two variables with them
-        string forward = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq.gz'
-        string reverse = '_2.fastq.gz.2P.fastq.00.0_0.cor.fastq.gz'
-        string forwardFile= baseName + correctFile + forward ;
-        println(forwardFile)
+        string forward     = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq.gz'
+        string reverse     = '_2.fastq.gz.2P.fastq.00.0_0.cor.fastq.gz'
+        string forwardFile = baseName + correctFile + forward ;
         string reverseFile = baseName + correctFile + reverse ;
-        println(reverseFile)
 
         wait
-            
+        
+
+        if ( correctFile.startsWith("ERR") == false ) {
+
+            println("~~~~~~~~~~~~~ I AM IN THE WILD LOOP ~~~~~~~~~~~~`")
+            string deF  = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq'
+            string deR  = '_2.fastq.gz.2P.fastq.00.0_0.cor.fastq'
+            string fwdF = baseName + correctFile + deF ;
+            string rvsF = baseName + correctFile + deR ;
+
+            println("fwdF: " + fwdF)
+            println("rvsF: " + rvsF)
+            wait
+            sys pwd
+
+            task{
+                sys sed -i 's/DRR/ERR/g' $fwdF
+                sys sed -i 's/DRR/ERR/g' $rvsF
+            }
+            wait 
+            deF = '' ; deR = '' ; fwdF = '' ; rvsF = ''
+        }
+        wait
+
+        sys /bin/gzip *.fastq 
+        wait
+
         # Execute pandaseq algorithm for merging 
         task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
             -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
-            -t $params{'threshold'} $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq.gz
+            -t $params{'threshold'} $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq
 
         wait
 
+        if ( correctFile.startsWith("ERR") == false ) {
+
+            println("~~~~~~~~~~~~~ I AM IN THE WILD LOOP for the 2nd time ~~~~~~~~~~~~`")
+
+            task{
+                sys /bin/gunzip *.fastq.gz
+                sys sed -i 's/ERR/DRR/g' *.fastq
+                sys /bin/gzip *cor.fastq
+            }
+            wait 
+        }
+        wait 
+
+        # Move the merged file in the `unzip` folder under the `/4.mergingPairedEndFiles/` path
+        sys mv $correctFile.merged.fastq $correctFile.merged.fastq.gz
         sys mv *.merged.fastq.gz $globalVars{'spaPath'}
         globalVars{'bayesPath'}.chdir()
     }
@@ -345,11 +381,10 @@ string merging(string{} params, string{} globalVars){
 
             string SAMPLE_NAME = anyFile.baseName('.merged.fastq.gz')
 
-            sys sed "s/>ERR[0-9]*:/>$SAMPLE_NAME:/g" $anyFile > tmp
+            sys sed -e "s/>ERR[0-9]*:/>$SAMPLE_NAME:/g" $anyFile > tmp
             sys mv tmp $anyFile
 
         }
-
 
         sys cp $anyFile $unzipPath
         unzipPath.chdir() ;
@@ -359,11 +394,6 @@ string merging(string{} params, string{} globalVars){
     }
 
     wait
-
-    
-
-
-
 
     println('Merging step by SPAdes is completed')
 
