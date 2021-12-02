@@ -246,10 +246,10 @@ numberOfCoresForPapara	7
 #
 #
 # When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. 
-# PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_132'
+# PEMA allows you to choose between the two last version of Silva. Hence, set the "referenceDb" parameter either as 'silva_128' or as 'silva_132'
 # depending on the version of your choice.
 #
-silvaVersion	silva_132
+referenceDb	silva_132
 #
 #
 # As you may need a series of taxonomy assignment when you use the alignment-based method, please give another name in your 
@@ -290,7 +290,7 @@ clusteringAlgo	algo_Swarm
 # will be grouped if they hav e integer (or less) differences. This is swarm's most important
 # parameter
 #
-d	15
+d	3
 #
 #
 # when using the option --fastidious (-f), define the minimum mass of a large ASV. 
