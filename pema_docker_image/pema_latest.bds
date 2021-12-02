@@ -104,6 +104,7 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
 
    println('Pema is at the dereplication step; this may take a while.')
    swarmDereplicate(paramsDereplication, globalVars)
+   wait
 
 
 } else {
@@ -113,6 +114,8 @@ if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
    wait
 
    mergeFilesNonSwarm(paramsDereplication, globalVars)
+
+   wait
 
 }
 
@@ -152,43 +155,109 @@ string{} paramsForTaxAssign =  readParameterFile(l)
 
 if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
-   if ( paramsForTaxAssign{'gene'} == 'gene_16S' || paramsForTaxAssign{'gene'} == 'gene_18S' || paramsForTaxAssign{'gene'} == 'gene_ITS') {
-
+   if ( paramsForTaxAssign{'gene'} == 'gene_16S') {
 
       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
 
          println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
-
-         globalVars{'classifierAlgo'} = 'CREST'
+         
+         globalVars{'classifierAlgo'}         = 'CREST'
+         paramsForTaxAssign{'classifierAlgo'} = 'CREST'
+         wait
 
       }
-
 
       if (paramsForTaxAssign{'taxonomyAssignmentMethod'} != 'phylogeny') {
 
          crestAssign(paramsForTaxAssign, globalVars)
+         wait
          println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
 
       } else {
-         
-         phylogenyAssign(paramsForTaxAssign, globalVars)
-         println("Phylogeny based taxonomy assignment has been completed.")
+   
+            phylogenyAssign(paramsForTaxAssign, globalVars)
+            wait
+            println("Phylogeny based taxonomy assignment has been completed.")
 
       }
 
-   } else {
+   } else if ( paramsForTaxAssign{'gene'} == 'gene_COI' ) {
 
-      if ( paramsForTaxAssign{'gene'} == 'gene_COI' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
-         if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+         println('Pema cannot run COI data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
 
-            println('Pema cannot run COI data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
+         globalVars{'classifierAlgo'}         = 'RDPClassifier'
+         paramsForTaxAssign{'classifierAlgo'} = 'RDPClassifier'
 
-            globalVars{'classifierAlgo'} = 'RDPClassifier'
+         wait
 
-         }
+      }
+      
+      if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
 
          rdpAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
+
+      }
+
+   } else if (paramsForTaxAssign{'gene'} == 'gene_18S') {
+
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+
+         println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
+
+         globalVars{'classifierAlgo'}         = 'CREST'
+         paramsForTaxAssign{'classifierAlgo'} = 'CREST'
+         wait
+
+      }
+      
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+ 
+         crestAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
+
+      }
+
+   } else if (paramsForTaxAssign{'gene'} == 'gene_ITS') {
+
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+
+         println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
+
+         globalVars{'classifierAlgo'}         = 'CREST'
+         paramsForTaxAssign{'classifierAlgo'} = 'CREST'
+         wait
+      } 
+      
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+ 
+         crestAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
+
+      }
+
+   } else if ( paramsForTaxAssign{'gene'} == 'gene_12S' ) {
+
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+
+         println('Pema cannot run COI data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
+
+         globalVars{'classifierAlgo'}         = 'RDPClassifier'
+         paramsForTaxAssign{'classifierAlgo'} = 'RDPClassifier'
+
+         wait
+
+      }
+      
+      if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
+
+         rdpAssign(paramsForTaxAssign, globalVars)
+         wait
          println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
 
       }
@@ -202,6 +271,7 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
    } else if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
+      crestAssign(paramsForTaxAssign, globalVars)
 
    } else {
 
@@ -211,6 +281,7 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 }
 println("The taxonomy assignment step has been completed.")
 
+# Check for running the ncbi-taxonomist tool
 if ( paramsForTaxAssign{'getNCBITaxId'} == 'Yes'){
 
     ncbiTaxonomyMapping(paramsForTaxAssign, globalVars)
@@ -247,9 +318,9 @@ parameterFilePath.chdir() ;
 
 perSampleGeneral(paramsForCA, globalVars)
 wait
-if ( paramsForCA{'classifierAlgo'} == 'CREST') {
+if ( globalVars{'classifierAlgo'} == 'CREST') {
     CrestPerSample(paramsForCA, globalVars)
-} else if ( paramsForCA{'classifierAlgo'} == 'RDPClassifier') {
+} else if ( globalVars{'classifierAlgo'} == 'RDPClassifier') {
     RDPClassifierPerSample(paramsForCA, globalVars)
 }
 wait
@@ -281,231 +352,5 @@ println('Thanks for using Pema.')
 
 
    
-# / Clustering to OTUs by making use of the CROP algorithm   ///////////
-   
-#    if ( paramsOfTable{'clusteringAlgoForCOI_ITS'} == 'algo_CROP' ) {
-      
-#       string croPath = genePath + '/' + paramsOfTable{'gene'}  + '/' + 'CROP'
-      
-      
-#       ####   CROP    #####
-#       ##  In this case we do chimera removal first and then we apply the clustering algorithm  ----  Until now (23/3) we think we prefer CROP over SWARM
-      
-#       outputFilePath.chdir()
-
-#       task sed 's/_/;size=/g' final_all_samples.fasta > COI_CROP_all_samples.fasta
-#       wait
-#       sys cp COI_CROP_all_samples.fasta $croPath
-#       wait
-
-#       ###### we build a contingency table for AMPLICONS  - here the awk.sh file is a bash script that you can find in the PEMA file
-#       linearPath.chdir()
-      
-#       task{
-#          sys bash $path/scripts/createContigencyTable.sh
-#          sys sed 's/linearized.dereplicate_//g; s/.merged.fastq//g' amplicon_contingency_table_temp.csv >  amplicon_contingency_table.csv
-#          sys  mv  amplicon_contingency_table.csv  $croPath
-#       }
-#       wait
-      
-#       print 'the contigency table has been created successfully!' + "\n"
-
-#       croPath.chdir()
-      
-#       ### chimera removal
-#       task $path/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/vsearch --uchime3_denovo COI_CROP_all_samples.fasta --nonchimeras no_chim_COI_CROP_all_samples.fasta --abskew $paramsOfTable{'abskew'}
-#       wait
-#       ### calculate parameters for CROP clustering algorithm   
-#       croPath.chdir()
-#       string OMP_NUM_THREADS = paramsOfTable{'omp_num_threads'}
-#       sys export OMP_NUM_THREADS=$OMP_NUM_THREADS
-#       sys bash $path/scripts/croParameters.sh
-#       wait
-      
-#       # read the parameters estimated
-#       string param_file = "cropParameters.tsv"
-#       string{} crop_params = readParameterFile(param_file)
-      
-#       # run the CROP algorithm
-#       sys $path/tools/CROP/CROP/CROPLinux -i no_chim_COI_CROP_all_samples.fasta -o CROP_output -z $crop_params{'zeta'} -b $crop_params{'beta'} -e $crop_params{'epsilon'} || true
-            
-#       ##### at last, we create an OTU table that comes after the CROP results. Again, we have an awk command in a bash script 
-#       croPath.chdir()
-#       sys mv $linearPath/amplicon_contingency_table_temp.csv $croPath
-#       wait
-      
-#       ### perform a script that will allow us to use the CROP output as it had SWARM's format
-#       sys bash $path/scripts/cropOutputTranformations.sh
-
-#       # if necessary, remove some not that nice things 
-#       sys sed -i 's/:::/:/g; s/:0:0:0:0./0./g'  amplicon_contingency_table.csv
-#       sys bash $path/scripts/otuContingencyTableSwarm.sh
-      
-#       # The file returned is called "SWARM_OTU_table.tsv" just to have a sole script for this task for both the cases of Swarm and Crop. It is exactly the same approach.
-#       sys mv SWARM_OTU_table.tsv CROP_OTU_table.tsv
-#       print 'the contigency table with the found otus was just created!' + "\n"
-#       print 'The clustering of the MOTUs by the CROP algorithm, has been concluded!'  + "\n"
-#    }
-# }
 
 
-
-
-
-# #######################################################################################################
-# ###################     Taxonomy assignment for the COI and the ITS marker genes    ###################
-# #######################################################################################################
-
-
-# #\\\\\\\\\\\\\\ \\\\\\\\      When CROP has been used for OTUs clustering  /////////////////////////////
-
-# if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_CROP' ) {
-   
-#    string croPath = genePath + '/' + 'gene_COI'  + '/' + 'CROP'
-#    croPath.chdir()
-   
-#    print 'The taxonomy assignment with the CROP output has STARTED! '
-   
-#    ## make a file where the sequence and the abundance of otus will be present 
-#    task {
-#         sys cat CROP_output.cluster.fasta | grep ">" > heads.txt
-#         sys sed 's/=[0-9]*/=/g' heads.txt > heads2.txt
-#         sys cat CROP_output.cluster.fasta | grep -v ">"  > seqs.fasta
-#         sys awk '{print $2}' CROP_output.cluster > abundancies.txt
-#         sys tail -n +2 abundancies.txt > abundancies2.txt
-#         sys paste heads2.txt abundancies2.txt > new_heads.txt
-#         sys sed 's/\t//g' new_heads.txt > final_heads.txt
-#         sys paste -d'\n' final_heads.txt seqs.fasta > crop_for_rdpclassifier.fasta
-#         sys rm heads.txt heads2.txt seqs.fasta abundancies.txt abundancies2.txt new_heads.txt final_heads.txt
-#    }
-   
-#    print 'I have made the file I need for the taxonomy assignment' + "\n"
-   
-#    ## run RDPClassifier 
-#    croPath.chdir()
-#    task java -Xmx64g -jar $path/tools/RDPTools/classifier.jar classify -t $path/tools/RDPTools/TRAIN/rRNAClassifier.properties -o taxonomy_from_rdpclassifer_COI_CROP.txt crop_for_rdpclassifier.fasta
-
-
-#   ## Build final_table.tsv for the case of COI marker gene with CROP as clustering algorithm
-
-#    wait
-
-#    # croPath.chdir()
-#    # sys bash $path/scripts/keepOnlyPerCentSimilartityForCrop.sh
-
-#    croPath.chdir()
-#    task {
-#       sys cp taxonomy_from_rdpclassifer_COI_CROP.txt tax_assign_swarm_COI.txt
-#       sys cp CROP_OTU_table.tsv SWARM_OTU_table.tsv
-#       sys bash $path/scripts/makeMotuTableForRDPClassifier.sh
-#       sys rm *_sorted tax_assign_swarm_COI.txt SWARM_OTU_table.tsv SWARM.stats SWARM.swarms
-#    }
-
-# } else if ( paramsOfTaxonomy{'gene'} == 'gene_ITS'  &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_CROP') {
-   
-#    string croPath = genePath + '/' + 'gene_ITS'  + '/' + 'CROP'
-#    croPath.chdir()
-   
-#    # run a script that will make all the changes needed for the SWARM output to run with LCAClassifier
-   
-#    sys mv CROP_OTU_table.tsv SWARM_OTU_table.tsv
-#    task bash $path/scripts/transformationsOnTable.sh
-
-#    wait
-#    sys mv SWARM_OTU_table.tsv ITS_otutab_$paramsOfTaxonomy{'taxonomyFolderName'}.txt 
-#    sys mv CROP_output.cluster.fasta ITS_all_samples.otus.fa
-#    sys sed -i 's/;size=[0-9]*//g' ITS_all_samples.otus.fa
-
-   
-#    task $path/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast -query ITS_all_samples.otus.fa -db $path/tools/CREST/LCAClassifier/parts/flatdb/unite/unite.fasta -num_alignments 100 -outfmt 5 -out ITS_myunitemod.xml -num_threads $paramsOfTaxonomy{'vsearchThreads'}
-
-#    wait
-      
-#    task $path/tools/CREST/LCAClassifier/bin/classify -c $path/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf -d unite -t ITS_otutab_$paramsOfTaxonomy{'taxonomyFolderName'}.txt -o $paramsOfTaxonomy{'taxonomyFolderName'} ITS_myunitemod.xml
-   
-#    wait
-   
-#    string taxonomyDirectoryITS = genePath + '/'+ paramsOfTaxonomy{'gene'} + '/' + 'CROP' + '/' +paramsOfTaxonomy{'taxonomyFolderName'}
-#    taxonomyDirectoryITS.chdir()
-#    sys cp ITS_otutab_* final_table.tsv
-# }
-
-
-# 
-# ###########################################################################################
-# ##################      making output per sample for COI marker gene     ##################
-# ###########################################################################################
-
-# if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_SWARM' ){
-#     #using string.readLines() i will create my otu table..
-#    string swarmPath = genePath + '/' + 'gene_COI' +  '/' + 'SWARM'
-#    print swarmPath + "\n"
-#    swarmPath.chdir()
-#    string[] allSamplesList
-#    string[] allContainsOfSwarm = swarmPath.dir()
-#    for ( string sample : allContainsOfSwarm ) {
-#       print "sample is " + sample + "\n"
-#       if ( sample.endsWith('.finalTriplesPerSampleFromSwarmClustering.txt') == true  ) {
-#          string sampleId = sample.split('.finalTriplesPerSampleFromSwarmClustering.txt')[0]
-#          print "sample is " + sampleId + "\n"
-#          sys mv $sample $outputPerSamplePath/$sampleId
-#       }
-#    }
-#    # here, the number of the SPECIES that are found from all samples, are computed
-#    sys bash $path/scripts/uniqSpecies.sh
-# }      
-
-# if  ( paramsOfTaxonomy{'gene'} == 'gene_COI' &&  paramsOfTaxonomy{'clusteringAlgoForCOI_ITS'} == 'algo_CROP' ){
-#    print ' EDO EINAI POU XOUME TO KENAKI MAS TO TELEUTAIO.....' +"\n"
-#    string cropPath = genePath + '/' + 'gene_COI' +  '/' + 'CROP'
-#    print cropPath + "\n"
-#    cropPath.chdir()
-#    string[] allSamplesList
-#    string[] allContainsOfCrop = cropPath.dir()
-#    for ( string sample : allContainsOfCrop ) {
-#       print "sample is " + sample + "\n"
-#       if ( sample.endsWith('.finalTriplesFromCropClustering.txt') == true  ) {
-#          string sampleId = sample.split('.finalTriplesFromCropClustering.txt')[0]
-#          print "sample is " + sampleId + "\n"
-#          sys mv $sample $outputPerSamplePath/$sampleId
-#       }
-#    }
-   
-#    # here, the number of the SPECIES that are found from all samples, are computed
-#    #using string.readLines() i will create my otu table..  
-#    #string.readLines() 
-# }      
-
-# string checkPhyloseq = outputPoint + "/phyloseq.chp"
-# checkpoint checkPhyloseq 
-# parameterFilePath.chdir()
-# string m = "parameters.tsv"
-# string{} paramForPhyloseq = readParameterFile(m)
-
-
-
-
-
-# ###  make a file where i will move all the checkpoints
-# parameterFilePath.chdir() ;
-# if ( paramForPhyloseq{'emptyCheckpoints'} == 'Yes' ) {
-#    string checkpointsDir = 'checkpoints_for_' + paramForPhyloseq{'outputFolderName'}
-#    outputFilePath.chdir()
-#    checkpointsDir.mkdir()
-#    outputPoint.chdir()   
-#    sys mv *.chp $outputFilePath/$checkpointsDir
-# }
-
-# # # keep only one OTU-table for every analysis in the case of the 16S marker gene and the alignment based taxonomy assignment method
-# # if ( paramForPhyloseq{'gene'} == '16S' &&  paramForPhyloseq{'taxonomyAssignmentMethod'} == 'alignment' ) {
-# # 
-# #    string algoCluster = paramForPhyloseq{'clusteringAlgoFor16S_18SrRNA'}
-# #    string algo = algoCluster.split('_')[1]   
-# #    string assignmentPath = genePath + '/' + "gene_16S" + '/' + algo + '/' + paramForPhyloseq{'taxonomyFolderName'}
-# #    assignmentPath.chdir()
-# #    sys cd 
-# #    sys mv 16S_otu_table.txt 16S_otutab_$paramForPhyloseq{'taxonomyFolderName'}.txt
-# # }
-
-# outputFilePath.chdir()
-# print(" \n PEMA has come to an end! Let biology start! \n ")

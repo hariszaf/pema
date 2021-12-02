@@ -211,8 +211,24 @@ string buildDirectories(string{} params, string{} globalVars){
          algo.mkdir()
       } 
 
-   } else if ( params{'gene'} == 'gene_other' ) {
+
+   } else if ( params{'gene'} == 'gene_12S' ) {
+      println('Marker gene under study 12S.')
+      string sixteenPath = globalVars{'genePath'} + '/' + 'gene_12S'
+      sixteenPath.chdir()
+      
+      if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
+            string algo = 'Swarm'
+            algo.mkdir()
+      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
+            string algo = 'vsearch'
+            algo.mkdir()
+      } 
+
+    } else if ( params{'gene'} == 'gene_other' ) {
+
       println('My marker gene is not among the 4 PEMA supports by default.')
+
       string newMarkerGenePath = globalVars{'genePath'} + '/' + 'gene_new'
       newMarkerGenePath.chdir()
 
@@ -225,7 +241,7 @@ string buildDirectories(string{} params, string{} globalVars){
       } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
          string algo = 'vsearch'
          algo.mkdir()
-      }      
+      }
    }
    # Again make everything 777
    sys chmod 777 $globalVars{'outputFilePath'} -R

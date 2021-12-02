@@ -8,12 +8,7 @@ string crestAssign(string{} params, string{} globalVars) {
 
       if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
 
-         # string algoCluster1 = params{'clusteringAlgo'}
-         # string algo1 = algoCluster1.split('_')[1]
-         # string assignmentPath = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + algo1
-         # assignmentPath.chdir()
          globalVars{'assignmentPath'}.chdir()
-
 
          if ( params{'taxonomyFolderName'}.isDir() ){
             int previousRandomNumber = randInt( 100 )
@@ -21,7 +16,7 @@ string crestAssign(string{} params, string{} globalVars) {
          }
 
       
-         if ( params{'silvaVersion'} == 'silva_128' ) { 
+         if ( params{'referenceDb'} == 'silva_128' ) { 
 
             # First use megablast algorithm of blastn for sequence identification, intra-species comparison                   
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
@@ -43,7 +38,7 @@ string crestAssign(string{} params, string{} globalVars) {
             wait
             
          # Follow the same steps for the case of the Silva 132    
-         } else if ( params{'silvaVersion'} == 'silva_132' ) {
+         } else if ( params{'referenceDb'} == 'silva_132' ) {
                
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
                -task megablast \
@@ -63,8 +58,31 @@ string crestAssign(string{} params, string{} globalVars) {
                -o $params{'taxonomyFolderName'} mysilvamod132_$params{'taxonomyFolderName'}.xml
             
             wait      
+         
+         } else if ( params{'referenceDb'} == 'pr2' ) {
+
+            task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
+               -task megablast \
+               -query all_sequences_grouped.fa \
+               -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/pr2/pr2 \
+               -num_alignments 100 \
+               -outfmt 5 \
+               -out my_pr2_$params{'taxonomyFolderName'}.xml \
+               -num_threads $params{'vsearchThreads'}
+            
+            wait
+            
+            task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
+               -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
+               -d pr2 \
+               -t allTab_$params{'taxonomyFolderName'}.tsv \
+               -o $params{'taxonomyFolderName'} my_pr2_$params{'taxonomyFolderName'}.xml
+            
+            wait      
+
          }
 
+         # Task always the same for all previous cases
          task {
             sys mv $params{'taxonomyFolderName'}/allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/finalTable.tsv
             sys sed -i 's/classification/Classification/g' $params{'taxonomyFolderName'}/finalTable.tsv
@@ -98,7 +116,7 @@ string crestAssign(string{} params, string{} globalVars) {
             sys sed -i 's/classification/Classification/g' $params{'taxonomyFolderName'}/finalTable.tsv
          }
          wait
-      }
+      } 
 
    } else {
 
@@ -199,6 +217,16 @@ string rdpAssign(string{} params, string{} globalVars) {
 
 
       if ( params{'gene'} == "gene_COI" ) {
+
+         task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'midori_version'}/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
+
+         wait
+
+         rdpBuildingTable(params, globalVars)
+
+         wait
+
+      } else if ( params{'gene'} == "gene_12S" ) {
 
          task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'midori_version'}/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
 

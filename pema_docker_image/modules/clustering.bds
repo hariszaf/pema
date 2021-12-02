@@ -109,10 +109,12 @@ string clusteringSwarm(string{} params, string{} globalVars) {
    if ( d_param < 6 ) {
 
       swarmMinValues(params, globalVars)
+      wait
 
    } else {
 
       swarmMaxValues(params, globalVars)
+      wait
    }
 
    wait
@@ -146,7 +148,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
    wait
 
    # According to the Clustering step to come, we need to implement some transformations
-   if ( params{'classifierAlgo'} == 'CREST' && params{'gene'} != 'gene_COI' ) {
+   if ( params{'classifierAlgo'} == 'CREST' && (params{'gene'} != 'gene_COI' || params{'gene'} != 'gene_12S' ) ) {
 
       println('Build CREST input once Swarm has been completed')
       println('Transformations on the Swarm output to align to the CREST input are about to be implemented.')
@@ -161,7 +163,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
 
       wait
 
-   } else if ( params{'classifierAlgo'} == 'CREST' && params{'gene'} == 'gene_COI' ) {
+   } else if ( params{'classifierAlgo'} == 'CREST' && (params{'gene'} != 'gene_COI' || params{'gene'} != 'gene_12S' ) ) {
 
       println('You have selected CREST classifier and your marker gene is COI. Pema does not support this combination.')
 
@@ -179,7 +181,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
 string swarmMinValues(string{} params, string{} globalVars) {
 
    int d_param = params{'d'}.parseInt()
-   
+
    if ( d_param == 1){
 
       task $globalVars{'path'}/tools/swarm/swarm/bin/swarm -d 1 -f -b $params{'boundary'} \
@@ -192,7 +194,7 @@ string swarmMinValues(string{} params, string{} globalVars) {
    } else {
 
       # Run Swarm for d != 1
-      task $globalVars{'path'}/tools/swarm/swarm/bin/swarm -d $params{'d'} -t $params{'swarmThreads'} -s asvs.stats -w asvs_representatives_all_samples.fasta < all.denovo.nonchimeras.fasta > asvs.swarms
+      task $globalVars{'path'}/tools/swarm/swarm/bin/swarm -d $params{'d'} -t $params{'swarmThreads'} -s asvs.stats -w asvs_representatives_all_samples.fasta < all_samples.fasta > asvs.swarms
 
       wait
    }
