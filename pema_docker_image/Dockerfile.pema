@@ -6,7 +6,7 @@
 # Usage: docker build -t hariszaf/pemabase:<tag> .
 
 
-FROM hariszaf/pemabase:v.2.1.0
+FROM hariszaf/pemabase:v.2.1.1
 LABEL maintainer = "Haris Zafeiropoulos" 
 LABEL contact    = "haris-zaf@hcmr.gr"
 LABEL build_date = "2021-30-11"
@@ -32,6 +32,7 @@ RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
 
 RUN export PATH=$PATH:/home/tools/BDS/.bds
 ENV PATH=$PATH:/home/tools/BDS/.bds
+
 
 # Set "home" as my working directory when a container starts
 WORKDIR /home
