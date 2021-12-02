@@ -11,8 +11,8 @@ FROM ubuntu:16.04
 
 LABEL maintainer = "Haris Zafeiropoulos" 
 LABEL contact    = "haris-zaf@hcmr.gr"
-LABEL build_date = "2021-30-11"
-LABEL version    = "v.2.1.0"
+LABEL build_date = "2021-12-02"
+LABEL version    = "v.2.1.1"
 
 ## Set Java envs
 
@@ -381,11 +381,29 @@ RUN apt-get install -y jq
 WORKDIR /root
 RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
 
+
+# Add db for the case of 12S rRNA marker gene
+WORKDIR /home/tools/CREST/LCAClassifier/parts/flatdb
+RUN wget https://zenodo.org/record/5749799/files/pr2_for_pema.tar.gz && \
+    tar -zxvf pr2_for_pema.tar.gz && \
+    rm pr2_for_pema.tar.gz && \
+    mv pr2/PR2_DB . && \
+    rm -r pr2
+
+# Add alternativ db for the case of 18S rRNA marker gene - PR2
+WORKDIR /home/tools/RDPTools/TRAIN
+RUN wget https://zenodo.org/record/5749799/files/12S_v2.0.0.zip  && \
+    unzip 12S_v2.0.0.zip && \
+    rm 12S_v2.0.0.zip
+
+# Include new CREST dbs in the .conf file
+RUN echo "pr2 = /home/tools/CREST/LCAClassifier/parts/flatdb/pr2" >>/home/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf
+
 # Set "home" as my working directory when a container starts
 WORKDIR /home
 
-###################################################################
-#													 			  #	
-#					the Dockerfile ends here!					  #
-#  	     	 													  #
-###################################################################
+################################################################
+#													 		       	         #	
+#					   the Dockerfile ends here!			            #
+#  	     	 													            #
+################################################################
