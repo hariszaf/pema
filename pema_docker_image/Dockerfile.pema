@@ -34,6 +34,15 @@ RUN export PATH=$PATH:/home/tools/BDS/.bds
 ENV PATH=$PATH:/home/tools/BDS/.bds
 
 
+# Upgrade SPAdes 
+WORKDIR /home/tools/SPAdes
+RUN rm -r SPAdes-3.13.0-Linux/  && \
+    wget http://cab.spbu.ru/files/release3.14.0/SPAdes-3.14.0.tar.gz  && \
+    tar -xzf SPAdes-3.14.0.tar.gz && \
+    cd SPAdes-3.14.0 && \
+    ./spades_compile.sh
+
+
 # Set "home" as my working directory when a container starts
 WORKDIR /home
 RUN rm *tar.gz Miniconda3-latest-Linux-x86_64.sh &&\ 
@@ -49,3 +58,5 @@ RUN echo "R version running on PEMA" > pema_R_packages.tsv ; Rscript -e 'R.versi
     echo  "\nRColorBrewer" >> pema_R_packages.tsv ; Rscript -e 'packageVersion("RColorBrewer")' >> pema_R_packages.tsv && \
     echo  "\nphyloseq"     >> pema_R_packages.tsv ; Rscript -e 'packageVersion("phyloseq")' >> pema_R_packages.tsv && \
     echo  "\nShortRead"    >> pema_R_packages.tsv ; Rscript -e 'packageVersion("ShortRead")' >> pema_R_packages.tsv
+
+   
