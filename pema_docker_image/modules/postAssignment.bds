@@ -155,7 +155,7 @@ string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
         globalVars{'assignmentPath'}.chdir()
     }
     
-    sys python $globalVars{'path'}/scripts/getNCBITaxonomyIds.py
+    sys /usr/bin/python3 $globalVars{'path'}/scripts/getNCBITaxonomyIds.py
 
     wait
 
