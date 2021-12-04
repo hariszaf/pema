@@ -12,6 +12,7 @@ LABEL contact    = "haris-zaf@hcmr.gr"
 LABEL build_date = "2021-30-11"
 LABEL version    = "v.2.1.4"
 
+
 # Copy and paste the manually written scripts that PEMA needs
 WORKDIR /home/scripts
 COPY /scripts/ ./
@@ -25,6 +26,7 @@ RUN chmod -R +777 /home/modules
 WORKDIR /home
 COPY pema_latest.bds .
 
+
 ## Make a source of the .bashrc file
 WORKDIR /root
 RUN echo "export PATH=$PATH:/home/tools/BDS/.bds" >> /root/.bashrc
@@ -33,15 +35,8 @@ RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
 RUN export PATH=$PATH:/home/tools/BDS/.bds
 ENV PATH=$PATH:/home/tools/BDS/.bds
 
-
-# Upgrade SPAdes 
-WORKDIR /home/tools/SPAdes
-RUN rm -r SPAdes-3.13.0-Linux/  && \
-    wget http://cab.spbu.ru/files/release3.14.0/SPAdes-3.14.0.tar.gz  && \
-    tar -xzf SPAdes-3.14.0.tar.gz && \
-    cd SPAdes-3.14.0 && \
-    ./spades_compile.sh
-
+# Walk around so ncbi-taxonomist can be used in Singularity containers
+RUN ln -s /opt/miniconda3/bin/ncbi-taxonomist /home/tools/ncbi-taxonomist
 
 # Set "home" as my working directory when a container starts
 WORKDIR /home
@@ -59,4 +54,4 @@ RUN echo "R version running on PEMA" > pema_R_packages.tsv ; Rscript -e 'R.versi
     echo  "\nphyloseq"     >> pema_R_packages.tsv ; Rscript -e 'packageVersion("phyloseq")' >> pema_R_packages.tsv && \
     echo  "\nShortRead"    >> pema_R_packages.tsv ; Rscript -e 'packageVersion("ShortRead")' >> pema_R_packages.tsv
 
-   
+
