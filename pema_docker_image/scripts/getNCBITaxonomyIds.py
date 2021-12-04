@@ -1,4 +1,4 @@
-#!/usr/bin/python 
+#!/usr/bin/python3 
 
 import subprocess, time
 
@@ -46,7 +46,7 @@ for line in final_table:
                         break
 
                 else:
-                    ps = subprocess.Popen(('ncbi-taxonomist', 'resolve', '-n', level), stdout=subprocess.PIPE)
+                    ps = subprocess.Popen(('/opt/miniconda3/bin/ncbi-taxonomist', 'resolve', '-n', level), stdout=subprocess.PIPE)
                     output = subprocess.check_output(("jq", ".taxon.taxid"), stdin=ps.stdout, stderr=subprocess.STDOUT)
                     ps.wait()
 
