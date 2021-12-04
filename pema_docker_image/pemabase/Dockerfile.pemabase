@@ -102,23 +102,6 @@ WORKDIR /home/tools/Trimmomatic
 RUN wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.38.zip && unzip Trimmomatic-0.38.zip \
         && rm Trimmomatic-0.38.zip
 
-# ------------------------------   SPAdes  --------------------------------
-
-# Download and install SPAdes
-WORKDIR /home/tools
-RUN mkdir SPAdes
-WORKDIR /home/tools/SPAdes
-RUN wget http://cab.spbu.ru/files/release3.13.0/SPAdes-3.13.0-Linux.tar.gz && tar -zxvf SPAdes-3.13.0-Linux.tar.gz && rm SPAdes-3.13.0-Linux.tar.gz
-
-# ------------------------------   PANDAseq  --------------------------------
-
-# Download and install PANDAseq
-WORKDIR /home/tools
-RUN mkdir PANDAseq
-WORKDIR /home/tools/PANDAseq
-RUN git clone http://github.com/neufeld/pandaseq.git && cd pandaseq && ./autogen.sh && ./configure --prefix="/home/tools/PANDAseq"&& make && make install
-RUN chmod -R +777 /home/tools/PANDAseq/pandaseq/.libs/ 
-
 
 # ------------------------------   OBITools  [START]  --------------------------------
 
@@ -127,10 +110,13 @@ RUN apt-get update && apt-get install -y apt-transport-https && \
     apt-get install -y cython3 && \
     apt-get install -y python-pip
 
-# Install Miniconda 
+# Install Miniconda - ATTENTION! Using -p we denote the path where will be installed
+# By default it would be installed under `/root`.
+# That is fine in the Docker case, but in the Singularity containers leads to issues
 WORKDIR /home
-RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && bash Miniconda3-latest-Linux-x86_64.sh -b
-ENV PATH=/root/miniconda3/bin:${PATH} 
+RUN wget https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh && \ 
+    bash Miniconda3-latest-Linux-x86_64.sh -b -p /opt/miniconda3
+ENV PATH=/opt/miniconda3/bin:${PATH} 
 
 # Get venv
 RUN apt-get install -y python3-dev
@@ -152,6 +138,7 @@ RUN /bin/bash bootstrap
 RUN make -j$(nproc) 
 RUN make install
 
+
 # [Future work] Install OBITools3 
 # Based on https://git.metabarcoding.org/obitools/obitools3/wikis/Installing-the-OBITools3
 # WORKDIR /home
@@ -166,6 +153,30 @@ RUN rm obi_v1.2.13.tar
 
 
 # --------------------------------   OBITools [END]    --------------------------------
+
+# ------------------------------   SPAdes  --------------------------------
+
+
+# Download and install SPAdes
+WORKDIR /home/tools/SPAdes
+RUN wget http://cab.spbu.ru/files/release3.14.0/SPAdes-3.14.0.tar.gz  && \
+    tar -xzf SPAdes-3.14.0.tar.gz && \
+    cd SPAdes-3.14.0 && \
+    ./spades_compile.sh
+
+# ------------------------------   PANDAseq  --------------------------------
+
+# Download and install PANDAseq
+WORKDIR /home/tools
+RUN mkdir PANDAseq
+WORKDIR /home/tools/PANDAseq
+RUN git clone http://github.com/neufeld/pandaseq.git && \
+    cd pandaseq && ./autogen.sh && \
+    ./configure --prefix="/home/tools/PANDAseq" && \
+    make && \
+    make install
+RUN chmod -R +777 /home/tools/PANDAseq/pandaseq/.libs/ 
+
 
 
 # ------------------------------   NCBI tools   --------------------------------
