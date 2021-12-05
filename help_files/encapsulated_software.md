@@ -83,7 +83,7 @@ To facilitate updating reference databases, a Zenodo repository has been
 created to version RDPTools and CREST classifiers, along with their training 
 files. 
 
-You may find this repo [here]().
+You may find this repo [here](https://zenodo.org/record/5749799).
 
 Currently, RDPTools support: 
     - [Midori 1](http://www.reference-midori.info/)
