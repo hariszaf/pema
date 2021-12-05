@@ -86,12 +86,15 @@ files.
 You may find this repo [here]().
 
 Currently, RDPTools support: 
-    - Midori 1
-    - Midori 2
+    - [Midori 1](http://www.reference-midori.info/)
+    - [Midori 2](http://www.reference-midori.info/)
+    - [12S Vertebrate Classifier v2.0.0-ref](https://github.com/terrimporter/12SvertebrateClassifier/releases)
+    - [Unite (CREST version 6.0)](https://unite.ut.ee/repository.php)
 
 CREST supports: 
-    - Silva 128
-    - Silva 132
+    - [Silva 128](https://www.arb-silva.de/documentation/release-128/)
+    - [Silva 132](https://www.arb-silva.de/documentation/release-132/)
+    - [PR2 version 4.14.0](https://github.com/pr2database/pr2database/releases/tag/v4.14.0)
     <!-- - [Silva 138](https://www.arb-silva.de/no_cache/download/archive/release_138_1/Exports/) [Integrated in 2021 Dec]: 119,525 unique taxa out of 510,508 (SSURef_NR99_tax_silva_full_align_trunc.fasta.gz)
     - [PR2 v.4.14.0](https://github.com/pr2database/pr2database/releases/tag/v4.14.0) [Integrated in 2021 Dec]:  -->
 
