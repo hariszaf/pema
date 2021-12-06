@@ -38,6 +38,19 @@ ENV PATH=$PATH:/home/tools/BDS/.bds
 # Walk around so ncbi-taxonomist can be used in Singularity containers
 RUN ln -s /opt/miniconda3/bin/ncbi-taxonomist /home/tools/ncbi-taxonomist
 
+# Rename PR2 db files
+WORKDIR /home/tools/CREST/LCAClassifier/parts/flatdb/PR2_DB
+RUN mv PR2_DB.fasta pr2.fasta && \
+    mv PR2_DB.map  pr2.map && \
+    mv PR2_DB.nhr  pr2.nhr && \
+    mv PR2_DB.nin  pr2.nin && \
+    mv PR2_DB.nsq  pr2.nsq && \
+    mv PR2_DB.tre  pr2.tre
+
+WORKDIR /home/tools/CREST/LCAClassifier/parts/flatdb/
+RUN mv PR2_DB pr2
+
+
 # Set "home" as my working directory when a container starts
 WORKDIR /home
 RUN rm *tar.gz Miniconda3-latest-Linux-x86_64.sh &&\ 
