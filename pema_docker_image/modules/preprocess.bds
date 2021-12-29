@@ -4,388 +4,439 @@
 # Function to run FASTQC
 string qualityControl(string{} params, string{} globalVars) {
 
-   # If there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
-   # I re-run this command because of FastQC and the way it reacts in multiple runs over the same folders
-   globalVars{'dataPath'}.chdir() ; 
-   sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi
+    # If there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
+    # I re-run this command because of FastQC and the way it reacts in multiple runs over the same folders
+    globalVars{'dataPath'}.chdir() ; 
+    sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi
 
-   # make a copy of 'parameters.tsv' file to the output folder.
-   # this way the user will be able to get the parameters he used for analysis, anytime!
-   sys cp $globalVars{'parameterFilePath'}/parameters.tsv $globalVars{'outputFilePath'}/parameters0f.$globalVars{'analysisName'}.tsv
+    # make a copy of 'parameters.tsv' file to the output folder.
+    # this way the user will be able to get the parameters he used for analysis, anytime!
+    sys cp $globalVars{'parameterFilePath'}/parameters.tsv $globalVars{'outputFilePath'}/parameters0f.$globalVars{'analysisName'}.tsv
 
-   # now FASTQC runs for all files
-   string[] rawFiles = globalVars{'dataPath'}.dir()
-   for ( string rawFile : rawFiles ) {
-      println(rawFile)
-      task $globalVars{'path'}/tools/fastqc/FastQC/fastqc --outdir $globalVars{'fastqcPath'}  $globalVars{'dataPath'}/$rawFile
-   }
-   wait
-   println('FastQC has been completed!')
+    # now FASTQC runs for all files
+    string[] rawFiles = globalVars{'dataPath'}.dir()
+    for ( string rawFile : rawFiles ) {
+        println(rawFile)
+        task $globalVars{'path'}/tools/fastqc/FastQC/fastqc --outdir $globalVars{'fastqcPath'}  $globalVars{'dataPath'}/$rawFile
+    }
+    wait
+    println('FastQC has been completed!')
 
 
-   # now i create a checkpoint and read again the parameters file.
-   # this way if i change any of my parameters, i can do only the steps from here and after with the new ones.
-   if ( globalVars{'fastqcPath'}.isEmpty() == false ) {
-      string checkTrim = globalVars{'outputPoint'} + '/trimming.chp'
-      checkpoint checkTrim
-   }
+    # now i create a checkpoint and read again the parameters file.
+    # this way if i change any of my parameters, i can do only the steps from here and after with the new ones.
+    if ( globalVars{'fastqcPath'}.isEmpty() == false ) {
+        string checkTrim = globalVars{'outputPoint'} + '/trimming.chp'
+        checkpoint checkTrim
+    }
 
-   return 'ok'
+    return 'ok'
 
 }
 
 # Function to run CUTADAPT
 string cutadaptForIts(string{} params, string{} globalVars) {
 
-   globalVars{'dataPath'}.chdir()
+    globalVars{'dataPath'}.chdir()
 
-   string cutadaptOutputDirectory = 'cutadapt'
-   string initialData = 'initialData'
+    string cutadaptOutputDirectory = 'cutadapt'
+    string initialData = 'initialData'
 
-   if ( cutadaptOutputDirectory.isDir() && initialData.isDir() ) {
-      println('A directory for the cutadapt output is already there.') 
+    if ( cutadaptOutputDirectory.isDir() && initialData.isDir() ) {
+        println('A directory for the cutadapt output is already there.') 
 
-   } else {
-      cutadaptOutputDirectory.mkdir()
-      initialData.mkdir()
-      sys chmod 777 $globalVars{'outputFilePath'} -R
-      println('An output directory for cutadapt was just made.')
-   }   
-   
-   wait
-   task /usr/local/bin/Rscript $globalVars{'path'}/scripts/cutadaptITS.R $params{'forwardITSPrimer'} $params{'reverseITSPrimer'} $globalVars{'dataPath'}
-   
-   wait
-   
-   sys mv *.fastq.gz initialData
-   sys mv $initialData $globalVars{'outputPoint'}/$globalVars{'analysisName'}
-   sys mv cutadapt/* .
-   sys rm -r cutadapt
-   
-   wait
+    } else {
+        cutadaptOutputDirectory.mkdir()
+        initialData.mkdir()
+        sys chmod 777 $globalVars{'outputFilePath'} -R
+        println('An output directory for cutadapt was just made.')
+    }    
+    
+    wait
+    task /usr/local/bin/Rscript $globalVars{'path'}/scripts/cutadaptITS.R $params{'forwardITSPrimer'} $params{'reverseITSPrimer'} $globalVars{'dataPath'}
+    
+    wait
+    
+    sys mv *.fastq.gz initialData
+    sys mv $initialData ../  #$globalVars{'outputPoint'}/$globalVars{'analysisName'}
+    sys mv cutadapt/* .
+    sys rm -r cutadapt
+    
+    wait
 
-   println 'Cutadapt has been completed successfully.'
+    println 'Cutadapt has been completed successfully.'
 
-   return 'ok'
+    return 'ok'
 
 }
 
 # Function to run TRIMMOMATIC
 string trimSeqs(string{} params, string{} globalVars){
 
-   # Mmake a list with all the file names on `mydata` dir
-   string[] data = globalVars{'dataPath'}.dir()
-   
-   # Set two variables readF and readR for the forward and reverse file of each sample  
-   string readF
-   string readR
-   int counter = 0
+    # Mmake a list with all the file names on `mydata` dir
+    string[] data = globalVars{'dataPath'}.dir()
+    
+    # Set two variables readF and readR for the forward and reverse file of each sample  
+    string readF
+    string readR
+    int counter = 0
 
-   for ( string file : data ) {
-      
-      # Here's the trick! i need to tell which file is the forward and which is the reverese. Hence, i try to split a suffix. 
-      string check = file.split('_2\.fastq\.gz')[0]
+    for ( string file : data ) {
+        
+        # Here's the trick! i need to tell which file is the forward and which is the reverese. Hence, i try to split a suffix. 
+        string check = file.split('_2\.fastq\.gz')[0]
 
-      # If the split does occure then i know that i have the second file of each sample (reverse)
-      # That is because the 'file' variable will always have a '.fastq.gz' suffix.
-      # Hence, if there is no split, 'file' and 'check'  variables are the same.
-      if ( file == check ) {
-               readF = file
-               println('readF is: ' + readF)
-               
-               # if there is a split, then they are different
-               } else {
-                  readR = file
-                  println('readR is: ' + readR)
-            }
+        # If the split does occure then i know that i have the second file of each sample (reverse)
+        # That is because the 'file' variable will always have a '.fastq.gz' suffix.
+        # Hence, if there is no split, 'file' and 'check'  variables are the same.
+        if ( file == check ) {
+                    readF = file
+                    println('readF is: ' + readF)
+                    
+                    # if there is a split, then they are different
+                    } else {
+                        readR = file
+                        println('readR is: ' + readR)
+                }
 
-      wait
+        wait
 
-      if ( readF.isEmpty() == false && readR.isEmpty() == false ) {
+        if ( readF.isEmpty() == false && readR.isEmpty() == false ) {
 
-         if ( params{'maxInfo'} == 'Yes' ) {
+            if ( params{'maxInfo'} == 'Yes' ) {
 
-            println('You hace selected Max INFO')
-            wait
-            task /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
-               -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
-               -threads $params{'threadsTrimmomatic'} \
-               -trimlog TrimLog $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
-               $globalVars{'trimoPath'}/filtered_max_$readF.1P.fastq.gz \
-               $globalVars{'trimoPath'}/filtered_max_$readF.1U.fastq.gz \
-               $globalVars{'trimoPath'}/filtered_max_$readR.2P.fastq.gz \
-               $globalVars{'trimoPath'}/filtered_max_$readR.2U.fastq.gz \
-               ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
-               LEADING:$params{'leading'} TRAILING:$params{'trailing'} MAXINFO:$params{'targetLength'}:$params{'strictness'} MINLEN:$params{'minlen'}
-            
-            wait
-            readF = ''
-            readR = ''
+                println('You hace selected Max INFO')
+                wait
+                task /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
+                    -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+                    -threads $params{'threadsTrimmomatic'} \
+                    -trimlog TrimLog $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
+                    $globalVars{'trimoPath'}/filtered_max_$readF.1P.fastq.gz \
+                    $globalVars{'trimoPath'}/filtered_max_$readF.1U.fastq.gz \
+                    $globalVars{'trimoPath'}/filtered_max_$readR.2P.fastq.gz \
+                    $globalVars{'trimoPath'}/filtered_max_$readR.2U.fastq.gz \
+                    ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
+                    LEADING:$params{'leading'} TRAILING:$params{'trailing'} MAXINFO:$params{'targetLength'}:$params{'strictness'} MINLEN:$params{'minlen'}
+                
+                wait
+                readF = ''
+                readR = ''
 
-            } else if ( params{'maxInfo'} == 'No' ) {
+                } else if ( params{'maxInfo'} == 'No' ) {
 
-                  print('You have selected no Max INFO' + '\n')
+                        print('You have selected no Max INFO' + '\n')
 
-                  task /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
-                     -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
-                     -threads $params{'threadsTrimmomatic'} \
-                     -trimlog TrimLog2 $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
-                     $globalVars{'trimoPath'}/filtered_$readF.1P.fastq.gz \
-                     $globalVars{'trimoPath'}/filtered_$readF.1U.fastq.gz \
-                     $globalVars{'trimoPath'}/filtered_$readR.2P.fastq.gz \
-                     $globalVars{'trimoPath'}/filtered_$readR.2U.fastq.gz \
-                     ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
-                     LEADING:$params{'leading'} TRAILING:$params{'trailing'}  MINLEN:$params{'minlen'}
+                        task /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
+                            -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+                            -threads $params{'threadsTrimmomatic'} \
+                            -trimlog TrimLog2 $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
+                            $globalVars{'trimoPath'}/filtered_$readF.1P.fastq.gz \
+                            $globalVars{'trimoPath'}/filtered_$readF.1U.fastq.gz \
+                            $globalVars{'trimoPath'}/filtered_$readR.2P.fastq.gz \
+                            $globalVars{'trimoPath'}/filtered_$readR.2U.fastq.gz \
+                            ILLUMINACLIP:/$globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/adapters/$params{'adapters'}:$params{'seedMismatches'}:$params{'palindromeClipThreshold'}:$params{'simpleClipThreshold'} \
+                            LEADING:$params{'leading'} TRAILING:$params{'trailing'}  MINLEN:$params{'minlen'}
 
-                  wait
+                        wait
 
-                  readF = ''
-                  readR = ''
-            }
-      }
-   }
+                        readF = ''
+                        readR = ''
+                }
+        }
+    }
 
-   wait
-   println('Trimmomatic  is done')
+    wait
+    println('Trimmomatic  is done')
 
 
-   #  Make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
-   # globalVars{'path'}.chdir() ; 
-   globalVars{'trimoPath'}.chdir() ;
-   if ( globalVars{'trimoPath'}.isEmpty() == false ) {
-      string checkCor = globalVars{'outputPoint'} + '/errorCorrection.chp'
-      checkpoint checkCor
-   }
+    #  Make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
+    # globalVars{'path'}.chdir() ; 
+    globalVars{'trimoPath'}.chdir() ;
+    if ( globalVars{'trimoPath'}.isEmpty() == false ) {
+        string checkCor = globalVars{'outputPoint'} + '/errorCorrection.chp'
+        checkpoint checkCor
+    }
 
-   return 'ok'
+    return 'ok'
 
 }
 
 # Function to run SPAdes - BayesHammer algo
 string adjustSeqs(string{} params, string{} globalVars){
 
-   # Make a list with all the file names that there are in the folder with Trimmomatic's
-   # Output -- e.g: suffix : '2.fastq.gz.2U.fastq.gz' 
-   globalVars{'trimoPath'}.chdir()
+    # Make a list with all the file names that there are in the folder with Trimmomatic's
+    # Output -- e.g: suffix : '2.fastq.gz.2U.fastq.gz' 
+    globalVars{'trimoPath'}.chdir()
 
-   sys if [ $(find '$globalVars{'trimoPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
+    sys if [ $(find '$globalVars{'trimoPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
 
-   string[] trimos = globalVars{'trimoPath'}.dir()
-   wait
-   for (string filename : trimos ) {
+    string[] trimos = globalVars{'trimoPath'}.dir()
+    wait
+    for (string filename : trimos ) {
 
-      # Delete all the "U.fastq.gz" files using the list we just made
-      if ( filename.endsWith("U\.fastq\.gz") ) {
-         filename.delete()
-      }
-   }
+        # Delete all the "U.fastq.gz" files using the list we just made
+        if ( filename.endsWith("U\.fastq\.gz") ) {
+            filename.delete()
+        }
+    }
 
-   # And then make a new list with the files that remained 
-   string[] finalTrimos = globalVars{'trimoPath'}.dir()
+    # And then make a new list with the files that remained 
+    string[] finalTrimos = globalVars{'trimoPath'}.dir()
 
-   string readBayesF
-   string readBayesR
-   string newDir
-   string newFile
-   wait
+    string readBayesF
+    string readBayesR
+    string newDir
+    string newFile
+    wait
 
-   for ( string trimmed : finalTrimos ) {
-      
-      # As in Trimmomatic step, we need to know the forward and the reverse file
-      string trimCheck = trimmed.split("_2\.fastq\.gz\.2P\.fastq.\gz")[0]
+    for ( string trimmed : finalTrimos ) {
+        
+        # As in Trimmomatic step, we need to know the forward and the reverse file
+        string trimCheck = trimmed.split("_2\.fastq\.gz\.2P\.fastq.\gz")[0]
 
-      if ( trimmed == trimCheck ) {
-         readBayesF = trimmed
-         println('this is readBayesF:' + readBayesF)
-         } else {
-         readBayesR = trimmed
-         println('this is readBayesR:' + readBayesR)
-         }
+        if ( trimmed == trimCheck ) {
+            readBayesF = trimmed
+            println('this is readBayesF:' + readBayesF)
+            } else {
+            readBayesR = trimmed
+            println('this is readBayesR:' + readBayesR)
+            }
 
-      if ( readBayesF.isEmpty() == false && readBayesR.isEmpty() == false ) {
-         
-         if ( params{'maxInfo'} == 'Yes' ) {
-            string newName = trimCheck.split("filtered\_max\_")
-            newDir = newName.substr(3,13) ;
-            println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
+        if ( readBayesF.isEmpty() == false && readBayesR.isEmpty() == false ) {
+            
+            if ( params{'maxInfo'} == 'Yes' ) {
+                string newName = trimCheck.split("filtered\_max\_")
+                println(">>>> HERE IS A NEWNAME:  " + newName)
+                newDir = newName.substr(3, newName.length()-1) ;
+               #  newDir = newName.split("")
+                println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
 
-         } else if ( params{'maxInfo'} == 'No' ) {
-            string newName = trimCheck.split("filtered_")
-            newDir = newName.substr(3,13) ;
-            println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
-         }
-         
-         # Working where the output of BayesHammer is located!
-         globalVars{'bayesPath'}.chdir() ; 
-         newDir.mkdir() ;
-         
-         # Going back to Trimo's output
-         globalVars{'trimoPath'}.chdir()
-         sys chmod 777 $globalVars{'outputFilePath'} -R
-         wait
+            } else if ( params{'maxInfo'} == 'No' ) {
+                string newName = trimCheck.split("filtered_")
+                newDir = newName.substr(3, newName.length()-1) ;
+                println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
+            }
+            
+            # Working where the output of BayesHammer is located!
+            globalVars{'bayesPath'}.chdir() ; 
+            newDir.mkdir() ;
+            
+            # Going back to Trimo's output
+            globalVars{'trimoPath'}.chdir()
+            sys chmod 777 $globalVars{'outputFilePath'} -R
+            wait
 
-         # And execute the BayesHammer algorithm that it is in SPAdes
-         
-         sys which gzip
-         sys gzip --version
-         
-         println('readBayesF: ' + readBayesF +'\n' + 'and readBayesR: ' + readBayesR)
-         
-         task $globalVars{'path'}/tools/SPAdes/SPAdes-3.14.0/bin/spades.py --only-error-correction \
-            --threads $params{'threadsTrimmomatic'} \
-            -o $globalVars{'bayesPath'}/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
+            # And execute the BayesHammer algorithm that it is in SPAdes
+            println('readBayesF: ' + readBayesF +'\n' + 'and readBayesR: ' + readBayesR)
+            
+            task $globalVars{'path'}/tools/SPAdes/SPAdes-3.14.0/bin/spades.py --only-error-correction \
+                --threads $params{'threadsTrimmomatic'} \
+                -o $globalVars{'bayesPath'}/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
 
-         wait
-      
-         # Clear all variables that are used in BayesHammer step in order to be re-used
-         readBayesF = ''
-         readBayesR = ''
-         newFile = ''
-         newDir = ''
-      }
-   }
+            wait
 
-   wait
+            # Clear all variables that are used in BayesHammer step in order to be re-used
+            readBayesF = ''
+            readBayesR = ''
+            newFile = ''
+            newDir = ''
+        }
+    }
 
-   println('Adjusting sequences using the BayesHammer algorithm of SPAdes has been completed.')
+    wait
 
-   #  Make a checkpoint to start our pipeline from the  merging step!
-   if ( globalVars{'bayesPath'}.isEmpty() == false ) {
-      string checkMerge = globalVars{'outputPoint'} + '/merging.chp'
-      checkpoint checkMerge
-   }
+    println('Adjusting sequences using the BayesHammer algorithm of SPAdes has been completed.')
 
-   wait
+    #  Make a checkpoint to start our pipeline from the  merging step!
+    if ( globalVars{'bayesPath'}.isEmpty() == false ) {
+        string checkMerge = globalVars{'outputPoint'} + '/merging.chp'
+        checkpoint checkMerge
+    }
 
-   return 'ok'
+    wait
+
+    return 'ok'
 
 }
 
 # Function to run PANDASEQ 
 string merging(string{} params, string{} globalVars){
 
-   globalVars{'bayesPath'}.chdir()
+    globalVars{'bayesPath'}.chdir()
 
-   sys if [ $(find '$globalVars{'bayesPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
-   
-   # Keep in a list all files that came from the BayesHammer algo leaving aside some stats file
-   # Make a list with all the folders that exist in Bayes Hammer output folder - only sample names (e.g. SRR1643855 ) 
-   string[] correct = globalVars{'bayesPath'}.dir()
-   correct.remove('input_dataset.yaml') ;
-   correct.remove( 'params.txt' ) ;
-   correct.remove('spades.log') ;
-   correct.remove( 'tmp')
+    sys if [ $(find '$globalVars{'bayesPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
+    
+    # Keep in a list all files that came from the BayesHammer algo leaving aside some stats file
+    # Make a list with all the folders that exist in Bayes Hammer output folder - only sample names (e.g. SRR1643855 ) 
+    string[] correct = globalVars{'bayesPath'}.dir()
+    correct.remove('input_dataset.yaml') ;
+    correct.remove( 'params.txt' ) ;
+    correct.remove('spades.log') ;
+    correct.remove( 'tmp')
 
-   # 'Create' the names of forward and reverse files each time
-   string baseName
-   if ( params{'maxInfo'} == 'Yes' ) {
-      
-      # Keep as 'baseName' the prefix of every file that depends on whether  we had maxInfo or not
-      baseName = 'filtered_max_'
-   } else {
-      baseName = 'filtered_'
-   }
-   
-   for ( string correctFile : correct )  {
+    # 'Create' the names of forward and reverse files each time
+    string baseName
+    if ( params{'maxInfo'} == 'Yes' ) {
+        
+        # Keep as 'baseName' the prefix of every file that depends on whether  we had maxInfo or not
+        baseName = 'filtered_max_'
+    } else {
+        baseName = 'filtered_'
+    }
+    
+    for ( string correctFile : correct )  {
 
-      string uniqPath = globalVars{'bayesPath'} + '/' +  correctFile + '/' + 'corrected' ;
+        string uniqPath = globalVars{'bayesPath'} + '/' +  correctFile + '/' + 'corrected' ;
 
-      # Enter to the directory of a specific sample each time in the output folder of BayesHammer - previous step
-      uniqPath.chdir()
+        # Enter to the directory of a specific sample each time in the output folder of BayesHammer - previous step
+        uniqPath.chdir()
 
-      # In case of re-running, delete the .gz files as they cannot be over-written
-      sys if [[ $(find '$uniqPath' -name '*.gz') ]] ; then  rm *gz ; fi    
+        # In case of re-running, delete the .gz files as they cannot be over-written
+        sys if [[ $(find '$uniqPath' -name '*.gz') ]] ; then  rm *gz ; fi     
 
-      sys /bin/gzip *.fastq
-      
-      # In the corrected file of each sample there are two files - one for forward, one for reverse -
-      # Make two variables with them
-      string forward = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq.gz'
-      string reverse = '_2.fastq.gz.2P.fastq.00.0_0.cor.fastq.gz'
-      string forwardFile= baseName + correctFile + forward ;
-      println(forwardFile)
-      string reverseFile = baseName + correctFile + reverse ;
-      println(reverseFile)
 
-      wait
-         
-      # Execute pandaseq algorithm for merging 
-      task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
-         -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
-         -t $params{'threshold'} $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq.gz
+        # In the corrected file of each sample there are two files - one for forward, one for reverse -
+        # Make two variables with them
+        string forward     = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq.gz'
+        string reverse     = '_2.fastq.gz.2P.fastq.00.0_0.cor.fastq.gz'
+        string forwardFile = baseName + correctFile + forward ;
+        string reverseFile = baseName + correctFile + reverse ;
 
-      wait
+        wait
+        
 
-      sys mv *.merged.fastq.gz $globalVars{'spaPath'}
-      globalVars{'bayesPath'}.chdir()
-   }
-   wait
+        if ( correctFile.startsWith("ERR") == false ) {
 
-   # Unzip all my merged files in a new file named 'unzip'
-   # Go to the folder with the output of SPAdes and make a list with its elements
-   globalVars{'spaPath'}.chdir() ;
-   string[] merged = globalVars{'spaPath'}.dir() ;
-   string unzip = 'unzip' ;
+            println("~~~~~~~~~~~~~ I AM IN THE WILD LOOP ~~~~~~~~~~~~`")
+            string deF  = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq'
+            string deR  = '_2.fastq.gz.2P.fastq.00.0_0.cor.fastq'
+            string fwdF = baseName + correctFile + deF ;
+            string rvsF = baseName + correctFile + deR ;
 
-   # Make a new directory named 'unzip'
-   unzip.mkdir() ;
-   sys chmod 777 $globalVars{'outputFilePath'} -R
-   string unzipPath = globalVars{'spaPath'} + '/unzip'
+            println("fwdF: " + fwdF)
+            println("rvsF: " + rvsF)
+            wait
+            sys pwd
 
-   # And remove the element 'unzip' from the list we made
-   merged.remove('unzip')
+            task{
+                sys sed -i 's/DRR/ERR/g' $fwdF
+                sys sed -i 's/DRR/ERR/g' $rvsF
+            }
+            wait 
+            deF = '' ; deR = '' ; fwdF = '' ; rvsF = ''
+        }
+        wait
 
-   for ( string anyFile : merged ) {
-      sys cp $anyFile $unzipPath
-      unzipPath.chdir() ;
-      string newFile = anyFile.baseName('.gz')
-      sys mv $anyFile $newFile
-      globalVars{'spaPath'}.chdir()
-   }
+        sys /bin/gzip *.fastq 
+        wait
 
-   wait
+        # Execute pandaseq algorithm for merging 
+        task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
+            -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
+            -t $params{'threshold'} $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq
 
-   println('Merging step by SPAdes is completed')
+        wait
 
-   # Make a checkpoint to start our pipeline from the dereplication step!
-   if ( globalVars{'spaPath'}.isEmpty() == false ) {
-      string checkDerep = globalVars{'outputPoint'} + '/dereplication.chp'
-      checkpoint checkDerep
-   }
+        if ( correctFile.startsWith("ERR") == false ) {
 
-   globalVars{'parameterFilePath'}.chdir()
-   string j = 'parameters.tsv'
-   string{} paramsDereplication =  readParameterFile(j)
+            println("~~~~~~~~~~~~~ I AM IN THE WILD LOOP for the 2nd time ~~~~~~~~~~~~`")
 
-   wait
+            task{
+                sys /bin/gunzip *.fastq.gz
+                sys sed -i 's/ERR/DRR/g' *.fastq
+                sys /bin/gzip *cor.fastq
+            }
+            wait 
+        }
+        wait 
 
-   return 'ok'
+        # Move the merged file in the `unzip` folder under the `/4.mergingPairedEndFiles/` path
+        sys mv $correctFile.merged.fastq $correctFile.merged.fastq.gz
+        sys mv *.merged.fastq.gz $globalVars{'spaPath'}
+        globalVars{'bayesPath'}.chdir()
+    }
+    wait
+
+    ### Unzip all my merged files in a new file named 'unzip'
+
+    # Go to the folder with the output of SPAdes and make a list with its elements
+    globalVars{'spaPath'}.chdir() ;
+    string[] merged = globalVars{'spaPath'}.dir() ;
+    string unzip = 'unzip' ;
+
+    # Make a new directory named 'unzip'
+    unzip.mkdir() ;
+    sys chmod 777 $globalVars{'outputFilePath'} -R
+    string unzipPath = globalVars{'spaPath'} + '/unzip'
+
+    # And remove the element 'unzip' from the list we made
+    merged.remove('unzip')
+
+    for ( string anyFile : merged ) {
+
+
+        # In case of non ENA data, then this step changes the pseudo-names PEMA gives
+        # To get these back, we run the following 
+        if ( params{'EnaData'} == "No"){
+
+            string SAMPLE_NAME = anyFile.baseName('.merged.fastq.gz')
+
+            sys sed -e "s/>ERR[0-9]*:/>$SAMPLE_NAME:/g" $anyFile > tmp
+            sys mv tmp $anyFile
+
+        }
+
+        sys cp $anyFile $unzipPath
+        unzipPath.chdir() ;
+        string newFile = anyFile.baseName('.gz')
+        sys mv $anyFile $newFile
+        globalVars{'spaPath'}.chdir()
+    }
+
+    wait
+
+    println('Merging step by SPAdes is completed')
+
+    # Make a checkpoint to start our pipeline from the dereplication step!
+    if ( globalVars{'spaPath'}.isEmpty() == false ) {
+        string checkDerep = globalVars{'outputPoint'} + '/dereplication.chp'
+        checkpoint checkDerep
+    }
+
+    globalVars{'parameterFilePath'}.chdir()
+    string j = 'parameters.tsv'
+    string{} paramsDereplication =  readParameterFile(j)
+
+    wait
+
+    return 'ok'
 
 }
 
 # Function to dereplicate using OBITools 
 string{} obiDereplicate(string{} params, string{} globalVars){
 
-   globalVars{'unzipPath'} = globalVars{'spaPath'} + '/unzip'
+    globalVars{'unzipPath'} = globalVars{'spaPath'} + '/unzip'
 
-   globalVars{'unzipPath'}.chdir()
+    globalVars{'unzipPath'}.chdir()
 
-   sys if [ $(find '$globalVars{'unzipPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
-   string[] unzips = globalVars{'unzipPath'}.dir()
+    sys if [ $(find '$globalVars{'unzipPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
+    string[] unzips = globalVars{'unzipPath'}.dir()
 
-   string fileForDerepl
-   for ( string nodereplicate : unzips ) {
-      
-      # Execute OBITools
-      task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > \
-         $globalVars{'derePath'}/dereplicate_$nodereplicate
-      
-      wait
-   }
-   wait
-   println('All the first steps are done! clustering is about to start!')
+    string fileForDerepl
+    for ( string nodereplicate : unzips ) {
+        
+        # Execute OBITools - when new pemabase available: 
+        # /home/obi3-env/bin/obi uniq
+        task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > \
+            $globalVars{'derePath'}/dereplicate_$nodereplicate
+        
+        wait
+    }
+    wait
+    println('All the first steps are done! clustering is about to start!')
 
-   return globalVars
+    return globalVars
 
 }
 
@@ -393,80 +444,80 @@ string{} obiDereplicate(string{} params, string{} globalVars){
 # Function to dereplicate using AWK commands and scripts
 string swarmDereplicate(string{} params, string{} globalVars){
 
-   globalVars{'unzipPath'}.chdir()
+    globalVars{'unzipPath'}.chdir()
 
-   sys bash $globalVars{'path'}/scripts/dereplicateSwarm.sh
+    sys bash $globalVars{'path'}/scripts/dereplicateSwarm.sh
 
-   println('Sample files have been dereplicated and a contingency table for the amplicons has been built.')
+    println('Sample files have been dereplicated and a contingency table for the amplicons has been built.')
 
-   return 'ok'
+    return 'ok'
 
 }
 
 # Function to merge all samples in one; it goes with the obiDereplicate() function
 string mergeFilesNonSwarm(string{} params, string{} globalVars){
 
-   globalVars{'derePath'}.chdir()
-   sys if [ $(find '$globalVars{'derePath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
+    globalVars{'derePath'}.chdir()
+    sys if [ $(find '$globalVars{'derePath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
 
-   # we make a list with all the file names that exist in the folder with the dereplication-step output
-   string[] dereplicates = globalVars{'derePath'}.dir()
-   
-   for ( string derepl : dereplicates ) {
-      
-      task {
-         # we substitue both 'merged_sample...' amd ';' with '_' and nothing respectively
-         sys sed 's/ merged_sample={}; count=/_/g ; s/;//g' $derepl > se.$derepl
-         # merge all lines of a fastq entry into one and only one line!
-         sys awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' se.$derepl > nospace.$derepl
-         # we turn all down- to upcases
-         sys cat nospace.$derepl | tr '[a-z]' '[A-Z]' > $globalVars{'linearPath'}/linearized.$derepl
-      }
-   }
-   wait
+    # we make a list with all the file names that exist in the folder with the dereplication-step output
+    string[] dereplicates = globalVars{'derePath'}.dir()
+    
+    for ( string derepl : dereplicates ) {
+        
+        task {
+            # we substitue both 'merged_sample...' amd ';' with '_' and nothing respectively
+            sys sed 's/ merged_sample={}; count=/_/g ; s/;//g' $derepl > se.$derepl
+            # merge all lines of a fastq entry into one and only one line!
+            sys awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' se.$derepl > nospace.$derepl
+            # we turn all down- to upcases
+            sys cat nospace.$derepl | tr '[a-z]' '[A-Z]' > $globalVars{'linearPath'}/linearized.$derepl
+        }
+    }
+    wait
 
-   globalVars{'derePath'}.chdir()
-   sys rm se.* nospace.*
+    globalVars{'derePath'}.chdir()
+    sys rm se.* nospace.*
 
-   # we go to the folder with the linearized data and make a list with all its contents  
-   globalVars{'linearPath'}.chdir()
-   string[] linears = globalVars{'linearPath'}.dir()
-   # we remove from these files some characteristic symbols
-   for ( string sample : linears ) {
-      task{
-         sys sed 's/\:\:\:/\:/g' $sample > $sample.f.fasta
-         sys sed 's/\:0\:0\:0\://' $sample.f.fasta > $sample.g.fasta
-         }
-   }
-   wait
-   
-   globalVars{'linearPath'}.chdir()
-   sys rm *.f.fasta
-   wait
+    # we go to the folder with the linearized data and make a list with all its contents  
+    globalVars{'linearPath'}.chdir()
+    string[] linears = globalVars{'linearPath'}.dir()
+    # we remove from these files some characteristic symbols
+    for ( string sample : linears ) {
+        task{
+            sys sed 's/\:\:\:/\:/g' $sample > $sample.f.fasta
+            sys sed 's/\:0\:0\:0\://' $sample.f.fasta > $sample.g.fasta
+            }
+    }
+    wait
+    
+    globalVars{'linearPath'}.chdir()
+    sys rm *.f.fasta
+    wait
 
-   # this command forces applications to use the default language for output, and forces sorting to be bytewise.  
-   sys export LC_ALL=C
+    # this command forces applications to use the default language for output, and forces sorting to be bytewise.  
+    sys export LC_ALL=C
 
-   ######################################################################################################################################
-   # here I read all the files I have made at once and run over them an awk command in which I set as record separator ">"
-   # and as field separaton '_' or new line.
-   # from the second line I make an array with the sample as keys and their abundances as value and anotherone with the otus
-   # as keys and the sequnece asw value.
-   # finally, I make a file in which in every line i have the amplicon name (sample) its abundance and its sequence.
-   ######################################################################################################################################
+    ######################################################################################################################################
+    # here I read all the files I have made at once and run over them an awk command in which I set as record separator ">"
+    # and as field separaton '_' or new line.
+    # from the second line I make an array with the sample as keys and their abundances as value and anotherone with the otus
+    # as keys and the sequnece asw value.
+    # finally, I make a file in which in every line i have the amplicon name (sample) its abundance and its sequence.
+    ######################################################################################################################################
 
-   task cat *.g.fasta | awk 'BEGIN {RS = ">" ; FS = "[_\n]"} {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}} END {for (amplicon in sequences) {print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > $globalVars{'outputFilePath'}/all_samples.fasta
+    task cat *.g.fasta | awk 'BEGIN {RS = ">" ; FS = "[_\n]"} {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}} END {for (amplicon in sequences) {print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > $globalVars{'outputFilePath'}/all_samples.fasta
 
-   wait   
+    wait    
 
-   task awk '/N/{n=2}; n {n--; next}; 1' < $globalVars{'outputFilePath'}/all_samples.fasta  > $globalVars{'outputFilePath'}/final_all_samples.fasta
+    task awk '/N/{n=2}; n {n--; next}; 1' < $globalVars{'outputFilePath'}/all_samples.fasta  > $globalVars{'outputFilePath'}/final_all_samples.fasta
 
-   wait
-   sys rm *.g.fasta 
-   
-   sys rm $globalVars{'outputFilePath'}/all_samples.fasta
+    wait
+    sys rm *.g.fasta 
+    
+    sys rm $globalVars{'outputFilePath'}/all_samples.fasta
 
-   return 'ok'
+    return 'ok'
 
 }
 

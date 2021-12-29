@@ -2,7 +2,7 @@
 ################################   PEMA 's PARAMETERS   ####################################
 ############################################################################################
 #
-#    for version 2.1.3
+#    for version 2.1.4
 #
 # In this file there are all the parameters that need to be assigned every time PEMA is 
 # about to run! The parameters we have here, are not the only parameters of the tools 
@@ -28,6 +28,11 @@ outputFolderName	test_Swarm_16S
 # Otherwise, you need to set the "EnaData" variable as 'No'.  
 EnaData	Yes
 #
+# Each sequencer has a special combination of letters with which all its reads start with
+# For example MiSeq has "@M0". Please provide this pattern to PEMA to convert your data to the ENA 
+# format. If you do not know that, you can either google it or gunzip a fastq.gz files of yours and provide
+# the letatters between the "@" and the first ":" characters.
+sequencerPrefix	M0
 #
 #############################################################
 #################   fastqc (v0.11.8)    #####################
@@ -241,9 +246,10 @@ numberOfCoresForPapara	7
 #
 # When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. 
 # PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_132'
-# depending on the version of your choice.
+# depending on the version of your choice. 
+# In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'.
 #
-silvaVersion	silva_132
+referenceDb	silva_132
 #
 #
 # As you may need a series of taxonomy assignment when you use the alignment-based method, please give another name in your 
@@ -357,12 +363,18 @@ midori_version	midori_1
 custom_ref_db	No
 name_of_custom_db	partialCustomdb
 #
+#######################################################################################################
 #
-#########################################################################################################
+# In case you would like to link the OTU/ASV assignment to its closest NCBI Taxonomy Id
+# set the following parameter as `Yes`
 #
-#		the following parameters is only for the case that the Phyloseq R package is about to run
+getNCBITaxId	No
 #
-#########################################################################################################
+######################################################################################################
+#
+# The following parameters is only for the case that the Phyloseq R package is about to run
+#
+######################################################################################################
 #
 # If wish to use Phyloseq in order to analyse your returned data then set the following  parameter 'phyloseq' with 'Yes'.
 # In order to do that, PEMA needs an MSA that it is returned by the MAFFT (v7.427) aligner and a phylogeny tree of the OTUs found which is built by the RAxML-ng algorithm.
@@ -401,6 +413,17 @@ emptyRawDataFile	Yes
 emptyCheckpoints	Yes
 #
 #
-# Classifier to use
+# Classifier to use, parameter values ("CREST","phylogeny","RDPClassifier")
+# If you are about to use a version of Silva db, or Unite db or a custom db that you have prepared
+# the required files accordingly 
+# (see https://hariszaf.github.io/pema_documentation/training_crest_classifier/), 
+# you may set this parameter as "CREST".
+# In case you are running 16S data and you would like a phylogeny based taxonomy assignment, 
+# you may set this parametera as "phylogeny"
+# In case you are about to use a version of Midori or a custom db for which you have prepared the 
+# required files (see https://hariszaf.github.io/pema_documentation/training_rdpclassifier/) you 
+# may set this parameter as "RDPClassifier"
 classifierAlgo	CREST
 #
+# 
+# 

@@ -1,19 +1,21 @@
 #!/bin/bash
 
-# This is a script that converts Illumina raw data file to the ENA format.
-# All sample files that are going to be used in PEM., they need to be in the ENA format.
-#
-# This script will accomplish this task as long as your paired end raw data files have the following suffixes:
-#
-# forward read:   "_R1_001.fastq.gz"
-# reverese reads: "_R2_001.fastq.gz"
-#
-# The rest of the name is irrelevant. 
+'''
+Aim:    This script converts Illumina raw data file to the ENA format.
+        All sample files that are going to be used in PEM., they need to be in the ENA format.
 
+Usage:  This script will accomplish this task as long as your paired end raw data files have the following suffixes:
+        forward read:   "_R1_001.fastq.gz"
+        reverese reads: "_R2_001.fastq.gz"
+        The rest of the name is irrelevant. 
+
+Author: Haris Zafeiropoulos
+'''
 
 
 # Keep the directory of the initial data in a variable
 directory=${1}
+seqPattern=${2}
 
 # set the directoryPath the proper way no matter how the path was given by the user
 if [ ${directory:1} == "/" ]
@@ -68,7 +70,7 @@ do
 		
 		echo sample_1 is: $sample
 		
-		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${sampleName}_R1_001.fastq"
+		sed "s/^@$seqPattern.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${sampleName}_R1_001.fastq"
 		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/1"} else print $0}' half_"${sampleName}"\_R1_001.fastq  > $directoryPath/ena_"${newName}"\_1.fastq 
 	fi
 	
@@ -77,7 +79,7 @@ do
 
 		echo sample_2 is: $sample
 
-		sed "s/^@M0.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${newName}_R2_001.fastq"
+		sed "s/^@$seqPattern.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${newName}_R2_001.fastq"
 		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/2"} else print $0}' half_"${newName}"\_R2_001.fastq  > $directoryPath/ena_"${newName}"\_2.fastq
 
 	fi

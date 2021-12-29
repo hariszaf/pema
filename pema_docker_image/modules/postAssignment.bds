@@ -1,0 +1,166 @@
+#!/usr/bin/env bds
+
+
+string perSampleGeneral(string{} params, string{} globalVars) {
+
+    globalVars{'bayesPath'}.chdir()
+    string[] names = globalVars{'bayesPath'}.dir()
+
+    # for each sample we make a folder with its name, in order to put PEMA's output concerning each of those
+    globalVars{'outputPerSamplePath'}.chdir()
+    for ( string sample : names ) {
+        sample.mkdir()
+    }
+
+    # in 'samples' we make a list with all file names we find in fastqc output folder - that means for all the files
+    globalVars{'fastqcPath'}.chdir()
+    string[] samples = globalVars{'fastqcPath'}.dir()
+    
+    # we remove all .html files from our list
+    for (string file : samples ) {
+        if ( file.endsWith(".html") ) {
+            samples.remove(file)
+        }
+    }
+
+    #set variables 
+    string unzipfq 
+    string sampleNoZip
+    string readDirection
+    globalVars{'fastqcPath'}.chdir()
+
+    for ( string sample : samples ) {
+    
+        # we unzip the output of fastqc for each file
+        task unzip $globalVars{'fastqcPath'}/$sample
+
+        sampleNoZip   = sample.split('.zip')[0]
+        unzipfq       = sample.split('_[0-9]_fastqc')[0]
+        readDirection = sample.split('_')[1]
+        # Remove print statements if working right
+        println("here is readDirection from sample")
+        println(sample)
+        println(readDirection)
+       
+        wait
+        
+        # we copy two significant output files of FastQC to the sample's output folder
+        task{
+            # sys cp $globalVars{'fastqcPath'}/$sampleNoZip/Images/per_base_quality.png  $globalVars{'outputPerSamplePath'}/$unzipfq
+            sys cp $globalVars{'fastqcPath'}/$sampleNoZip/summary.txt $globalVars{'fastqcPath'}/$sampleNoZip/summary_$readDirection.txt
+            sys mv $globalVars{'fastqcPath'}/$sampleNoZip/summary_$readDirection.txt $globalVars{'outputPerSamplePath'}/$unzipfq
+        }
+        wait
+        unzipfq = ''
+    }
+    wait
+
+    return 'ok'
+}
+
+
+
+# Function to build the per sample profiles in case of CREST
+string CrestPerSample(string{} params, string{} globalVars) {
+
+    if  ( ( params{'gene'} != 'COI' )  &&  params{'taxonomyAssignmentMethod'} == 'alignment') {
+
+        globalVars{'bayesPath'}.chdir()
+        string[] names = globalVars{'bayesPath'}.dir()
+        string finalAssignDir = globalVars{'assignmentPath'} + '/' + params{'taxonomyFolderName'}
+        finalAssignDir.chdir()
+        
+        task {
+            sys sed "s/ /_/g" Richness.tsv > Richness2.tsv 
+            sys sed "s/ /_/g" All_Cumulative.tsv > All_Cumulative2.tsv 
+            sys sed "s/ /_/g" Relative_Abundance.tsv > Relative_Abundance2.tsv 
+        }
+        wait
+
+        counter := 3
+        for ( string sample : names ) {
+
+            counter += 1
+
+            wait
+            sys awk -v col=$counter '{print $2 "\t" $3 "\t" $((col)) }' Richness2.tsv           > Richness_$sample.tsv
+            sys sed -i "s/$sample/Richness/g" Richness_$sample.tsv
+            sys awk -v col=$counter '{print $2 "\t" $3 "\t" $((col)) }' All_Cumulative2.tsv     > All_Cumulative_$sample.tsv
+            sys awk -v col=$counter '{print $2 "\t" $3 "\t" $((col)) }' Relative_Abundance2.tsv > Relative_Abundance_$sample.tsv
+            sys awk -v col=$counter '{print $((col))                 }' All_Cumulative2.tsv     > All_Cumulative_only_int_$sample.tsv
+            sys sed -i "s/$sample/Cumulative/g" All_Cumulative_only_int_$sample.tsv
+            sys awk -v col=$counter '{print $((col))                 }' Relative_Abundance2.tsv > Relative_Abundance_only_int_$sample.tsv
+            sys sed -i "s/$sample/Relative_abundance/g" Relative_Abundance_only_int_$sample.tsv
+            wait
+            
+            sys paste -d "\t" Richness_$sample.tsv All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv > profile_$sample.tsv
+            wait
+
+            sys rm All_Cumulative_only_int_$sample.tsv Relative_Abundance_only_int_$sample.tsv
+            wait
+
+            sys mv profile_$sample.tsv Richness_$sample.tsv  All_Cumulative_$sample.tsv  Relative_Abundance_$sample.tsv $globalVars{'outputPerSamplePath'}/$sample
+        }
+
+        sys rm Richness2.tsv All_Cumulative2.tsv Relative_Abundance2.tsv 
+    } else {
+        println("It is not an actual CREST based taxonomy assignment that was performed. Your parameters are not in line.")
+    }
+
+    return 'ok'
+}
+
+
+
+
+
+## Function to build the per sample profiles in case of RDPClassifier
+string RDPClassifierPerSample(string{} params, string{} globalVars) {
+
+    if  ( params{'gene'} == 'gene_COI' &&  params{'clusteringAlgo'} == 'algo_Swarm' ){
+
+        globalVars{'bayesPath'}.chdir()
+        string[] sampleNames = globalVars{'bayesPath'}.dir()
+        
+        globalVars{'assignmentPath'}.chdir()
+
+        for ( string sample : sampleNames ) {
+            
+            sys bash $globalVars{'path'}/scripts/getColumnFromRDPFinalTable.sh $sample
+            sys mv profile_$sample.tsv $globalVars{'outputPerSamplePath'}/$sample
+            
+        }
+    
+    } else {
+        println("That was not the case..")
+    }
+    return 'ok'
+}
+
+
+
+
+
+# Get NCBI Taxonomy Id for the taxonomies found in the finalTable.tsv file
+string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
+
+    # Move to dir of finaTable.tsv
+    if (globalVars{'classifierAlgo'} == "CREST") {
+
+        string finalPath = globalVars{'assignmentPath'} + "/" + params{'taxonomyFolderName'}
+        finalPath.chdir()
+
+    } else {
+
+        globalVars{'assignmentPath'}.chdir()
+    }
+    
+    sys /usr/bin/python3 $globalVars{'path'}/scripts/getNCBITaxonomyIds.py
+
+    wait
+
+    return 'ok'
+
+}
+
+

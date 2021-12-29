@@ -1,5 +1,13 @@
 #!/bin/bash
 
+# Aim:    Train the RDPClassifier using the required files, based on a custom db
+# 
+# Usage:  PEMA invokes this script every time that the RDPClassifier has been selected
+#         and the custom_ref_db parameter has beeen set as "Yes". It is called as part 
+#         of the `initialize` module of PEMA 
+# 
+# Authors: Haris Zafeiropoulos
+
 # Go to the RDPTools directory
 cd /home/tools/RDPTools
 

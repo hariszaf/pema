@@ -1,8 +1,14 @@
 #!/bin/bash
 
-# This script is based on blocks of code from F.Mahe - developer of Swarm 
-# You may find more about that on the following GitHub Wiki page:
-#  https://github.com/torognes/swarm/wiki/
+# Aim:     Keep track of the number of occurrences of each amplicon in each sample
+#          Amplicons (rows) and their occurrences in the different samples (columns).
+# 
+# Usage:   This script is invoked every time the user selects Swarm, as part of the
+#          PEMA preprocessing module, in the swarmDereplicate() function
+# 
+# Authors: Haris Zafeiropoulos, based on blocks of code from F.Mahe
+#          You may find the initial script here:
+#          https://github.com/torognes/swarm/wiki/
 
 # Linearize sequences 
 for file in $(ls); 

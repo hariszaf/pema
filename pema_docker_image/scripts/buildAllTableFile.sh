@@ -1,6 +1,17 @@
 #!/bin/bash
 
-
+# Aim:   When ASVs are built using the Swarm v2 algorithm, 
+#        this script builds the 
+#        asvs_representatives_all_samples.fasta file
+#        where the abundance of each ASV is merged to its id 
+#        e.g. 
+#        >218a968dfc3034ee2071c2f017aac9b38596ba5f_1286
+#        CCAAGGATGAACTGTTTACCCC....
+#
+# Usage: This script is called in the clustering.bds file 
+#        from the clusteringSwarm() function 
+#
+# Author: Haris Zafeiropoulos
 
 awk -F "\t" 'BEGIN {OFS = "\t"} { $2=""; $NF=""; print }' asvs_contingency_table.tsv | \
 sed 's/linearized.dereplicate_//g ; s/.merged.fastq//g ; s/OTU/#OTU_ID/g; s/^\([0-9].*\)/Otu\1/g ; s/\t\t/\t/g ; s/_/ /g'  > tmp

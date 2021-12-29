@@ -130,7 +130,7 @@ string communityAnalysis(string{} params, string{} globalVars) {
       sys cp $globalVars{'outputPoint'}/phyloseq_in_PEMA.R .
       wait
       
-      sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $params{'gene'} $params{'silvaVersion'}
+      sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $params{'gene'} $params{'referenceDb'}
 
       wait      
    }

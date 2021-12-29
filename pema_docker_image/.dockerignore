@@ -1,0 +1,3 @@
+# Add exception for the directories you actually want to include in the context
+sanity_check
+pemabase

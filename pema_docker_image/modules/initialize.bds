@@ -135,7 +135,7 @@ string{} initializeAnalysis(string{} params) {
 
    # Convert Illumina data to ENA format
    if ( params{'EnaData'} == 'No' ) {
-      sys bash $globalVars{'path'}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'}
+      sys bash $globalVars{'path'}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
    }
 
    # # IMPORTANT! Module to train classifiers is enabled through this statement
@@ -190,10 +190,10 @@ string buildDirectories(string{} params, string{} globalVars){
       string sixteenPath = globalVars{'genePath'} + '/' + 'gene_18S'
       sixteenPath.chdir()
       
-      if ( params{'clusteringAlgoFor16S_18SrRNA'} == 'algo_Swarm' ) {
+      if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
          string algo = 'Swarm'
          algo.mkdir()
-      } else if ( params{'clusteringAlgoFor16S_18SrRNA'} == 'algo_vsearch' ) {
+      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
          string algo = 'vsearch'
          algo.mkdir()
       } 
@@ -211,8 +211,24 @@ string buildDirectories(string{} params, string{} globalVars){
          algo.mkdir()
       } 
 
-   } else if ( params{'gene'} == 'gene_other' ) {
+
+   } else if ( params{'gene'} == 'gene_12S' ) {
+      println('Marker gene under study 12S.')
+      string sixteenPath = globalVars{'genePath'} + '/' + 'gene_12S'
+      sixteenPath.chdir()
+      
+      if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
+            string algo = 'Swarm'
+            algo.mkdir()
+      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
+            string algo = 'vsearch'
+            algo.mkdir()
+      } 
+
+    } else if ( params{'gene'} == 'gene_other' ) {
+
       println('My marker gene is not among the 4 PEMA supports by default.')
+
       string newMarkerGenePath = globalVars{'genePath'} + '/' + 'gene_new'
       newMarkerGenePath.chdir()
 
@@ -225,7 +241,7 @@ string buildDirectories(string{} params, string{} globalVars){
       } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
          string algo = 'vsearch'
          algo.mkdir()
-      }      
+      }
    }
    # Again make everything 777
    sys chmod 777 $globalVars{'outputFilePath'} -R
@@ -245,7 +261,7 @@ string{} trainClassifier(string{} params, string{} globalVars){
 
       # Path for user's files 
       globalVars{'myCustomDbInPema'}  = globalVars{'path'} + '/tools/RDPTools/TRAIN'
-      string checkIfAlreadyTrained = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
+      string checkIfAlreadyTrained    = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
 
       # Check if RDPClassifier has already been trained with this custom DB
       if ( checkIfAlreadyTrained.isDir() ) {

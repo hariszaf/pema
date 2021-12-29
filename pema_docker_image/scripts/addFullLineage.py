@@ -1,5 +1,17 @@
 #!/usr/bin/python
 
+'''
+Aim:    This script is required when user asks for a custom db to be used
+        along with the RDPClassifier. For more about this task, you may check
+        here: https://hariszaf.github.io/pema_documentation/training_rdpclassifier/
+
+Usage:  The script is invoked by the trainForRDPClassifier.sh 
+        script of PEMA (see at /scripts).
+
+Author: This script has not been developed by the PEMA team.
+        You may find the original at: https://github.com/GLBRC-TeamMicrobiome/python_scripts
+'''
+
 import sys, string
 if len(sys.argv) != 3:
 	print 'addFullLineage.py taxonomyFile fastaFile'
@@ -45,5 +57,3 @@ for line in f2:
 	else:
 			print line.strip()
 
-# This script has not been developed by the PEMA team.
-# You may find the original at: https://github.com/GLBRC-TeamMicrobiome/python_scripts

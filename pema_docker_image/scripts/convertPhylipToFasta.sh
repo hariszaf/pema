@@ -1,7 +1,14 @@
 #!/bin/bash
 
-
-#phy_file=$(cat papara_alignment.phy)
+# Aim: This script takes as input a Phylim alignment file and 
+#      converts it into a fasta file
+#
+# Usage: That is required in case phylogeny based taxonomy
+#        assignment has been asked (16S data). In the 
+#        phylogenyAssign() function once PaPaRa has been completed
+#        its papara_alignment.phy output needs to be converted to fasta
+# 
+# Author: Haris Zafeiropoulos
 
 
 awk '{print ">"$1}' papara_alignment*.phy > only_ids.txt
