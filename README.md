@@ -7,7 +7,7 @@
 ## a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S rRNA, ITS and COI marker genes 
 *PEMA is reposited in* [*Docker Hub*](https://hub.docker.com/r/hariszaf/pema) *as well as in* [*Singularity Hub*](https://singularity-hub.org/collections/2295)
 
-#### A PEMA tutorial can be found [**here**]( https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?fbclid=IwAR14PpWfPtxB8lLBBnoxs7UbG3IJfkArrJBS5f2kRA__kvGDUb8wiJ2Cy_s#slide=id.g57f092f54d_1_21).
+#### PEMA website along with *how to* documentation can be found [**here**](https://hariszaf.github.io/pema_documentation/).
 
 #### For any troubles you may have when running PEMA or for any potential improvevments you would like to suggest, please share on the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community).
 
@@ -112,7 +112,7 @@ or Docker on your computing environment.
 In case you are working on Singularity, you may run the following command to get the PEMA Singularity image:
 
 ```
- singularity pull pema_v.2.1.4.sif https://gitlab.com/microbactions/pema-singularity-images/-/raw/v.2.1.4/pema_v.2.1.4.sif
+ singularity pull pema_v.2.1.4.sif https://gitlab.com/microbactions/pema-singularity-images-v.2.1.4/-/raw/main/pema_v.2.1.4.sif 
 ```
 
 This will take some time but once it's downloaded you have PEMA ready to go!
