@@ -338,9 +338,9 @@ if ( paramsForCA{'gene'} == 'gene_ITS' ) {
 
     globalVars{'dataPath'}.chdir()
     
-    sys mkdir cutadapt 
+    sys mkdir data_after_cutadapt 
     sys mv *fastq.gz data_after_cutadapt/
-    sys data_after_cutadapt/ ..
+    sys mv data_after_cutadapt/ ..
 
     sys mv ../initialData/* .
     sys rmdir ../initialData
