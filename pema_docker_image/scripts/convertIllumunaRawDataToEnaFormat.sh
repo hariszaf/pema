@@ -1,16 +1,16 @@
 #!/bin/bash
 
-'''
-Aim:    This script converts Illumina raw data file to the ENA format.
-        All sample files that are going to be used in PEM., they need to be in the ENA format.
 
-Usage:  This script will accomplish this task as long as your paired end raw data files have the following suffixes:
-        forward read:   "_R1_001.fastq.gz"
-        reverese reads: "_R2_001.fastq.gz"
-        The rest of the name is irrelevant. 
+# Aim:    This script converts Illumina raw data file to the ENA format.
+#        All sample files that are going to be used in PEM., they need to be in the ENA format.
+#
+# Usage:  This script will accomplish this task as long as your paired end raw data files have the following suffixes:
+#        forward read:   "_R1_001.fastq.gz"
+#        reverese reads: "_R2_001.fastq.gz"
+#       The rest of the name is irrelevant. 
+#
+# Author: Haris Zafeiropoulos
 
-Author: Haris Zafeiropoulos
-'''
 
 
 # Keep the directory of the initial data in a variable
@@ -41,20 +41,27 @@ do
 done
 
 # convert them in the ENA format
-let counter=-1
-let giveName=0
+let counter=0
+let giveName=1000000
 
 for sample in ./*
 do
+
+    echo "~~~~~~~~~~~~~~~~~~~~~~~"
+    echo $sample
+
+
     ((counter+=1))
     echo counter = $counter
-	
+
     let test=$counter%2
     echo test = $test
 
-    if [ "$test" -eq "0" ]
+    if [ "$test" -eq "1" ]
     then
-        ((giveName+=1))
+        let giveName+=1
+    else
+        let giveName=giveName
     fi
 
     echo giveName = $giveName
@@ -62,7 +69,7 @@ do
 	sampleName=${sample##*/} 
 	sampleId=${sampleName%%_*}
 	newName=$(printf "ERR%07d" $giveName)
-    
+
 	sample="${sample:2}"
 	
 	if [[ $sample == *"_R1_001.fastq"* ]]
