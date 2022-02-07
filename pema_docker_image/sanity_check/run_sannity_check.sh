@@ -92,8 +92,10 @@ echo "PEMA for COI using Swarm and Midori-1 db has been completed"
 # #----------------------------
 
 # ## Run example case for ITS using Swarm and Unite
-# docker run --rm -v $CWD/ITS/:/mnt/analysis/ hariszaf/pema:v.2.1.4 ./pema_latest.bds
-
+echo "PEMA for ITS is about to start"
+docker run --rm -v $CWD/ITS/:/mnt/analysis/ hariszaf/pema:v.2.1.4 rm -rf /mnt/analysis/    test_*
+docker run --rm -v $CWD/ITS/:/mnt/analysis/ hariszaf/pema:v.2.1.4 ./pema_latest.bds
+echo "PEMA for ITS has been completed"
 
 
 
