@@ -1,0 +1,563 @@
+#   --------------------------         GENERAL PARAMETERS       --------------------------
+#
+# :param: gene
+# :gene.title: marker gene
+# :gene.description: Indicates the marker gene of the study. Currently PEMA supports the analysis of 16S, 12S, 18S, ITS and COI marker genes. Add the name of the marker gene after the underscore ("_")
+# :gene.type: string
+# :gene.required: Yes
+# :gene.prefix: gene_
+#
+gene	gene_16S
+#
+#
+# :param: outputFolderName
+# :outputFolderName.title: output folder name
+# :outputFolderName.description: Name of the output folder PEMA will save its results
+# :outputFolderName.type: string
+# :outputFolderName.required: Yes
+#
+outputFolderName	test_Swarm_16S
+#
+#
+# :param: EnaData
+# :EnaData.title: ENA data format
+# :EnaData.description: PEMA requires the names of the samples to be in ENA format (e.g "ERR1021912_1.fastq.gz"). In that case EnaData would be "Yes". Ohterise, if the raw data are as returned by the Illumina sequencer PEMA has to make this convertion (EnaData: No) and it will return a mapping file linking the initial filenames to those created for the analysis.
+# :EnaData.type: boolean
+# :EnaData.required: No
+#
+EnaData No
+#
+#
+# :param: sequencerPrefix
+# :sequencerPrefix.title: sequencer prefix
+# :sequencerPrefix.description: Each sequencer has a special combination of letters with which all its reads start with (e.g., "@M0"). Please provide this pattern if the EnaData is "No".
+# :sequencerPrefix.type: string
+# :sequencerPrefix.required: Yes
+#
+sequencerPrefix	M0
+#
+#
+#   --------------------------     PRE-PROCESSING PARAMETERS : Trimmomatic     --------------------------
+#
+# :param: maxInfo
+# :maxInfo.title: maximum information
+# :maxInfo.description: A Trimmomatic parameter. When enabled, it performs an adaptive quality trim, balancing the benefits of retaining longer reads against the costs of retaining bases with errors.
+# :maxInfo.type: boolean
+# :maxInfo.required: Yes
+#
+maxInfo	Yes
+#
+#
+# :param: targetLength
+# :targetLength.title: maximum information
+# :targetLength.description: A Trimmomatic parameter. Specifies the read length which is likely to allow the location of the read within the target sequence to be determined.
+# :targetLength.type: integer
+# :targetLength.required: Yes
+# :targetLength.values: 
+#   - 16S: 
+#   - 12S:
+#   - 18S:
+#   - COI: 
+#   - ITS: 
+#
+targetLength	180
+#
+#
+# :param: strictness
+# :strictness.title: strictness
+# :strictness.description: A Trimmomatic parameter. Specifies the balance between preserving as much read length as possible vs. removal of incorrect bases. A low value of this parameter (<0.2) favours longer reads, while a high value (>0.8) favours read correctness.
+# :strictness.type: float
+# :strictness.required: Yes
+# :strictness.values: 0.0 < strictness <1.0
+#
+strictness	0.8
+#
+#
+# :param: adapters
+# :adapters.title: adapters
+# :adapters.description: A Trimmomatic parameter. Suggested adapter sequences are provided for TruSeq2 (as used in GAII machines) and TruSeq3 (as used by HiSeq and MiSeq machines),
+# :adapters.type: string
+# :adapters.required: Yes
+# :adapters.default: TruSeq2-PE.fa
+#
+adapters	TruSeq2-PE.fa
+#
+#
+# :param: seedMismatches
+# :seedMismatches.title: adapters
+# :seedMismatches.description: A Trimmomatic parameter. Specifies the maximum mismatch count which will still allow a full match to be performed.
+# :seedMismatches.type: integer
+# :seedMismatches.required: Yes
+# :seedMismatches.default: 0
+#
+seedMismatches	0
+#
+#
+# :param: palindromeClipThreshold
+# :palindromeClipThreshold.title: adapters
+# :palindromeClipThreshold.description: A Trimmomatic parameter. Specifies how accurate the match between the two 'adapter ligated' reads must be for PE palindrome read alignment.
+# :palindromeClipThreshold.type: integer
+# :palindromeClipThreshold.required: Yes
+# :palindromeClipThreshold.default: 0
+#
+palindromeClipThreshold 20
+#
+#
+# :param: simpleClipThreshold
+# :simpleClipThreshold.title: simple ClipThreshold
+# :simpleClipThreshold.description: A Trimmomatic parameter. Specifies how accurate the match between any adapter etc. sequence must be against a read.
+# :simpleClipThreshold.type: integer
+# :simpleClipThreshold.required: Yes
+# :simpleClipThreshold.default: 0
+#
+simpleClipThreshold 30
+#
+#
+# :param: leading
+# :leading.title: simple ClipThreshold
+# :leading.description: A Trimmomatic parameter. Removes low quality bases from the beginning. As long as a base has a value below this threshold (value of the 'leading' parameter) the base is removed and the next base will be investigated.
+# :leading.type: integer
+# :leading.required: Yes
+# :leading.default: 0
+#
+leading 20
+#
+#
+# :param: trailing
+# :trailing.title: trailing
+# :trailing.description: A Trimmomatic parameter. Removes low quality bases from the end. As long as a base has a value below this threshold (value of the 'trailing' parameter), the base is removed and the next base (which as Trimmomatic is starting from the 3' prime end, would be base preceding the just removed base) will be investigated.
+# :trailing.type: integer
+# :trailing.required: Yes
+# :trailing.default: 0
+#
+trailing 2
+#
+#
+# :param: minlen
+# :minlen.title: minimum length of the amplicon
+# :minlen.description: A Trimmomatic parameter. Removes reads that fall below the specified minimal length.
+# :minlen.type: integer
+# :minlen.required: Yes
+# :minlen.default: 0
+#
+minlen 100
+#
+#
+# :param: threadsTrimmomatic
+# :threadsTrimmomatic.title: minimum length of the amplicon
+# :threadsTrimmomatic.description: A Trimmomatic parameter. Set how many threads you want Trimmomatic to run into.
+# :threadsTrimmomatic.type: integer
+# :threadsTrimmomatic.required: Yes
+# :threadsTrimmomatic.default: 0
+#
+threadsTrimmomatic 100
+#
+#
+#   --------------------------     PRE-PROCESSING PARAMETERS : PANDAseq     --------------------------
+#
+#
+# :param: pandaseqAlgorithm
+# :pandaseqAlgorithm.title: minimum length of the amplicon
+# :pandaseqAlgorithm.description: Merging algorithm of the PANDAseq parameter. 
+# :pandaseqAlgorithm.type: string
+# :pandaseqAlgorithm.required: Yes
+# :pandaseqAlgorithm.default: simple_bayesian
+# :pandaseqAlgorithm.values: 
+#   - pear:  
+#        description: uses the formula described in the PEAR paper (Zhang 2013), optionally with the probability of a random base (q) provide
+#    - simple_bayesian: 
+#        description: uses the formula described in the original paper (Masella 2012), optionally with an error estimation (ε) provided.
+#    - stich
+#    - flash 
+#
+pandaseqAlgorithm simple_bayesian
+#
+#
+# :param: pandaseqThreads
+# :pandaseqThreads.title: pandaseq threads
+# :pandaseqThreads.description: Set number of threads to be used from pandaseq. PANDAseq is a I/O bound algorithm. That means that it needs severous time in order to handle the ipnut and output files. while the process is quite fast. However, it does support multithreading and here you can set the number of threads it is going to use.
+# :pandaseqThreads.type: integer
+# :pandaseqThreads.required: Yes
+# :pandaseqThreads.default: 0
+#
+pandaseqThreads 20
+#
+#
+# :param: pandaseqMinlen
+# :pandaseqMinlen.title: pandaseq minimum length
+# :pandaseqMinlen.description: Sets the minimum length for a sequence, after primers are removed. By default, all sequences are kept. With this option, sequences shorter than desired can be discarded. In case you need to use this parameter, be sure you leave a tab after 'minlen' and set it like this: '-l 80'. If you do not want to use this parameter, make sure there is nothing after 'minlen'.
+# :pandaseqMinlen.type: integer
+# :pandaseqMinlen.required: Yes
+# :pandaseqMinlen.default: 0
+#
+pandaseqMinlen 
+#
+#
+# :param: minoverlap
+# :minoverlap.title: pandaseq minimum overlap
+# :minoverlap.description: Sets the minimum overlap between forward and reverse reads. Raising this number does not generally increase the quality of the output as alignments with small overlaps tend to score poorly and are discarded anyway.
+# :minoverlap.type: integer
+# :minoverlap.required: Yes
+# :minoverlap.default: 1
+#
+minoverlap  1 
+#
+#
+# :param: threshold
+# :threshold.title: threshold
+# :threshold.description: Sets the score, that a sequence must meet to be kept in the output. Any alignments lower than this will be discarded as low quality. Increasing this number will not necessarily prevent uncalled bases (Ns) from appearing in the final sequence. It is also used as the threshold to match primers, if primers are supplied.
+# :threshold.type: integer
+# :threshold.required: Yes
+# :threshold.default: 1
+# :theshold.values: 0.0 < threshold < 1.0
+#
+threshold  0.6 
+#
+#
+# :param: elimination
+# :elimination.title: elimination
+# :elimination.description: The '-N' parameter eliminates all sequences with uncalled nucleotides in the output. Otherwise, during assembly, uncalled bases (Ns) from unpaired regions may be emitted. If you need -N to be on your analysis, please add '-N' after 'elimination'. Please make sure you leave a tab. If you do not want the parameter to be on, please make sure there is nothing after the 'elimination' parameter.
+# :elimination.type: integer
+# :elimination.required: Yes
+# :elimination.default: 1
+# :elimination.values: 
+#
+elimination  
+#
+#
+#   --------------------------        CLUSTERING PARAMETERS           --------------------------
+#
+#
+# :param: clusteringAlgo
+# :clusteringAlgo.title: clustering algorithm
+# :clusteringAlgo.description: For OTU clustering PEMA invokes the vsearch algorithm while for ASVs inference the Swarm. Select which way to go.  
+# :clusteringAlgo.type: string
+# :clusteringAlgo.required: Yes
+# :clusteringAlgo.default: vsearch
+# :clusteringAlgo.values:
+#   - algo_Swarm
+#   - algo_vsearch
+#
+clusteringAlgo	algo_Swarm
+#
+#
+#   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
+#
+#
+# :param: vsearchThreads
+# :vsearchThreads.title: vsearch threads
+# :vsearchThreads.description: Set the number of threads PANDAseq to use.
+# :vsearchThreads.type: integer
+# :vsearchThreads.required: Yes
+# :vsearchThreads.default: 1
+#
+vsearchThreads	8
+#
+#
+# :param: vsearchId
+# :vsearchId.title: vsearch threads
+# :vsearchId.description: Set a score about the clustering step of the VSEARCH algorithm. Do not add a read into a certain cluster if the pairwise identity with its centroid, is lower than the value of the 'vsearchId' parameter. The pairwise identity is defined as the number of (matching columns) / (alignment length - terminal gaps).
+# :vsearchId.type: float
+# :vsearchId.required: Yes
+# :vsearchId.default: 0.97
+# :vsearchId.values: 0.0 < vsearchId < 1.0
+#
+vsearchId	0.95
+#
+#
+#
+#   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
+#
+#
+# :param: d
+# :d.title: d
+# :d.description: Maximum number of differences allowed between two amplicons, meaning that two amplicons will be grouped if they hav e integer (or less) differences.
+# :d.type: integer
+# :d.required: Yes
+# :d.default: 12
+# :d.values: d > 0
+#
+d	0.95
+#
+#
+# :param: boundary
+# :boundary.title: boundary
+# :boundary.description: By default, an ASV with a mass of 3 or more is considered large. Conversely, an ASV is small if it has a mass of less than 3, meaning that it is composed of either one amplicon of abundance 2, or two amplicons of abundance 1. Any positive value greater than 1 can be specified. Using higher boundary values will speed up the second pass, but also reduce the taxonomical resolution of swarm results.
+# :boundary.type: integer
+# :boundary.required: No
+# :boundary.default: 3
+# :boundary.values: boundary > 0
+#
+boundary	
+#
+#
+# :param: swarmThreads
+# :swarmThreads.title: boundary
+# :swarmThreads.description: The number of threads (CPUs) the Swarm algorithm is allowed to use
+# :swarmThreads.type: integer
+# :swarmThreads.required: No
+# :swarmThreads.default: 1
+# :swarmThreads.values: swarmThreads > 0
+#
+swarmThreads	
+#
+#
+# :param: removeSingletons
+# :removeSingletons.title: boundary
+# :removeSingletons.description:  Remove the singletons (ASVs that appear only once with abundance equal to 1) ?
+# :removeSingletons.type: boolean
+# :removeSingletons.required: No
+# :removeSingletons.default: Yes
+# :removeSingletons.values: [Yes | No]
+#
+removeSingletons	Yes
+#
+#
+#
+#   --------------------------     CLASSIFIER-SPECIFIC : CREST      --------------------------
+#
+#
+# :param: classifierAlgo
+# :classifierAlgo.title: classifier algorithm
+# :classifierAlgo.description:  Select classifier for the taxonomy assignment step. If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
+# :classifierAlgo.type: string
+# :classifierAlgo.required: No
+# :classifierAlgo.constraints:
+#   - if gene [ COI ] then RDPClassifier  
+#   - if gene [ 12S | 16S | 18S | ITS ] then CREST
+# :classifierAlgo.values: [ CREST | RDPClassifier ]
+#
+classifierAlgo  CREST	
+#
+#
+# :param: taxonomyFolderName
+# :taxonomyFolderName.title: number of cores for PaPaRa
+# :taxonomyFolderName.description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail.
+# :taxonomyFolderName.type: string
+# :taxonomyFolderName.required:
+#   - if gene [ 16S | 18S |  ITS ]
+# :taxonomyFolderName.default: taxonomies
+#
+taxonomyFolderName	my_taxon_assign
+#
+#
+#   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
+#
+#
+# :param: taxonomyAssignmentMethod
+# :taxonomyAssignmentMethod.title: vsearch threads
+# :taxonomyAssignmentMethod.description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used.  
+# :taxonomyAssignmentMethod.type: string
+# :taxonomyAssignmentMethod.required: Yes
+# :taxonomyAssignmentMethod.default: alignment
+# :taxonomyAssignmentMethod.values: 
+#   - alignment
+#   - phylogeny
+#
+taxonomyAssignmentMethod	alignment
+#
+#
+# :param: numberOfCoresForPapara
+# :numberOfCoresForPapara.title: number of cores for PaPaRa
+# :numberOfCoresForPapara.description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use.
+# :numberOfCoresForPapara.type: integer
+# :numberOfCoresForPapara.required: Yes
+# :numberOfCoresForPapara.default: 0.97
+#
+numberOfCoresForPapara	7
+#
+#
+# :param: referenceDb
+# :referenceDb.title: reference database 
+# :referenceDb.description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_132' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'.
+# :referenceDb.type: string
+# :referenceDb.required: Yes
+# :referenceDb.default: silva_132
+# :referenceDb.values: 
+#   - silva_128
+#   - silva_132
+#   - pr_2
+#
+referenceDb	silva_132
+#
+#
+#   --------------------------     GENE-SPECIFIC : ITS     --------------------------
+#
+#
+# :param: forwardITSPrimer
+# :forwardITSPrimer.title: forward ITS primer
+# :forwardITSPrimer.description: Provide the forward primer used (only in case of ITS) 
+# :forwardITSPrimer.type: string
+# :forwardITSPrimer.required: 
+#   - if gene ITS
+# :forwardITSPrimer.default: GATGAAGAACGYAGYRAA
+#
+forwardITSPrimer	GATGAAGAACGYAGYRAA
+#
+#
+# :param: reverseITSPrimer
+# :reverseITSPrimer.title: reverse ITS primer
+# :reverseITSPrimer.description: Provide the reverse primer used (only in case of ITS) 
+# :reverseITSPrimer.type: string
+# :reverseITSPrimer.required: 
+#   - if gene ITS
+# :reverseITSPrimer.default: CTBTTVCCKCTTCACTCG
+#
+reverseITSPrimer	CTBTTVCCKCTTCACTCG
+#
+#
+#   --------------------------     GENE-SPECIFIC : COI     --------------------------
+#
+#
+# :param: midori_version
+# :midori_version.title: midori version 
+# :midori_version.description: Select between Midori and Midori 2. The latter includes more than 180,000 unique species and expands beyond Metazoa. The computational time needed increases to a great extent when Midori2 is the one selected.
+# :midori_version.type: string
+# :midori_version.required: 
+#   - if gene COI
+# :midori_version.default: midori_1
+# :midori_version.values:
+#   - midori_1
+#   - midori_2
+#
+midori_version	midori_1
+#
+#
+# :param: abskew
+# :abskew.title: abskew
+# :abskew.description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most.
+# :abskew.type: integer
+# :abskew.required: 
+#   - if gene COI
+# :abskew.default: 2
+# :abskew.values:
+#   - midori_1
+#   - midori_2
+#
+abskew	2
+#
+#
+#   --------------------------     CUSTOM REFERENCE DATABASE     --------------------------
+#
+#
+# :param: custom_ref_db
+# :custom_ref_db.title: custom reference database
+# :custom_ref_db.description: # When using a custom reference database for the taxonomy step, PEMA requires certain files to train each of the two classifiers supported. In <my_analysis> directory, the user needs to provide those files under a `local_ref_db` folder. In case of COI, the RDPClassifier is used and a taxonomy and a sequence file are required, as described here: https://hariszaf.github.io/pema_documentation/training_rdpclassifier/. In case of any other marker gene, the CREST classifier is used and you need to provide the corresponding two files as described at: https://hariszaf.github.io/pema_documentation/training_crest_classifier/. Remember that as containers are lost when exit from one, you will have to train the classifier, every time you run a new PEMA container If you are about to use a custom ref db, set the following parameter as 'Yes'. Otherwise, it must be set as 'No'. The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
+# :custom_ref_db.type: boolean
+# :custom_ref_db.required: No
+# :custom_ref_db.default: No
+#
+custom_ref_db	No
+#
+#
+# :param: name_of_custom_db
+# :name_of_custom_db.title: name of custom database
+# :name_of_custom_db.description: Name of how custom reference database will be named 
+# :name_of_custom_db.type: string
+# :name_of_custom_db.required: No
+# :name_of_custom_db.default: No
+#
+name_of_custom_db	partialCustomdb
+#
+#
+#   --------------------------     PHYLOSEQ - SPECIFIC     --------------------------
+#
+# :param: phyloseq
+# :phyloseq.title: phyloseq
+# :phyloseq.description: To use Phyloseq set the following  parameter 'phyloseq' with 'Yes'. Please remember that in order to use phyloseq a "metadata.csv" file is necessary to be part of your anaylis folder. 
+# :phyloseq.type: boolean
+# :phyloseq.required: No
+# :phyloseq.default: No
+#
+phyloseq	Yes
+#
+#
+# :param: tree
+# :tree.title: tree
+# :tree.description: The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees. Do you want to create such a tree with your OTUs? In case you build this once, you can use it as many times as you want.
+# :tree.type: boolean
+# :tree.required: No
+#   - if phyloseq Yes
+# :tree.default: No
+#
+tree	No
+#
+#
+# :param: raxmlThreads
+# :raxmlThreads.title: raxml threads
+# :raxmlThreads.description: Set the number of threads raxml is allowed to use
+# :raxmlThreads.type: integer
+# :raxmlThreads.required: No
+#   - if phyloseq Yes
+# :raxmlThreads.default: No
+#
+raxmlThreads	5
+#
+#
+# :param: parsTrees
+# :parsTrees.title: parsimony trees
+# :parsTrees.description: Number of parsimony trees raxml-ng will go for
+# :parsTrees.type: integer
+# :raxmlThreads.required: No
+#   - if phyloseq Yes
+# :parsTrees.default: No
+#
+parsTrees	5
+#
+#
+# :param: bootstrapTrees
+# :bootstrapTrees.title: bootstrap trees
+# :bootstrapTrees.description: Number of bootstrap trees raxml-ng will go for
+# :bootstrapTrees.type: integer
+# :raxmlThreads.required: No
+#   - if phyloseq Yes
+# :bootstrapTrees.default: No
+#
+bootstrapTrees	5
+#
+#
+#   --------------------------     sum up      --------------------------
+
+
+# :param: emptyRawDataFile
+# :emptyRawDataFile.title: empty raw data files 
+# :emptyRawDataFile.description: Move raw data to a new folder
+# :emptyRawDataFile.type: boolean
+# :emptyRawDataFile.required: No
+# :emptyRawDataFile.default: Yes
+#
+emptyRawDataFile	Yes
+#
+#
+# :param: emptyCheckpoints
+# :emptyCheckpoints.title: empty check points
+# :emptyCheckpoints.description: Move all check points returned in a separate folder
+# :emptyCheckpoints.type: boolean
+# :emptyCheckpoints.required: No
+# :emptyCheckpoints.default: Yes
+#
+emptyCheckpoints	Yes
+#
+#
+# :param: getNCBITaxId
+# :getNCBITaxId.title: get NCBI Taxonomy Id
+# :getNCBITaxId.description: Link the OTU/ASV taxonomy assignment to its closest NCBI Taxonomy Id, meaning if there is no NCBI Taxonomy id at the species level, PEMA will search for the one of the genus and so on. 
+# :getNCBITaxId.type: boolean
+# :getNCBITaxId.required: No
+# :getNCBITaxId.default: Yes
+#
+getNCBITaxId	Yes
+#
+#
+#
+#   --------------------------     PEMA METADATA     --------------------------
+#
+# The following are not to be set by the user but describe each PEMA version
+# :about:  Configuration file for PEMA :version:. We encourage users to study the manual of each tool and tune these parameters according to their specific experiments
+# :version: v.2.1.4
+# :tools: https://github.com/hariszaf/pema/blob/master/help_files/encapsulated_software.md
+# :databases: https://github.com/hariszaf/pema/blob/master/help_files/encapsulated_software.md
+# :author: Haris Zafeiropoulos <haris-zaf@hcmr.gr>
+# :contributors: Christina Pavloudi <cpavloud@hotmail.com>
+
+
