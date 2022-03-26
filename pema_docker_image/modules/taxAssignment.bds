@@ -218,7 +218,7 @@ string rdpAssign(string{} params, string{} globalVars) {
 
       if ( params{'gene'} == "gene_COI" ) {
 
-         task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'midori_version'}/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
+         task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'referenceDb'}/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
 
          wait
 
@@ -228,7 +228,7 @@ string rdpAssign(string{} params, string{} globalVars) {
 
       } else if ( params{'gene'} == "gene_12S" ) {
 
-         task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'midori_version'}/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
+         task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/12S_v2.0.0/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
 
          wait
 

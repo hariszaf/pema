@@ -378,7 +378,7 @@ numberOfCoresForPapara	7
 #=        title: reference database 
 #=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_132' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'.
 #=        type: string
-#=        required: Yes | custom_ref_db: No
+#=        required: Yes | custom_ref_db: No && gene: [gene_16S, 'gene_18S', 'gene_COI']
 #=        validation: 
 #=          - gene: gene_16S
 #=              value: ['silva_128', 'silva_132']
