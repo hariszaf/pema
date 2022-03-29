@@ -333,7 +333,7 @@ string merging(string{} params, string{} globalVars){
         # Execute pandaseq algorithm for merging 
         task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
             -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
-            -t $params{'threshold'} $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq
+            -t $params{'threshold'} -l $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq
 
         wait
 

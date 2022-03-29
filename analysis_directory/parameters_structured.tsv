@@ -4,10 +4,9 @@
 #=        title: marker gene
 #=        description: Indicates the marker gene of the study. Currently PEMA supports the analysis of 16S, 12S, 18S, ITS and COI marker genes. Add the name of the marker gene after the underscore ("_")
 #=        type: string
-#=        required: Yes
+#=        required: True
 #=        validation:
-#=          - prefix: gene_
-#=          - suffix: ['COI', '16S', '18S', '12S', 'ITS']
+#=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
 #
 gene	gene_16S
 #
@@ -16,7 +15,7 @@ gene	gene_16S
 #=        title: output folder name
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
-#=        required: Yes
+#=        required: True
 #
 outputFolderName	test_Swarm_16S
 #
@@ -25,16 +24,19 @@ outputFolderName	test_Swarm_16S
 #=        title: ENA data format
 #=        description: PEMA requires the names of the samples to be in ENA format (e.g "ERR1021912_1.fastq.gz"). In that case EnaData would be "Yes". Ohterise, if the raw data are as returned by the Illumina sequencer PEMA has to make this convertion (EnaData: No) and it will return a mapping file linking the initial filenames to those created for the analysis.
 #=        type: boolean
-#=        required: Yes
+#=        required: True
+#=        validation: 
+#=          - value: Yes
+#=          - value: No
 #
 EnaData No
 #
 #
 #=    param: sequencerPrefix
 #=        title: sequencer prefix
-#=        description: Each sequencer has a special combination of letters with which all its reads start with (e.g., "@M0"). Please provide this pattern if the EnaData is "No".
+#=        description: Each sequencer has a special combination of letters with which all its reads start with (e.g., "@M0"). Please provide this pattern if the EnaData is "No". 
 #=        type: string
-#=        required: Yes | EnaData: No
+#=        required: True
 #
 sequencerPrefix	M0
 #
@@ -45,8 +47,10 @@ sequencerPrefix	M0
 #=        title: maximum information
 #=        description: A Trimmomatic parameter. When enabled, it performs an adaptive quality trim, balancing the benefits of retaining longer reads against the costs of retaining bases with errors.
 #=        type: boolean
-#=        required: Yes
-#=        suggested-value: Yes
+#=        required: True
+#=        validation: 
+#=          - value: Yes
+#=          - value: No
 #
 maxInfo	Yes
 #
@@ -55,18 +59,10 @@ maxInfo	Yes
 #=        title: maximum information
 #=        description: A Trimmomatic parameter. Specifies the read length which is likely to allow the location of the read within the target sequence to be determined.
 #=        type: integer
-#=        required: Yes
-#=        suggested-value:
-#=          - gene: gene_16S
-#=            value: 200
-#=          - gene: gene_18S
-#=            value: 200
-#=          - gene: gene_12S
-#=            value: 200
-#=          - gene: gene_ITS
-#=            value: 200
-#=          - gene: gene_COI
-#=            value: 200
+#=        required: True
+#=        validation: 
+#=          - range: 
+#=            min: 1
 #
 targetLength	180
 #
@@ -75,8 +71,11 @@ targetLength	180
 #=        title: strictness
 #=        description: A Trimmomatic parameter. Specifies the balance between preserving as much read length as possible vs. removal of incorrect bases. A low value of this parameter (<0.2) favours longer reads, while a high value (>0.8) favours read correctness.
 #=        type: float
-#=        required: Yes
-#=        validation: 0.0 < strictness <1.0
+#=        required: True
+#=        validation:
+#=          - range:
+#=            min: 0.0
+#=            max: 1.0
 #
 strictness	0.8
 #
@@ -85,8 +84,7 @@ strictness	0.8
 #=        title: adapters
 #=        description: A Trimmomatic parameter. Suggested adapter sequences are provided for TruSeq2 (as used in GAII machines) and TruSeq3 (as used by HiSeq and MiSeq machines),
 #=        type: string
-#=        required: Yes
-#=        suggested-value: TruSeq2-PE.fa
+#=        required: True
 #
 adapters	TruSeq2-PE.fa
 #
@@ -95,9 +93,10 @@ adapters	TruSeq2-PE.fa
 #=        title: adapters
 #=        description: A Trimmomatic parameter. Specifies the maximum mismatch count which will still allow a full match to be performed.
 #=        type: integer
-#=        required: Yes
-#=        suggested-value: 
-#=        validation: seedMismatches >= 0 
+#=        required: True 
+#=        validation: 
+#=          - range: 
+#=            min: 0 
 #
 seedMismatches	0
 #
@@ -106,9 +105,10 @@ seedMismatches	0
 #=        title: adapters
 #=        description: A Trimmomatic parameter. Specifies how accurate the match between the two 'adapter ligated' reads must be for PE palindrome read alignment.
 #=        type: integer
-#=        required: Yes
-#=        validation: palindromeClipThreshold >= 0 
-#=        suggested-value: 
+#=        required: True
+#=        validation: 
+#=          - range: 
+#=            min: 1 
 #
 palindromeClipThreshold 20
 #
@@ -117,9 +117,10 @@ palindromeClipThreshold 20
 #=        title: simple ClipThreshold
 #=        description: A Trimmomatic parameter. Specifies how accurate the match between any adapter etc. sequence must be against a read.
 #=        type: integer
-#=        required: Yes
-#=        validation: simpleClipThreshold >= 0 
-#=        suggested-value: 
+#=        required: True
+#=        validation:
+#=          - range: 
+#-             min: 0 
 #
 simpleClipThreshold 30
 #
@@ -128,9 +129,10 @@ simpleClipThreshold 30
 #=        title: simple ClipThreshold
 #=        description: A Trimmomatic parameter. Removes low quality bases from the beginning. As long as a base has a value below this threshold (value of the 'leading' parameter) the base is removed and the next base will be investigated.
 #=        type: integer
-#=        required: Yes
-#=        validation: leading >= 0 
-#=        suggested-value: 
+#=        required: True
+#=        validation: 
+#=          - range: 
+#=            min: 0 
 #
 leading 20
 #
@@ -139,9 +141,10 @@ leading 20
 #=        title: trailing
 #=        description: A Trimmomatic parameter. Removes low quality bases from the end. As long as a base has a value below this threshold (value of the 'trailing' parameter), the base is removed and the next base (which as Trimmomatic is starting from the 3' prime end, would be base preceding the just removed base) will be investigated.
 #=        type: integer
-#=        required: Yes
-#=        validation: trailing >= 0 
-#=        suggested-value:
+#=        required: True
+#=        validation: 
+#=          - range: 
+#=            min: 0 
 #
 trailing 2
 #
@@ -150,9 +153,10 @@ trailing 2
 #=        title: minimum length of the amplicon
 #=        description: A Trimmomatic parameter. Removes reads that fall below the specified minimal length.
 #=        type: integer
-#=        required: Yes
-#=        validation: minlen > 0 
-#=        suggested-value:
+#=        required: True
+#=        validation: 
+#=          - range: 
+#=            min: 1
 #
 minlen 100
 #
@@ -161,9 +165,10 @@ minlen 100
 #=        title: minimum length of the amplicon
 #=        description: A Trimmomatic parameter. Set how many threads you want Trimmomatic to run into.
 #=        type: integer
-#=        required: Yes
-#=        validation: threadsTrimmomatic > 0 
-#=        suggested-value:
+#=        required: True
+#=        validation: 
+#=          - range: 
+#=            min: 0 
 #
 threadsTrimmomatic 20
 #
@@ -175,9 +180,12 @@ threadsTrimmomatic 20
 #=        title: minimum length of the amplicon
 #=        description: Merging algorithm of the PANDAseq parameter. The user might select among the `simple_bayesian` (Masella 2012), the `pear` (Zhang 2013), the `stich` and the `flash` algorithms.
 #=        type: string
-#=        required: Yes
-#=        suggested-value: simple_bayesian 
-#=        validation: ['simple_bayesian', 'pear', 'stich', 'flash']
+#=        required: True
+#=        validation: 
+#=          - value: simple_bayesian
+#=          - value: pear 
+#=          - value: stich
+#=          - value: flash
 #
 pandaseqAlgorithm simple_bayesian
 #
@@ -186,8 +194,10 @@ pandaseqAlgorithm simple_bayesian
 #=        title: pandaseq threads
 #=        description: Set number of threads to be used from pandaseq. PANDAseq is a I/O bound algorithm. That means that it needs severous time in order to handle the ipnut and output files. while the process is quite fast. However, it does support multithreading and here you can set the number of threads it is going to use.
 #=        type: integer
-#=        required: Yes
-#=        validation: pandaseqThreads > 0
+#=        required: True
+#=        validation:
+#=          - range:
+#=            min: 0
 #
 pandaseqThreads 20
 #
@@ -196,11 +206,10 @@ pandaseqThreads 20
 #=        title: pandaseq minimum length
 #=        description: Sets the minimum length for a sequence, after primers are removed. By default, all sequences are kept. With this option, sequences shorter than desired can be discarded. In case you need to use this parameter, be sure you leave a tab after 'minlen' and set it like this: '-l 80'. If you do not want to use this parameter, make sure there is nothing after 'minlen'.
 #=        type: integer
-#=        required: Yes
+#=        required: True
 #=        validation: 
-#=          - prefix: '-l '
-#=          - suffix: pandaseqMinlen > 0 
-#=        suggested-value: -l 100
+#=          - range: 
+#=            min: 0 
 #
 pandaseqMinlen 
 #
@@ -209,9 +218,10 @@ pandaseqMinlen
 #=        title: pandaseq minimum overlap
 #=        description: Sets the minimum overlap between forward and reverse reads. Raising this number does not generally increase the quality of the output as alignments with small overlaps tend to score poorly and are discarded anyway.
 #=        type: integer
-#=        required: Yes
-#=        validation: minoverlap > 0
-#=        suggested-value: 
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0
 #
 minoverlap  1 
 #
@@ -220,9 +230,11 @@ minoverlap  1
 #=        title: threshold
 #=        description: Sets the score, that a sequence must meet to be kept in the output. Any alignments lower than this will be discarded as low quality. Increasing this number will not necessarily prevent uncalled bases (Ns) from appearing in the final sequence. It is also used as the threshold to match primers, if primers are supplied.
 #=        type: float
-#=        required: Yes
-#=        validation: 0.0 < threshold < 1.0
-#=        suggested-value: threshold > 0.8
+#=        required: True
+#=        validation:
+#=            - range: 
+#=              min:  0.0
+#=              max: 1.0
 #
 threshold  0.6 
 #
@@ -230,9 +242,11 @@ threshold  0.6
 #=    param: elimination
 #=        title: elimination
 #=        description: The '-N' parameter eliminates all sequences with uncalled nucleotides in the output. Otherwise, during assembly, uncalled bases (Ns) from unpaired regions may be emitted. If you need -N to be on your analysis, please add '-N' after 'elimination'. Please make sure you leave a tab. If you do not want the parameter to be on, please make sure there is nothing after the 'elimination' parameter.
-#=        type: integer
-#=        required: Yes
-#=        validation: ['', '-N']
+#=        type: string
+#=        required: True
+#=        validation: 
+#=          - value: ''
+#=          - value: -N
 #
 elimination  
 #
@@ -244,8 +258,10 @@ elimination
 #=        title: clustering algorithm
 #=        description: For OTU clustering PEMA invokes the vsearch algorithm while for ASVs inference the Swarm. Select which way to go.  
 #=        type: string
-#=        required: Yes
-#=        validation: ['algo_Swarm', 'algo_vsearch']
+#=        required: True
+#=        validation:
+#=          - value: algo_Swarm
+#=          - value: algo_vsearch
 #
 clusteringAlgo	algo_Swarm
 #
@@ -257,8 +273,10 @@ clusteringAlgo	algo_Swarm
 #=        title: vsearch threads
 #=        description: Set the number of threads PANDAseq to use.
 #=        type: integer
-#=        required: Yes
-#=        validation: vsearchThreads > 0
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0
 #
 vsearchThreads	8
 #
@@ -267,9 +285,11 @@ vsearchThreads	8
 #=        title: vsearch threads
 #=        description: Set a score about the clustering step of the VSEARCH algorithm. Do not add a read into a certain cluster if the pairwise identity with its centroid, is lower than the value of the 'vsearchId' parameter. The pairwise identity is defined as the number of (matching columns) / (alignment length - terminal gaps).
 #=        type: float
-#=        required: Yes
-#=        validation: 0.0 < vsearchId < 1.0
-#=        suggested-value: vsearchId > 0.90
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0.0
+#=            max: 1.0
 #
 vsearchId	0.95
 #
@@ -282,13 +302,10 @@ vsearchId	0.95
 #=        title: d
 #=        description: Maximum number of differences allowed between two amplicons, meaning that two amplicons will be grouped if they hav e integer (or less) differences.
 #=        type: integer
-#=        required: Yes
-#=        validation: d > 0 
-#=        suggested-value:
-#=          - gene: gene_COI
-#=            value: 10 < d < 25
-#=          - gene: gene_16S
-#=            value: d < 8
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0 
 #
 d	12
 #
@@ -297,8 +314,10 @@ d	12
 #=        title: boundary
 #=        description: By default, an ASV with a mass of 3 or more is considered large. Conversely, an ASV is small if it has a mass of less than 3, meaning that it is composed of either one amplicon of abundance 2, or two amplicons of abundance 1. Any positive value greater than 1 can be specified. Using higher boundary values will speed up the second pass, but also reduce the taxonomical resolution of swarm results.
 #=        type: integer
-#=        required: Yes
-#=        validation: boundary > 0
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0
 #
 boundary	
 #
@@ -307,8 +326,11 @@ boundary
 #=        title: boundary
 #=        description: The number of threads (CPUs) the Swarm algorithm is allowed to use
 #=        type: integer
-#=        required: Yes
-#=        validation: swarmThreads > 0
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 1
+
 #
 swarmThreads	
 #
@@ -317,8 +339,10 @@ swarmThreads
 #=        title: boundary
 #=        description:  Remove the singletons (ASVs that appear only once with abundance equal to 1) ?
 #=        type: boolean
-#=        required: Yes
-#=        validation: ['Yes', 'No']
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
 #
 removeSingletons	Yes
 #
@@ -331,22 +355,19 @@ removeSingletons	Yes
 #=        title: classifier algorithm
 #=        description:  Select classifier for the taxonomy assignment step. If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
 #=        type: string
-#=        required: Yes
+#=        required: True
 #=        validation:
-#=          - custom_ref_db: No
-#=            - gene: ['COI', '12S'] 
-#=              value: RDPClassifier  
-#=            - gene: [ '16S', '18S', 'ITS'] 
-#=              value: CREST
+#=          - value: RDPClassifier
+#=          - value: CREST
 #
 classifierAlgo  CREST	
 #
 #
 #=    param: taxonomyFolderName
 #=        title: number of cores for PaPaRa
-#=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail.
+#=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail. Parameter required if gene: ['16S', '18S', 'ITS'].
 #=        type: string
-#=        required: Yes | gene: ['16S', '18S', 'ITS']
+#=        required: True 
 #
 taxonomyFolderName	my_taxon_assign
 #
@@ -356,36 +377,39 @@ taxonomyFolderName	my_taxon_assign
 #
 #=    param: taxonomyAssignmentMethod
 #=        title: vsearch threads
-#=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used.  
+#=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used. Parameter required only if gene: gene_16S.
 #=        type: string
-#=        required: Yes | gene: gene_16S
-#=        validation: ['alignment', 'phylogeny']
+#=        required: True
+#=        validation: 
+#=          - value: alignment
+#=          - value: phylogeny
 #
 taxonomyAssignmentMethod	alignment
 #
 #
 #=    param: numberOfCoresForPapara
 #=        title: number of cores for PaPaRa
-#=        description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use.
+#=        description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use. The parameeter is required if axonomyAssignmentMethod: phylogeny and gene: gene_16S
 #=        type: integer
-#=        required: Yes | taxonomyAssignmentMethod: phylogeny && gene: gene_16S
-#=        validation: numberOfCoresForPapara > 0
+#=        required: True 
+#=        validation:
+#=          - range:
+#=            min: 0
 #
 numberOfCoresForPapara	7
 #
 #
 #=    param: referenceDb
 #=        title: reference database 
-#=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_132' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'.
+#=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_132' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. The parameter is required if custom_ref_db: No and gene: [gene_16S, 'gene_18S', 'gene_COI']
 #=        type: string
-#=        required: Yes | custom_ref_db: No && gene: [gene_16S, 'gene_18S', 'gene_COI']
+#=        required: True
 #=        validation: 
-#=          - gene: gene_16S
-#=              value: ['silva_128', 'silva_132']
-#=            - gene: gene_18S
-#=             value: ['silva_128', 'silva_132', 'pr2']
-#=            - gene: gene_COI
-#=              value: ['midori_1', midori_2]
+#=          - value: silva_128
+#=          - value: silva_132
+#=          - value: pr2
+#=          - value: midori_1
+#=          - value: midori_2
 #
 referenceDb	silva_132
 #
@@ -395,18 +419,18 @@ referenceDb	silva_132
 #
 #=    param: forwardITSPrimer
 #=        title: forward ITS primer
-#=        description: Provide the forward primer used (only in case of ITS) 
+#=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
-#=        required: Yes | gene: gene_ITS
+#=        required: True 
 #
 forwardITSPrimer	GATGAAGAACGYAGYRAA
 #
 #
 #=    param: reverseITSPrimer
 #=        title: reverse ITS primer
-#=        description: Provide the reverse primer used (only in case of ITS) 
+#=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
-#=        required: Yes | gene: gene_ITS
+#=        required: True 
 #
 reverseITSPrimer	CTBTTVCCKCTTCACTCG
 #
@@ -415,10 +439,12 @@ reverseITSPrimer	CTBTTVCCKCTTCACTCG
 #
 #=    param: abskew
 #=        title: abskew
-#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most.
+#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: gene_COI
 #=        type: integer
-#=        required: Yes | gene: gene_COI
-#=        validation: abskew > 0
+#=        required: True
+#=        validation:
+#=          - range:
+#=            min: 0
 #
 abskew	2
 #
@@ -430,20 +456,21 @@ abskew	2
 #=        title: custom reference database
 #=        description: Use a custom reference database for the taxonomy assignment step. In this case, extra input files are required depending on the classifier the user selected. To see more on how these files should be in case of the RDPClassifier, follow this link: https://hariszaf.github.io/pema_documentation/training_rdpclassifier/. In case that the CREST classifier is be used, follow this link: https://hariszaf.github.io/pema_documentation/training_crest_classifier/. Remember that as containers are lost when exit from one, you will have to train the classifier, every time you run a new PEMA container If you are about to use a custom ref db, set the following parameter as 'Yes'. Otherwise, it must be set as 'No'. The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
 #=        type: boolean
-#=        required: Yes
-#=        validation: ['Yes', 'No']
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
 #
 custom_ref_db	No
 #
 #
 #=    param: name_of_custom_db
 #=        title: name of custom database
-#=        description: Name of how custom reference database will be named 
+#=        description: Name of how custom reference database will be named. Parameter required only if custom_ref_db: Yes
 #=        type: string
-#=        required: Yes | custom_ref_db: Yes
-#=        validaiton: ['Yes', 'No']
+#=        required: True
 #
-name_of_custom_db	partialCustomdb
+name_of_custom_db	
 #
 #
 #   --------------------------     PHYLOSEQ - SPECIFIC     --------------------------
@@ -452,48 +479,58 @@ name_of_custom_db	partialCustomdb
 #=        title: phyloseq
 #=        description: To use Phyloseq set the following  parameter 'phyloseq' with 'Yes'. Please remember that in order to use phyloseq a "metadata.csv" file is necessary to be part of your anaylis folder. 
 #=        type: boolean
-#=        required: Yes
-#=        validaiton: ['Yes', 'No']
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
 #
 phyloseq	Yes
 #
 #
 #=    param: tree
 #=        title: tree
-#=        description: The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees. Do you want to create such a tree with your OTUs? In case you build this once, you can use it as many times as you want.
+#=        description: The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees. Do you want to create such a tree with your OTUs? In case you build this once, you can use it as many times as you want. Parameter required if phyloseq: Yes.
 #=        type: boolean
-#=        required: Yes | phyloseq: Yes
-#=        validaiton: ['Yes', 'No']
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
 #
 tree	No
 #
 #
 #=    param: raxmlThreads
 #=        title: raxml threads
-#=        description: Set the number of threads raxml is allowed to use
+#=        description: Set the number of threads raxml is allowed to use. Paameter required if phyloseq: Yes and tree: Yes.
 #=        type: integer
-#=        required: Yes | phyloseq: Yes && tree: Yes
-#=        validation: raxmlThreads > 0 
+#=        required: True 
+#=        validation:
+#=          - range: 
+#=              min: 0  
 #
 raxmlThreads	5
 #
 #
 #=    param: parsTrees
 #=        title: parsimony trees
-#=        description: Number of parsimony trees raxml-ng will go for
+#=        description: Number of parsimony trees raxml-ng will go for. Parameter required if phyloseq: Yes and tree: Yes
 #=        type: integer
-#=        required: Yes | phyloseq: Yes && tree: Yes
-#=        validation: parsTrees > 0 
+#=        required: True
+#=        validation: 
+#=          - range: 
+#=              min: 0 
 #
 parsTrees	5
 #
 #
 #=    param: bootstrapTrees
 #=        title: bootstrap trees
-#=        description: Number of bootstrap trees raxml-ng will go for
+#=        description: Number of bootstrap trees raxml-ng will go for. Parameter required if phyloseq: Yes and tree: Yes
 #=        type: integer
-#=        required: Yes | phyloseq: Yes && tree: Yes
-#=        validation: bootstrapTrees > 0 
+#=        required: True 
+#=        validation:
+#=          - range: 
+#=              min: 0 
 #
 bootstrapTrees	5
 #
@@ -505,8 +542,10 @@ bootstrapTrees	5
 #=        title: empty raw data files 
 #=        description: Move raw data to a new folder
 #=        type: boolean
-#=        required: Yes
-#=        validation: ['Yes', 'No']
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
 #
 emptyRawDataFile	Yes
 #
@@ -515,8 +554,10 @@ emptyRawDataFile	Yes
 #=        title: empty check points
 #=        description: Move all check points returned in a separate folder
 #=        type: boolean
-#=        required: Yes
-#=        validation: ['Yes', 'No']
+#=        required: True
+#=        validation: 
+#=          - value: Yes
+#=          - value: No
 #
 emptyCheckpoints	Yes
 #
@@ -525,8 +566,10 @@ emptyCheckpoints	Yes
 #=        title: get NCBI Taxonomy Id
 #=        description: Link the OTU/ASV taxonomy assignment to its closest NCBI Taxonomy Id, meaning if there is no NCBI Taxonomy id at the species level, PEMA will search for the one of the genus and so on. 
 #=        type: boolean
-#=        required: Yes
-#=        validation: ['Yes', 'No']
+#=        required: True
+#=        validation: 
+#=          - value: Yes
+#=          - value: No
 #
 getNCBITaxId	Yes
 #
