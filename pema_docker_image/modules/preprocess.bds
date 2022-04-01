@@ -331,9 +331,15 @@ string merging(string{} params, string{} globalVars){
         wait
 
         # Execute pandaseq algorithm for merging 
-        task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
-            -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
-            -t $params{'threshold'} -l $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq
+        if ( params{'pandaseqMinlen'} !=  '' ) {
+            task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
+                -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
+                -t $params{'threshold'} -l $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq
+        } else {
+            task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
+                -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
+                -t $params{'threshold'} $params{'elimination'}  > $correctFile.merged.fastq
+        }
 
         wait
 
