@@ -205,7 +205,7 @@ pandaseqThreads 20
 #
 #=     pandaseqMinlen:
 #=        title: pandaseq minimum length
-#=        description: "Sets the minimum length for a sequence, after primers are removed. By default, all sequences are kept. With this option, sequences shorter than desired can be discarded. In case you need to use this parameter, be sure you leave a tab after 'minlen' and set it like this: '-l 80'. If you do not want to use this parameter, make sure there is nothing after 'minlen'."
+#=        description: "Sets the minimum length for a sequence, after primers are removed. Sequences shorter than desired will be discarded. By default, all sequences are kept. To do so, you may leave this parameter empty."
 #=        type: integer
 #=        required: True
 #=        validation: 
