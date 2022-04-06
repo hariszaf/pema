@@ -57,6 +57,28 @@ string crestAssign(string{} params, string{} globalVars) {
                -t allTab_$params{'taxonomyFolderName'}.tsv \
                -o $params{'taxonomyFolderName'} mysilvamod132_$params{'taxonomyFolderName'}.xml
             
+            wait
+         
+         # and Silva 138
+         } else if ( params{'referenceDb'} == 'silva_138' ) {
+               
+            task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
+               -task megablast \
+               -query all_sequences_grouped.fa \
+               -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silva138/silva138 \
+               -num_alignments 100 \
+               -outfmt 5 \
+               -out mysilvamod138_$params{'taxonomyFolderName'}.xml \
+               -num_threads $params{'vsearchThreads'}
+            
+            wait
+            
+            task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
+               -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
+               -d silva138 \
+               -t allTab_$params{'taxonomyFolderName'}.tsv \
+               -o $params{'taxonomyFolderName'} mysilvamod138_$params{'taxonomyFolderName'}.xml
+            
             wait      
          
          } else if ( params{'referenceDb'} == 'pr2' ) {
