@@ -8,7 +8,7 @@
 #=        validation:
 #=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
 #
-gene	gene_ITS
+gene	gene_COI
 #
 #
 #=     outputFolderName:
@@ -360,7 +360,7 @@ removeSingletons	Yes
 #=          - value: RDPClassifier
 #=          - value: CREST
 #
-classifierAlgo	CREST	
+classifierAlgo	RDPClassifier	
 #
 #
 #=     taxonomyFolderName:
@@ -411,7 +411,7 @@ numberOfCoresForPapara	7
 #=          - value: midori_1
 #=          - value: midori_2
 #
-referenceDb	silva_138
+referenceDb	midori_1
 #
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
@@ -484,7 +484,7 @@ name_of_custom_db
 #=          - value: Yes
 #=          - value: No
 #
-phyloseq	Yes
+phyloseq	No
 #
 #
 #=     tree:

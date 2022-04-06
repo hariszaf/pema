@@ -581,7 +581,7 @@ getNCBITaxId	Yes
 # The following are not to be set by the user but describe each PEMA version
 #= about:  
 #=     description: 'Configuration file for PEMA :version:. We encourage users to study the manual of each tool and tune these parameters according to their specific experiments'
-#=     version: v.2.1.4
+#=     version: v.2.1.5
 #=     tools: https://github.com/hariszaf/pema/blob/master/help_files/encapsulated_software.md
 #=     databases: https://github.com/hariszaf/pema/blob/master/help_files/encapsulated_software.md
 #=     author: Haris Zafeiropoulos <haris-zaf@hcmr.gr>

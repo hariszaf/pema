@@ -8,7 +8,7 @@
 #=        validation:
 #=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
 #
-gene	gene_ITS
+gene	gene_18S
 #
 #
 #=     outputFolderName:
@@ -17,7 +17,7 @@ gene	gene_ITS
 #=        type: string
 #=        required: True
 #
-outputFolderName	swarm_v.2.1.5
+outputFolderName	18S_swarm_v_2.1.5
 #
 #
 #=     EnaData:
@@ -263,7 +263,7 @@ elimination
 #=          - value: algo_Swarm
 #=          - value: algo_vsearch
 #
-clusteringAlgo	algo_Swarm
+clusteringAlgo	algo_vsearch
 #
 #
 #   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
@@ -332,7 +332,7 @@ boundary
 #=            min: 1
 
 #
-swarmThreads	5
+swarmThreads	
 #
 #
 #=     removeSingletons:
@@ -411,7 +411,7 @@ numberOfCoresForPapara	7
 #=          - value: midori_1
 #=          - value: midori_2
 #
-referenceDb	silva_138
+referenceDb	pr2
 #
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
