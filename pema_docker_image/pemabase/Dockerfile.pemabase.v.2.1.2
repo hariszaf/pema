@@ -1,0 +1,35 @@
+# PEMA: a flexible Pipeline for Environmental DNA Metabarcoding Analysis 
+# of the 16S/18S ribosomal RNA, ITS, and COI marker genes. GigaScience. 2020 Mar;9(3):giaa022.
+# 
+# Aim:   Build the base of the PEMA environment 
+#        This base image will be used for the FROM statement  
+#        when building the actual PEMA docker image
+# 
+# Usage: docker build -t hariszaf/pemabase:<tag> -f Dockerfile.pemabase.v.2.1.2 .
+
+FROM hariszaf/pemabase:v.2.1.1   
+
+LABEL maintainer = "Haris Zafeiropoulos" 
+LABEL contact    = "haris-zaf@hcmr.gr"
+LABEL build_date = "2021-04-06"
+LABEL version    = "v.2.1.2"
+
+# Add Silva 138 version
+WORKDIR /home/tools/CREST/LCAClassifier/parts/flatdb
+# COPY silva138.tar.gz .
+RUN wget https://zenodo.org/record/6419029/files/silva138.tar.gz
+RUN tar -zxvf silva138.tar.gz && \
+    rm silva138.tar.gz  &&\
+    mv silva_138 silva138 &&\
+    echo "silva138 = /home/tools/CREST/LCAClassifier/parts/flatdb/silva138" >>/home/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf
+
+# Rename PR2 db files
+WORKDIR /home/tools/CREST/LCAClassifier/parts/flatdb/
+RUN rm -r PR2_DB
+# COPY pr2.tar.gz .
+RUN wget https://zenodo.org/record/6419029/files/pr2_for_pema.tar.gz
+RUN tar -zxvf pr2_for_pema.tar.gz && \
+    rm pr2_for_pema.tar.gz && \
+    mv pr2_for_pema/pr2 . &&\
+    rmdir pr2_for_pema
+
