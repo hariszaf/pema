@@ -1,0 +1,12 @@
+#   -----------------         PEMA OUTPUT FILES DESCRIPTION      -----------------
+#
+#= output_files:
+#=     mapping_files_for_PEMA.tsv:
+#=        filename: mapping_files_for_PEMA.tsv
+#=        description: A 2-column file with the actual file names as provided by the user in the first column and the names of their corresponding mapped files with the ENA format. This file is built only when the `EnaData` parameter is set as `Yes`.
+#=        type: File
+#=        required: False
+#=        validation:
+#=          - regex: //
+#
+#
