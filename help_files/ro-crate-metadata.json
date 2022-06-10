@@ -1,0 +1,97 @@
+{
+    "@context": "https://w3id.org/ro/crate/1.1/context",
+
+    "@graph": [
+        {
+            "@id": "./",
+            "@type": "ComputationalWorkflow",
+            "datePublished": , 
+            "hasPart": [
+                {
+                    "@id": "mydata"
+                },
+                {
+                    "@id": "parameters.tsv"
+                },
+                {   
+                    "@id": "<outputFolderName>"
+                },
+                {
+                    "@id": "mapping_files_for_PEMA.tsv"
+                }, 
+                {
+                    "@id": "initial_data"  // if EnaData is set to No
+                } 
+            ]
+        },
+        {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {
+                "@id": "./"
+            },
+            "conformsTo": {
+                "@id": "localhost:8080"
+            }
+        },
+        {
+            "@id": "mydata",
+            "@type": "Dataset",
+            "hasPart": [
+                {
+                    "@id": "*_fastq.gz"
+                }, // similarly for all input files
+            ]
+        }
+
+    {
+        "@id": "<outputFolderName>",
+        "@type": "Folder",
+        "@hasPart":[
+            {
+                "@id": "1.qualityControl"
+            }, 
+            {
+                "@id": "2.trimmingSequences"
+            },
+            {
+                "@id": "3.adjustingSequnces"
+            },
+            {
+                "@id": "4.mergingPairedEndFiles"
+            },
+            {
+                "@id": "5.dereplicateSamples"
+            },
+            {
+                "@id": "6.linearizedSequences"
+            },
+            {
+                "@id": "7.mainOutput"
+            }, 
+            {
+                "@id": "final_all_samples.fasta"
+            },
+            {
+                "@id": "parameters0f.<outputFolderName>.tsv"
+            }
+        //   8.outputPerSample  checkpoints_for_18S_Jan_2022_v97_pr2_16042022  
+        ]
+    }
+    
+
+
+
+
+    {
+        "@id": "parameters.tsv",
+        "@type": "File"
+    },
+    {
+        "@id": "mapping_files_for_PEMA.tsv",
+        "@type": "File"
+    } // if EnaData is set to No
+    ]
+}
+
+
