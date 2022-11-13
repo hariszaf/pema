@@ -9,19 +9,19 @@
             "datePublished": "<fill with date>" , 
             "hasPart": [
                 {
-                    "@id": "mydata/"
+                    "@id": "./mydata/"
                 },
                 {
-                    "@id": "initial_data/"
+                    "@id": "./initial_data/"
                 }, // if EnaData is set to No
                 {
-                    "@id": "parameters.tsv"
+                    "@id": "./parameters.tsv"
                 },
                 {
-                    "@id": "mapping_files_for_PEMA.tsv"
+                    "@id": "./mapping_files_for_PEMA.tsv"
                 }, 
                 {   
-                    "@id": "<outputFolderName>/"
+                    "@id": "./<outputFolderName>/"
                 }
             ]
         },
@@ -36,39 +36,39 @@
             }
         },
         {
-            "@id": "mydata/",
+            "@id": "./mydata/",
             "@type": "Dataset",
             "hasPart": [
                 {
-                    "@id": "_1_fastq.gz"
+                    "@id": "./mydata/_1_fastq.gz"
                 }, 
                 {
-                    "@id": "_2_fastq.gz"
+                    "@id": "./mydata/_2_fastq.gz"
                 }// similarly for all input files
             ]
         },
         {
-            "@id": "_1_fastq.gz",
+            "@id": "./mydata/_1_fastq.gz",
             "$type": "File"
         },
         {
-            "@id": "_2_fastq.gz",
+            "@id": "./mydata/_2_fastq.gz",
             "$type": "File"
         },
         {
-            "@id": "parameters.tsv",
+            "@id": "./parameters.tsv",
             "@type": "File"
         },
         {
-            "@id": "mapping_files_for_PEMA.tsv",
+            "@id": "./mapping_files_for_PEMA.tsv",
             "@type": "File"
         }, // if EnaData is set to No
         {
-        "@id": "<outputFolderName>",
+        "@id": "./<outputFolderName>/",
         "@type": "Folder",
         "@hasPart":[
             {
-                "@id": "1.qualityControl/"
+                "@id": "./<outputFolderName>/1.qualityControl/"
             }, 
             {
                 "@id": "2.trimmingSequences/"

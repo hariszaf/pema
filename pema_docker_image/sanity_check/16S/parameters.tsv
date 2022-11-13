@@ -17,7 +17,7 @@ gene	gene_16S
 #=        type: string
 #=        required: True
 #
-outputFolderName	vsearch_pema_v.2.1.5
+outputFolderName	vsearch_pema_v.2.1.5-oligotons
 #
 #
 #=     EnaData:
@@ -86,7 +86,7 @@ strictness	0.8
 #=        type: string
 #=        required: True
 #
-adapters	TruSeq2-PE.fa
+adapters	adapters_combined_152_unique.fasta
 #
 #
 #=     seedMismatches:
@@ -294,6 +294,27 @@ vsearchThreads	8
 vsearchId	0.95
 #
 #
+#=     removeOligotons:
+#=        title: removeOligotons
+#=        description:  Remove the oligotons (OTUs that appear with an abuncance less that numOligotons) ?
+#=        type: boolean
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
+#
+removeOligotons	Yes
+#
+#=     numOligotons:
+#=        title: numOligotons
+#=        description:  The minimum number of reads that have been clustered under the same OTUs in order not to skip that OTU
+#=        type: integer
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 1
+#
+numOligotons	5
 #
 #   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
 #
@@ -323,7 +344,7 @@ boundary
 #
 #
 #=     swarmThreads:
-#=        title: boundary
+#=        title: swarmThreads
 #=        description: The number of threads (CPUs) the Swarm algorithm is allowed to use
 #=        type: integer
 #=        required: True
@@ -336,7 +357,7 @@ swarmThreads
 #
 #
 #=     removeSingletons:
-#=        title: boundary
+#=        title: removeSingletons
 #=        description:  Remove the singletons (ASVs that appear only once with abundance equal to 1) ?
 #=        type: boolean
 #=        required: True
@@ -571,7 +592,7 @@ emptyCheckpoints	Yes
 #=          - value: Yes
 #=          - value: No
 #
-getNCBITaxId	Yes
+getNCBITaxId	No
 #
 #
 #

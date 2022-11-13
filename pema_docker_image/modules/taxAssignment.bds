@@ -5,7 +5,6 @@ string crestAssign(string{} params, string{} globalVars) {
 
    if ( params{'custom_ref_db'} != 'Yes') {
 
-
       if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
 
          globalVars{'assignmentPath'}.chdir()
@@ -15,7 +14,6 @@ string crestAssign(string{} params, string{} globalVars) {
             sys mv $params{'taxonomyFolderName'} old.$previousRandomNumber.$params{'taxonomyFolderName'}
          }
 
-      
          if ( params{'referenceDb'} == 'silva_128' ) { 
 
             # First use megablast algorithm of blastn for sequence identification, intra-species comparison                   
@@ -78,9 +76,9 @@ string crestAssign(string{} params, string{} globalVars) {
                -d silva138 \
                -t allTab_$params{'taxonomyFolderName'}.tsv \
                -o $params{'taxonomyFolderName'} mysilvamod138_$params{'taxonomyFolderName'}.xml
-            
-            wait      
-         
+
+            wait
+
          } else if ( params{'referenceDb'} == 'pr2' ) {
 
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
@@ -110,7 +108,6 @@ string crestAssign(string{} params, string{} globalVars) {
             sys sed -i 's/classification/Classification/g' $params{'taxonomyFolderName'}/finalTable.tsv
          }
          wait
-
 
       } else if (params{'gene'}  == 'gene_ITS') {
 
@@ -233,7 +230,6 @@ string rdpAssign(string{} params, string{} globalVars) {
    println('RDPClassifier is about to start assigning your grouped sequences.')
 
    globalVars{'assignmentPath'}.chdir()
-
 
    if ( params{'custom_ref_db'} != 'Yes' ) {
 
