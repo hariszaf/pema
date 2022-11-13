@@ -151,6 +151,17 @@ string{} initializeAnalysis(string{} params) {
    # Keep the classifer as a global var so you can change it if needed
    globalVars{'classifierAlgo'} = params{'classifierAlgo'}
 
+
+   # Keep the adapters file to be used from Trimmomatic as a global var
+   if ( params{'adapters'} != 'TruSeq3-PE-2.fa' && params{'adapters'} != 'NexteraPE-PE.fa' && params{'adapters'} != 'TruSeq2-PE.fa' && params{'adapters'} != 'TruSeq3-PE.fa') {
+      globalVars{'adapterFile'} = globalVars{'parameterFilePath'} + '/' + params{'adapters'}
+   } else {
+      globalVars{'adapterFile'} = globalVars{'path'} + '/tools/Trimmomatic/Trimmomatic-0.38/adapters/' + params{'adapters'}
+   }
+
+
+
+
    return(globalVars)
 }
 

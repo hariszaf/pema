@@ -294,6 +294,28 @@ vsearchThreads	8
 vsearchId	0.95
 #
 #
+#=     removeOligotons:
+#=        title: removeOligotons
+#=        description:  Remove the oligotons (OTUs that appear with an abuncance less that numOligotons) ?
+#=        type: boolean
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
+#
+removeOligotons	Yes
+#
+#=     numOligotons:
+#=        title: numOligotons
+#=        description:  The minimum number of reads that have been clustered under the same OTUs in order not to skip that OTU
+#=        type: integer
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 1
+#
+numOligotons	5
+#
 #
 #   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
 #

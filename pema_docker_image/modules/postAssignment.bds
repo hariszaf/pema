@@ -1,6 +1,5 @@
 #!/usr/bin/env bds
 
-
 string perSampleGeneral(string{} params, string{} globalVars) {
 
     globalVars{'bayesPath'}.chdir()
@@ -18,7 +17,7 @@ string perSampleGeneral(string{} params, string{} globalVars) {
     
     # we remove all .html files from our list
     for (string file : samples ) {
-        if ( file.endsWith(".html") ) {
+        if ( file.endsWith(".zip")  == false) {
             samples.remove(file)
         }
     }
@@ -36,18 +35,13 @@ string perSampleGeneral(string{} params, string{} globalVars) {
 
         sampleNoZip   = sample.split('.zip')[0]
         unzipfq       = sample.split('_[0-9]_fastqc')[0]
-        readDirection = sample.split('_')[1]
-        # Remove print statements if working right
-        println("here is readDirection from sample")
-        println(sample)
-        println(readDirection)
-       
+        readDirection = sample.split('_')[1]       
         wait
         
         # we copy two significant output files of FastQC to the sample's output folder
         task{
-            # sys cp $globalVars{'fastqcPath'}/$sampleNoZip/Images/per_base_quality.png  $globalVars{'outputPerSamplePath'}/$unzipfq
             sys cp $globalVars{'fastqcPath'}/$sampleNoZip/summary.txt $globalVars{'fastqcPath'}/$sampleNoZip/summary_$readDirection.txt
+
             sys mv $globalVars{'fastqcPath'}/$sampleNoZip/summary_$readDirection.txt $globalVars{'outputPerSamplePath'}/$unzipfq
         }
         wait
@@ -57,8 +51,6 @@ string perSampleGeneral(string{} params, string{} globalVars) {
 
     return 'ok'
 }
-
-
 
 # Function to build the per sample profiles in case of CREST
 string CrestPerSample(string{} params, string{} globalVars) {
@@ -110,10 +102,6 @@ string CrestPerSample(string{} params, string{} globalVars) {
     return 'ok'
 }
 
-
-
-
-
 ## Function to build the per sample profiles in case of RDPClassifier
 string RDPClassifierPerSample(string{} params, string{} globalVars) {
 
@@ -137,10 +125,6 @@ string RDPClassifierPerSample(string{} params, string{} globalVars) {
     return 'ok'
 }
 
-
-
-
-
 # Get NCBI Taxonomy Id for the taxonomies found in the finalTable.tsv file
 string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
 
@@ -151,7 +135,6 @@ string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
         finalPath.chdir()
 
     } else {
-
         globalVars{'assignmentPath'}.chdir()
     }
     
@@ -162,5 +145,3 @@ string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
     return 'ok'
 
 }
-
-
