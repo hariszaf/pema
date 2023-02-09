@@ -73,7 +73,7 @@ string clusteringVsearch(string{} params, string{} globalVars) {
    wait
 
    if ( params{'removeOligotons'} == 'Yes' ){
-      sys python $globalVars{'path'}/scripts/removeSingletonsForVsearch.py all.otutab.txt all.otus.fasta $params{'numOligotons'}
+      sys python $globalVars{'path'}/scripts/removeOligotonsVsearch.py all.otutab.txt all.otus.fasta $params{'numOligotons'}
       sys cp no-singl-allTab.tsv  allTab_$params{'taxonomyFolderName'}.tsv
       sys cp no-singl-allSquences.fa  all_sequences_grouped.fa
 
@@ -132,12 +132,12 @@ string clusteringSwarm(string{} params, string{} globalVars) {
 
 
    ## Singletons may be removed or not
-   if ( params{'removeSingletons'} == 'Yes' ){
-
+   if ( params{'removeOligotons'} == 'Yes' ){
+      
       sys cp asvs_representatives_all_samples.fasta asvs_repr_with_singletons.fasta
-      sys sed '/\<size=[1,2]\>/,+1 d' asvs_representatives_all_samples.fasta > no_singletons.fasta
-      sys mv no_singletons.fasta asvs_representatives_all_samples.fasta
-      println('Singletons have been removed')     
+      sys python $globalVars{'path'}/scripts/removeOligotonsSwarm.py asvs_representatives_all_samples.fasta  $params{'numOligotons'}
+      sys mv no_oligotons.tsv asvs_representatives_all_samples.fasta
+      println('Oligotons have been removed')
    }   
 
    # Check if this is a second analysis to remove files not needed and make links to others 
