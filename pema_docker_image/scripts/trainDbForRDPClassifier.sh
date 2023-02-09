@@ -20,9 +20,9 @@ name_of_custom_db=${3}
 mkdir TRAIN/$name_of_custom_db
 
 # This step could take hours; for example for training the Midori2 database took more than 12hours.
-python /home/scripts/lineage2taxTrain.py $taxonomy_file > ready4train_taxonomy.txt 
+python2 /home/scripts/lineage2taxTrain.py $taxonomy_file > ready4train_taxonomy.txt 
 
-python /home/scripts/addFullLineage.py $taxonomy_file $sequence_file > ready4train_seqs.fasta
+python2 /home/scripts/addFullLineage.py $taxonomy_file $sequence_file > ready4train_seqs.fasta
 
 java -Xmx10g -jar /home/tools/RDPTools/classifier.jar train -o TRAIN/$name_of_custom_db/ -s ready4train_seqs.fasta -t ready4train_taxonomy.txt
 
