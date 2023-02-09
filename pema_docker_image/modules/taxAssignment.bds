@@ -5,6 +5,8 @@ string crestAssign(string{} params, string{} globalVars) {
 
    if ( params{'custom_ref_db'} != 'Yes') {
 
+      # CASE 1:
+      # 16S and 18S alignment-based taxonomy assignment
       if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
 
          globalVars{'assignmentPath'}.chdir()
@@ -14,9 +16,10 @@ string crestAssign(string{} params, string{} globalVars) {
             sys mv $params{'taxonomyFolderName'} old.$previousRandomNumber.$params{'taxonomyFolderName'}
          }
 
+         # Using Silva 128
          if ( params{'referenceDb'} == 'silva_128' ) { 
 
-            # First use megablast algorithm of blastn for sequence identification, intra-species comparison                   
+            # First use megablast algorithm of blastn for sequence identification, intra-species comparison
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
                -task megablast \
                -query all_sequences_grouped.fa \
@@ -25,19 +28,19 @@ string crestAssign(string{} params, string{} globalVars) {
                -outfmt 5 \
                -out mysilvamod128_$params{'taxonomyFolderName'}.xml \
                -num_threads $params{'vsearchThreads'}
-            
+
             wait
-            
+
             # And then use the classifier in order to get our assignment
             task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
                -t allTab_$params{'taxonomyFolderName'}.tsv \
                -o $params{'taxonomyFolderName'} mysilvamod128_$params{'taxonomyFolderName'}.xml
-            
+
             wait
-            
-         # Follow the same steps for the case of the Silva 132    
+
+         # Using Silva 132: follow the same steps like in the Silva 128 case
          } else if ( params{'referenceDb'} == 'silva_132' ) {
-               
+
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
                -task megablast \
                -query all_sequences_grouped.fa \
@@ -46,20 +49,20 @@ string crestAssign(string{} params, string{} globalVars) {
                -outfmt 5 \
                -out mysilvamod132_$params{'taxonomyFolderName'}.xml \
                -num_threads $params{'vsearchThreads'}
-            
+
             wait
-            
+
             task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
                -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
                -d silva132 \
                -t allTab_$params{'taxonomyFolderName'}.tsv \
                -o $params{'taxonomyFolderName'} mysilvamod132_$params{'taxonomyFolderName'}.xml
-            
+
             wait
-         
-         # and Silva 138
+
+         # Using Silva 138
          } else if ( params{'referenceDb'} == 'silva_138' ) {
-               
+
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
                -task megablast \
                -query all_sequences_grouped.fa \
@@ -68,9 +71,9 @@ string crestAssign(string{} params, string{} globalVars) {
                -outfmt 5 \
                -out mysilvamod138_$params{'taxonomyFolderName'}.xml \
                -num_threads $params{'vsearchThreads'}
-            
+
             wait
-            
+
             task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
                -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
                -d silva138 \
@@ -79,6 +82,7 @@ string crestAssign(string{} params, string{} globalVars) {
 
             wait
 
+         # Using PR2
          } else if ( params{'referenceDb'} == 'pr2' ) {
 
             task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
@@ -89,26 +93,21 @@ string crestAssign(string{} params, string{} globalVars) {
                -outfmt 5 \
                -out my_pr2_$params{'taxonomyFolderName'}.xml \
                -num_threads $params{'vsearchThreads'}
-            
+
             wait
-            
+
             task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
                -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
                -d pr2 \
                -t allTab_$params{'taxonomyFolderName'}.tsv \
                -o $params{'taxonomyFolderName'} my_pr2_$params{'taxonomyFolderName'}.xml
-            
-            wait      
+
+            wait
 
          }
 
-         # Task always the same for all previous cases
-         task {
-            sys mv $params{'taxonomyFolderName'}/allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/finalTable.tsv
-            sys sed -i 's/classification/Classification/g' $params{'taxonomyFolderName'}/finalTable.tsv
-         }
-         wait
-
+      # CASE 2:
+      # Alignment-based taxonomy assignmnet for the ITS marker gene
       } else if (params{'gene'}  == 'gene_ITS') {
 
          globalVars{'assignmentPath'}.chdir()
@@ -121,32 +120,49 @@ string crestAssign(string{} params, string{} globalVars) {
             -num_threads $params{'vsearchThreads'}
 
          wait
-            
+
          task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
             -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
             -d unite \
             -t allTab_$params{'taxonomyFolderName'}.tsv \
             -o $params{'taxonomyFolderName'} unite_$params{'taxonomyFolderName'}.xml
-         
-         wait
-         
-         task {
-            sys mv $params{'taxonomyFolderName'}/allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/finalTable.tsv
-            sys sed -i 's/classification/Classification/g' $params{'taxonomyFolderName'}/finalTable.tsv
-         }
-         wait
+
       } 
 
+   # CASE 3:
+   # Using the CREST algorithm with a custom reference database
    } else {
 
-      # # That is the case where a custom DB has been asked for the taxonomy step 
+      globalVars{'assignmentPath'}.chdir()
 
-      # task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'name_of_custom_db'}/rRNAClassifier.properties -o tax_assign_swarm_COI_temp.txt rdpClassifierInput.fasta
+      task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast \
+          -query all_sequences_grouped.fa \
+          -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/$params{'name_of_custom_db'}/$params{'name_of_custom_db'} \
+          -num_alignments 100 -outfmt 5 \
+          -out $params{'name_of_custom_db'}_$params{'taxonomyFolderName'}.xml \
+          -num_threads $params{'vsearchThreads'}
 
+      wait
+
+      task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
+        -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
+        -d $params{'name_of_custom_db'} \
+        -t allTab_$params{'taxonomyFolderName'}.tsv \
+        -o $params{'taxonomyFolderName'} $params{'name_of_custom_db'}_$params{'taxonomyFolderName'}.xml
+
+      wait
    }
 
-   return 'ok'
+   wait
 
+   task {
+      sys mv $params{'taxonomyFolderName'}/allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/finalTable.tsv
+      sys sed -i 's/classification/Classification/g' $params{'taxonomyFolderName'}/finalTable.tsv
+   }
+
+   wait
+
+   return 'ok'
 }
 
 # Function to get the phylogeny based taxonomy assignmnent in case of the 16S marker gene
