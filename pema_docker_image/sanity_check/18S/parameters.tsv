@@ -357,7 +357,11 @@ boundary
 swarmThreads	
 #
 #
+<<<<<<< HEAD
 #=     removeOligotons:
+=======
+#=     removeSingletons:
+>>>>>>> b2b7b5dcb146168bd5ee2a899d6a52bc03fdeda9
 #=        title: boundary
 #=        description:  Remove the singletons (ASVs that appear only once with abundance equal to 1) ?
 #=        type: boolean
@@ -366,7 +370,11 @@ swarmThreads
 #=          - value: Yes
 #=          - value: No
 #
+<<<<<<< HEAD
 removeOligotons	Yes
+=======
+removeSingletons	Yes
+>>>>>>> b2b7b5dcb146168bd5ee2a899d6a52bc03fdeda9
 #
 #
 #
