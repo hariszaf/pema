@@ -1,3 +1,5 @@
+
+
 #!/usr/bin/env bds
 
 # In order to get a phyloseq analysis, a phylogenetic tree for the OTUs found, needs to be made. 
@@ -130,7 +132,14 @@ string communityAnalysis(string{} params, string{} globalVars) {
       sys cp $globalVars{'outputPoint'}/phyloseq_in_PEMA.R .
       wait
       
-      sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $params{'gene'} $params{'referenceDb'}
+      #sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $params{'gene'} $params{'referenceDb'}
+
+      if ( params{'custom_ref_db'} != 'Yes' ) {
+         sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $params{'gene'} $params{'referenceDb'}
+      } else {
+         sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $params{'gene'} $params{'name_of_custom_db'}
+      }
+
 
       wait      
    }

@@ -4,7 +4,7 @@
 
 
 # PEMA: 
-## a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S rRNA, ITS and COI marker genes 
+### a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S rRNA, ITS and COI marker genes 
 *PEMA is reposited in* [*Docker Hub*](https://hub.docker.com/r/hariszaf/pema) *as well as in* [*Singularity Hub*](https://singularity-hub.org/collections/2295)
 
 #### PEMA website along with *how to* documentation can be found [**here**](https://hariszaf.github.io/pema_documentation/).
@@ -20,10 +20,18 @@ Table of Contents
 =================
 
    * [PEMA: biodiversity in all its different levels](#pema-biodiversity-in-all-its-different-levels)
-   * [ A container-based tool](#a-container-based-tool)
-   * [How to run PEMA](#how-to-run-pema)
-      * [Parameters' file](#parameters-file)
-   * [PEMA on HPC](#pema-on-hpc)
+   * [A container-based tool](#a-container-based-tool)
+   * [How to run PEMA](#get-set-go-pema)
+      * [Get](#get)
+      * [Set](#set)
+      * [Go](#go)
+   * [The Parameters' file](#parameters-file)
+   * [Downstream ecological analysis](#downstream-ecological-analysis)
+   * [Acknowledgments](#acknowledgments)
+   * [License](#license)
+   * [Citation](#citation)
+
+<!--   * [PEMA on HPC](#pema-on-hpc)
       * [Prerequisites](#prerequisites-1)
       * [Installing](#installing-1)
       * [Running PEMA](#running-pema-1)
@@ -33,16 +41,7 @@ Table of Contents
       * [Installing](#installing)
       * [Running PEMA](#running-pema)
          * [Step 1 - Build a Docker container](#step-1---build-a-docker-container)
-         * [Step 2 - Run PEMA](#step-2---run-pema)
-   * [phyloseq - for a downstream ecological analysis](#the-phyloseq-r-package)
-   * [Acknowledgments](#acknowledgments)
-   * [License](#license)
-   * [Citation](#citation)
-
-
-```diff
-+ You may have a look on pema's main website: http://pema.hcmr.gr/
-```
+         * [Step 2 - Run PEMA](#step-2---run-pema) -->
 
 
 <!-- ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=hariszaf&show_icons=true&theme=onedark) -->
@@ -105,8 +104,7 @@ PEMA runs either as a [**Docker**](https://www.docker.com/) or as a [**Singulari
 
 ### Get
 
-To get PEMA running you first need to make sure you either have  
-**[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )** , 
+To get PEMA running you first need to make sure you either have **[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )** , 
 or Docker on your computing environment. 
 
 In case you are working on Singularity, you may run the following command to get the PEMA Singularity image:
@@ -250,8 +248,7 @@ So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/mas
 
 
 
-## The "phyloseq" R package 
-**for a downstream ecological analysis of OTUs/ASVs retrieved**
+## Downstream ecological analysis
 
 PEMA performs all the basic functions of the "phyloseq" R package. In addition, it performs certain functions of the [***vegan***](https://cran.r-project.org/web/packages/vegan/index.html) R package. 
 

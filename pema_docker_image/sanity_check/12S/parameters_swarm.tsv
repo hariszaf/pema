@@ -310,7 +310,7 @@ swarmThreads	20
 ## SWARM tends to create a great numebr of ASVs, especially when d takes a low value. 
 ## Would you like to remove the singletons (ASVs that appear only once with abundance equal to 1) ?
 #
-removeSingletons	Yes
+removeOligotons	Yes
 #
 #
 # CROP is able to run on multiple CPUs. As PEMA needs to update an environmental variable to do thi$

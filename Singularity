@@ -2,7 +2,7 @@
 
 # Set base image
 Bootstrap: docker
-From: hariszaf/pema:v.2.1.4
+From: hariszaf/pema:v.2.1.5-beta
 
 # Set Singularity environment
 %post

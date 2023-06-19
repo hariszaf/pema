@@ -1,0 +1,75 @@
+#   -----------------         PEMA OUTPUT FILES DESCRIPTION      -----------------
+#
+#= pema_output:
+#=     mapping_files_for_PEMA.tsv:
+#=        name: mapping_files_for_PEMA.tsv
+#=        description: A 2-column file with the actual file names as provided by the user in the first column and the names of their corresponding mapped files with the ENA format. This file is built only when the `EnaData` parameter is set as `Yes`.
+#=        type: File
+#=        path: /<mount_dir>/
+#=        global: False
+#=        validation:
+#=          - regex: //
+#
+
+#=     outputFolderName:
+#=        name: outputFolderName
+#=        description: Main PEMA output folder including a copy of the parateres.tsv file used for the certain analysis and all output files PEMA returns based on this parameters set.  
+#=        type: Folder
+#=        path: /<mount_dir>/outputFolderName
+#=        global: True
+#=        validation:
+#=          - regex: //
+
+
+#=     1.qualityControl:
+#=        name: 1.qualityControl
+#=        description: Folder with the output of sequences quality control (using fastqc). In this folder, there is a .zip and a .html file as well as a folder for each of the read files provided by the user. 
+#=        type: Folder
+#=        path: /<mount_dir>/
+#=        global: True
+#=        validation:
+#=          - regex: //
+
+
+#=     rawFileName_fastqc:
+#=        name: outputFolderName
+#=        description: The rawFileName_fastqc.zip file unzipped. 
+#=        type: Folder
+#=        path: /<mount_dir>/outputFolderName/1.qualityControl/
+#=        global: True
+#=        validation:
+#=          - regex: //
+
+#=     rawFileName_fastqc.html:
+#=        name: outputFolderName
+#=        description: A self-contained HTML file document with all of the fastqc graphs embedded into it. 
+#=        type: File
+#=        path: /<mount_dir>/outputFolderName
+#=        global: True
+#=        validation:
+#=          - regex: //
+
+#=     rawFileName_fastqc.zip:
+#=        name: outputFolderName
+#=        description: A zip file (with the same name as the HTML file, but with .zip added to the end). This file contains the graphs from the report as separate files but also contains data files which are designed to be easily parsed to allow for a more detailed and automated evauation of the raw data on which the QC report is built.
+#=        type: File
+#=        path: /<mount_dir>/outputFolderName
+#=        global: True
+#=        validation:
+#=          - regex: //
+
+
+#=     rawFileName_fastqc.zip:
+#=        name: outputFolderName
+#=        description: 
+#=        type: File
+#=        path: /<mount_dir>/outputFolderName
+#=        global: True
+#=        validation:
+#=          - regex: //
+
+
+
+
+
+

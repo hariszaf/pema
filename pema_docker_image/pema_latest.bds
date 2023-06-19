@@ -16,7 +16,7 @@ include "modules/phyloseq"
 # Read parameters file for the first time! 
 string parameterFilePath = "/mnt/analysis/"
 parameterFilePath.chdir()
-string f = "parameters.tsv"                           
+string f = "parameters.tsv"
 string{} paramsFirstAssignment =  readParameterFile(f)
 
 
@@ -27,14 +27,14 @@ string{} globalVars = initializeAnalysis(paramsFirstAssignment)
 wait
 
 # IMPORTANT! Module to train classifiers is enabled through this statement
-if ( paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
-   
-   string{} initGlobalVars = globalVars
-   wait
-   string{} globalVars = trainClassifier(paramsFirstAssignment, initGlobalVars)
-   
-}
-wait
+#if ( paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
+#
+#   string{} initGlobalVars = globalVars
+#   wait
+#   string{} globalVars = trainClassifier(paramsFirstAssignment, initGlobalVars)
+#
+#}
+#wait
 
 ###############################################################
 #                   1. Quality Control                        #
@@ -349,8 +349,5 @@ if ( paramsForCA{'gene'} == 'gene_ITS' ) {
 println('----------------------------------------------------------')
 println('Pema has been completed successfully. Let biology start!')
 println('Thanks for using Pema.')
-
-
-   
 
 

@@ -1,5 +1,3 @@
-#!/usr/bin/python
-
 '''
 Aim:    This script is required when user asks for a custom db to be used
         along with the RDPClassifier. For more about this task, you may check

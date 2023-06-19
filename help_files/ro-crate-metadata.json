@@ -1,0 +1,277 @@
+// for a pema output example, you may have a look at:
+// 
+{
+    "@context": "https://w3id.org/ro/crate/1.1/context",
+    "@graph": [
+        {
+            "@id": "./",
+            "@type": "ComputationalWorkflow",
+            "datePublished": "<fill with date>" , 
+            "hasPart": [
+                {
+                    "@id": "./mydata/"
+                },
+                {
+                    "@id": "./initial_data/"
+                }, // if EnaData is set to No
+                {
+                    "@id": "./parameters.tsv"
+                },
+                {
+                    "@id": "./mapping_files_for_PEMA.tsv"
+                }, 
+                {   
+                    "@id": "./<outputFolderName>/"
+                }
+            ]
+        },
+        {
+            "@id": "ro-crate-metadata.json",
+            "@type": "CreativeWork",
+            "about": {
+                "@id": "./"
+            },
+            "conformsTo": {
+                "@id": "localhost:8080"
+            }
+        },
+        {
+            "@id": "./mydata/",
+            "@type": "Dataset",
+            "hasPart": [
+                {
+                    "@id": "./mydata/_1_fastq.gz"
+                }, 
+                {
+                    "@id": "./mydata/_2_fastq.gz"
+                }// similarly for all input files
+            ]
+        },
+        {
+            "@id": "./mydata/_1_fastq.gz",
+            "$type": "File"
+        },
+        {
+            "@id": "./mydata/_2_fastq.gz",
+            "$type": "File"
+        },
+        {
+            "@id": "./parameters.tsv",
+            "@type": "File"
+        },
+        {
+            "@id": "./mapping_files_for_PEMA.tsv",
+            "@type": "File"
+        }, // if EnaData is set to No
+        {
+        "@id": "./<outputFolderName>/",
+        "@type": "Folder",
+        "@hasPart":[
+            {
+                "@id": "./<outputFolderName>/1.qualityControl/"
+            }, 
+            {
+                "@id": "2.trimmingSequences/"
+            },
+            {
+                "@id": "3.adjustingSequnces/"
+            },
+            {
+                "@id": "4.mergingPairedEndFiles/"
+            },
+            {
+                "@id": "5.dereplicateSamples/"
+            },
+            {
+                "@id": "6.linearizedSequences/"
+            },
+            {
+                "@id": "7.mainOutput/"
+            }, 
+            {
+                "@id": "8.outputPerSample/"
+            },
+            {
+                "@id": "final_all_samples.fasta"
+            },
+            {
+                "@id": "parameters0f.<outputFolderName>.tsv"
+            },
+            {
+                "@id": "checkpoints_for_<outputFolderName>/" 
+            } // if emptyCheckpoints is Yes
+        ]
+    },
+    {
+        "@id": "1.qualityControl", 
+        "@type": "Folder",
+        "description": "",
+        "hasPart": [
+            {
+                "@id": "_1_fastq"
+            }, 
+            {
+                "@id": "_1_fastqc.zip"
+            },
+            {
+                "@id": "_1_fastqc.html"
+            }
+        ] // for every reads file we have such a triplet
+    }, 
+    {
+        "@id": "_1_fastqc.zip",
+        "@type": "File"
+    }, 
+    {
+        "@id": "_1_fastqc.html",
+        "@type": "File"
+    }, 
+    {
+        "@id": "_1_fastqc",
+        "@type": "Folder", 
+        "description": "",
+        "hasPart": [
+            {
+                "@id": "Icons/"
+            },
+            {
+                "@id": "Images/"
+            },
+            {
+                "@id": "fastqc_data.txt"
+            },
+            {
+                "@id": "fastqc_report.html"
+            },
+            {
+                "@id": "summary.txt"
+            }
+        ]
+    }, 
+    {
+        "@id": "Icons/",
+        "@type": "Folder",
+        "hasPart":[
+            {
+                "@id": "error.png"
+            },
+            {
+                "@id": "fastqc_icon.png"
+            },
+            {
+                "@id": "tick.png"
+            },
+            {
+                "@id": "warning.png"
+            }
+        ]
+    },
+    {
+        "@id": "error.png",
+        "@type": "File"
+    },
+    {
+        "@id": "fastqc_icon.png",
+        "@type": "File"
+    },
+    {
+        "@id": "tick.png",
+        "@type": "File"
+    },
+    {
+        "@id": "warning.png",
+        "@type": "File"
+    },
+    {
+        "@id": "Images/",
+        "@type": "Folder",
+        "hasPart":[
+            {
+                "@id": "adapter_content.png"
+            },
+            {
+                "@id": "per_base_quality.png"
+            },
+            {
+                "@id": "per_sequence_quality.png"
+            },
+            {
+                "@id": "duplication_levels.png"
+            },
+            {
+                "@id": "per_base_sequence_content.png"
+            },
+            {
+                "@id": "sequence_length_distribution.png"
+            },
+            {
+                "@id": "per_base_n_content.png"
+            },
+            {
+                "@id": "per_sequence_gc_content.png"
+            }
+        ]
+    },
+    {
+        "@id": "adapter_content.png",
+        "@type": "File"
+    },
+    {
+        "@id": "per_base_quality.png",
+        "@type": "File"
+    },
+    {
+        "@id": "per_sequence_quality.png",
+        "@type": "File"
+    },
+    {
+        "@id": "duplication_levels.png",
+        "@type": "File"
+    },
+    {
+        "@id": "per_base_sequence_content.png",
+        "@type": "File"
+    },
+    {
+        "@id": "sequence_length_distribution.png",
+        "@type": "File"
+    },
+    {
+        "@id": "per_base_n_content.png",
+        "@type": "File"
+    },
+    {
+        "@id": "per_sequence_gc_content.png",
+        "@type": "File"
+    },
+    // is this now right? fastqc_data.txt is a level up from the previous... 
+    {
+        "@id": "fastqc_data.txt",
+        "@type": "File"
+    },
+    {
+        "@id": "fastqc_report.html",
+        "@type": "File"
+    },
+    {
+        "@id": "summary.txt",
+        "@type": "File"
+    },
+    {
+        "@id": "2.trimmingSequences/",
+        "@type": "Folder",
+        "description": "",
+        "hasPart": [
+            {
+                "@id": "filtered_max_*.fastq.gz"
+            }
+        ]
+    },
+    {
+        "@id": "filtered_max_*.fastq.gz",
+        "@type": "File"
+    }
+    ]
+}
+
+

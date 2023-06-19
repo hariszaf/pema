@@ -10,7 +10,7 @@
 # Author: Haris Zafeiropoulos
 
 sed 's/[A-Z]*.*;size=[0-9]*//g ; s/superkingdom//g ; s/phylum//g ; s/class//g ; s/order//g ; s/family//g ; s/genus//g ; s/species//g' tax_assignments.tsv > almost
-sed 's/\t//g ; s/[0-9]\.[0-9]*/;/g ; s/.$// ; s/_[0-9]*/\t/g' almost > taxonomies.txt
+sed 's/\t//g ; s/[0-9]\.[0-9]*/;/g ; s/.$// ; s/_[0-9]*/\t/' almost > taxonomies.txt
 
 
 while read line; do awk -F "\t" '{print $2}' | \
@@ -29,6 +29,7 @@ rm tml tnl
 
 awk -F "\t" '{print "ASV_"$1 ":" $2}' asvs_contingency_table.tsv | sed -e 's/ASV_ASV/ASV_number/' > asvs
 
+sed -i 's/\(.*\)_/\1 /' taxonomies_sorted.txt
 
 paste -d "\t" asvs TMP taxonomies_sorted.txt > finalTable.tsv
 

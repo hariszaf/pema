@@ -94,11 +94,11 @@ string{} initializeAnalysis(string{} params) {
 
    # Check if an output folder called with the same name as the one given in the 'parameters' file, 
    # has already been created from previous runs
-   if ( params{'outputFolderName'}.isDir() ) {                                     
-      println 'This ouput file already exists' 
+   if ( params{'outputFolderName'}.isDir() ) {
+      println 'This ouput file already exists'
 
    } else {
-      
+
       # if it is not, create a file with its name
       params{'outputFolderName'}.mkdir()
       println('A new output files was just created!')
@@ -138,10 +138,10 @@ string{} initializeAnalysis(string{} params) {
       sys bash $globalVars{'path'}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
    }
 
-   # # IMPORTANT! Module to train classifiers is enabled through this statement
-   # if ( params{'custom_ref_db'} == 'Yes' ){
-   #    string{} globalVars = trainClassifier(params, globalVars)
-   # }
+   # IMPORTANT! Module to train classifiers is enabled through this statement
+   if ( params{'custom_ref_db'} == 'Yes' ){
+       string{} globalVars = trainClassifier(params, globalVars)
+   }
 
    # Taxonomy assignment path
    string algoCluster1 = params{'clusteringAlgo'}
@@ -150,6 +150,14 @@ string{} initializeAnalysis(string{} params) {
 
    # Keep the classifer as a global var so you can change it if needed
    globalVars{'classifierAlgo'} = params{'classifierAlgo'}
+
+
+   # Keep the adapters file to be used from Trimmomatic as a global var
+   if ( params{'adapters'} != 'TruSeq3-PE-2.fa' && params{'adapters'} != 'NexteraPE-PE.fa' && params{'adapters'} != 'TruSeq2-PE.fa' && params{'adapters'} != 'TruSeq3-PE.fa') {
+      globalVars{'adapterFile'} = globalVars{'parameterFilePath'} + '/' + params{'adapters'}
+   } else {
+      globalVars{'adapterFile'} = globalVars{'path'} + '/tools/Trimmomatic/Trimmomatic-0.38/adapters/' + params{'adapters'}
+   }
 
    return(globalVars)
 }
@@ -176,7 +184,7 @@ string buildDirectories(string{} params, string{} globalVars){
       println('Marker gene under study 16S.')
       string sixteenPath = globalVars{'genePath'} + '/' + 'gene_16S'
       sixteenPath.chdir()
-      
+
       if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
          string algo = 'Swarm'
          algo.mkdir()
@@ -260,7 +268,7 @@ string{} trainClassifier(string{} params, string{} globalVars){
    if ( params{'classifierAlgo'} == 'RDPClassifier' ) {
 
       # Path for user's files 
-      globalVars{'myCustomDbInPema'}  = globalVars{'path'} + '/tools/RDPTools/TRAIN'
+      globalVars{'myCustomDbInPema'}  = '/home/tools/RDPTools/TRAIN'
       string checkIfAlreadyTrained    = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
 
       # Check if RDPClassifier has already been trained with this custom DB
@@ -275,21 +283,30 @@ string{} trainClassifier(string{} params, string{} globalVars){
          string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
 
          # Train the RDPClassifier using your custom COI ref db
-         sys bash $globalVars{'path'}/scripts/trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+         sys bash /home/scripts/trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
 
       }
-   
+
    } else if ( params{'classifierAlgo'} == 'CREST' ) {
-      
-      # Files
+
+      # Custom files
       globalVars{'customDbFilesPath'}.chdir() ;
       string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.nds'
-      string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'       
-   
-      # All markers genes but the COI, use the CREST algorithm for the taxonomy step. 
-      # Here we train CREST
-      sys bash $globalVars{'path'}/scripts/trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+      string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
 
+      globalVars{'myCustomDbInPema'} =  '/home/tools/CREST/LCAClassifier/parts/flatdb'
+      string checkIfAlreadyTrained   = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
+
+      # Check if CREST has already been trained with this custom db
+      if ( checkIfAlreadyTrained.isDir()  ) {
+
+         println('CREST has already been trained with this custom db. Pema will proceed using that.')
+
+      } else {
+
+         # Train CREST using a custom ref db
+         sys bash /home/scripts/trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+      }
    }
 
    return globalVars
