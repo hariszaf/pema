@@ -26,6 +26,15 @@ string{} paramsFirstAssignment =  readParameterFile(f)
 string{} globalVars = initializeAnalysis(paramsFirstAssignment)
 wait
 
+# If there are Trimlogs in the rawData file, PEMA does not run as it should. Hence, we remove them if there are any!
+# I re-run this command because of FastQC and the way it reacts in multiple runs over the same folders
+globalVars{'dataPath'}.chdir() ; 
+sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi
+
+# make a copy of 'parameters.tsv' file to the output folder.
+# this way the user will be able to get the parameters he used for analysis, anytime!
+sys cp $globalVars{'parameterFilePath'}/parameters.tsv $globalVars{'outputFilePath'}/parameters0f.$globalVars{'analysisName'}.tsv
+
 # IMPORTANT! Module to train classifiers is enabled through this statement
 #if ( paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
 #
@@ -37,52 +46,54 @@ wait
 #wait
 
 ###############################################################
-#                   1. Quality Control                        #
+#              PRE-PROCESSING
 ###############################################################
 
-qualityControl(paramsFirstAssignment, globalVars)
-wait
-################################################################
-#                   2. Trimming                                #
-################################################################
+# With the original approach
+if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
 
-parameterFilePath.chdir()
-string g = "parameters.tsv"
-string{} paramsTrimmoStep =  readParameterFile(g)
 
-globalVars{'dataPath'}.chdir()
+   # * Quality Control
+   qualityControl(paramsFirstAssignment, globalVars)
+   wait
 
-# If ITS as marker gene, remove length variablity with cutadat
-if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
-   cutadaptForIts(paramsTrimmoStep, globalVars)
+   # * Trimming
+   parameterFilePath.chdir()
+   string g = "parameters.tsv"
+   string{} paramsTrimmoStep =  readParameterFile(g)
+
+   globalVars{'dataPath'}.chdir()
+
+   # If ITS as marker gene, remove length variablity with cutadat
+   if ( paramsTrimmoStep{'gene'} == 'gene_ITS' ){
+      cutadaptForIts(paramsTrimmoStep, globalVars)
+   }
+
+   # Trim fastq files using Trimmomatic
+   trimSeqs(paramsTrimmoStep, globalVars)
+   wait
+
+   # * Sequence adjustment
+   parameterFilePath.chdir()
+   string h = "parameters.tsv"
+   string{} paramsBayesHammerStep =  readParameterFile(h)
+   
+   adjustSeqs(paramsBayesHammerStep, globalVars)
+   wait
+
+   # * Merging the paired-end samples
+   parameterFilePath.chdir()
+   string i = "parameters.tsv"
+   string{} paramsSpadesMerging = readParameterFile(i)
+
+   merging(paramsSpadesMerging, globalVars)
+   wait
+
+} else {
+   # With fastp
+   preprocessWithFastp(paramsFirstAssignment, globalVars)
+   wait
 }
-
-# Trim fastq files using Trimmomatic
-trimSeqs(paramsTrimmoStep, globalVars)
-wait
-
-
-################################################################
-#              3. Sequence adjustment                          #
-################################################################
-parameterFilePath.chdir()
-string h = "parameters.tsv"
-string{} paramsBayesHammerStep =  readParameterFile(h)
- 
-adjustSeqs(paramsBayesHammerStep, globalVars)
-wait
-
-
-################################################################
-#          4. Merging the paired-end samples                   #
-################################################################
-
-parameterFilePath.chdir()
-string i = "parameters.tsv"
-string{} paramsSpadesMerging = readParameterFile(i)
-
-merging(paramsSpadesMerging, globalVars)
-wait
 
 
 ################################################################
@@ -93,26 +104,30 @@ wait
 #      Build subdirectories according to the params file       #
 ################################################################
 
-buildDirectories(paramsSpadesMerging, globalVars)
-
 parameterFilePath.chdir()
 string j = "parameters.tsv"
 string{} paramsDereplication =  readParameterFile(j)
+
+buildDirectories(paramsDereplication, globalVars)
+
 wait
 
+println('Pema is at the dereplication step; this may take a while.')
 if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
 
-   println('Pema is at the dereplication step; this may take a while.')
+   println("Dereplication for the case of using Swarm to infer clusters.")
    swarmDereplicate(paramsDereplication, globalVars)
    wait
 
 
 } else {
 
+   println("Dereplications for the case of VSEARCH.")
    globalVars = obiDereplicate(paramsDereplication, globalVars)
 
    wait
 
+   println("PEMA will merge reads from all files in one.")
    mergeFilesNonSwarm(paramsDereplication, globalVars)
 
    wait
@@ -126,7 +141,8 @@ checkpoint clustering
 ################################################################
 #           6. OTUs clustering / ASVs inference                #
 ################################################################
- 
+
+println('All the first steps are done! clustering is about to start!')
 parameterFilePath.chdir()
 string k = "parameters.tsv"
 string{} paramsOfTable =  readParameterFile(k)

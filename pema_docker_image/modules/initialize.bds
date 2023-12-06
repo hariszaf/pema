@@ -31,6 +31,87 @@ string{} readParameterFile(string parameter_file) {
       }
    }
    
+   if ( my_case{'preprocess'} == 'fastp'){
+
+      if ( my_case{'disable_adapter_trimming'} == "True") {
+         my_case{'disable_adapter_trimming'} = "--disable_adapter_trimming"
+         my_case{'detect_adapter_for_pe'} = ""
+         my_case{'adapter_sequence'} = ""
+         my_case{'adapter_sequence_r2'} = ""
+      } else {
+         my_case{'disable_adapter_trimming'} = ""
+         if ( my_case{'detect_adapter_for_pe'} == "True"){
+            my_case{'detect_adapter_for_pe'} = "--detect_adapter_for_pe"
+            my_case{'adapter_sequence'} = ""
+            my_case{'adapter_sequence_r2'} = ""
+         } else{
+            my_case{'detect_adapter_for_pe'} = ""
+            my_case{'adapter_sequence'} = "--adapter_sequence=" + my_case{'adapter_sequence'}
+            my_case{'adapter_sequence_r2'} = '--adapter_sequence_r2' + my_case{'adapter_sequence_r2'}
+            }
+      }
+      if ( my_case{'correction'} == "True"){
+         my_case{'correction'} = "--correction"
+      } else {
+         my_case{'correction'} = ""
+      }
+      if ( my_case{'overrepresentation_analysis'} == "True"){
+         my_case{'overrepresentation_analysis'} = "--overrepresentation_analysis"
+         if ( my_case{'overrepresentation_sampling'}.isEmpty() ) {
+            my_case{'overlap_diff_percent_limit'} = "--overlap_diff_percent_limit=" + my_case{'overlap_diff_percent_limit'} 
+         } else {
+            my_case{'overrepresentation_sampling'} = "--overrepresentation_sampling=" + my_case{'overrepresentation_sampling'}
+            my_case{'overlap_diff_percent_limit'} = ""
+         }
+      } else {
+         my_case{'overrepresentation_analysis'} = ""
+         my_case{'overrepresentation_sampling'} = ""
+         my_case{'overlap_diff_percent_limit'} = ""
+      }
+      if ( my_case{'cut_right'} == "True"){
+         my_case{'cut_right'} = "--cut_right"
+         my_case{'cut_right_window_size'} = "--cut_right_window_size=" + my_case{'cut_right_window_size'}
+         my_case{'cut_right_mean_quality'} = "cut_right_mean_quality=" + my_case{'cut_right_mean_quality'}
+      } else {
+         my_case{'cut_right'} = ""
+         my_case{'cut_right_window_size'} = ""
+         my_case{'cut_right_mean_quality'} = ""
+      }
+      if ( my_case{'cut_tail'} == "True"){
+         my_case{'cut_tail'} = "--cut_tail"
+         my_case{'cut_tail_window_size'} = "--cut_tail_window_size=" + my_case{'cut_tail_window_size'}
+         my_case{'cut_tail_mean_quality'} = "--cut_tail_mean_quality=" + my_case{'cut_tail_mean_quality'}
+      } else {
+         my_case{'cut_tail'} = ""
+         my_case{'cut_tail_window_size'} = ""
+         my_case{'cut_tail_mean_quality'} = ""
+      }
+      if ( my_case{'cut_front'} == "True"){
+         my_case{'cut_front'} = "--cut_front"
+         my_case{'cut_front_mean_quality'} = "--cut_front_mean_quality=" + my_case{'cut_front_mean_quality'}
+         my_case{'cut_front_window_size'} = "--cut_front_window_size=" + my_case{'cut_front_window_size'}
+      } else {
+         my_case{'cut_front'} = ""
+         my_case{'cut_front_mean_quality'} =""
+         my_case{'cut_front_window_size'} = ""
+      }
+      if ( my_case{'n_base_limit'}.isEmpty() ){
+         my_case{'n_base_limit'} = ""
+      } else {
+         my_case{'n_base_limit'} = "--n_base_limit=" + my_case{'n_base_limit'}
+      }
+      if ( my_case{'length_required'}.isEmpty() ){
+         my_case{'length_required'} = ""
+      } else {
+         my_case{'length_required'} = "--length_required=" + my_case{'length_required'}
+      }
+      if ( my_case{'complexity_threshold'}.isEmpty() ){
+         my_case{'complexity_threshold'} = ""
+      } else {
+         my_case{'complexity_threshold'} = "--complexity_threshold=" + my_case{'complexity_threshold'}
+      }
+   }
+
    # return the map
    return(my_case)
 
@@ -65,30 +146,42 @@ string{} initializeAnalysis(string{} params) {
    # I create a file where the pipeline's output will be saved
    globalVars{'outputPoint'}.chdir()
    globalVars{'analysisName'} = params{'outputFolderName'}
+   globalVars{'geneDependent'} = 'mainOutput'
+   globalVars{'outputPerSample'} = 'outputPerSample'
+   globalVars{'dereplicate'}     = 'dereplicateSamples'
+   globalVars{'linearized'}      = 'linearizedSequences'
+
+   globalVars{'outputFilePath'}      = globalVars{'outputPoint'}    + '/' + params{'outputFolderName'}
+   globalVars{'genePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'geneDependent'}
+   globalVars{'outputPerSamplePath'} = globalVars{'outputFilePath'} + '/' + globalVars{'outputPerSample'}
+   globalVars{'derePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'dereplicate'}
+   globalVars{'linearPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'linearized'}
 
    # Here are all the directories as variables that i will use
-   globalVars{'qualityControl'}  = '1.qualityControl'
-   globalVars{'trimmomatic'}     = '2.trimmingSequences'
-   globalVars{'bayesHammer'}     = '3.adjustingSequnces'
-   globalVars{'spades'}          = '4.mergingPairedEndFiles'
-   globalVars{'dereplicate'}     = '5.dereplicateSamples'
-   globalVars{'linearized'}      = '6.linearizedSequences'
-   globalVars{'geneDependent'}   = '7.mainOutput'
-   globalVars{'outputPerSample'} = '8.outputPerSample'
+   if ( params{'preprocess'} == "original" ){
 
-   wait
-   
-   ## and all the paths for each of them
-   globalVars{'outputFilePath'}      = globalVars{'outputPoint'}    + '/' + params{'outputFolderName'}
-   globalVars{'fastqcPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'} 
-   globalVars{'trimoPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'trimmomatic'} 
-   globalVars{'bayesPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'bayesHammer'} 
-   globalVars{'spaPath'}             = globalVars{'outputFilePath'} + '/' + globalVars{'spades'} 
-   globalVars{'derePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'dereplicate'} 
-   globalVars{'linearPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'linearized'} 
-   globalVars{'genePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'geneDependent'} 
-   globalVars{'outputPerSamplePath'} = globalVars{'outputFilePath'} + '/' + globalVars{'outputPerSample'}
-   globalVars{'unzipPath'}           = globalVars{'spaPath'} + '/' + 'unzip'
+      globalVars{'qualityControl'}  = 'qualityReports'
+      globalVars{'trimmomatic'}     = 'trimmingSequences'
+      globalVars{'bayesHammer'}     = 'adjustingSequnces'
+      globalVars{'spades'}          = 'mergingPairedEndFiles'
+
+      wait
+
+      ## and all the paths for each of them
+      globalVars{'fastqcPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'} 
+      globalVars{'trimoPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'trimmomatic'} 
+      globalVars{'bayesPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'bayesHammer'} 
+      globalVars{'spaPath'}             = globalVars{'outputFilePath'} + '/' + globalVars{'spades'} 
+      globalVars{'unzipPath'}           = globalVars{'spaPath'} + '/' + 'unzip'
+
+   } else {
+      globalVars{'qualityControl'} = 'qualityReports'
+      globalVars{'fastpqPath'} = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'}
+      globalVars{'fastpTrimmed'} = 'trimmedSequences'
+      globalVars{'fastpTrimmedPath'} = globalVars{'outputFilePath'} + '/' + globalVars{'fastpTrimmed'}
+      globalVars{'fastpMerged'} = 'mergedSequences'
+      globalVars{'fastpMergedPath'} = globalVars{'outputFilePath'} + '/' + globalVars{'fastpMerged'}
+   }
 
    wait
 
@@ -115,17 +208,24 @@ string{} initializeAnalysis(string{} params) {
    string[] outputFiles = globalVars{'outputFilePath'}.dir()         
 
    # If that list is empty, then create the directories mentioned above
-   if ( outputFiles.isEmpty() == true ) {
-
-      # Create all the output directories
-      globalVars{'qualityControl'}.mkdir()
-      globalVars{'trimmomatic'}.mkdir()
-      globalVars{'bayesHammer'}.mkdir()
-      globalVars{'spades'}.mkdir()
-      globalVars{'dereplicate'}.mkdir()
-      globalVars{'linearized'}.mkdir() 
+   if ( outputFiles.isEmpty() == true) {
+      
       globalVars{'geneDependent'}.mkdir()
       globalVars{'outputPerSample'}.mkdir()
+      globalVars{'qualityControl'}.mkdir()
+      globalVars{'dereplicate'}.mkdir()
+      globalVars{'linearized'}.mkdir() 
+
+      if (params{'preprocess'} == "original" ) {
+         globalVars{'trimmomatic'}.mkdir()
+         globalVars{'bayesHammer'}.mkdir()
+         globalVars{'spades'}.mkdir()
+      }
+
+      if ( outputFiles.isEmpty() == true && params{'preprocess'} == "fastp" ) {
+         globalVars{'fastpTrimmed'}.mkdir()
+         globalVars{'fastpMerged'}.mkdir()
+      }
    }
 
    # Gene dependent directory

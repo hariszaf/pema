@@ -2,6 +2,12 @@
 
 string perSampleGeneral(string{} params, string{} globalVars) {
 
+    if (params{'preprocess'} == "fastp") {
+        # to be added
+        return "ok"
+    }
+
+
     globalVars{'bayesPath'}.chdir()
     string[] names = globalVars{'bayesPath'}.dir()
 

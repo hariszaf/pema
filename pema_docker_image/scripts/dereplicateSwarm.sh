@@ -14,10 +14,10 @@
 for file in $(ls); 
 do 
    awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' $file \
-   > ../../6.linearizedSequences/$file.linearized.fasta ; 
+   > ../../linearizedSequences/$file.linearized.fasta ; 
 done
 
-cd ../../6.linearizedSequences/
+cd ../../linearizedSequences/
 
 # Dereplication at the sample level
 for file in $(ls | grep linearized.fasta); 
@@ -30,11 +30,11 @@ do
       hash=${hash:0:40}; \
       printf ">%s_%d_%s\n" "${hash}" "${abundance}" "${sequence}"; 
    done | \
-   sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > ../5.dereplicateSamples/$file._dereplicated.fasta ; 
+   sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > ../dereplicateSamples/$file._dereplicated.fasta ; 
 done
 
 
-cd ../5.dereplicateSamples/
+cd ../dereplicateSamples/
 rename.ul .linearized.fasta._dereplicated.fasta "" *_dereplicated.fasta
 
 for f in * ; do mv -- "$f" "linearized.dereplicate_$f" ; done

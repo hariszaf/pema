@@ -17,7 +17,7 @@ gene	gene_16S
 #=        type: string
 #=        required: True
 #
-outputFolderName	vsearch_pema_v.2.1.5-oligotons
+outputFolderName	dev_fastp
 #
 #
 #=     EnaData:
@@ -39,6 +39,169 @@ EnaData	Yes
 #=        required: True
 #
 sequencerPrefix	M0
+#
+#
+# ------------------------------------     PRE-PROCESSING : APPROACH     ------------------------------------
+#
+preprocess	fastp
+#=    title: preprocess approach
+#=    description: Since this version of PEMA the user may choose between either the initial PEMA implementation for pre-processing (Trimmomatic, pandaseq) or the latest one (fastp). Based on your choice, you may skip the parameters of the other approach.
+#=    type: string
+#=    required: True
+#=    validation:
+#=      - value: original
+#=      - value: fastp
+#
+#   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
+#
+fastpThreads	3
+#=    title: fastp threads
+#=    description: Number of threads to be used by fastp
+#=    type: integer
+#=    required: True
+#=    validation:
+#
+disable_adapter_trimming	True
+#=    title:
+#=    description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
+#=    type: boolean
+#=    required:
+#=    validation:
+#
+detect_adapter_for_pe	False
+#=    title:
+#=    description: Adapter sequence auto-detection.
+#=    type: boolean
+#=    required:
+#=    validation:
+#
+adapter_sequence	"ATCCTC"
+#=    title:
+#=    description: the adapter for read1.This is used if R1/R2 are found not overlapped.
+#=    type: string
+#=    required: False
+#=    validation:
+#=      -value: {A, T, C, G}*n
+#
+adapter_sequence_r2	"ATCCTC"
+#=    title:
+#=    description: the adapter for read2. This is used if R1/R2 are found not overlapped. If not specified, it will be the same as <adapter_sequence>.
+#=    type: string
+#=    required: False
+#=    validation:
+#=      -value: {A, T, C, G}*n
+#
+correction	True
+#=    title: Enable base correction in overlapped regions, default is disabled.
+#=    description:
+#=    type:
+#=    required:
+#=    validation:
+#
+overrepresentation_analysis	False
+#=    title:
+#=    description: enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
+#=    type:
+#=    required:
+#=    validation:
+#
+overrepresentation_sampling	20 
+#=    title:
+#=    description: One in (--overrepresentation_sampling) reads will be computed for overrepresentation analysis (1~10000), smaller is slower, default is 20.
+#=    type: integer
+#=    required:
+#=    validation:
+#
+overlap_diff_percent_limit	20
+#=    title:
+#=    description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
+#=    type: integer
+#=    required: False
+#=    validation:
+#
+complexity_threshold	30
+#=    title:
+#=    description: The threshold for low complexity filter (0~100). Default is 30, which means 30% complexity is required. 
+#=    type: integer
+#=    required: False
+#=    validation:
+#
+length_required	15
+#=    title:
+#=    description: Reads shorter than length_required will be discarded, default is 15.
+#=    type: integer
+#=    required: False
+#=    validation:
+#
+n_base_limit	5
+#=    title:
+#=    description: If one read's number of N base is >n_base_limit, then this read/pair is discarded. Default is 5.
+#=    type:
+#=    required:
+#=    validation:
+#
+cut_front	False
+#=    title:
+#=    description: Move a sliding window from front (5') to tail, drop the bases in the window if its mean quality < threshold, stop otherwise.
+#=    type:
+#=    required:
+#=    validation:
+#
+cut_front_mean_quality	20
+#=    title:
+#=    description: The mean quality requirement option for cut_front. Range: 1~36 default: 20 (Q20).
+#=    type: integer
+#=    required:
+#=    validation:
+#
+cut_front_window_size	4
+#=    title:
+#=    description: The window size option of cut_front. Range: 1~1000, default: 4.
+#=    type:
+#=    required:
+#=    validation:
+#
+cut_tail	False
+#=    title:
+#=    description: Move a sliding window from tail (3') to front, drop the bases in the window if its mean quality < threshold, stop otherwise.
+#=    type:
+#=    required:
+#=    validation:
+#
+cut_tail_window_size	4
+#=    title:
+#=    description: The window size option of cut_tail. Range: 1~1000, default: 4.
+#=    type:
+#=    required:
+#=    validation:
+#
+cut_tail_mean_quality	20
+#=    title:
+#=    description: The mean quality requirement option for cut_tail. Range: 1~36 default: 20 (Q20)
+#=    type:
+#=    required:
+#=    validation:
+#
+cut_right	False
+#=    title:
+#=    description: Move a sliding window from front to tail, if meet one window with mean quality < threshold, drop the bases in the window and the right part, and then stop.
+#=    type:
+#=    required:
+#=    validation:
+#
+cut_right_window_size	5
+#=    title:
+#=    description: The window size option of cut_right. Range: 1~1000, default: 4.
+#=    type:
+#=    required:
+#=    validation:
+#
+cut_right_mean_quality	20
+#=    title:
+#=    description: The mean quality requirement option for cut_right. Range: 1~36 default: 20 (Q20)
+#=    type:
+#=    required:
+#=    validation:
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : Trimmomatic     --------------------------
@@ -263,7 +426,7 @@ elimination
 #=          - value: algo_Swarm
 #=          - value: algo_vsearch
 #
-clusteringAlgo	algo_vsearch
+clusteringAlgo	algo_Swarm
 #
 #
 #   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
@@ -305,7 +468,7 @@ vsearchId	0.95
 #=          - range: 
 #=            min: 0 
 #
-d	12
+d	2
 #
 #
 #=     boundary:
@@ -330,7 +493,7 @@ boundary
 #=            min: 1
 
 #
-swarmThreads	
+swarmThreads	3
 #
 #
 #  -----------------------------     OLIGOTONS        -------------------------------------
@@ -494,7 +657,7 @@ name_of_custom_db
 #=          - value: Yes
 #=          - value: No
 #
-phyloseq	Yes
+phyloseq	No
 #
 #
 #=     tree:
