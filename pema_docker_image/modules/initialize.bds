@@ -111,6 +111,9 @@ string{} readParameterFile(string parameter_file) {
          my_case{'complexity_threshold'} = "--complexity_threshold=" + my_case{'complexity_threshold'}
       }
    }
+   string algoCluster1 = my_case{'clusteringAlgo'}
+   string algo1 = algoCluster1.split('_')[1]
+   my_case{'assignmentPath'} = "/mnt/analysis/" + my_case{'outputFolderName'} + '/mainOutput/' + my_case{'gene'} +  '/' + algo1
 
    # return the map
    return(my_case)
