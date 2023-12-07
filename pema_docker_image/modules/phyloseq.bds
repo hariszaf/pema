@@ -32,7 +32,7 @@ string communityAnalysis(string{} params, string{} globalVars) {
       }
       
       # Get path where the input files for phyloseq are located
-      if ( globalVars{'classifierAlgo'} == 'CREST' ) {
+      if ( params{'classifierAlgo'} == 'CREST' ) {
 
          globalVars{'phyloPath'} = globalVars{'assignmentPath'} + '/' + params{'taxonomyFolderName'}
 

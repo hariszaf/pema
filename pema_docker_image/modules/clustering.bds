@@ -98,7 +98,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
 
    task {
       
-      sys cp all_samples.fasta $globalVars{'assignmentPath'}/all_samples.fasta
+      sys cp all_samples.fasta $params{'assignmentPath'}/all_samples.fasta
       sys rm all_samples.fasta
    }
 
@@ -106,7 +106,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
    wait
 
    # globalVars{'swarmPath'}.chdir()
-   globalVars{'assignmentPath'}.chdir()
+   params{'assignmentPath'}.chdir()
    int d_param = params{'d'}.parseInt()
 
    # Here is the clustering step with SWARM algorithm
@@ -143,7 +143,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
    # Check if this is a second analysis to remove files not needed and make links to others 
    task {
       
-      sys if [ $(find '$globalVars{'assignmentPath'}' -name 'all_sequences_grouped.fa') ] ; then  rm all_sequences_grouped.fa ; fi
+      sys if [ $(find '$params{'assignmentPath'}' -name 'all_sequences_grouped.fa') ] ; then  rm all_sequences_grouped.fa ; fi
 
       sys ln -s asvs_representatives_all_samples.fasta all_sequences_grouped.fa
    
@@ -198,7 +198,7 @@ string swarmMinValues(string{} params, string{} globalVars) {
    } else {
 
       # Run Swarm for d != 1
-      task $globalVars{'path'}/tools/swarm/swarm/bin/swarm -d $params{'d'} -t $params{'swarmThreads'} -s asvs.stats -w asvs_representatives_all_samples.fasta < all_samples.fasta > asvs.swarms
+      task $globalVars{'path'}/tools/swarm/swarm/bin/swarm -d $params{'d'} -t $params{'swarmThreads'} -s asvs.stats -w asvs_representatives_all_samples_tmp.fasta < all_samples.fasta > asvs.swarms
 
       wait
    }
@@ -233,7 +233,7 @@ string swarmMinValues(string{} params, string{} globalVars) {
 
    wait
 
-   sys rm asvs_representatives_all_samples_tmp.fasta asvs_tmp*
+   sys rm -f asvs_representatives_all_samples_tmp.fasta asvs_tmp*
 
    return 'ok'
 

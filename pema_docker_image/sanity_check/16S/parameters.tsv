@@ -17,7 +17,7 @@ gene	gene_16S
 #=        type: string
 #=        required: True
 #
-outputFolderName	dev_fastp
+outputFolderName	dev_original_swarm
 #
 #
 #=     EnaData:
@@ -43,7 +43,7 @@ sequencerPrefix	M0
 #
 # ------------------------------------     PRE-PROCESSING : APPROACH     ------------------------------------
 #
-preprocess	fastp
+preprocess	original
 #=    title: preprocess approach
 #=    description: Since this version of PEMA the user may choose between either the initial PEMA implementation for pre-processing (Trimmomatic, pandaseq) or the latest one (fastp). Based on your choice, you may skip the parameters of the other approach.
 #=    type: string

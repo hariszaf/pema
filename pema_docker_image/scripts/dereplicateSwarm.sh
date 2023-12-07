@@ -13,15 +13,17 @@
 # Linearize sequences 
 for file in $(ls); 
 do 
+   base_filename="${file%%.*}"
    awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' $file \
-   > ../../linearizedSequences/$file.linearized.fasta ; 
+   > ../../linearizedSequences/$base_filename.merged.linearized.fa ; 
 done
 
 cd ../../linearizedSequences/
 
 # Dereplication at the sample level
-for file in $(ls | grep linearized.fasta); 
-do  
+for file in $(ls | grep merged.linearized.fa); 
+do
+   base_filename="${file%%.*}"
    grep -v "^>" $file | \
    grep -v [^ACGTacgt] | sort -d | uniq -c | \
    while read abundance sequence ; 
@@ -30,19 +32,19 @@ do
       hash=${hash:0:40}; \
       printf ">%s_%d_%s\n" "${hash}" "${abundance}" "${sequence}"; 
    done | \
-   sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > ../dereplicateSamples/$file._dereplicated.fasta ; 
+   sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > ../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa ; 
 done
 
 
 cd ../dereplicateSamples/
-rename.ul .linearized.fasta._dereplicated.fasta "" *_dereplicated.fasta
+# rename.ul .linearized.fasta._dereplicated.fasta "" *_dereplicated.fasta
 
-for f in * ; do mv -- "$f" "linearized.dereplicate_$f" ; done
+# for f in * ; do mv -- "$f" "linearized.dereplicate_$f" ; done
 
 
 # Dereplication at the study level
 export LC_ALL=C
-cat linearized.dereplicate* | \
+cat *.dereplicated.fa | \
 awk 'BEGIN {RS = ">" ; FS = "[_\n]"}
      {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}}
      END {for (amplicon in sequences) {
@@ -96,6 +98,6 @@ awk 'BEGIN {FS = "[>_]"}
                    printf "\t%d", contingency[amplicon][samples[j]]
                }
                printf "\t%d\n", amplicons[amplicon]
-          }}' linearized.dereplicate* > ../amplicon_contingency_table.tsv
+          }}' *.dereplicated.fa > ../amplicon_contingency_table.tsv
 
 

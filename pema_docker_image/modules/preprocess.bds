@@ -340,7 +340,7 @@ string merging(string{} params, string{} globalVars){
     string baseName
     if ( params{'maxInfo'} == 'Yes' ) {
         
-        # Keep as 'baseName' the prefix of every file that depends on whether  we had maxInfo or not
+        # Keep as 'baseName' the prefix of every file that depends on whether we had maxInfo or not
         baseName = 'filtered_max_'
     } else {
         baseName = 'filtered_'
@@ -582,6 +582,7 @@ string mergeFilesNonSwarm(string{} params, string{} globalVars){
         task{
             sys sed 's/\:\:\:/\:/g' $sample > $sample.f.fasta
             sys sed 's/\:0\:0\:0\://' $sample.f.fasta > $sample.g.fasta
+            sys sed -i 's/\:/_/g' $sample.g.fasta
         }
     }
     wait
@@ -603,7 +604,7 @@ string mergeFilesNonSwarm(string{} params, string{} globalVars){
 
     task cat *.g.fasta | awk 'BEGIN {RS = ">" ; FS = "[_\n]"} {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}} END {for (amplicon in sequences) {print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > $globalVars{'outputFilePath'}/all_samples.fasta
 
-    wait    
+    wait
 
     task awk '/N/{n=2}; n {n--; next}; 1' < $globalVars{'outputFilePath'}/all_samples.fasta  > $globalVars{'outputFilePath'}/final_all_samples.fasta
 
