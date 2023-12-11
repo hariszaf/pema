@@ -137,6 +137,9 @@ string clusteringSwarm(string{} params, string{} globalVars) {
       sys cp asvs_representatives_all_samples.fasta asvs_repr_with_singletons.fasta
       sys python $globalVars{'path'}/scripts/removeOligotonsSwarm.py asvs_representatives_all_samples.fasta  $params{'numOligotons'}
       sys mv no_oligotons.tsv asvs_representatives_all_samples.fasta
+      sys awk -v threshold=$params{'numOligotons'} '$4 > threshold || NR == 1' asvs_contingency_table.tsv > asvs_contingency_table.noOligos
+      sys mv asvs_contingency_table.tsv asvs_contingency_table_oligotons_included.tsv
+      sys mv asvs_contingency_table.noOligos asvs_contingency_table.tsv
       println('Oligotons have been removed')
    }   
 
@@ -159,11 +162,17 @@ string clusteringSwarm(string{} params, string{} globalVars) {
 
 
       task {
-
          sys bash $globalVars{'path'}/scripts/buildAllTableFile.sh
-     
-         sys mv allTab.tsv allTab_$params{'taxonomyFolderName'}.tsv
       }
+
+      wait
+
+      if (params{'clusteringAlgo'} == "algo_Swarm"){
+         sys sed -i 's/Otu/ASV/g' asvs_representatives_all_samples.fasta
+         sys sed -i 's/Otu/ASV/g' allTab.tsv
+      }
+
+      sys mv allTab.tsv allTab_$params{'taxonomyFolderName'}.tsv
 
       wait
 
