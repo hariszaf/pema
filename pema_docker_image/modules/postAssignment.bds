@@ -2,21 +2,27 @@
 
 string perSampleGeneral(string{} params, string{} globalVars) {
 
-
-
-    globalVars{'derePath'}.chdir()
-    string[] names = globalVars{'derePath'}.dir()
-
-    # for each sample we make a folder with its name, in order to put PEMA's output concerning each of those
-    globalVars{'outputPerSamplePath'}.chdir()
-    for ( string sample : names ) {
-        sample=sample.split("\.merged\.linearized\.dereplicated\.fa")
-        sample = sample.substr(1, sample.length()-3) ;
-        sample.mkdir()
-    }
-
     # in 'samples' we make a list with all file names we find in fastqc output folder - that means for all the files
     if (params{'preprocess'} == "original") {
+
+        globalVars{'derePath'}.chdir()
+        string[] names = globalVars{'derePath'}.dir()
+
+        # for each sample we make a folder with its name, in order to put PEMA's output concerning each of those
+        globalVars{'outputPerSamplePath'}.chdir()
+
+        for ( string sample : names ) {
+            if (params{"clusteringAlgo"} == "algo_vsearch"){
+                sample = sample.split("\.merged\.dereplicated\.fa")
+                sample = sample.substr( 1, sample.length() - 3 ) ;
+                sample.mkdir()
+            } else {
+                sample = sample.split("\.merged\.linearized\.dereplicated\.fa")
+                sample = sample.substr( 1, sample.length() - 3 ) ;
+                sample.mkdir()
+            }
+        }
+
         globalVars{'fastqcPath'}.chdir()
         string[] samples = globalVars{'fastqcPath'}.dir()
         
@@ -40,12 +46,12 @@ string perSampleGeneral(string{} params, string{} globalVars) {
 
             sampleNoZip   = sample.split('.zip')[0]
             unzipfq       = sample.split('_[0-9]_fastqc')[0]
-            readDirection = sample.split('_')[1]       
+            readDirection = sample.split('_')[1]
             wait
             
             # we copy two significant output files of FastQC to the sample's output folder
             task{
-                sys cp $globalVars{'fastqcPath'}/$sampleNoZip/summary.txt $globalVars{'fastqcPath'}/$sampleNoZip/summary_$readDirection.txt
+                sys yes | cp -f $globalVars{'fastqcPath'}/$sampleNoZip/summary.txt $globalVars{'fastqcPath'}/$sampleNoZip/summary_$readDirection.txt
 
                 sys mv $globalVars{'fastqcPath'}/$sampleNoZip/summary_$readDirection.txt $globalVars{'outputPerSamplePath'}/$unzipfq
             }
@@ -53,6 +59,26 @@ string perSampleGeneral(string{} params, string{} globalVars) {
             unzipfq = ''
         }
         wait
+    } else {
+
+        globalVars{'derePath'}.chdir()
+        string[] names = globalVars{'derePath'}.dir()
+
+        # for each sample we make a folder with its name, in order to put PEMA's output concerning each of those
+        globalVars{'outputPerSamplePath'}.chdir()
+
+        for ( string sample : names ) {
+            if (params{"clusteringAlgo"} == "algo_vsearch"){
+                sample = sample.split("\.merged\.dereplicated\.fa")
+                sample = sample.substr( 1, sample.length() - 3 ) ;
+                sample.mkdir()
+            } else {
+                sample = sample.split("\.merged\.linearized\.dereplicated\.fa")
+                sample = sample.substr( 1, sample.length() - 3 ) ;
+                sample.mkdir()
+            }
+        }
+
     }
     return 'ok'
 }
@@ -64,8 +90,11 @@ string CrestPerSample(string{} params, string{} globalVars) {
 
 
         globalVars{'derePath'}.chdir()
+
         string[] names = globalVars{'derePath'}.dir()
+
         string finalAssignDir = params{'assignmentPath'} + '/' + params{'taxonomyFolderName'}
+
         finalAssignDir.chdir()
         
         task {
@@ -78,8 +107,19 @@ string CrestPerSample(string{} params, string{} globalVars) {
         counter := 3
         for ( string sample : names ) {
 
-            sample = sample.split("\.merged\.linearized\.dereplicated\.fa")
-            sample = sample.substr( 1, sample.length()-3 ) ;
+            println(sample)
+
+            if (params{"clusteringAlgo"} == "algo_vsearch"){
+                sample = sample.split("\.merged\.dereplicated\.fa")
+                sample = sample.substr( 1, sample.length() - 3 ) ;
+            } else {
+                sample = sample.split("\.merged\.linearized\.dereplicated\.fa")
+                sample = sample.substr( 1, sample.length() - 3 ) ;
+            }
+
+            println(sample)
+            println("~~~~~")
+
             counter += 1
 
             wait
@@ -113,18 +153,30 @@ string CrestPerSample(string{} params, string{} globalVars) {
 ## Function to build the per sample profiles in case of RDPClassifier
 string RDPClassifierPerSample(string{} params, string{} globalVars) {
 
-    if  ( params{'gene'} == 'gene_COI' &&  params{'clusteringAlgo'} == 'algo_Swarm' ){
+    if  ( (params{'gene'} == 'gene_COI') && (params{'clusteringAlgo'} == 'algo_Swarm') ){
 
-        globalVars{'bayesPath'}.chdir()
-        string[] sampleNames = globalVars{'bayesPath'}.dir()
-        
+        string[] sampleNames
         params{'assignmentPath'}.chdir()
 
-        for ( string sample : sampleNames ) {
-            sys bash $globalVars{'path'}/scripts/getColumnFromRDPFinalTable.sh $sample
-            sys mv profile_$sample.tsv $globalVars{'outputPerSamplePath'}/$sample
+        if (params{'preprocess'} == "original") {
+            string[] sampleNames = globalVars{'unzipPath'}.dir()
+            for ( string sample : sampleNames ) {
+                sample = sample.split("\.merged\.fastq")
+                sample = sample.substr( 1, sample.length() - 3 ) ;
+                println(">>> " + sample)
+                sys bash $globalVars{'path'}/scripts/getColumnFromRDPFinalTable.sh $sample
+                sys mv profile_$sample.tsv $globalVars{'outputPerSamplePath'}/$sample
+            }
+        } else { 
+            string[] sampleNames = globalVars{'fastpMergedPath'}.dir()
+            for ( string sample : sampleNames ) {
+                sample = sample.split("\.merged\.fastq")
+                sample = sample.substr( 1, sample.length() - 3 ) ;
+                println(">>> " + sample)
+                sys bash $globalVars{'path'}/scripts/getColumnFromRDPFinalTable.sh $sample
+                sys mv profile_$sample.tsv $globalVars{'outputPerSamplePath'}/$sample
+            }
         }
-    
     } else {
         println("That was not the case..")
     }

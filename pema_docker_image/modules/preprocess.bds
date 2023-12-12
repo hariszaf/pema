@@ -485,6 +485,8 @@ string merging(string{} params, string{} globalVars){
 # Function to dereplicate using OBITools 
 string{} obiDereplicate(string{} params, string{} globalVars){
 
+    string sampleName
+
     if (params{'preprocess'} == "original") {
 
         globalVars{'unzipPath'} = globalVars{'spaPath'} + '/unzip'
@@ -495,14 +497,18 @@ string{} obiDereplicate(string{} params, string{} globalVars){
         # string fileForDerepl
         for ( string nodereplicate : mergedFiles ) {
 
+            string sample = nodereplicate.split("\.merged\.fastq")
+            sampleName = sample.substr(1, sample.length()-3) ;
+
             # awk 'NR%4<=2' input.txt > output.txt
             # Execute OBITools - when new pemabase available: 
             task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > \
-                $globalVars{'derePath'}/dereplicate_$nodereplicate
+                $globalVars{'derePath'}/$sampleName\.merged.dereplicated.fa
             wait
         }
 
     } else {
+
         globalVars{'fastpMergedPath'}.chdir()
         sys if [ $(find '$globalVars{'fastpMergedPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
         string[] mergedFiles = globalVars{'fastpMergedPath'}.dir()
@@ -511,16 +517,17 @@ string{} obiDereplicate(string{} params, string{} globalVars){
         # string fileForDerepl
         for ( string nodereplicate : mergedFiles ) {
 
+            string sample = nodereplicate.split("\.merged\.fastq")
+            sampleName = sample.substr(1, sample.length()-3) ;
+
             # awk 'NR%4<=2' input.txt > output.txt
             # Execute OBITools - when new pemabase available: 
             task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > \
-                $globalVars{'derePath'}/dereplicate_$nodereplicate
+                $globalVars{'derePath'}/$sampleName\.merged.dereplicated.fa
             wait
         }
 
     }
-
-
 
     wait
     return globalVars
@@ -549,6 +556,8 @@ string swarmDereplicate(string{} params, string{} globalVars){
 # Function to merge all samples in one; it goes with the obiDereplicate() function
 string mergeFilesNonSwarm(string{} params, string{} globalVars){
 
+    string sampleName
+
     globalVars{'derePath'}.chdir()
     sys if [ $(find '$globalVars{'derePath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
 
@@ -556,14 +565,19 @@ string mergeFilesNonSwarm(string{} params, string{} globalVars){
     string[] dereplicates = globalVars{'derePath'}.dir()
     
     for ( string derepl : dereplicates ) {
+
+        string sample = derepl.split("\.merged\.dereplicated\.fa")
+        sampleName = sample.substr(1, sample.length()-3) ;
+
         task {
             # we substitue both 'merged_sample...' amd ';' with '_' and nothing respectively
             sys sed 's/ merged_sample={}; count=/_/g ; s/;.*//g' $derepl > se.$derepl
+
             # merge all lines of a fastq entry into one and only one line!
             sys awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' se.$derepl > nospace.$derepl
-            
+
             # we turn all down- to upcases
-            sys cat nospace.$derepl | tr '[a-z]' '[A-Z]' > $globalVars{'linearPath'}/linearized.$derepl  
+            sys cat nospace.$derepl | tr '[a-z]' '[A-Z]' > $globalVars{'linearPath'}/$sampleName\.merged.dereplicated.linearized.fa
 
             # '# JUST to beautify the vscode perl 
         }
@@ -588,7 +602,7 @@ string mergeFilesNonSwarm(string{} params, string{} globalVars){
     wait
     
     globalVars{'linearPath'}.chdir()
-    sys rm *.f.fasta
+    # sys rm *.f.fasta
     wait
 
     # this command forces applications to use the default language for output, and forces sorting to be bytewise.  
@@ -602,18 +616,24 @@ string mergeFilesNonSwarm(string{} params, string{} globalVars){
     # finally, I make a file in which in every line i have the amplicon name (sample) its abundance and its sequence.
     ######################################################################################################################################
 
-    task cat *.g.fasta | awk 'BEGIN {RS = ">" ; FS = "[_\n]"} {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}} END {for (amplicon in sequences) {print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > $globalVars{'outputFilePath'}/all_samples.fasta
+    task{ 
+         sys cat *.g.fasta | \
+         awk 'BEGIN {RS = ">" ; FS = "[_\n]"} {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}} END { \
+            for (amplicon in sequences) {print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | \
+         sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > $globalVars{'outputFilePath'}/all_samples.fasta
+    } 
 
     wait
 
     task awk '/N/{n=2}; n {n--; next}; 1' < $globalVars{'outputFilePath'}/all_samples.fasta  > $globalVars{'outputFilePath'}/final_all_samples.fasta
 
     wait
-    sys rm *.g.fasta 
+    # sys rm *.g.fasta 
     
-    sys rm $globalVars{'outputFilePath'}/all_samples.fasta
+    # sys rm $globalVars{'outputFilePath'}/all_samples.fasta
 
     return 'ok'
 
 }
 
+# docker run --rm -it -v /home/luna.kuleuven.be/u0156635/github_repos/HCMR/pema/pema_docker_image/sanity_check/16S/:/mnt/analysis hariszaf/pema:v.2.1.5 bash
