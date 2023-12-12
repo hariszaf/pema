@@ -12,56 +12,103 @@
 CWD=$(pwd)
 TAG=v.2.1.5
 
+cp 16S/parameters.tsv 16S/parameters.tsv.bck
+
 ## Run example case for 16S ENA data using vsearch
-echo "PEMA for 16S in ENA format and using vsearch and Silva db is about to start"
-cp 16S/parameters_vsearch.tsv 16S/parameters.tsv
-cp 16S/ena_data/ERR* 16S/mydata/
-docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_16S_vsearch/
-docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG ./pema_latest.bds
-rm 16S/parameters.tsv
-rm 16S/mydata/*
-echo "PEMA for 16S using vsearch and Silva db has been completed"
+echo "PEMA for 16S in ENA format and using original setup for preprocessing, vsearch and Silva db is about to start"
+docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_16S_original_vsearch
 
-## Run example case for 16S non ENA data using vsearch
-echo "PEMA for 16S in non ENA format using vsearch and Silva db is about to start"
-cp 16S/parameters_vsearch_noENA_data.tsv 16S/parameters.tsv
-cp 16S/noEna_data/We1* 16S/mydata/
+start_time=$(date +%s.%N)
 
-docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_16S_vsearch_noENA/ 
-docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/initial_data/ 
-# docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/mydata/
-docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm /mnt/analysis/mapping_files_for_PEMA.tsv
-docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG ./pema_latest.bds 
+docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG bds /home/pema_latest.bds
 
-rm 16S/parameters.tsv
-rm 16S/mydata/*
-echo "PEMA for 16S in non ENA format using vsearch and Silva db has been completed"
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_minutes=$(echo "$elapsed_time / 60" | bc)
+
+echo "PEMA for 16S using vsearch and Silva db has been completed in ${elapsed_minutes} minutes"
 
 
 ## Run example case for 16S using Swarm
-echo "PEMA for 16S in ENA format using Swarm and Silva db is about to start"
-cp 16S/parameters_swarm.tsv 16S/parameters.tsv
-cp 16S/ena_data/ERR* 16S/mydata/
-docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_16S_swarm/
-docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG ./pema_latest.bds
-rm 16S/parameters.tsv
-rm 16S/mydata/*
-echo "PEMA for 16S using Swarm and Silva db has been completed"
+echo "PEMA for 16S in ENA format using using original setup for preprocessing, Swarm and Silva db is about to start"
+
+sed -i 's/outputFolderName\ttest_16S_original_vsearch/outputFolderName\ttest_16S_original_swarm/' 16S/parameters.tsv
+sed -i 's/clusteringAlgo\talgo_vsearch/clusteringAlgo\talgo_Swarm/' 16S/parameters.tsv
+
+docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_16S_original_swarm/
+
+start_time=$(date +%s.%N)
+
+docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG bds /home/pema_latest.bds
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_minutes=$(echo "$elapsed_time / 60" | bc)
+
+echo "PEMA for 16S using original setup for preprocessing, Swarm and Silva db has been completed in ${elapsed_minutes} minutes"
+
+
+## Run example case for 16S using fastp and Swarm
+echo "PEMA for 16S in ENA format using fastp for preprocessing, Swarm and Silva db is about to start"
+
+sed -i 's/outputFolderName\ttest_16S_original_swarm/outputFolderName\ttest_16S_fastp_swarm/' 16S/parameters.tsv
+sed -i 's/preprocess\toriginal/preprocess\tfastp/' 16S/parameters.tsv
+
+docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_16S_fastp_swarm/
+
+start_time=$(date +%s.%N)
+
+docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG bds /home/pema_latest.bds
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_minutes=$(echo "$elapsed_time / 60" | bc)
+
+
+echo "PEMA for 16S using fastp for preprocessing, Swarm and Silva db has been completed in ${elapsed_minutes} minutes"
+
+
+## Run example case for 16S using fastp and vsearch
+echo "PEMA for 16S in ENA format using fastp for preprocessing, Swarm and Silva db is about to start"
+
+sed -i 's/outputFolderName\ttest_16S_fastp_swarm/outputFolderName\ttest_16S_fastp_vsearch/' 16S/parameters.tsv
+sed -i 's/clusteringAlgo\talgo_Swarm/clusteringAlgo\talgo_vsearch/' 16S/parameters.tsv
+
+docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_16S_fastp_vsearch/
+
+start_time=$(date +%s.%N)
+
+docker run --rm -v $CWD/16S/:/mnt/analysis/ hariszaf/pema:$TAG bds /home/pema_latest.bds
+
+end_time=$(date +%s.%N)
+elapsed_time=$(echo "$end_time - $start_time" | bc)
+elapsed_minutes=$(echo "$elapsed_time / 60" | bc)
+
+echo "PEMA for 16S using fastp for preprocessing, vsearch and Silva db has been completed in ${elapsed_minutes} minutes"
+
+
+mv parameters.tsv.bck parameters.tsv
+exit
+
+
 
 # #----------------------------
 
 #  Run example case for 18S using vsearch and Silva db
-echo "PEMA for 18S using vsearch and Silva db is about to start"
-cp 18S/parameters_vsearch.tsv 18S/parameters.tsv
-docker run --rm -v $CWD/18S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_18S_vsearch/
-docker run --rm -v $CWD/18S/:/mnt/analysis/ hariszaf/pema:$TAG ./pema_latest.bds
-rm 18S/parameters.tsv
+cp 18S/parameters.tsv 18S/parameters.tsv.bck
+
+echo "PEMA for 18S using original preprocessing setup, vsearch and Silva db is about to start"
+
+docker run --rm -v $CWD/18S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_18S_original_vsearch/
+docker run --rm -v $CWD/18S/:/mnt/analysis/ hariszaf/pema:$TAG bds /home/pema_latest.bds
+
+
 echo "PEMA for 18S using vsearch and Silva db has been completed"
 
 ## Run example case for 18S using Swarm and Silva db
 echo "PEMA for 18S using Swarm and Silva db is about to start"
 cp 18S/parameters_swarm.tsv 18S/parameters.tsv
-docker run --rm -v $CWD/18S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_18S_swarm/
+docker run --rm -v $CWD/18S/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/test_18S_original_swarm/
 docker run --rm -v $CWD/18S/:/mnt/analysis/ hariszaf/pema:$TAG ./pema_latest.bds
 rm 18S/parameters.tsv
 echo "PEMA for 18S using Swarm and Silva db has been completed"
