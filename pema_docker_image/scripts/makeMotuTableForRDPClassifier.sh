@@ -23,7 +23,7 @@ sed -i '1 i\Classification' taxonomies_sorted.txt
 
 awk 'BEGIN {OFS="\t"} {for(i=3;i<=NF;i++){printf "%s ", $i}; printf "\n"}' asvs_contingency_table.tsv > tml
 awk 'BEGIN {FS=" "}{OFS="\t"} NF{NF-=1};1' tml > tnl
-sed 's/linearized.dereplicate_//g ; s/.merged.fastq//g' tnl > TMP
+sed 's/linearized.dereplicate_//g ; s/.merged.fastq//g; s/.merged.linearized.dereplicated.fa//g' tnl > TMP
 
 rm tml tnl
 
