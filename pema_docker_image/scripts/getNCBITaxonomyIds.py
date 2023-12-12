@@ -1,5 +1,10 @@
 #!/usr/bin/python3 
 
+"""
+This script makes use of the ncbi-taxonomist tool to get the NCBI Taxonomy id of the 
+lowest possible taxon level in each taxonomic assignment mentioned in the finalTable.tsv
+"""
+
 import subprocess, time
 
 final_table         = open("finalTable.tsv", "r")
@@ -26,12 +31,16 @@ for line in final_table:
         for entry in range(len(taxa_levels)-1, 0, -1): 
 
             level = taxa_levels[entry]
+
+            if "__" in level:
+                level = level.split("__")[-1]
+
             level = level.replace("_", " ")
 
-            print("this is my level:\t" + level)
+            print("This is my level:\t" + level)
 
             if level[0].isupper() == False:
-                print("This taxon name does not has an uppercase as a first letter")
+                print("Taxon name does not has an uppercase as a first letter.")
                 continue
 
             else:
