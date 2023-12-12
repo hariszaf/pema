@@ -50,6 +50,7 @@ RUN chmod -R +777 /home/modules
 
 # Copy and paste the PEMA script!
 WORKDIR /home
+RUN cp /home/tools/RDPTools/TRAIN/midori_1/rRNAClassifier.properties /home/tools/RDPTools/TRAIN/12S_v2.0.0/rRNAClassifier.properties 
 COPY pema_latest.bds .
 
 ## Make a source of the .bashrc file
