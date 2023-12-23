@@ -1,18 +1,24 @@
 # PEMA's output files
 Each of the next paragraphs stands for a subdirectory in the output folder that PEMA creates after each run.
 
-## 1.quality_control
+## qualityReports
 
-The first folder in the output folder contains the results of FastQC; the quality control results. In this folder, there is a folder for each sample, as well as an .html file and a .zip file which contain all the information included in the folder with the sample’s output. The sequences of each sample, could get either a “pass”, “warn” or “fail” to each of FASTQC’s tests. 
+The first folder in the output folder contains the reports of sample sequence quality of FastQC or fastp. 
+
+### FastQC
+In this folder, there is a folder for each sample, as well as an .html file and a .zip file which contain all the information included in the folder with the sample’s output. The sequences of each sample, could get either a “pass”, “warn” or “fail” to each of FASTQC’s tests. 
+
+### fastp
+In this folder thera are file reports in .json and .html formats for each sample.
 
 ## Pre-processing steps
-In folders *2.trimmomatic_output*, *3.correct_by_BayesHammer*, *4.merged_by_SPAdes* and *5.dereplicate_by_obiuniq* the output of each of tool used for the pre-processing steps are placed. 
+In folders *trimmedSequences*, *mergedSequences* and *dereplicateSamples* the output of each of tool used for the pre-processing steps are placed. When the original approach is selected for the preprocessing an additional folder is created called *adjustedSequences*.
 
-## 6.linearized_files
+## linearizedSequences
 
-The folder called “6.linearized_files” contains sample files (.fasta) only with the sequences that remained after the quality control and the pre-processing steps. These files are used to form a single .fasta (“final_all_samples.fasta”). That is the file PEMA will use from this point onwards for the clustering and taxonomy assignment steps.
+The folder called “linearizedSequences” contains sample files (.fasta) only with the sequences that remained after the quality control and the pre-processing steps. These files are used to form a single .fasta (“final_all_samples.fasta”). That is the file PEMA will use from this point onwards for the clustering and taxonomy assignment steps.
 
-## 7.gene_dependent
+## mainOutput
 
 In this folder, all output from clustering and taxonomy assignment steps is placed. Depending on the marker gene, another folder is created (called "gene_16S" or "gene_COI" correspondingly). 
 
