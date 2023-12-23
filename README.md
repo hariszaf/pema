@@ -5,12 +5,10 @@
 
 # PEMA: 
 ### a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S rRNA, ITS and COI marker genes 
-*PEMA is reposited in* [*Docker Hub*](https://hub.docker.com/r/hariszaf/pema) *as well as in* [*Singularity Hub*](https://singularity-hub.org/collections/2295)
-
+*PEMA is reposited in* [*Docker Hub*](https://hub.docker.com/r/hariszaf/pema) 
 #### PEMA website along with *how to* documentation can be found [**here**](https://hariszaf.github.io/pema_documentation/).
 
 #### For any troubles you may have when running PEMA or for any potential improvevments you would like to suggest, please share on the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community).
-
 
 [![Gitter](https://badges.gitter.im/pema-helpdesk/community.svg)](https://gitter.im/pema-helpdesk/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
@@ -80,10 +78,7 @@ For the latter, a reference tree of 1000 taxa was created using SILVA_132_SSURef
 PEMA has been implemented in [BigDataScript](https://pcingola.github.io/BigDataScript/) programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such features and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine; for example, if PEMA is executed on a personal laptop with 4 cores, it is going to use all four of them. 
 
 Finally, container-based technologies such as Docker and Singularity, make PEMA easy accessible for all operating systems.
-As you can see in the [PEMA_tutorial.pdf](https://github.com/hariszaf/pema/blob/master/help_files/GitHub%20tutorial.pdf), once you have either Docker or Singularity on your computational environment (see below which suits your case better), running PEMA is cakewalk. You can also find the [**PEMA tutorial**](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?usp=sharing) as a Google Slides file.
-
-
-
+As you can see in the [PEMA documentation](https://hariszaf.github.io/pema_documentation/2.running_general/), once you have either Docker or Singularity on your computational environment (see below which suits your case better), running PEMA is cakewalk. You can also find the [**PEMA tutorial**](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?usp=sharing) as a Google Slides file.
 
 ## A container-based tool
 
@@ -217,7 +212,7 @@ In case you are working on Singularity, you may implement both these steps with 
 by running:
 
 ```bash
-singularity run -B /<path_to_analysis_directory>/:/mnt/analysis /<path_to>/pema_v.2.1.4.sif
+singularity run -B /<path_to_analysis_directory>/:/mnt/analysis /<path_to>/pema_v.2.1.5.sif
 ```
 
 The `pema_v.2.1.4.sif` may be called differently according to the pema version you 're using.
@@ -225,9 +220,6 @@ The `pema_v.2.1.4.sif` may be called differently according to the pema version y
 
 
 > For further information, you can always check on [PEMA's website](https://hariszaf.github.io/pema_documentation/2.running_general/).
-
-
-
 
 
 
@@ -263,6 +255,7 @@ The tools & databases that PEMA uses are:
 * BigDataScript programming language - https://pcingola.github.io/BigDataScript/
 * FASTQC - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 * Trimmomatic - http://www.usadellab.org/cms/?page=trimmomatic
+* fastp - https://github.com/OpenGene/fastp
 * Cutadapt - https://cutadapt.readthedocs.io/en/stable/
 * BayesHammer - included in SPAdes - http://cab.spbu.ru/software/spades/
 * PANDAseq - https://github.com/neufeld/pandaseq
