@@ -105,7 +105,7 @@ or Docker on your computing environment.
 In case you are working on Singularity, you may run the following command to get the PEMA Singularity image:
 
 ```
- singularity pull pema_v.2.1.4.sif https://gitlab.com/microbactions/pema-singularity-images-v.2.1.4/-/raw/main/pema_v.2.1.4.sif 
+ singularity pull pema_v.2.1.5.sif https://gitlab.com/microbactions/pema-singularity-images-v.2.1.5/-/raw/main/pema_v.2.1.5.sif 
 ```
 
 This will take some time but once it's downloaded you have PEMA ready to go!
@@ -113,7 +113,7 @@ This will take some time but once it's downloaded you have PEMA ready to go!
 
 Similarly, in case you are working on Docker you need to run: 
 ```bash=
-docker pull hariszaf/pema:v.2.1.4
+docker pull hariszaf/pema:v.2.1.5
 ```
 instead.
 
@@ -136,7 +136,7 @@ In the *analysis directory*, you need to add the following **mandatory** files:
 
    * the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file 
    (you can download it from this repository and then **complete it** according to the needs of your analysis) 
-   > **ATTENTION!** You always need to check that you have the corresponding version of the parameters file with the pema version you are about to use! For example, if you are about to use `pema:v.2.1.4` then, your parameters file needs to be the [`v.2.1.4`](https://github.com/hariszaf/pema/blob/ARMS/analysis_directory/parameters.tsv) 
+   > **ATTENTION!** You always need to check that you have the corresponding version of the parameters file with the pema version you are about to use! For example, if you are about to use `pema:v.2.1.5` then, your parameters file needs to be the [`v.2.1.5`](https://github.com/hariszaf/pema/blob/ARMS/analysis_directory/parameters.tsv) 
 
    * a subdirectory called ***mydata*** where your .fastq.gz files will be located <br />
 
@@ -215,7 +215,7 @@ by running:
 singularity run -B /<path_to_analysis_directory>/:/mnt/analysis /<path_to>/pema_v.2.1.5.sif
 ```
 
-The `pema_v.2.1.4.sif` may be called differently according to the pema version you 're using.
+The `pema_v.2.1.5.sif` may be called differently according to the pema version you 're using.
 
 
 
