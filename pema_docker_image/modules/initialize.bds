@@ -344,7 +344,7 @@ string{} initializeAnalysis(string{} params) {
 
       globalVars{'qualityControl'}  = 'qualityReports'
       globalVars{'trimmomatic'}     = 'trimmedSequences'
-      globalVars{'bayesHammer'}     = 'adjustedSequnces'
+      globalVars{'bayesHammer'}     = 'adjustedSequences'
       globalVars{'spades'}          = 'mergedSequences'
 
       wait
