@@ -24,7 +24,7 @@ string{} readParameterFile(string parameter_file) {
       } else {
          string pname, pvalue
          
-         (pname, pvalue) = line.split('\t')       
+         (pname, pvalue) = line.split('=')
          my_case { pname } = pvalue            # keep 1st elemenet as key (parameter) and the second as its value (parameter's value)
          pname = ''
          pvalue = ''
@@ -344,7 +344,7 @@ string{} initializeAnalysis(string{} params) {
 
       globalVars{'qualityControl'}  = 'qualityReports'
       globalVars{'trimmomatic'}     = 'trimmedSequences'
-      globalVars{'bayesHammer'}     = 'adjustedSequnces'
+      globalVars{'bayesHammer'}     = 'adjustedSequences'
       globalVars{'spades'}          = 'mergedSequences'
 
       wait
