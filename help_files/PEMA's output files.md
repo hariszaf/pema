@@ -20,6 +20,8 @@ In this folder, the user can find one subfolder per sample. The same analyses do
 In this folder, all outputs from clustering and taxonomy assignment steps are placed. Depending on the marker gene, another folder is created (in the format "gene_" + the marker name). 
 In this folder, another subfolder is created and named after the chosen clustering algorithm (e.g. "Swarm" or "vsearch").The outputs found in "Swarm" and in "vsearch" differ quite a bit.
 
+### Difference between clustering algorithms
+
 * ### Swarm 
 ***"all_samples.fasta"*** contains all the sequences found in all samples and their respective unique identifiers based on abundances and sequences. This is the main input file for all clustering algorithms.
 ***"all.denovo.nonchimeras.fasta"*** contains the sequences, their abundances and identifiers after chimera removal
@@ -50,7 +52,7 @@ SWARM also produces two files ***“.stats”*** and ***“.swarms”***. The fi
 ***"allTab_my_taxon_assign.tsv"*** is a copy of "no-singl-allTab.tsv"
 ***"all_sequences_grouped"*** is a copy of "no-singl-allSquences.fa"
 
-
+### Difference between classifiers
 
 The chosen classifier algorithm for the taxonomy assignment step is also going to influence the outputs. Remember, if you have 16S, 18S or ITS you should choose CREST, if you have COI or 12S you should choose RDPClassifier. 
 
