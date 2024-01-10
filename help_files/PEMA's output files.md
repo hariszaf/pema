@@ -91,18 +91,3 @@ If **phylogeny-based taxonomy approach** has also been performed, another folder
 For the phylogeny-based taxonomy assignment, an MSA will be made with both the reference sequences and the query sequences; the final file will contain only the alignment of the query sequences as it ensued. The reference sequences are removed automatically from the final MSA by PEMA which subsequently executes the “convertPhylipToFasta.sh” (which is located in the folder *scripts* of PEMA) manually written program, to convert this final MSA from phylip (.phy) to Fasta (.fasta) format. 
 
 Finally, EPA-ng is performed using the MSA file (“papara_alignment.fasta”, located in the *gene_16S* folder) along with the reference MSA (“raxml_easy_right_refmsa.raxml.reduced.phy.fasta”) and the reference tree (“raxml_easy_right_refmsa.raxml.bestTree”). The last two files, can be found here: *PEMA/tools/silva_132/for_placement/createTreeTheEasyWay*
-
-
-* ### gene_COI
-
-For the COI marker gene, there are two clustering algorithms provided by PEMA but only one taxonomy assignment method. Depending on the chosen clustering algorithm, a subfolder is created in it. Let us assume that the clustering method chosen by the user, was the Swarm clustering algorithm. Then a subfolder in the *7.gene_dependent* folder is created called as the clustering algorithm chosen; in our case *"SWARM"**. 
-
-The file “SWARM_otu_no_chimera.fasta” contains all the MOTUs found.
-
-As SWARM does the clustering and then the chimera removal takes place, in this file only the true MOTU sequences are included. Contrary, MOTU representatives are included in the “SWARM_final_OTU_representative.fasta” .
-
-SWARM also produces two files “.stats” and “.swarms”. The first one is a tab-separated table with one MOTU per row and 8 columns of information, while  the MOTUs are written in the “.swarms” file. In fact, each line of this file, contains as much MOTUs as it is mentioned in the first column of the “.stats” file.
-
-Finally, for the alignment-based taxonomy assignment that is used in the case of the COI marker gene, CREST - LCAClassifier and the MIDORI database, are used and you can find the output of each of the tools used for the pre-processing of the reads.
-
-In the ***tax_assign_swarm_COI.txt*** file, the user can find the final MOTU-table. All MOTUs, are assigned to the species level; each MOTU has a taxonomy assigned and next to each taxon level, the confidence estimate that the MOTU belongs to that taxon is reported. However, the final MOTU-table for the case of the COI marker gene, is not made by the *“tax_assign_swarm_COI.txt”* file, but after a pre-process on that, during which only the assignments that have more than 97% confidence estimate to the MIDORI taxa, are kept. The final MOTU-table is the ***OTU_table_for_significantly_assigned.tsv*** file, where the user can see the taxonomies found with certainty and the samples in which they were recorded.
