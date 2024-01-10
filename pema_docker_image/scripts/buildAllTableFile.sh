@@ -30,7 +30,7 @@ awk '1' header OUTPUT > samples
 
 paste -d "\t" firstCol samples  > allTab.tsv
 
-rm tmp firstCol header samples OUTPUT
+rm tmp firstCol header samples OUTPUT OUTPUT_t
 
 
 # Map Swarm ids to Otu numbers
@@ -53,5 +53,5 @@ cat asvs_representatives_all_samples.fasta | grep -v ">" > seqs
 
 paste -d \\n otus seqs  > asvs_representatives_all_samples.fasta
 
-rm otus seqs 
+rm otus seqs pairs
 

@@ -1,3 +1,4 @@
+#= pema_version: 2.1.5
 #   --------------------------         GENERAL PARAMETERS       --------------------------
 #
 #=     gene:
@@ -7,39 +8,199 @@
 #=        required: True
 #=        validation:
 #=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
-#
 gene	gene_COI
-#
 #
 #=     outputFolderName:
 #=        title: output folder name
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-#
-outputFolderName	swarm_v.2.1.5
-#
+outputFolderName	test_coi_original_vsearch
 #
 #=     EnaData:
 #=        title: ENA data format
-#=        description: PEMA requires the names of the samples to be in ENA format (e.g "ERR1021912_1.fastq.gz"). In that case EnaData would be "Yes". Ohterise, if the raw data are as returned by the Illumina sequencer PEMA has to make this convertion (EnaData: No) and it will return a mapping file linking the initial filenames to those created for the analysis.
+#=        description: PEMA requires the names of the samples to be in ENA format (e.g "ERR1021912_1.fastq.gz"). In that case EnaData would be "Yes". Otherwise, if the raw data are as returned by the Illumina sequencer PEMA has to make this convertion (EnaData: No) and it will return a mapping file linking the initial filenames to those created for the analysis.
 #=        type: boolean
 #=        required: True
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-#
 EnaData	Yes
-#
 #
 #=     sequencerPrefix:
 #=        title: sequencer prefix
 #=        description: Each sequencer has a special combination of letters with which all its reads start with (e.g., "@M0"). Please provide this pattern if the EnaData is "No". 
 #=        type: string
 #=        required: True
-#
 sequencerPrefix	M0
 #
+# ------------------------------------     PRE-PROCESSING : APPROACH     ------------------------------------
+#
+#=     preprocess:
+#=        title: preprocess approach
+#=        description: Since the v.2.1.5 of PEMA the user may choose between either the initial PEMA implementation for pre-processing (Trimmomatic, pandaseq) or the latest one (fastp). If you choose the original approach (Trimmomatic) you should skip the fastp-related parameters and vice-versa."""
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - value: original
+#=          - value: fastp
+preprocess	original
+#
+#   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
+#
+#=     fastpThreads:
+#=        title: fastp threads
+#=        description: Number of threads to be used by fastp
+#=        type: integer
+#=        required: False
+fastpThreads	3
+#
+#=     disable_adapter_trimming:
+#=        title:
+#=        description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
+#=        type: boolean
+#=        required: False
+disable_adapter_trimming	True
+#
+#=     detect_adapter_for_pe:
+#=        title:
+#=        description: Adapter sequence auto-detection.
+#=        type: boolean
+#=        required:
+detect_adapter_for_pe	False
+#
+#=     adapter_sequence:
+#=        title:
+#=        description: the adapter for read1.This is used if R1/R2 are found not overlapped.
+#=        type: string
+#=        required: False
+#=        validation:
+#=          -value: {A, T, C, G}*n
+adapter_sequence	"ATCCTC"
+#
+#=     adapter_sequence_r2:
+#=        title:
+#=        description: the adapter for read2. This is used if R1/R2 are found not overlapped. If not specified, it will be the same as <adapter_sequence>.
+#=        type: string
+#=        required: False
+#=        validation:
+#=         -value: {A, T, C, G}*n
+adapter_sequence_r2	"ATCCTC"
+#
+#=     correction:
+#=        title: Enable base correction in overlapped regions, default is disabled.
+#=        description:
+#=        type:
+#=        required: False
+correction	True
+#
+#=     overrepresentation_analysis:
+#=        title:
+#=        description: enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
+#=        type:
+#=        required: False
+overrepresentation_analysis	False
+#
+#=     overrepresentation_sampling:
+#=        title:
+#=        description: One in (--overrepresentation_sampling) reads will be computed for overrepresentation analysis (1~10000), smaller is slower, default is 20.
+#=        type: integer
+#=        required: False
+overrepresentation_sampling	20 
+#
+#=     overlap_diff_percent_limit
+#=        title:
+#=        description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
+#=        type: integer
+#=        required: False
+overlap_diff_percent_limit	20
+#
+#=      complexity_threshold:
+#=         title:
+#=         description: The threshold for low complexity filter (0~100). Default is 30, which means 30% complexity is required. 
+#=         type: integer
+#=         required: False
+complexity_threshold	30
+#
+#=     length_required:
+#=        title:
+#=        description: Reads shorter than length_required will be discarded, default is 15.
+#=        type: integer
+#=        required: False
+length_required	100
+#
+#=      n_base_limit:
+#=         title:
+#=         description: If one read's number of N base is >n_base_limit, then this read/pair is discarded. Default is 5.
+#=         type:
+#=         required:
+n_base_limit	5
+#
+#=     cut_front:
+#=        title:
+#=        description: Move a sliding window from front (5') to tail, drop the bases in the window if its mean quality < threshold, stop otherwise.
+#=        type:
+#=        required:
+cut_front	False
+#
+#=     cut_front_mean_quality:
+#=        title:
+#=        description: The mean quality requirement option for cut_front. Range: 1~36 default: 20 (Q20).
+#=        type: integer
+#=        required: False
+cut_front_mean_quality	20
+#
+#=     cut_front_window_size:
+#=        title:
+#=        description: The window size option of cut_front. Range: 1~1000, default: 4.
+#=        type: integer
+#=        required: False
+cut_front_window_size	4
+#
+#=     cut_tail:
+#=        title:
+#=        description: Move a sliding window from tail (3') to front, drop the bases in the window if its mean quality < threshold, stop otherwise.
+#=        type: boolean
+#=        required: False
+cut_tail	False
+#
+#=     cut_tail_window_size:
+#=        title:
+#=        description: The window size option of cut_tail. Range: 1~1000, default: 4.
+#=        type: integer
+#=        required: False
+cut_tail_window_size	4
+#
+#=     cut_tail_mean_quality:
+#=        title:
+#=        description: The mean quality requirement option for cut_tail. Range: 1~36 default: 20 (Q20)
+#=        type: integer
+#=        required: False
+cut_tail_mean_quality	20
+#
+#=     cut_right:
+#=        title:
+#=        description: Move a sliding window from front to tail, if meet one window with mean quality < threshold, drop the bases in the window and the right part, and then stop.
+#=        type: boolean
+#=        required: False
+cut_right	False
+#
+#=     cut_right_window_size:
+#=        title:
+#=        description: The window size option of cut_right. Range: 1~1000, default: 4.
+#=        type: integer
+#=        required: False
+cut_right_window_size	5
+#
+#=     cut_right_mean_quality:
+#=        title:
+#=        description: The mean quality requirement option for cut_right. Range: 1~36 default: 20 (Q20)
+#=        type: integer
+#=        required: False
+cut_right_mean_quality	20
+#
+#
+#   --------------------------     PRE-PROCESSING PARAMETERS : original approach     --------------------------
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : Trimmomatic     --------------------------
 #
@@ -51,9 +212,7 @@ sequencerPrefix	M0
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-#
 maxInfo	Yes
-#
 #
 #=     targetLength:
 #=        title: maximum information
@@ -63,9 +222,7 @@ maxInfo	Yes
 #=        validation: 
 #=          - range: 
 #=            min: 1
-#
 targetLength	100
-#
 #
 #=     strictness:
 #=        title: strictness
@@ -76,18 +233,14 @@ targetLength	100
 #=          - range:
 #=            min: 0.0
 #=            max: 1.0
-#
 strictness	0.8
-#
 #
 #=     adapters:
 #=        title: adapters
 #=        description: A Trimmomatic parameter. Suggested adapter sequences are provided for TruSeq2 (as used in GAII machines) and TruSeq3 (as used by HiSeq and MiSeq machines),
 #=        type: string
 #=        required: True
-#
-adapters	TruSeq2-PE.fa
-#
+adapters	adapters_combined_152_unique.fasta
 #
 #=     seedMismatches:
 #=        title: adapters
@@ -97,9 +250,7 @@ adapters	TruSeq2-PE.fa
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-#
 seedMismatches	0
-#
 #
 #=     palindromeClipThreshold:
 #=        title: adapters
@@ -109,9 +260,7 @@ seedMismatches	0
 #=        validation: 
 #=          - range: 
 #=            min: 1 
-#
 palindromeClipThreshold	20
-#
 #
 #=     simpleClipThreshold:
 #=        title: simple ClipThreshold
@@ -121,9 +270,7 @@ palindromeClipThreshold	20
 #=        validation:
 #=          - range: 
 #-             min: 0 
-#
 simpleClipThreshold	30
-#
 #
 #=     leading:
 #=        title: simple ClipThreshold
@@ -133,9 +280,7 @@ simpleClipThreshold	30
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-#
 leading	20
-#
 #
 #=     trailing:
 #=        title: trailing
@@ -145,9 +290,7 @@ leading	20
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-#
 trailing	2
-#
 #
 #=     minlen:
 #=        title: minimum length of the amplicon
@@ -157,9 +300,7 @@ trailing	2
 #=        validation: 
 #=          - range: 
 #=            min: 1
-#
 minlen	100
-#
 #
 #=     threadsTrimmomatic:
 #=        title: minimum length of the amplicon
@@ -169,12 +310,10 @@ minlen	100
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-#
 threadsTrimmomatic	8
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : PANDAseq     --------------------------
-#
 #
 #=     pandaseqAlgorithm:
 #=        title: minimum length of the amplicon
@@ -186,9 +325,7 @@ threadsTrimmomatic	8
 #=          - value: pear 
 #=          - value: stich
 #=          - value: flash
-#
 pandaseqAlgorithm	simple_bayesian
-#
 #
 #=     pandaseqThreads:
 #=        title: pandaseq threads
@@ -198,9 +335,7 @@ pandaseqAlgorithm	simple_bayesian
 #=        validation:
 #=          - range:
 #=            min: 0
-#
 pandaseqThreads	8
-#
 #
 #=     pandaseqMinlen:
 #=        title: pandaseq minimum length
@@ -210,9 +345,7 @@ pandaseqThreads	8
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-#
 pandaseqMinlen	
-#
 #
 #=     minoverlap:
 #=        title: pandaseq minimum overlap
@@ -222,9 +355,7 @@ pandaseqMinlen
 #=        validation:
 #=          - range: 
 #=            min: 0
-#
 minoverlap	1 
-#
 #
 #=     threshold:
 #=        title: threshold
@@ -235,9 +366,7 @@ minoverlap	1
 #=            - range: 
 #=              min:  0.0
 #=              max: 1.0
-#
 threshold	0.6 
-#
 #
 #=     elimination:
 #=        title: elimination
@@ -247,12 +376,9 @@ threshold	0.6
 #=        validation: 
 #=          - value: ''
 #=          - value: -N
-#
 elimination	
 #
-#
 #   --------------------------        CLUSTERING PARAMETERS           --------------------------
-#
 #
 #=     clusteringAlgo:
 #=        title: clustering algorithm
@@ -262,12 +388,9 @@ elimination
 #=        validation:
 #=          - value: algo_Swarm
 #=          - value: algo_vsearch
-#
 clusteringAlgo	algo_Swarm
 #
-#
 #   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
-#
 #
 #=     vsearchThreads:
 #=        title: vsearch threads
@@ -277,9 +400,7 @@ clusteringAlgo	algo_Swarm
 #=        validation:
 #=          - range: 
 #=            min: 0
-#
 vsearchThreads	8
-#
 #
 #=     vsearchId:
 #=        title: vsearch threads
@@ -290,10 +411,43 @@ vsearchThreads	8
 #=          - range: 
 #=            min: 0.0
 #=            max: 1.0
-#
 vsearchId	0.95
 #
-##=     removeOligotons:
+#   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
+#
+#=     d:
+#=        title: d
+#=        description: Maximum number of differences allowed between two amplicons, meaning that two amplicons will be grouped if they hav e integer (or less) differences.
+#=        type: integer
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0 
+d	3
+#
+#=     boundary:
+#=        title: boundary
+#=        description: By default, an ASV with a mass of 3 or more is considered large. Conversely, an ASV is small if it has a mass of less than 3, meaning that it is composed of either one amplicon of abundance 2, or two amplicons of abundance 1. Any positive value greater than 1 can be specified. Using higher boundary values will speed up the second pass, but also reduce the taxonomical resolution of swarm results.
+#=        type: integer
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0
+boundary	
+#
+#=     swarmThreads:
+#=        title: swarmThreads
+#=        description: The number of threads (CPUs) the Swarm algorithm is allowed to use
+#=        type: integer
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 1
+swarmThreads	3
+#
+#  -----------------------------     OLIGOTONS        -------------------------------------
+#
+#=     removeOligotons:
 #=        title: removeOligotons
 #=        description:  Remove the oligotons (OTUs that appear with an abuncance less that numOligotons) ?
 #=        type: boolean
@@ -301,7 +455,6 @@ vsearchId	0.95
 #=        validation:
 #=          - value: Yes
 #=          - value: No
-#
 removeOligotons	Yes
 #
 #=     numOligotons:
@@ -312,89 +465,32 @@ removeOligotons	Yes
 #=        validation:
 #=          - range: 
 #=            min: 1
-#
 numOligotons	5
 #
 #
-#   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
-#
-#
-#=     d:
-#=        title: d
-#=        description: Maximum number of differences allowed between two amplicons, meaning that two amplicons will be grouped if they hav e integer (or less) differences.
-#=        type: integer
-#=        required: True
-#=        validation:
-#=          - range: 
-#=            min: 0 
-#
-d	12
-#
-#
-#=     boundary:
-#=        title: boundary
-#=        description: By default, an ASV with a mass of 3 or more is considered large. Conversely, an ASV is small if it has a mass of less than 3, meaning that it is composed of either one amplicon of abundance 2, or two amplicons of abundance 1. Any positive value greater than 1 can be specified. Using higher boundary values will speed up the second pass, but also reduce the taxonomical resolution of swarm results.
-#=        type: integer
-#=        required: True
-#=        validation:
-#=          - range: 
-#=            min: 0
-#
-boundary	
-#
-#
-#=     swarmThreads:
-#=        title: boundary
-#=        description: The number of threads (CPUs) the Swarm algorithm is allowed to use
-#=        type: integer
-#=        required: True
-#=        validation:
-#=          - range: 
-#=            min: 1
-
-#
-swarmThreads	5
-#
-#
-#=     removeOligotons:
-#=        title: boundary
-#=        description:  Remove the singletons (ASVs that appear only once with abundance equal to 1) ?
-#=        type: boolean
-#=        required: True
-#=        validation:
-#=          - value: Yes
-#=          - value: No
-#
-removeOligotons	Yes
-#
-#
-#
-#   --------------------------     CLASSIFIER-SPECIFIC : CREST      --------------------------
-#
+#   --------------------------     CLASSIFIER       --------------------------
 #
 #=     classifierAlgo:
 #=        title: classifier algorithm
-#=        description:  Select classifier for the taxonomy assignment step. If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
+#=        description:  """Select classifier for the taxonomy assignment step.
+#=                      If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. 
+#=                      If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier)."""
 #=        type: string
 #=        required: True
 #=        validation:
 #=          - value: RDPClassifier
 #=          - value: CREST
-#
-classifierAlgo	RDPClassifier	
-#
+classifierAlgo	RDPClassifier
 #
 #=     taxonomyFolderName:
 #=        title: number of cores for PaPaRa
 #=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail. Parameter required if gene: ['16S', '18S', 'ITS'].
 #=        type: string
 #=        required: True 
-#
 taxonomyFolderName	my_taxon_assign
 #
 #
 #   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
-#
 #
 #=     taxonomyAssignmentMethod:
 #=        title: vsearch threads
@@ -404,9 +500,7 @@ taxonomyFolderName	my_taxon_assign
 #=        validation: 
 #=          - value: alignment
 #=          - value: phylogeny
-#
 taxonomyAssignmentMethod	alignment
-#
 #
 #=     numberOfCoresForPapara:
 #=        title: number of cores for PaPaRa
@@ -416,9 +510,7 @@ taxonomyAssignmentMethod	alignment
 #=        validation:
 #=          - range:
 #=            min: 0
-#
 numberOfCoresForPapara	7
-#
 #
 #=     referenceDb:
 #=        title: reference database 
@@ -431,30 +523,33 @@ numberOfCoresForPapara	7
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
-#
 referenceDb	midori_1
-#
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
 #
+#=     cutadapt:
+#=        title: perform a cutadapt script to 
+#=        description: 
+#=        type: string
+#=        required: False
+#=        validation:
+#=          - value: Yes
+#=          - value: No 
+cutadapt	Yes
 #
 #=     forwardITSPrimer:
 #=        title: forward ITS primer
 #=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
 #=        required: True 
-#
 forwardITSPrimer	GATGAAGAACGYAGYRAA
-#
 #
 #=     reverseITSPrimer:
 #=        title: reverse ITS primer
 #=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
 #=        required: True 
-#
 reverseITSPrimer	CTBTTVCCKCTTCACTCG
-#
 #
 #   --------------------------     GENE-SPECIFIC : COI     --------------------------
 #
@@ -466,12 +561,9 @@ reverseITSPrimer	CTBTTVCCKCTTCACTCG
 #=        validation:
 #=          - range:
 #=            min: 0
-#
 abskew	2
 #
-#
 #   --------------------------     CUSTOM REFERENCE DATABASE     --------------------------
-#
 #
 #=     custom_ref_db:
 #=        title: custom reference database
@@ -481,16 +573,13 @@ abskew	2
 #=        validation:
 #=          - value: Yes
 #=          - value: No
-#
 custom_ref_db	No
-#
 #
 #=     name_of_custom_db:
 #=        title: name of custom database
 #=        description: Name of how custom reference database will be named. Parameter required only if custom_ref_db: Yes
 #=        type: string
 #=        required: True
-#
 name_of_custom_db	
 #
 #
@@ -504,9 +593,7 @@ name_of_custom_db
 #=        validation:
 #=          - value: Yes
 #=          - value: No
-#
 phyloseq	No
-#
 #
 #=     tree:
 #=        title: tree
@@ -516,9 +603,7 @@ phyloseq	No
 #=        validation:
 #=          - value: Yes
 #=          - value: No
-#
 tree	No
-#
 #
 #=     raxmlThreads:
 #=        title: raxml threads
@@ -528,9 +613,7 @@ tree	No
 #=        validation:
 #=          - range: 
 #=              min: 0  
-#
 raxmlThreads	5
-#
 #
 #=     parsTrees:
 #=        title: parsimony trees
@@ -540,9 +623,7 @@ raxmlThreads	5
 #=        validation: 
 #=          - range: 
 #=              min: 0 
-#
 parsTrees	5
-#
 #
 #=     bootstrapTrees:
 #=        title: bootstrap trees
@@ -552,13 +633,10 @@ parsTrees	5
 #=        validation:
 #=          - range: 
 #=              min: 0 
-#
 bootstrapTrees	5
 #
-#
 #   --------------------------     sum up      --------------------------
-
-
+#
 #=     emptyRawDataFile:
 #=        title: empty raw data files 
 #=        description: Move raw data to a new folder
@@ -567,9 +645,7 @@ bootstrapTrees	5
 #=        validation:
 #=          - value: Yes
 #=          - value: No
-#
 emptyRawDataFile	Yes
-#
 #
 #=     emptyCheckpoints:
 #=        title: empty check points
@@ -579,9 +655,7 @@ emptyRawDataFile	Yes
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-#
 emptyCheckpoints	Yes
-#
 #
 #=     getNCBITaxId:
 #=        title: get NCBI Taxonomy Id
@@ -591,10 +665,7 @@ emptyCheckpoints	Yes
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-#
-getNCBITaxId	Yes
-#
-#
+getNCBITaxId	No
 #
 #   --------------------------     PEMA METADATA     --------------------------
 #

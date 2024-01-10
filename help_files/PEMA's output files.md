@@ -3,7 +3,13 @@ Each of the next paragraphs stands for a subdirectory in the output folder that 
 
 ## qualityReports
 
-This folder contains the results of FastQC; the quality control results. In this folder, there is a folder for each sample, as well as an .html file and a .zip file which contain all the information included in the folder with the sample’s output. The sequences of each sample, could get either a “pass”, “warn” or “fail” to each of FASTQC’s tests. 
+The first folder in the output folder contains the reports of sample sequence quality of FastQC or fastp. 
+
+### FastQC
+In this folder, there is a folder for each sample, as well as an .html file and a .zip file which contain all the information included in the folder with the sample’s output. The sequences of each sample, could get either a “pass”, “warn” or “fail” to each of FASTQC’s tests. 
+
+### fastp
+In this folder thera are file reports in .json and .html formats for each sample.
 
 ## Pre-processing steps
 In folders *trimmedSequences*, *mergedSequences* and *dereplicateSamples* the output of each of tool used for the pre-processing steps are placed. When the original approach is selected for the preprocessing an additional folder is created called *adjustedSequences*.

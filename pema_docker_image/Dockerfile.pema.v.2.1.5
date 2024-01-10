@@ -8,35 +8,20 @@
 
 FROM hariszaf/pemabase:v.2.1.2
 LABEL maintainer = "Haris Zafeiropoulos" 
-LABEL contact    = "haris-zaf@hcmr.gr"
-LABEL build_date = "2022-04-06"
+LABEL contact    = "haris.zafeiropoulos@kuleuven.be"
+LABEL build_date = "2023-12-06"
 LABEL version    = "v.2.1.5"
 
 
-# Copy and paste the manually written scripts that PEMA needs
-WORKDIR /home/scripts
-COPY /scripts/ ./
-RUN chmod -R +777 /home/scripts
-
-WORKDIR /home/modules
-COPY /modules/ ./
-RUN chmod -R +777 /home/modules
-
-# Copy and paste the PEMA script!
-WORKDIR /home
-COPY pema_latest.bds .
-
-
-## Make a source of the .bashrc file
-WORKDIR /root
-RUN echo "export PATH=$PATH:/home/tools/BDS/.bds" >> /root/.bashrc
-RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
-
-RUN export PATH=$PATH:/home/tools/BDS/.bds
-ENV PATH=$PATH:/home/tools/BDS/.bds
-
 # Walk around so ncbi-taxonomist can be used in Singularity containers
 RUN ln -s /opt/miniconda3/bin/ncbi-taxonomist /home/tools/ncbi-taxonomist
+
+# Install fastp 
+WORKDIR /usr/local/bin
+RUN wget http://opengene.org/fastp/fastp && \
+    chmod a+x ./fastp && \
+    echo "export PATH=$PATH:/usr/bin/local/fastp"
+
 
 # Set "home" as my working directory when a container starts
 WORKDIR /home
@@ -53,3 +38,25 @@ RUN echo "R version running on PEMA" > pema_R_packages.tsv ; Rscript -e 'R.versi
     echo  "\nRColorBrewer" >> pema_R_packages.tsv ; Rscript -e 'packageVersion("RColorBrewer")' >> pema_R_packages.tsv && \
     echo  "\nphyloseq"     >> pema_R_packages.tsv ; Rscript -e 'packageVersion("phyloseq")' >> pema_R_packages.tsv && \
     echo  "\nShortRead"    >> pema_R_packages.tsv ; Rscript -e 'packageVersion("ShortRead")' >> pema_R_packages.tsv
+
+# Copy and paste the manually written scripts that PEMA needs
+WORKDIR /home/scripts
+COPY /scripts/ ./
+RUN chmod -R +777 /home/scripts
+
+WORKDIR /home/modules
+COPY /modules/ ./
+RUN chmod -R +777 /home/modules
+
+# Copy and paste the PEMA script!
+WORKDIR /home
+RUN cp /home/tools/RDPTools/TRAIN/midori_1/rRNAClassifier.properties /home/tools/RDPTools/TRAIN/12S_v2.0.0/rRNAClassifier.properties 
+COPY pema_latest.bds .
+
+## Make a source of the .bashrc file
+WORKDIR /root
+RUN echo "export PATH=$PATH:/home/tools/BDS/.bds" >> /root/.bashrc
+RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
+
+RUN export PATH=$PATH:/home/tools/BDS/.bds
+ENV PATH=$PATH:/home/tools/BDS/.bds

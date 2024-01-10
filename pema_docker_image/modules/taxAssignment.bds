@@ -9,7 +9,7 @@ string crestAssign(string{} params, string{} globalVars) {
       # 16S and 18S alignment-based taxonomy assignment
       if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
 
-         globalVars{'assignmentPath'}.chdir()
+         params{'assignmentPath'}.chdir()
 
          if ( params{'taxonomyFolderName'}.isDir() ){
             int previousRandomNumber = randInt( 100 )
@@ -110,7 +110,7 @@ string crestAssign(string{} params, string{} globalVars) {
       # Alignment-based taxonomy assignmnet for the ITS marker gene
       } else if (params{'gene'}  == 'gene_ITS') {
 
-         globalVars{'assignmentPath'}.chdir()
+         params{'assignmentPath'}.chdir()
 
          task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast \
             -query all_sequences_grouped.fa \
@@ -133,7 +133,7 @@ string crestAssign(string{} params, string{} globalVars) {
    # Using the CREST algorithm with a custom reference database
    } else {
 
-      globalVars{'assignmentPath'}.chdir()
+      params{'assignmentPath'}.chdir()
 
       task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast \
           -query all_sequences_grouped.fa \
@@ -174,7 +174,7 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    ## getting this tree in  $path/tools/silva_132/for_placement
    ## in order to get our PHYLOGENY based taxonomy assignment we make use of EPA - NG // last version of Evolutionary Placement Algorithm
    
-   globalVars{'assignmentPath'}.chdir()
+   params{'assignmentPath'}.chdir()
    
    wait
    
@@ -245,7 +245,7 @@ string rdpAssign(string{} params, string{} globalVars) {
 
    println('RDPClassifier is about to start assigning your grouped sequences.')
 
-   globalVars{'assignmentPath'}.chdir()
+   params{'assignmentPath'}.chdir()
 
    if ( params{'custom_ref_db'} != 'Yes' ) {
 
