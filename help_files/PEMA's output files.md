@@ -23,7 +23,7 @@ In this folder, another subfolder is created and named after the chosen clusteri
 ### Difference between clustering algorithms
 
 * ### Swarm
-* 
+ 
 ***"all_samples.fasta"*** contains all the sequences found in all samples and their respective unique identifiers based on abundances and sequences. This is the main input file for all clustering algorithms.
 
 ***"all.denovo.nonchimeras.fasta"*** contains the sequences, their abundances and identifiers after chimera removal
@@ -40,8 +40,9 @@ In this folder, another subfolder is created and named after the chosen clusteri
 
 SWARM also produces two files ***“.stats”*** and ***“.swarms”***. The first one is a tab-separated table with one MOTU per row and 8 columns of information, while  the MOTUs are written in the “.swarms” file. In fact, each line of this file, contains as much MOTUs as it is mentioned in the first column of the “.stats” file.
 
+
 * ### vsearch
-* 
+
 ***"all_samples.fasta"*** is also present in "vsearch", but it has been reformatted to comply with the algorithm's requirements: underscores are replaced with ";size=", hence the presence of two files with the same name (the initial one outside "mainOutput" and the reformatted one inside "vsearch" folder)
 
 ***"all.derep.fasta"*** contains the sequences and their abundances in each samples after dereplication
@@ -67,6 +68,7 @@ SWARM also produces two files ***“.stats”*** and ***“.swarms”***. The fi
 ***"allTab_my_taxon_assign.tsv"*** is a copy of "no-singl-allTab.tsv"
 
 ***"all_sequences_grouped"*** is a copy of "no-singl-allSquences.fa"
+
 
 ### Difference between classifiers
 
