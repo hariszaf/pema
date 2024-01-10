@@ -22,34 +22,50 @@ In this folder, another subfolder is created and named after the chosen clusteri
 
 ### Difference between clustering algorithms
 
-* ### Swarm 
+* ### Swarm
+* 
 ***"all_samples.fasta"*** contains all the sequences found in all samples and their respective unique identifiers based on abundances and sequences. This is the main input file for all clustering algorithms.
+
 ***"all.denovo.nonchimeras.fasta"*** contains the sequences, their abundances and identifiers after chimera removal
+
 ***"all_sequences_grouped.fasta"*** contains the sequences, their abundances and identifiers after chimera removal and clustering
 
 ***"amplicon_contingency_table.tsv"*** contains the abundance of each unique sequence (amplicon) across different samples, and the total, after dereplication.
+
 ***"asvs_contingency_table.tsv"*** contains the abundance of each ASV across different samples, and the total.
-***"asvs_representatives_all_samples.fasta"*** contains the abundance of each ASV, merged to its id (e.g. >218a968dfc3034ee2071c2f017aac9b38596ba5f_1286), and its built using "asvs_contingency_table.tsv"
+
+***"asvs_representatives_all_samples.fasta"*** contains the abundance of each ASV, merged to its id (e.g. >218a968dfc3034ee2071c2f017aac9b38596ba5f_1286), and its built using "asvs_contingency_table.tsv".
+
 ***"asvs_repr_with_singletons"*** contains the same information as the above, with similar structure, but still contains oligotons
 
 SWARM also produces two files ***“.stats”*** and ***“.swarms”***. The first one is a tab-separated table with one MOTU per row and 8 columns of information, while  the MOTUs are written in the “.swarms” file. In fact, each line of this file, contains as much MOTUs as it is mentioned in the first column of the “.stats” file.
 
 * ### vsearch
+* 
 ***"all_samples.fasta"*** is also present in "vsearch", but it has been reformatted to comply with the algorithm's requirements: underscores are replaced with ";size=", hence the presence of two files with the same name (the initial one outside "mainOutput" and the reformatted one inside "vsearch" folder)
 
 ***"all.derep.fasta"*** contains the sequences and their abundances in each samples after dereplication
+
 ***"all.preclustered.fasta"*** contains the sequences and their abundances in each samples after dereplication and first clustering step
+
 ***"all.denovo.nonchimeras.fasta"*** contains the sequences and their abundances in each samples after dereplication,first clustering step and chimera removal
+
 ***"all.ref.nonchimeras.fasta"*** is a copy of "all.denovo.nonchimeras.fasta" with a new name
+
 ***"all.nonchimeras.derep.fasta"*** is generated using "all.derep.fasta", "all.preclustered.uc" and "all.ref.nonchimeras.fasta" to perform the second clustering step
+
 ***"all.nonchimeras.fasta"*** contains all clustered sequences, and is generated using "all_samples.fasta", "all.derep.uc" and "all.nonchimeras.derep.fasta" during the second clustering step
 
 ***"all.otus.fasta"*** contains centroid sequences of the clusters (still contains oligotons)
+
 ***"all.otutab.txt"*** is an OTU table containing cluster abundance information (still contains oligotons)
+
 ***"no-singl-allSquences.fa"*** contains all the sequences clustered by vsearch (OTUs) and after oligotons removal
+
 ***"no-singl-allTab.tsv"*** contains the counts of these remaining OTUs
 
 ***"allTab_my_taxon_assign.tsv"*** is a copy of "no-singl-allTab.tsv"
+
 ***"all_sequences_grouped"*** is a copy of "no-singl-allSquences.fa"
 
 ### Difference between classifiers
@@ -59,9 +75,11 @@ The chosen classifier algorithm for the taxonomy assignment step is also going t
 * ### RDPClassifier
 
 In ***"finalTable.tsv"*** file, the user can find the final MOTU-table. The first column is the ASV identifier, the following columns contain the counts of each ASVs in each sample, and the last column contains the taxonomy.
+
 ***"extenedFinalTable.tsv"*** contains the same information with an additional column which is the NCBI ID of the identified taxa.
 
 ***"taxonomies.txt"*** is a table coming from RDPClassifier, with one line per ASV, containing their unique identifier followed by the taxonomic ranks from Kingdom to Species.
+
 ***"tax_assignments.tsv"*** combines the ASV identifiers, with their identified taxonomic ranks and their respective confidence levels.
 
 
