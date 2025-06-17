@@ -19,22 +19,45 @@ done
 
 cd ../linearizedSequences/
 
-# Dereplication at the sample level
-for file in $(ls | grep merged.linearized.fa); 
-do
-   base_filename="${file%%.*}"
-   sed 's/ .*_/./g' $file > $file.tmp.fa
-   grep -v "^>" $file.tmp.fa | \
-   grep -v [^ACGTacgt] | sort -d | uniq -c | \
-   while read abundance sequence ; 
-   do
-      hash=$(printf "${sequence}" | sha1sum); \
-      hash=${hash:0:40}; \
-      printf ">%s_%d_%s\n" "${hash}" "${abundance}" "${sequence}"; 
-   done | \
-   sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > ../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa ; 
-   rm $file.tmp.fa
-done
+## Dereplication at the sample level -- replace following loop with supposingly time efficient
+#for file in $(ls | grep merged.linearized.fa); 
+#do
+#   base_filename="${file%%.*}"
+#   sed 's/ .*_/./g' $file > $file.tmp.fa
+#   grep -v "^>" $file.tmp.fa | \
+#   grep -v [^ACGTacgt] | sort -d | uniq -c | \
+#   while read abundance sequence ; 
+#   do
+#      hash=$(printf "${sequence}" | sha1sum); \
+#      hash=${hash:0:40}; \
+#      printf ">%s_%d_%s\n" "${hash}" "${abundance}" "${sequence}"; 
+#   done | \
+#   sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > ../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa ; 
+#   rm $file.tmp.fa
+#done
+#
+
+# -------------   probably wrong --------
+# for file in *merged.linearized.fa; do
+#     base_filename="${file%%.*}"
+#     awk '/^>/ {next} {gsub(/ .*/, ""); if (/^[ACGT]+$/) print}' "$file" | \
+#     sort | uniq -c | \
+#     awk '{hash = $2; $1 = ""; $2 = ""; printf ">%s_%s%s\n", substr(sha1sum($0), 1, 40), $1, $2}' | \
+#     sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/_/\n/2' > "../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa"
+# done
+
+
+parallel --jobs 4 '
+  base_filename="{= s/\..*// =}";
+  awk "/^>/ {next} {gsub(/ .*/, \"\"); if (/^[ACGTacgt]+$/) print}" {} |
+  sort | uniq -c |
+  while read -r abundance sequence; do
+    hash=$(printf "%s" "$sequence" | sha1sum | cut -d" " -f1)
+    printf ">%s_%d_%s\n" "$hash" "$abundance" "$sequence"
+  done |
+  sort -t "_" -k2,2nr -k1.2,1d |
+  sed -e "s/_/\n/2" > ../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa
+' ::: *merged.linearized.fa
 
 
 cd ../dereplicateSamples/
