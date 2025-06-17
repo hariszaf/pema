@@ -91,7 +91,6 @@ mv parameters.tsv.bck parameters.tsv
 exit
 
 
-
 # #----------------------------
 
 #  Run example case for 18S using vsearch and Silva db
@@ -151,9 +150,4 @@ echo "PEMA for ITS is about to start"
 docker run --rm -v $CWD/ITS/:/mnt/analysis/ hariszaf/pema:$TAG rm -rf /mnt/analysis/    test_*
 docker run --rm -v $CWD/ITS/:/mnt/analysis/ hariszaf/pema:$TAG ./pema_latest.bds
 echo "PEMA for ITS has been completed"
-
-
-
-
-
 

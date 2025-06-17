@@ -15,7 +15,7 @@ gene	gene_18S
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName	test_18s_fastp_vsearch
+outputFolderName	test_18s_fastp_vsearchiCE
 #
 #=     EnaData:
 #=        title: ENA data format

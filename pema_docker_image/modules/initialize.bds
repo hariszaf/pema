@@ -1,7 +1,7 @@
 #!/usr/bin/env bds
 
 
-# Overall notes: 
+# Overall notes:
 # ---------------
 # 1. When you are writing in the bash framework, use single quotes by default; check for exceptions
 # 2. Exception! Use double quotes for bds string functions, e.g bdsSting.split("<pattern>")
@@ -16,21 +16,21 @@ string{} readParameterFile(string parameter_file) {
    string{} my_case
 
    for ( string line : lines ) {
-   
+
       # I need a map with parameteres as keys and their values as values, hence i do not care about lines starting with '#'
       if ( line.startsWith('#') ) {
       continue
-   
+
       } else {
          string pname, pvalue
-         
+
          (pname, pvalue) = line.split('=')
          my_case { pname } = pvalue            # keep 1st elemenet as key (parameter) and the second as its value (parameter's value)
          pname = ''
          pvalue = ''
       }
    }
-   
+
    if ( my_case{'preprocess'} == 'fastp'){
 
       if ( my_case{'disable_adapter_trimming'} == "True") {
@@ -58,7 +58,7 @@ string{} readParameterFile(string parameter_file) {
       if ( my_case{'overrepresentation_analysis'} == "True"){
          my_case{'overrepresentation_analysis'} = "--overrepresentation_analysis"
          if ( my_case{'overrepresentation_sampling'}.isEmpty() ) {
-            my_case{'overlap_diff_percent_limit'} = "--overlap_diff_percent_limit=" + my_case{'overlap_diff_percent_limit'} 
+            my_case{'overlap_diff_percent_limit'} = "--overlap_diff_percent_limit=" + my_case{'overlap_diff_percent_limit'}
          } else {
             my_case{'overrepresentation_sampling'} = "--overrepresentation_sampling=" + my_case{'overrepresentation_sampling'}
             my_case{'overlap_diff_percent_limit'} = ""
@@ -175,21 +175,21 @@ string buildDirectories(string{} params, string{} globalVars){
       } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
          string algo = 'vsearch'
          algo.mkdir()
-      } 
+      }
 
    } else if ( params{'gene'} == 'gene_18S' ) {
 
       println('Marker gene under study 18S.')
       string sixteenPath = globalVars{'genePath'} + '/' + 'gene_18S'
       sixteenPath.chdir()
-      
+
       if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
          string algo = 'Swarm'
          algo.mkdir()
       } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
          string algo = 'vsearch'
          algo.mkdir()
-      } 
+      }
 
    } else if ( params{'gene'} == 'gene_ITS' ) {
       println('My marker gene is ITS.')
@@ -202,21 +202,21 @@ string buildDirectories(string{} params, string{} globalVars){
       } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
          string algo = 'Swarm'
          algo.mkdir()
-      } 
+      }
 
 
    } else if ( params{'gene'} == 'gene_12S' ) {
       println('Marker gene under study 12S.')
       string sixteenPath = globalVars{'genePath'} + '/' + 'gene_12S'
       sixteenPath.chdir()
-      
+
       if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
             string algo = 'Swarm'
             algo.mkdir()
       } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
             string algo = 'vsearch'
             algo.mkdir()
-      } 
+      }
 
     } else if ( params{'gene'} == 'gene_other' ) {
 
@@ -252,7 +252,7 @@ string{} trainClassifier(string{} params, string{} globalVars){
 
    if ( params{'classifierAlgo'} == 'RDPClassifier' ) {
 
-      # Path for user's files 
+      # Path for user's files
       globalVars{'myCustomDbInPema'}  = '/home/tools/RDPTools/TRAIN'
       string checkIfAlreadyTrained    = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
 
@@ -261,7 +261,7 @@ string{} trainClassifier(string{} params, string{} globalVars){
 
          println('The RDPClassifier has been already trained with this custom db. Pema will proceed using that.')
 
-      # If not, train it! 
+      # If not, train it!
       } else {
 
          string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.tsv'
@@ -308,20 +308,20 @@ string{} initializeAnalysis(string{} params) {
 
    # Main paths
    globalVars{'path'}              = '/home'
-   globalVars{'dataPath'}          = '/mnt/analysis/mydata' 
+   globalVars{'dataPath'}          = '/mnt/analysis/mydata'
    globalVars{'parameterFilePath'} = '/mnt/analysis/'
    globalVars{'outputPoint'}       = '/mnt/analysis'
 
    wait
 
-   # If there are Trimlogs in the rawData file, PEMA does not run as it should. 
+   # If there are Trimlogs in the rawData file, PEMA does not run as it should.
    # Hence, we remove them if there are any!
    globalVars{'dataPath'}.chdir() ;
 
    # Check if there is a TrimLog file and IF YES, then delete it
-   sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi 
+   sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi
 
-   # In case that PEMA run on macOS, then some '.DS_Store' files may appear; 
+   # In case that PEMA run on macOS, then some '.DS_Store' files may appear;
    # these need to be removed in every step of the way!
    sys if [ $(find '$globalVars{'dataPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
 
@@ -344,16 +344,16 @@ string{} initializeAnalysis(string{} params) {
 
       globalVars{'qualityControl'}  = 'qualityReports'
       globalVars{'trimmomatic'}     = 'trimmedSequences'
-      globalVars{'bayesHammer'}     = 'adjustedSequences'
+      globalVars{'bayesHammer'}     = 'adjustedSequnces'
       globalVars{'spades'}          = 'mergedSequences'
 
       wait
 
       ## and all the paths for each of them
-      globalVars{'fastqcPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'} 
-      globalVars{'trimoPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'trimmomatic'} 
-      globalVars{'bayesPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'bayesHammer'} 
-      globalVars{'spaPath'}             = globalVars{'outputFilePath'} + '/' + globalVars{'spades'} 
+      globalVars{'fastqcPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'}
+      globalVars{'trimoPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'trimmomatic'}
+      globalVars{'bayesPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'bayesHammer'}
+      globalVars{'spaPath'}             = globalVars{'outputFilePath'} + '/' + globalVars{'spades'}
       globalVars{'unzipPath'}           = globalVars{'spaPath'} + '/' + 'unzip'
 
    } else {
@@ -367,7 +367,7 @@ string{} initializeAnalysis(string{} params) {
 
    wait
 
-   # Check if an output folder called with the same name as the one given in the 'parameters' file, 
+   # Check if an output folder called with the same name as the one given in the 'parameters' file,
    # has already been created from previous runs
    if ( params{'outputFolderName'}.isDir() ) {
       println 'This ouput file already exists'
@@ -386,17 +386,17 @@ string{} initializeAnalysis(string{} params) {
    # And create an output file for each pipeline step - if you run PEMA for the first time for a specific experiment
    globalVars{'outputFilePath'}.chdir()
 
-   # Make a list with all the directory names that can be found in the output directory 
-   string[] outputFiles = globalVars{'outputFilePath'}.dir()         
+   # Make a list with all the directory names that can be found in the output directory
+   string[] outputFiles = globalVars{'outputFilePath'}.dir()
 
    # If that list is empty, then create the directories mentioned above
    if ( outputFiles.isEmpty() == true) {
-      
+
       globalVars{'geneDependent'}.mkdir()
       globalVars{'outputPerSample'}.mkdir()
       globalVars{'qualityControl'}.mkdir()
       globalVars{'dereplicate'}.mkdir()
-      globalVars{'linearized'}.mkdir() 
+      globalVars{'linearized'}.mkdir()
 
       if (params{'preprocess'} == "original" ) {
          globalVars{'trimmomatic'}.mkdir()
@@ -442,5 +442,6 @@ string{} initializeAnalysis(string{} params) {
    }
 
    return(globalVars)
+
 }
 
