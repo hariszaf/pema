@@ -32,7 +32,7 @@ string preprocessWithFastp(string{} params, string{} globalVars){
             println('readF is: ' + readF)
             println('readR is: ' + readR)
 
-            task /usr/local/bin/fastp --in1=$globalVars{'dataPath'}/$readF --in2=$globalVars{'dataPath'}/$readR \
+            task fastp --in1=$globalVars{'dataPath'}/$readF --in2=$globalVars{'dataPath'}/$readR \
                 --out1=$globalVars{'fastpTrimmedPath'}/$readF \
                 --out2=$globalVars{'fastpTrimmedPath'}/$readR \
                 --merge \
@@ -69,15 +69,21 @@ string preprocessWithFastp(string{} params, string{} globalVars){
 # Function to run FASTQC
 string qualityControl(string{} params, string{} globalVars) {
 
+    println('\n\n FastQC.. \n')
+
+
     # now FASTQC runs for all files
     string[] rawFiles = globalVars{'dataPath'}.dir()
     for ( string rawFile : rawFiles ) {
-        println(rawFile)
-        task $globalVars{'path'}/tools/fastqc/FastQC/fastqc --outdir $globalVars{'fastqcPath'}  $globalVars{'dataPath'}/$rawFile
-    }
-    wait
-    println('FastQC has been completed!')
 
+        println(rawFile)
+        task fastqc --outdir $globalVars{'fastqcPath'}  $globalVars{'dataPath'}/$rawFile
+    }
+
+    wait
+
+    string msg = "\n\n" + "<< FastQC has been completed!" + "\n\n"
+    println(msg)
 
     # now i create a checkpoint and read again the parameters file.
     # this way if i change any of my parameters, i can do only the steps from here and after with the new ones.
@@ -164,8 +170,10 @@ string trimSeqs(string{} params, string{} globalVars){
 
                 println('You hace selected Max INFO')
                 wait
-                task /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
-                    -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+                #  /usr/lib/jvm/java-8-openjdk-amd64/bin/
+                # -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+                task java \
+                    -jar $globalVars{'trimmomatic_jar'} PE \
                     -threads $params{'threadsTrimmomatic'} \
                     -trimlog TrimLog $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
                     $globalVars{'trimoPath'}/filtered_max_$readF.1P.fastq.gz \
@@ -185,8 +193,10 @@ string trimSeqs(string{} params, string{} globalVars){
 
                 print('You have selected no Max INFO' + '\n')
 
-                task /usr/lib/jvm/java-8-openjdk-amd64/bin/java \
-                    -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+                # /usr/lib/jvm/java-8-openjdk-amd64/bin/
+                # -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
+                task java \
+                    -jar $globalVars{'trimmomatic_jar'} PE \
                     -threads $params{'threadsTrimmomatic'} \
                     -trimlog TrimLog2 $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
                     $globalVars{'trimoPath'}/filtered_$readF.1P.fastq.gz \
@@ -206,7 +216,8 @@ string trimSeqs(string{} params, string{} globalVars){
     }
 
     wait
-    println('Trimmomatic  is done')
+    string msg = "\n\n" + "Trimmomatic  is done" + "\n\n"
+    println(msg)
 
 
     #  Make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
@@ -244,40 +255,62 @@ string adjustSeqs(string{} params, string{} globalVars){
     # And then make a new list with the files that remained 
     string[] finalTrimos = globalVars{'trimoPath'}.dir()
 
+    # Set to store unique prefixes
+    string[] uniquePrefixes
+
+    for (string file : finalTrimos) {
+        # Remove the paired-end and extension part to isolate the prefix
+        string prefix = file.split("_1\\.fastq\\.gz\\.1P\\.fastq\\.gz")[0]
+        if (prefix == file) {
+            prefix = file.split("_2\\.fastq\\.gz\\.2P\\.fastq\\.gz")[0]
+        }
+
+        # Add to list only if not already present
+        if (! uniquePrefixes.has(prefix)) {
+            uniquePrefixes.add(prefix)
+        }
+    }
+
     string readBayesF
     string readBayesR
     string newDir
     string newFile
+    string[] newName
     wait
 
-    for ( string trimmed : finalTrimos ) {
-        
-        # As in Trimmomatic step, we need to know the forward and the reverse file
-        string trimCheck = trimmed.split("_2\.fastq\.gz\.2P\.fastq.\gz")[0]
 
-        if ( trimmed == trimCheck ) {
-            readBayesF = trimmed
-            println('this is readBayesF:' + readBayesF)
-            } else {
-            readBayesR = trimmed
-            println('this is readBayesR:' + readBayesR)
-            }
+    for (string prefix : uniquePrefixes) {
+
+        readBayesF = prefix + "_1.fastq.gz.1P.fastq.gz"
+        readBayesR = prefix + "_2.fastq.gz.2P.fastq.gz"
 
         if ( readBayesF.isEmpty() == false && readBayesR.isEmpty() == false ) {
             
             if ( params{'maxInfo'} == 'Yes' ) {
-                string newName = trimCheck.split("filtered\_max\_")
-                println(">>>> HERE IS A NEWNAME:  " + newName)
-                newDir = newName.substr(3, newName.length()-1) ;
-               #  newDir = newName.split("")
-                println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
-
+                newName = prefix.split("filtered\_max\_")
             } else if ( params{'maxInfo'} == 'No' ) {
-                string newName = trimCheck.split("filtered_")
-                newDir = newName.substr(3, newName.length()-1) ;
-                println('trimCheck: ' + trimCheck + '\n' + 'newDir: ' + newDir)
+                newName = prefix.split("filtered_")
             }
-            
+            newDir = newName[1]
+
+            println("===================================")
+            println("readBayesF:" + readBayesF)
+            println("readBayesR:" + readBayesR)
+            println("newName:" + newName)
+            println("newDir:" + newDir)
+            println("===================================")
+
+
+            string check = globalVars{'bayesPath'} + "/" + newDir
+            println(check)
+            if (check.exists() && check.isDir()) {
+                string msg = "\n\n" + " **** Directory already exists for sample: " + newDir + "\n\n"
+                println(msg)
+                continue
+            } else {
+                println(">>>>>>>>>>> run forest!")
+            }
+
             # Working where the output of BayesHammer is located!
             globalVars{'bayesPath'}.chdir() ; 
             newDir.mkdir() ;
@@ -290,7 +323,8 @@ string adjustSeqs(string{} params, string{} globalVars){
             # And execute the BayesHammer algorithm that it is in SPAdes
             println('readBayesF: ' + readBayesF +'\n' + 'and readBayesR: ' + readBayesR)
             
-            task $globalVars{'path'}/tools/SPAdes/SPAdes-3.14.0/bin/spades.py --only-error-correction \
+            # $globalVars{'path'}/tools/SPAdes/SPAdes-3.14.0/bin/
+            task spades.py --only-error-correction \
                 --threads $params{'threadsTrimmomatic'} \
                 -o $globalVars{'bayesPath'}/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
 
@@ -332,9 +366,9 @@ string merging(string{} params, string{} globalVars){
     # Make a list with all the folders that exist in Bayes Hammer output folder - only sample names (e.g. SRR1643855 ) 
     string[] correct = globalVars{'bayesPath'}.dir()
     correct.remove('input_dataset.yaml') ;
-    correct.remove( 'params.txt' ) ;
+    correct.remove('params.txt') ;
     correct.remove('spades.log') ;
-    correct.remove( 'tmp')
+    correct.remove('tmp')
 
     # 'Create' the names of forward and reverse files each time
     string baseName
@@ -394,11 +428,11 @@ string merging(string{} params, string{} globalVars){
 
         # Execute pandaseq algorithm for merging 
         if ( params{'pandaseqMinlen'} !=  '' ) {
-            task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
+            task pandaseq -f $forwardFile -r $reverseFile -6 \
                 -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
                 -t $params{'threshold'} -l $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq
         } else {
-            task $globalVars{'path'}/tools/PANDAseq/bin/pandaseq -f $forwardFile -r $reverseFile -6 \
+            task pandaseq -f $forwardFile -r $reverseFile -6 \
                 -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
                 -t $params{'threshold'} $params{'elimination'}  > $correctFile.merged.fastq
         }
@@ -540,11 +574,11 @@ string swarmDereplicate(string{} params, string{} globalVars){
     if (params{'preprocess'} == "original") {
 
         globalVars{'unzipPath'}.chdir()
-        sys bash $globalVars{'path'}/scripts/dereplicateSwarm.sh
+        sys bash $globalVars{'path'}/scripts/dereplicateSwarm.sh original
 
     } else {
         globalVars{'fastpMergedPath'}.chdir()
-        sys bash $globalVars{'path'}/scripts/dereplicateFastpSwarm.sh
+        sys bash $globalVars{'path'}/scripts/dereplicateSwarm.sh fastp
     }
 
     println('Sample files have been dereplicated and a contingency table for the amplicons has been built.')
