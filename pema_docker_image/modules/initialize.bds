@@ -1,7 +1,7 @@
 #!/usr/bin/env bds
 
 
-# Overall notes: 
+# Overall notes:
 # ---------------
 # 1. When you are writing in the bash framework, use single quotes by default; check for exceptions
 # 2. Exception! Use double quotes for bds string functions, e.g bdsSting.split("<pattern>")
@@ -11,250 +11,245 @@
 # Function to build a map (==dictionary) out of the parameters.tsv file
 string{} readParameterFile(string parameter_file) {
 
-   string parameters_file = parameter_file
-   lines := parameters_file.readLines()
-   string{} my_case
+    string parameters_file = parameter_file
+    lines := parameters_file.readLines()
 
-   for ( string line : lines ) {
-   
-      # I need a map with parameteres as keys and their values as values, hence i do not care about lines starting with '#'
-      if ( line.startsWith('#') ) {
-      continue
-   
-      } else {
-         string pname, pvalue
-         
-         (pname, pvalue) = line.split('\t')       
-         my_case { pname } = pvalue            # keep 1st elemenet as key (parameter) and the second as its value (parameter's value)
-         pname = ''
-         pvalue = ''
-      }
-   }
-   
-   # return the map
-   return(my_case)
+    string{} my_case
+    for (string line : lines) {
 
-}
+        # I need a map with parameteres as keys and their values as values, hence i do not care about lines starting with '#'
+        if (line.startsWith('#')) {
+            continue
 
-# Function to initialize a PEMA analysis
-string{} initializeAnalysis(string{} params) {
+        } else {
+            string pname, pvalue
 
-   string{} globalVars
+            (pname, pvalue) = line.split('=')
+            my_case {pname} = pvalue            # keep 1st elemenet as key (parameter) and the second as its value (parameter's value)
+            pname = ''
+            pvalue = ''
+        }
+    }
 
-   wait
+    if (my_case{'preprocess'} == 'fastp'){
 
-   # Main paths
-   globalVars{'path'}              = '/home'
-   globalVars{'dataPath'}          = '/mnt/analysis/mydata' 
-   globalVars{'parameterFilePath'} = '/mnt/analysis/'
-   globalVars{'outputPoint'}       = '/mnt/analysis'
+        if (my_case{'disable_adapter_trimming'} == "True") {
 
-   wait
+            my_case{'disable_adapter_trimming'} = "--disable_adapter_trimming"
+            my_case{'detect_adapter_for_pe'}    = ""
+            my_case{'adapter_sequence'}         = ""
+            my_case{'adapter_sequence_r2'}      = ""
 
-   # If there are Trimlogs in the rawData file, PEMA does not run as it should. 
-   # Hence, we remove them if there are any!
-   globalVars{'dataPath'}.chdir() ;
+        } else {
 
-   # Check if there is a TrimLog file and IF YES, then delete it
-   sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi 
+            my_case{'disable_adapter_trimming'} = ""
 
-   # In case that PEMA run on macOS, then some '.DS_Store' files may appear; 
-   # these need to be removed in every step of the way!
-   sys if [ $(find '$globalVars{'dataPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
+            if (my_case{'detect_adapter_for_pe'} == "True"){
+                my_case{'detect_adapter_for_pe'} = "--detect_adapter_for_pe"
+                my_case{'adapter_sequence'}      = ""
+                my_case{'adapter_sequence_r2'}   = ""
+            } else {
+                my_case{'detect_adapter_for_pe'} = ""
+                my_case{'adapter_sequence'}      = "--adapter_sequence=" + my_case{'adapter_sequence'}
+                my_case{'adapter_sequence_r2'}   = '--adapter_sequence_r2' + my_case{'adapter_sequence_r2'}
+            }
+        }
 
-   # I create a file where the pipeline's output will be saved
-   globalVars{'outputPoint'}.chdir()
-   globalVars{'analysisName'} = params{'outputFolderName'}
+        if (my_case{'correction'} == "True"){
+            my_case{'correction'} = "--correction"
+        } else {
+            my_case{'correction'} = ""
+        }
 
-   # Here are all the directories as variables that i will use
-   globalVars{'qualityControl'}  = '1.qualityControl'
-   globalVars{'trimmomatic'}     = '2.trimmingSequences'
-   globalVars{'bayesHammer'}     = '3.adjustingSequnces'
-   globalVars{'spades'}          = '4.mergingPairedEndFiles'
-   globalVars{'dereplicate'}     = '5.dereplicateSamples'
-   globalVars{'linearized'}      = '6.linearizedSequences'
-   globalVars{'geneDependent'}   = '7.mainOutput'
-   globalVars{'outputPerSample'} = '8.outputPerSample'
+        if (my_case{'overrepresentation_analysis'} == "True"){
 
-   wait
-   
-   ## and all the paths for each of them
-   globalVars{'outputFilePath'}      = globalVars{'outputPoint'}    + '/' + params{'outputFolderName'}
-   globalVars{'fastqcPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'} 
-   globalVars{'trimoPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'trimmomatic'} 
-   globalVars{'bayesPath'}           = globalVars{'outputFilePath'} + '/' + globalVars{'bayesHammer'} 
-   globalVars{'spaPath'}             = globalVars{'outputFilePath'} + '/' + globalVars{'spades'} 
-   globalVars{'derePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'dereplicate'} 
-   globalVars{'linearPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'linearized'} 
-   globalVars{'genePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'geneDependent'} 
-   globalVars{'outputPerSamplePath'} = globalVars{'outputFilePath'} + '/' + globalVars{'outputPerSample'}
-   globalVars{'unzipPath'}           = globalVars{'spaPath'} + '/' + 'unzip'
+            my_case{'overrepresentation_analysis'} = "--overrepresentation_analysis"
 
-   wait
+            if (my_case{'overrepresentation_sampling'}.isEmpty()) {
+                my_case{'overlap_diff_percent_limit'} = "--overlap_diff_percent_limit=" + my_case{'overlap_diff_percent_limit'}
+            } else {
+                my_case{'overrepresentation_sampling'} = "--overrepresentation_sampling=" + my_case{'overrepresentation_sampling'}
+                my_case{'overlap_diff_percent_limit'}  = ""
+            }
+        } else {
+            my_case{'overrepresentation_analysis'} = ""
+            my_case{'overrepresentation_sampling'} = ""
+            my_case{'overlap_diff_percent_limit'}  = ""
+        }
+        if (my_case{'cut_right'} == "True"){
+            my_case{'cut_right'} = "--cut_right"
+            my_case{'cut_right_window_size'} = "--cut_right_window_size=" + my_case{'cut_right_window_size'}
+            my_case{'cut_right_mean_quality'} = "cut_right_mean_quality=" + my_case{'cut_right_mean_quality'}
+        } else {
+            my_case{'cut_right'} = ""
+            my_case{'cut_right_window_size'} = ""
+            my_case{'cut_right_mean_quality'} = ""
+        }
+        if (my_case{'cut_tail'} == "True"){
+            my_case{'cut_tail'} = "--cut_tail"
+            my_case{'cut_tail_window_size'}  = "--cut_tail_window_size=" + my_case{'cut_tail_window_size'}
+            my_case{'cut_tail_mean_quality'} = "--cut_tail_mean_quality=" + my_case{'cut_tail_mean_quality'}
+        } else {
+            my_case{'cut_tail'} = ""
+            my_case{'cut_tail_window_size'}  = ""
+            my_case{'cut_tail_mean_quality'} = ""
+        }
+        if (my_case{'cut_front'} == "True"){
+            my_case{'cut_front'} = "--cut_front"
+            my_case{'cut_front_mean_quality'} = "--cut_front_mean_quality=" + my_case{'cut_front_mean_quality'}
+            my_case{'cut_front_window_size'}  = "--cut_front_window_size=" + my_case{'cut_front_window_size'}
+        } else {
+            my_case{'cut_front'} = ""
+            my_case{'cut_front_mean_quality'} = ""
+            my_case{'cut_front_window_size'}  = ""
+        }
+        if (my_case{'n_base_limit'}.isEmpty()){
+            my_case{'n_base_limit'} = ""
+        } else {
+            my_case{'n_base_limit'} = "--n_base_limit=" + my_case{'n_base_limit'}
+        }
+        if (my_case{'length_required'}.isEmpty()){
+            my_case{'length_required'} = ""
+        } else {
+            my_case{'length_required'} = "--length_required=" + my_case{'length_required'}
+        }
+        if (my_case{'complexity_threshold'}.isEmpty()){
+            my_case{'complexity_threshold'} = ""
+        } else {
+            my_case{'complexity_threshold'} = "--complexity_threshold=" + my_case{'complexity_threshold'}
+        }
+    }
 
-   # Check if an output folder called with the same name as the one given in the 'parameters' file, 
-   # has already been created from previous runs
-   if ( params{'outputFolderName'}.isDir() ) {
-      println 'This ouput file already exists'
+    string algo1 = my_case{'clusteringAlgo'}
+    if (parameters_file.startsWith("/mnt/analysis")) {
+        my_case{'assignmentPath'} = "/mnt/analysis/" + my_case{'outputFolderName'} + '/mainOutput/' + my_case{'gene'} +  '/' + algo1
+    } else {
+        my_case{'assignmentPath'} = parameters_file.dirName() + "/" + my_case{'outputFolderName'} + '/mainOutput/' + my_case{'gene'} +  '/' + algo1
+    }
 
-   } else {
+    if (my_case{'gene'} == "gene_16S") {
+        if ((my_case{'referenceDb'} == "midori_1") || (my_case{'referenceDb'} == "midori_2") || (my_case{'referenceDb'} == "pr2") || (my_case{'referenceDb'} == "unite")) {
+            println('Your reference database of choice is not a 16S related one. Please choose among Silva_132, Silva_138 or a custom one.')
+            exit 1
+        }
+    }
 
-      # if it is not, create a file with its name
-      params{'outputFolderName'}.mkdir()
-      println('A new output files was just created!')
+    if (my_case{'gene'} == "gene_COI") {
+        if ((my_case{'referenceDb'} != "midori_1") && (my_case{'referenceDb'} != "midori_2")  && (my_case{'custom_ref_db'} != "Yes")) {
+            println('Your reference database of choice is not a COI related one. Please choose among midori_1, midori_2 or a custom one.')
+            exit 1
+        }
+    }
 
-      # Make all output (sub)directories having 777 permissions; ; the reason for this is that
-      sys chmod 777 $globalVars{'outputFilePath'} -R
-      wait
-   }
+    if (my_case{'gene'} == "gene_12S" || my_case{'gene'} == "gene_ITS") {
+        if (my_case{'clusteringAlgo'} != "swarm") {
+            println('PEMA support only the Swarm algorithm for the clustering step for the case of ' + my_case{'gene'} + ' marker gene. Please set swarm as your clusteringAlgo.')
+            exit 1
+        }
+    }
 
-   # And create an output file for each pipeline step - if you run PEMA for the first time for a specific experiment
-   globalVars{'outputFilePath'}.chdir()
+    # return the map
+    return (my_case)
 
-   # Make a list with all the directory names that can be found in the output directory 
-   string[] outputFiles = globalVars{'outputFilePath'}.dir()         
-
-   # If that list is empty, then create the directories mentioned above
-   if ( outputFiles.isEmpty() == true ) {
-
-      # Create all the output directories
-      globalVars{'qualityControl'}.mkdir()
-      globalVars{'trimmomatic'}.mkdir()
-      globalVars{'bayesHammer'}.mkdir()
-      globalVars{'spades'}.mkdir()
-      globalVars{'dereplicate'}.mkdir()
-      globalVars{'linearized'}.mkdir() 
-      globalVars{'geneDependent'}.mkdir()
-      globalVars{'outputPerSample'}.mkdir()
-   }
-
-   # Gene dependent directory
-   globalVars{'genePath'}.chdir()
-   params{'gene'}.mkdir()
-
-
-   # Convert Illumina data to ENA format
-   if ( params{'EnaData'} == 'No' ) {
-      sys bash $globalVars{'path'}/scripts/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
-   }
-
-   # IMPORTANT! Module to train classifiers is enabled through this statement
-   if ( params{'custom_ref_db'} == 'Yes' ){
-       string{} globalVars = trainClassifier(params, globalVars)
-   }
-
-   # Taxonomy assignment path
-   string algoCluster1 = params{'clusteringAlgo'}
-   string algo1 = algoCluster1.split('_')[1]
-   globalVars{'assignmentPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + algo1
-
-   # Keep the classifer as a global var so you can change it if needed
-   globalVars{'classifierAlgo'} = params{'classifierAlgo'}
-
-
-   # Keep the adapters file to be used from Trimmomatic as a global var
-   if ( params{'adapters'} != 'TruSeq3-PE-2.fa' && params{'adapters'} != 'NexteraPE-PE.fa' && params{'adapters'} != 'TruSeq2-PE.fa' && params{'adapters'} != 'TruSeq3-PE.fa') {
-      globalVars{'adapterFile'} = globalVars{'parameterFilePath'} + '/' + params{'adapters'}
-   } else {
-      globalVars{'adapterFile'} = globalVars{'path'} + '/tools/Trimmomatic/Trimmomatic-0.38/adapters/' + params{'adapters'}
-   }
-
-   return(globalVars)
 }
 
 # Function to build directories according to user's input
 string buildDirectories(string{} params, string{} globalVars){
 
-   globalVars{'genePath'}.chdir()
+    globalVars{'genePath'}.chdir()
 
-   if ( params{'gene'} == 'gene_COI' ) {
-      println('Marker gene under study COI.')
-      string coiPath = globalVars{'genePath'} + '/' + 'gene_COI'
-      coiPath.chdir()
+    if (params{'gene'} == 'gene_COI') {
+        println('Marker gene under study COI.')
+        string coiPath = globalVars{'genePath'} + '/' + 'gene_COI'
+        coiPath.chdir()
 
-      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
-         string algo = 'crop'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'Swarm'
-         algo.mkdir()
-      }
-
-   } else if ( params{'gene'} == 'gene_16S' ) {
-      println('Marker gene under study 16S.')
-      string sixteenPath = globalVars{'genePath'} + '/' + 'gene_16S'
-      sixteenPath.chdir()
-
-      if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'Swarm'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
-         string algo = 'vsearch'
-         algo.mkdir()
-      } 
-
-   } else if ( params{'gene'} == 'gene_18S' ) {
-      println('Marker gene under study 18S.')
-      string sixteenPath = globalVars{'genePath'} + '/' + 'gene_18S'
-      sixteenPath.chdir()
-      
-      if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'Swarm'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
-         string algo = 'vsearch'
-         algo.mkdir()
-      } 
-
-   } else if ( params{'gene'} == 'gene_ITS' ) {
-      println('My marker gene is ITS.')
-      string itsPath = globalVars{'genePath'} + '/' + 'gene_ITS'
-      itsPath.chdir()
-
-      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
-         string algo = 'crop'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'Swarm'
-         algo.mkdir()
-      } 
-
-
-   } else if ( params{'gene'} == 'gene_12S' ) {
-      println('Marker gene under study 12S.')
-      string sixteenPath = globalVars{'genePath'} + '/' + 'gene_12S'
-      sixteenPath.chdir()
-      
-      if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-            string algo = 'Swarm'
+        if (params{'clusteringAlgo'}  == 'algo_CROP') {
+            string algo = 'crop'
             algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
+        } else if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
+            algo.mkdir()
+        } else {
+            println("PEMA cannot handle COI marker gene with the clustering algorithm of your choice. Please use Swarm.")
+            exit 1
+        }
+
+    } else if (params{'gene'} == 'gene_16S') {
+        println('Marker gene under study 16S.')
+        string sixteenPath = globalVars{'genePath'} + '/' + 'gene_16S'
+        sixteenPath.chdir()
+
+        if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
+            algo.mkdir()
+        } else if (params{'clusteringAlgo'} == 'vsearch') {
             string algo = 'vsearch'
             algo.mkdir()
-      } 
+        }
 
-    } else if ( params{'gene'} == 'gene_other' ) {
+    } else if (params{'gene'} == 'gene_18S') {
 
-      println('My marker gene is not among the 4 PEMA supports by default.')
+        println('Marker gene under study 18S.')
+        string sixteenPath = globalVars{'genePath'} + '/' + 'gene_18S'
+        sixteenPath.chdir()
 
-      string newMarkerGenePath = globalVars{'genePath'} + '/' + 'gene_new'
-      newMarkerGenePath.chdir()
+        if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
+            algo.mkdir()
+        } else if (params{'clusteringAlgo'} == 'vsearch') {
+            string algo = 'vsearch'
+            algo.mkdir()
+        }
 
-      if ( params{'clusteringAlgo'}  == 'algo_CROP' ) {
-         string algo = 'crop'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_Swarm' ) {
-         string algo = 'Swarm'
-         algo.mkdir()
-      } else if ( params{'clusteringAlgo'} == 'algo_vsearch' ) {
-         string algo = 'vsearch'
-         algo.mkdir()
-      }
-   }
-   # Again make everything 777
-   sys chmod 777 $globalVars{'outputFilePath'} -R
+    } else if (params{'gene'} == 'gene_ITS') {
+        println('My marker gene is ITS.')
+        string itsPath = globalVars{'genePath'} + '/' + 'gene_ITS'
+        itsPath.chdir()
 
-   return 'ok'
+        if (params{'clusteringAlgo'}  == 'algo_CROP') {
+            string algo = 'crop'
+            algo.mkdir()
+        } else if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
+            algo.mkdir()
+        }
+
+
+    } else if (params{'gene'} == 'gene_12S') {
+        println('Marker gene under study 12S.')
+        string sixteenPath = globalVars{'genePath'} + '/' + 'gene_12S'
+        sixteenPath.chdir()
+
+        if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
+            algo.mkdir()
+        } else if (params{'clusteringAlgo'} == 'vsearch') {
+            string algo = 'vsearch'
+            algo.mkdir()
+        }
+
+    } else if (params{'gene'} == 'gene_other') {
+
+        println('My marker gene is not among the 4 PEMA supports by default.')
+
+        string newMarkerGenePath = globalVars{'genePath'} + '/' + 'gene_new'
+        newMarkerGenePath.chdir()
+
+        if (params{'clusteringAlgo'}  == 'algo_CROP') {
+            string algo = 'crop'
+            algo.mkdir()
+        } else if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
+            algo.mkdir()
+        } else if (params{'clusteringAlgo'} == 'vsearch') {
+            string algo = 'vsearch'
+            algo.mkdir()
+        }
+    }
+    # Again make everything 777
+    sys chmod 777 $globalVars{'outputFilePath'} -R
+
+    return 'ok'
 
 }
 
@@ -262,53 +257,230 @@ string buildDirectories(string{} params, string{} globalVars){
 # Function to train classifier based on a local reference database if required
 string{} trainClassifier(string{} params, string{} globalVars){
 
-   globalVars{'customDbFilesPath'} = '/mnt/analysis/custom_ref_db'
-   globalVars{'customDbFilesPath'}.chdir() ;
+    if (globalVars{'environment'} == "container"){
+        globalVars{'customDbFilesPath'} = '/mnt/analysis/custom_ref_db'
+    } else {
+        globalVars{'customDbFilesPath'} = globalVars{'tools'} + '/custom_ref_db'
+    }
+    globalVars{'customDbFilesPath'}.chdir()
 
-   if ( params{'classifierAlgo'} == 'RDPClassifier' ) {
+    if (params{'classifierAlgo'} == 'RDPClassifier') {
 
-      # Path for user's files 
-      globalVars{'myCustomDbInPema'}  = '/home/tools/RDPTools/TRAIN'
-      string checkIfAlreadyTrained    = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
+        # Path for user's files
+        globalVars{'myCustomDbInPema'}  = globalVars{'tools'} + "/RDPTools/TRAIN"
+        string checkIfAlreadyTrained    = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
 
-      # Check if RDPClassifier has already been trained with this custom DB
-      if ( checkIfAlreadyTrained.isDir() ) {
+        # Check if RDPClassifier has already been trained with this custom DB
+        if (checkIfAlreadyTrained.isDir()) {
 
-         println('The RDPClassifier has been already trained with this custom db. Pema will proceed using that.')
+            println('The RDPClassifier has been already trained with this custom db. Pema will proceed using that.')
 
-      # If not, train it! 
-      } else {
+            # If not, train it!
+        } else {
 
-         string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.tsv'
-         string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
+            string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.tsv'
+            string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
 
-         # Train the RDPClassifier using your custom COI ref db
-         sys bash /home/scripts/trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+            # Train the RDPClassifier using your custom COI ref db
+            sys bash $globalVars{'scripts'} / trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
 
-      }
+        }
 
-   } else if ( params{'classifierAlgo'} == 'CREST' ) {
+    } else if (params{'classifierAlgo'} == 'CREST') {
 
-      # Custom files
-      globalVars{'customDbFilesPath'}.chdir() ;
-      string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.nds'
-      string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
+        # Custom files
+        globalVars{'customDbFilesPath'}.chdir()
+        string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.nds'
+        string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
 
-      globalVars{'myCustomDbInPema'} =  '/home/tools/CREST/LCAClassifier/parts/flatdb'
-      string checkIfAlreadyTrained   = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
+        globalVars{'myCustomDbInPema'} =  '/home/tools/CREST/LCAClassifier/parts/flatdb'
+        string checkIfAlreadyTrained   = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
 
-      # Check if CREST has already been trained with this custom db
-      if ( checkIfAlreadyTrained.isDir()  ) {
+        # Check if CREST has already been trained with this custom db
+        if (checkIfAlreadyTrained.isDir()) {
 
-         println('CREST has already been trained with this custom db. Pema will proceed using that.')
+            println('CREST has already been trained with this custom db. Pema will proceed using that.')
 
-      } else {
+        } else {
 
-         # Train CREST using a custom ref db
-         sys bash /home/scripts/trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
-      }
-   }
+            # Train CREST using a custom ref db
+            sys bash $globalVars{'scripts'} / trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+        }
+    }
 
-   return globalVars
+    return globalVars
+
+}
+
+
+# Function to initialize a PEMA analysis
+string{} initializeAnalysis(string{} params) {
+
+    string{} globalVars
+
+    # Main paths
+    globalVars{'environment'} = params{'environment'}
+
+    if (params{'environment'} == 'container'){
+        globalVars{'path'}              = '/home/'
+        globalVars{'dataPath'}          = '/mnt/analysis/mydata/'
+        globalVars{'parameterFilePath'} = '/mnt/analysis/'
+        globalVars{'outputPoint'}       = '/mnt/analysis/'
+        globalVars{'scripts'}           =  globalVars{'path'} + "/scripts/"
+        globalVars{'tools'}             =  globalVars{'path'} + "/tools/"
+
+    } else {
+        string tmp = "/tmp/home_path.txt"
+        sys echo $HOME > $tmp
+        sys echo $PEMA_HOME >> $tmp
+        lines := tmp.readLines()
+        string home = lines[0]
+        string pema_home = lines[1]
+        globalVars{'path'}              = home + "/.pema/"
+        globalVars{'dataPath'}          = params{'paramsFilePath'} + '/mydata/'
+        globalVars{'parameterFilePath'} = params{'paramsFilePath'}
+        globalVars{'outputPoint'}       = params{'paramsFilePath'}
+        globalVars{'scripts'}           = pema_home + "/pema_docker_image/scripts/"
+        globalVars{'tools'}             = globalVars{'path'}
+
+    }
+
+    # If there are Trimlogs in the rawData file, PEMA does not run as it should.
+    # Hence, we remove them if there are any!
+    globalVars{'dataPath'}.chdir()
+
+    # Check if there is a TrimLog file and IF YES, then delete it
+    sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi 
+
+    # In case that PEMA run on macOS, then some '.DS_Store' files may appear;
+    # these need to be removed in every step of the way!
+    sys if [ $(find '$globalVars{'dataPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
+
+    # I create a file where the pipeline's output will be saved
+    globalVars{'outputPoint'}.chdir()
+
+    globalVars{'analysisName'}    = params{'outputFolderName'}
+    globalVars{'geneDependent'}   = 'mainOutput'
+    globalVars{'outputPerSample'} = 'outputPerSample'
+    globalVars{'dereplicate'}     = 'dereplicateSamples'
+    globalVars{'linearized'}      = 'linearizedSequences'
+
+    globalVars{'outputFilePath'}      = globalVars{'outputPoint'}    + '/' + params{'outputFolderName'}
+    globalVars{'genePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'geneDependent'}
+    globalVars{'outputPerSamplePath'} = globalVars{'outputFilePath'} + '/' + globalVars{'outputPerSample'}
+    globalVars{'derePath'}            = globalVars{'outputFilePath'} + '/' + globalVars{'dereplicate'}
+    globalVars{'linearPath'}          = globalVars{'outputFilePath'} + '/' + globalVars{'linearized'}
+
+    # Here are all the directories as variables that i will use
+    if (params{'preprocess'} == "original"){
+
+        globalVars{'qualityControl'}  = 'qualityReports'
+        globalVars{'trimmomatic'}     = 'trimmedSequences'
+        globalVars{'bayesHammer'}     = 'adjustedSequnces'
+        globalVars{'spades'}          = 'mergedSequences'
+
+        wait
+
+        # and all the paths for each of them
+        globalVars{'fastqcPath'} = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'}
+        globalVars{'trimoPath'}  = globalVars{'outputFilePath'} + '/' + globalVars{'trimmomatic'}
+        globalVars{'bayesPath'}  = globalVars{'outputFilePath'} + '/' + globalVars{'bayesHammer'}
+        globalVars{'spaPath'}    = globalVars{'outputFilePath'} + '/' + globalVars{'spades'}
+        globalVars{'unzipPath'}  = globalVars{'spaPath'} + '/' + 'unzip'
+
+    } else {
+        globalVars{'qualityControl'}   = 'qualityReports'
+        globalVars{'fastpqPath'}       = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'}
+        globalVars{'fastpTrimmed'}     = 'trimmedSequences'
+        globalVars{'fastpTrimmedPath'} = globalVars{'outputFilePath'} + '/' + globalVars{'fastpTrimmed'}
+        globalVars{'fastpMerged'}      = 'mergedSequences'
+        globalVars{'fastpMergedPath'}  = globalVars{'outputFilePath'} + '/' + globalVars{'fastpMerged'}
+    }
+
+    wait
+
+    # Check if an output folder called with the same name as the one given in the 'parameters' file,
+    # has already been created from previous runs
+    if (params{'outputFolderName'}.isDir()) {
+        println 'This ouput file already exists'
+
+    } else {
+
+        # if it is not, create a file with its name
+        params{'outputFolderName'}.mkdir()
+        println('A new output files was just created!')
+
+        # Make all output (sub)directories having 777 permissions; ; the reason for this is that
+        sys chmod 777 $globalVars{'outputFilePath'} -R
+        wait
+    }
+
+    # And create an output file for each pipeline step - if you run PEMA for the first time for a specific experiment
+    globalVars{'outputFilePath'}.chdir()
+
+    # Make a list with all the directory names that can be found in the output directory
+    string[] outputFiles = globalVars{'outputFilePath'}.dir()
+
+    # If that list is empty, then create the directories mentioned above
+    if (outputFiles.isEmpty() == true) {
+
+        globalVars{'geneDependent'}.mkdir()
+        globalVars{'outputPerSample'}.mkdir()
+        globalVars{'qualityControl'}.mkdir()
+        globalVars{'dereplicate'}.mkdir()
+        globalVars{'linearized'}.mkdir()
+
+        if (params{'preprocess'} == "original") {
+            globalVars{'trimmomatic'}.mkdir()
+            globalVars{'bayesHammer'}.mkdir()
+            globalVars{'spades'}.mkdir()
+        }
+
+        if (outputFiles.isEmpty() == true && params{'preprocess'} == "fastp") {
+            globalVars{'fastpTrimmed'}.mkdir()
+            globalVars{'fastpMerged'}.mkdir()
+        }
+    }
+
+    # Gene dependent directory
+    globalVars{'genePath'}.chdir()
+    params{'gene'}.mkdir()
+
+
+    # Convert Illumina data to ENA format
+    if (params{'EnaData'} == 'No') {
+        sys bash $globalVars{'scripts'} / convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
+    }
+
+    # IMPORTANT! Module to train classifiers is enabled through this statement
+    if (params{'custom_ref_db'} == 'Yes'){
+        string{} globalVars = trainClassifier(params, globalVars)
+    }
+
+    # Taxonomy assignment path
+    string algo1 = params{'clusteringAlgo'}
+    globalVars{'assignmentPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + algo1
+
+    # Keep the classifer as a global var so you can change it if needed
+    globalVars{'classifierAlgo'} = params{'classifierAlgo'}
+
+
+    # Keep the adapters file to be used from Trimmomatic as a global var
+    string trimmomaticBase
+    if (params{'environment'} == 'container') {
+        trimmomaticBase = globalVars{'path'} + "/tools/Trimmomatic/Trimmomatic-0.38"
+    } else {
+        trimmomaticBase = globalVars{'path'} + "/Trimmomatic-0.38"
+    }
+
+    globalVars{'trimmomatic_jar'} =  trimmomaticBase + "/" + "trimmomatic-0.38.jar"
+
+    if (params{'adapters'} != 'TruSeq3-PE-2.fa' && params{'adapters'} != 'NexteraPE-PE.fa' && params{'adapters'} != 'TruSeq2-PE.fa' && params{'adapters'} != 'TruSeq3-PE.fa') {
+        globalVars{'adapterFile'} = globalVars{'parameterFilePath'} + '/' + params{'adapters'}
+    } else {
+        globalVars{'adapterFile'} = globalVars{'path'} + '/adapters/' + params{'adapters'}
+    }
+
+    return (globalVars)
 
 }

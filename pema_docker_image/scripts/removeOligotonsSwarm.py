@@ -13,11 +13,8 @@ def pairwise(iterable):
     return zip(a, a)
 
 for x, y in pairwise(asvs):
-
     if x[0] == ">":
         abundance = int(x.split("_")[1])
         if abundance > threshold:
             new_otu_table.write(x)
             new_otu_table.write(y)
-
-

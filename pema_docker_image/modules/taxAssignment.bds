@@ -3,116 +3,135 @@
 # Function to run the CREST classifier 
 string crestAssign(string{} params, string{} globalVars) {
 
-   if ( params{'custom_ref_db'} != 'Yes') {
+   string searchFile
+   string assignmentsFile
 
+   params{'assignmentPath'}.chdir()
+
+   if (params{'minScore'} == "") {
+      if (params{'searchAlgo'} == "vsearch") {
+         params{'minScore'} = 0.75
+      } else {
+         params{'minScore'} = 155
+      }
+   }
+
+   if ( params{'taxonomyFolderName'}.isDir() ){
+      int previousRandomNumber = randInt( 100 )
+      println("!! Moving previous built assignment folder: " + params{'taxonomyFolderName'}  + " to old." + previousRandomNumber + "." + params{'taxonomyFolderName'})
+      task {
+         sys mv $params{'taxonomyFolderName'} old.$previousRandomNumber.$params{'taxonomyFolderName'}
+         sys mkdir $params{'taxonomyFolderName'}
+      }
+      wait
+      searchFile      = params{'assignmentPath'} + '/' + "old." + previousRandomNumber + "." + params{'taxonomyFolderName'} + '/' + "search.hits"
+      assignmentsFile = params{'assignmentPath'} + '/' + "old." + previousRandomNumber + "." + params{'taxonomyFolderName'} + '/' + "assignments.txt"
+      println(assignmentsFile)
+      if (assignmentsFile.exists()){
+         println("HELLO FRIEND: " + assignmentsFile)
+         sys cp $assignmentsFile $params{'assignmentPath'}/$params{'taxonomyFolderName'}
+      }
+   } else {
+      searchFile = params{'assignmentPath'} + '/' + params{'taxonomyFolderName'} + '/' + "search.hits"
+   }
+
+   wait
+
+   assignmentsFile = params{'assignmentPath'} + '/' + params{'taxonomyFolderName'} + '/' + "assignments.txt"
+
+   println(">>>>>>>>  " + assignmentsFile + "   >>>>>>>>>>>")
+
+
+   if (assignmentsFile.exists()){
+
+      println("We already have a CREST-based assignment file on this case.")
+   
+   } else if ( params{'custom_ref_db'} != 'Yes') {
+  
       # CASE 1:
       # 16S and 18S alignment-based taxonomy assignment
       if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
 
-         globalVars{'assignmentPath'}.chdir()
-
-         if ( params{'taxonomyFolderName'}.isDir() ){
-            int previousRandomNumber = randInt( 100 )
-            sys mv $params{'taxonomyFolderName'} old.$previousRandomNumber.$params{'taxonomyFolderName'}
-         }
-
          # Using Silva 128
          if ( params{'referenceDb'} == 'silva_128' ) { 
 
-            # First use megablast algorithm of blastn for sequence identification, intra-species comparison
-            task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
-               -task megablast \
-               -query all_sequences_grouped.fa \
-               -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silvamod/silvamod128.fasta \
-               -num_alignments 100 \
-               -outfmt 5 \
-               -out mysilvamod128_$params{'taxonomyFolderName'}.xml \
-               -num_threads $params{'vsearchThreads'}
+            string msg_in = "\n\n" + ">>>>>>>>> Taxonomy assignment using Silva 128 and crest4.." + "\n\n"
+            println(msg_in)
 
+            task crest4 --fasta all_sequences_grouped.fa \
+               --search_algo $params{'searchAlgo'} \
+               --num_threads $params{'vsearchThreads'} \
+               --search_db  silvamod128 \
+               --search_hits $params{'taxonomyFolderName'} \
+               --output_dir $params{'taxonomyFolderName'}
+
+            string msg_out = "\n\n" + "<<<<  crest4 was completed."
+            println(msg_out)
             wait
 
-            # And then use the classifier in order to get our assignment
-            task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
-               -t allTab_$params{'taxonomyFolderName'}.tsv \
-               -o $params{'taxonomyFolderName'} mysilvamod128_$params{'taxonomyFolderName'}.xml
+         # Using Silva 138 or PR2: follow the same steps like in the Silva 128 case
+         } else if ( params{'referenceDb'} == 'silva_138' || params{'referenceDb'} == 'pr2' ) {
 
+            string msg_in = "\n\n" + ">>>>>>>>> Taxonomy assignment using Silva 138 and crest4.." + "\n\n"
+            println(msg_in)
+
+            string cmd
+
+            if (searchFile.exists()) {
+               println("Provide previously calculated search hits.")
+               cmd = "crest4 --fasta all_sequences_grouped.fa " +\
+                     "--search_algo " + params{"searchAlgo"} + " " +\
+                     "--num_threads " + params{"vsearchThreads"} + " " +\
+                     "--search_db silvamod138pr2 " +\
+                     "--search_hits " + searchFile + " " +\
+                     "--output_dir " + params{"taxonomyFolderName"}
+
+            } else {
+               cmd = "crest4 --fasta all_sequences_grouped.fa " +\
+                     "--search_algo " + params{"searchAlgo"} + " " +\
+                     "--num_threads " + params{"vsearchThreads"} + " " +\
+                     "--search_db silvamod138pr2 " +\
+                     "--output_dir " + params{"taxonomyFolderName"}
+
+            }
+
+            # taskName:= "Run Crest4"
+            task (taskName:="run-crest", canFail=true) {
+               sys $cmd
+            }
+
+            # If I print something before the wait, it is shown before crest4 is done
             wait
 
-         # Using Silva 132: follow the same steps like in the Silva 128 case
-         } else if ( params{'referenceDb'} == 'silva_132' ) {
+            # Check output existence
+            if (! assignmentsFile.exists()) {
+               println("crest4 output not found. Aborting.")
+               exit 1
+            } else {
+               println("crest4 output exists. Continuing despite potential failure.")
+            }
 
-            task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
-               -task megablast \
-               -query all_sequences_grouped.fa \
-               -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silva132/silva132 \
-               -num_alignments 100 \
-               -outfmt 5 \
-               -out mysilvamod132_$params{'taxonomyFolderName'}.xml \
-               -num_threads $params{'vsearchThreads'}
+         } else if (params{'referenceDb'} == 'midori') {
 
-            wait
+            string msg = "\n\n" + ">>>>>>>>> Taxonomy assignment using midori + darn and crest4.." + "\n\n"
+            println(msg)
 
-            task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
-               -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
-               -d silva132 \
-               -t allTab_$params{'taxonomyFolderName'}.tsv \
-               -o $params{'taxonomyFolderName'} mysilvamod132_$params{'taxonomyFolderName'}.xml
-
-            wait
-
-         # Using Silva 138
-         } else if ( params{'referenceDb'} == 'silva_138' ) {
-
-            task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
-               -task megablast \
-               -query all_sequences_grouped.fa \
-               -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/silva138/silva138 \
-               -num_alignments 100 \
-               -outfmt 5 \
-               -out mysilvamod138_$params{'taxonomyFolderName'}.xml \
-               -num_threads $params{'vsearchThreads'}
+            task crest4 --fasta all_sequences_grouped.fa \
+               --search_algo $params{'searchAlgo'} \
+               --num_threads $params{'vsearchThreads'} \
+               --search_db  midori253darn \
+               --search_hits $params{'taxonomyFolderName'} \
+               --output_dir $params{'taxonomyFolderName'}
 
             wait
-
-            task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
-               -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
-               -d silva138 \
-               -t allTab_$params{'taxonomyFolderName'}.tsv \
-               -o $params{'taxonomyFolderName'} mysilvamod138_$params{'taxonomyFolderName'}.xml
-
-            wait
-
-         # Using PR2
-         } else if ( params{'referenceDb'} == 'pr2' ) {
-
-            task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn \
-               -task megablast \
-               -query all_sequences_grouped.fa \
-               -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/pr2/pr2 \
-               -num_alignments 100 \
-               -outfmt 5 \
-               -out my_pr2_$params{'taxonomyFolderName'}.xml \
-               -num_threads $params{'vsearchThreads'}
-
-            wait
-
-            task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
-               -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
-               -d pr2 \
-               -t allTab_$params{'taxonomyFolderName'}.tsv \
-               -o $params{'taxonomyFolderName'} my_pr2_$params{'taxonomyFolderName'}.xml
-
-            wait
-
          }
 
       # CASE 2:
       # Alignment-based taxonomy assignmnet for the ITS marker gene
       } else if (params{'gene'}  == 'gene_ITS') {
 
-         globalVars{'assignmentPath'}.chdir()
-
-         task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast \
+         # $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/
+         task blastn -task megablast \
             -query all_sequences_grouped.fa \
             -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/unite/unite.fasta \
             -num_alignments 100 -outfmt 5 \
@@ -127,15 +146,14 @@ string crestAssign(string{} params, string{} globalVars) {
             -t allTab_$params{'taxonomyFolderName'}.tsv \
             -o $params{'taxonomyFolderName'} unite_$params{'taxonomyFolderName'}.xml
 
-      } 
+      }
 
    # CASE 3:
    # Using the CREST algorithm with a custom reference database
    } else {
 
-      globalVars{'assignmentPath'}.chdir()
-
-      task $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/blastn -task megablast \
+      # $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/
+      task blastn -task megablast \
           -query all_sequences_grouped.fa \
           -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/$params{'name_of_custom_db'}/$params{'name_of_custom_db'} \
           -num_alignments 100 -outfmt 5 \
@@ -156,8 +174,7 @@ string crestAssign(string{} params, string{} globalVars) {
    wait
 
    task {
-      sys mv $params{'taxonomyFolderName'}/allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/finalTable.tsv
-      sys sed -i 's/classification/Classification/g' $params{'taxonomyFolderName'}/finalTable.tsv
+      sys python $globalVars{'scripts'}/crestTaxTable.py allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/assignments.txt
    }
 
    wait
@@ -174,7 +191,7 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    ## getting this tree in  $path/tools/silva_132/for_placement
    ## in order to get our PHYLOGENY based taxonomy assignment we make use of EPA - NG // last version of Evolutionary Placement Algorithm
    
-   globalVars{'assignmentPath'}.chdir()
+   params{'assignmentPath'}.chdir()
    
    wait
    
@@ -245,7 +262,7 @@ string rdpAssign(string{} params, string{} globalVars) {
 
    println('RDPClassifier is about to start assigning your grouped sequences.')
 
-   globalVars{'assignmentPath'}.chdir()
+   params{'assignmentPath'}.chdir()
 
    if ( params{'custom_ref_db'} != 'Yes' ) {
 
@@ -294,6 +311,3 @@ string rdpAssign(string{} params, string{} globalVars) {
    return 'ok'
 
 }
-
-
-

@@ -32,7 +32,7 @@ string communityAnalysis(string{} params, string{} globalVars) {
       }
       
       # Get path where the input files for phyloseq are located
-      if ( globalVars{'classifierAlgo'} == 'CREST' ) {
+      if ( params{'classifierAlgo'} == 'CREST' ) {
 
          globalVars{'phyloPath'} = globalVars{'assignmentPath'} + '/' + params{'taxonomyFolderName'}
 
@@ -47,8 +47,6 @@ string communityAnalysis(string{} params, string{} globalVars) {
 
       println('This is the phyloPath var: ' +globalVars{'phyloPath'})
 
-
-      
       ## Phyloseq functions that need a phylogenetic tree with the OTUs found, need a tree!
       if ( params{'tree'} == 'Yes' ) {
          
@@ -140,8 +138,7 @@ string communityAnalysis(string{} params, string{} globalVars) {
          sys /usr/local/bin/Rscript phyloseq_in_PEMA.R $params{'gene'} $params{'name_of_custom_db'}
       }
 
-
-      wait      
+      wait
    }
 
    return 'ok'

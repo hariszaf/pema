@@ -67,7 +67,8 @@ do
     echo giveName = $giveName
 
 	sampleName=${sample##*/} 
-	sampleId=${sampleName%%_*}
+	sampleId=${sampleName%%_R1_001.fastq.gz}
+
 	newName=$(printf "ERR%07d" $giveName)
 
 	sample="${sample:2}"
