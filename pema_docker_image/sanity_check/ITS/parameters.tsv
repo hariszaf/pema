@@ -15,7 +15,7 @@ gene	gene_ITS
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName	test_its_fastp_swarm_cut
+outputFolderName	TEST_ITS_FASTP_VSEARCH
 #
 #=     EnaData:
 #=        title: ENA data format
@@ -53,21 +53,21 @@ preprocess	fastp
 #=        description: Number of threads to be used by fastp
 #=        type: integer
 #=        required: False
-fastpThreads	3
+fastpThreads	20
 #
 #=     disable_adapter_trimming:
 #=        title:
 #=        description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
 #=        type: boolean
 #=        required: False
-disable_adapter_trimming	True
+disable_adapter_trimming	False
 #
 #=     detect_adapter_for_pe:
 #=        title:
 #=        description: Adapter sequence auto-detection.
 #=        type: boolean
 #=        required:
-detect_adapter_for_pe	False
+detect_adapter_for_pe	True
 #
 #=     adapter_sequence:
 #=        title:
@@ -76,7 +76,7 @@ detect_adapter_for_pe	False
 #=        required: False
 #=        validation:
 #=          -value: {A, T, C, G}*n
-adapter_sequence	"ATCCTC"
+adapter_sequence	"AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
 #
 #=     adapter_sequence_r2:
 #=        title:
@@ -85,7 +85,7 @@ adapter_sequence	"ATCCTC"
 #=        required: False
 #=        validation:
 #=         -value: {A, T, C, G}*n
-adapter_sequence_r2	"ATCCTC"
+adapter_sequence_r2	"AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 #
 #=     correction:
 #=        title: Enable base correction in overlapped regions, default is disabled.
@@ -99,7 +99,7 @@ correction	True
 #=        description: enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
 #=        type:
 #=        required: False
-overrepresentation_analysis	False
+overrepresentation_analysis	True
 #
 #=     overrepresentation_sampling:
 #=        title:
@@ -127,7 +127,7 @@ complexity_threshold	30
 #=        description: Reads shorter than length_required will be discarded, default is 15.
 #=        type: integer
 #=        required: False
-length_required	100
+length_required	50
 #
 #=      n_base_limit:
 #=         title:
@@ -190,7 +190,7 @@ cut_right	False
 #=        description: The window size option of cut_right. Range: 1~1000, default: 4.
 #=        type: integer
 #=        required: False
-cut_right_window_size	5
+cut_right_window_size	4
 #
 #=     cut_right_mean_quality:
 #=        title:
@@ -222,7 +222,7 @@ maxInfo	Yes
 #=        validation: 
 #=          - range: 
 #=            min: 1
-targetLength	100
+targetLength	150
 #
 #=     strictness:
 #=        title: strictness
@@ -233,14 +233,14 @@ targetLength	100
 #=          - range:
 #=            min: 0.0
 #=            max: 1.0
-strictness	0.8
+strictness	0.1
 #
 #=     adapters:
 #=        title: adapters
 #=        description: A Trimmomatic parameter. Suggested adapter sequences are provided for TruSeq2 (as used in GAII machines) and TruSeq3 (as used by HiSeq and MiSeq machines),
 #=        type: string
 #=        required: True
-adapters	adapters_combined_152_unique.fasta
+adapters	TruSeq3-PE.fa
 #
 #=     seedMismatches:
 #=        title: adapters
@@ -250,7 +250,7 @@ adapters	adapters_combined_152_unique.fasta
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-seedMismatches	0
+seedMismatches	2
 #
 #=     palindromeClipThreshold:
 #=        title: adapters
@@ -260,7 +260,7 @@ seedMismatches	0
 #=        validation: 
 #=          - range: 
 #=            min: 1 
-palindromeClipThreshold	20
+palindromeClipThreshold	30
 #
 #=     simpleClipThreshold:
 #=        title: simple ClipThreshold
@@ -280,7 +280,7 @@ simpleClipThreshold	30
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-leading	20
+leading	10
 #
 #=     trailing:
 #=        title: trailing
@@ -290,7 +290,7 @@ leading	20
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-trailing	2
+trailing	15
 #
 #=     minlen:
 #=        title: minimum length of the amplicon
@@ -300,7 +300,7 @@ trailing	2
 #=        validation: 
 #=          - range: 
 #=            min: 1
-minlen	100
+minlen	150
 #
 #=     threadsTrimmomatic:
 #=        title: minimum length of the amplicon
@@ -310,7 +310,7 @@ minlen	100
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-threadsTrimmomatic	8
+threadsTrimmomatic	20
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : PANDAseq     --------------------------
@@ -335,7 +335,7 @@ pandaseqAlgorithm	simple_bayesian
 #=        validation:
 #=          - range:
 #=            min: 0
-pandaseqThreads	8
+pandaseqThreads	20
 #
 #=     pandaseqMinlen:
 #=        title: pandaseq minimum length
@@ -345,7 +345,7 @@ pandaseqThreads	8
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-pandaseqMinlen	
+pandaseqMinlen	-l 150
 #
 #=     minoverlap:
 #=        title: pandaseq minimum overlap
@@ -355,7 +355,7 @@ pandaseqMinlen
 #=        validation:
 #=          - range: 
 #=            min: 0
-minoverlap	1 
+minoverlap	5
 #
 #=     threshold:
 #=        title: threshold
@@ -366,7 +366,7 @@ minoverlap	1
 #=            - range: 
 #=              min:  0.0
 #=              max: 1.0
-threshold	0.6 
+threshold	0.6
 #
 #=     elimination:
 #=        title: elimination
@@ -376,7 +376,7 @@ threshold	0.6
 #=        validation: 
 #=          - value: ''
 #=          - value: -N
-elimination	
+elimination	-N
 #
 #   --------------------------        CLUSTERING PARAMETERS           --------------------------
 #
@@ -388,7 +388,7 @@ elimination
 #=        validation:
 #=          - value: algo_Swarm
 #=          - value: algo_vsearch
-clusteringAlgo	algo_Swarm
+clusteringAlgo	algo_vsearch
 #
 #   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
 #
@@ -400,7 +400,7 @@ clusteringAlgo	algo_Swarm
 #=        validation:
 #=          - range: 
 #=            min: 0
-vsearchThreads	8
+vsearchThreads	20
 #
 #=     vsearchId:
 #=        title: vsearch threads
@@ -411,7 +411,7 @@ vsearchThreads	8
 #=          - range: 
 #=            min: 0.0
 #=            max: 1.0
-vsearchId	0.95
+vsearchId	0.9
 #
 #   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
 #
@@ -433,7 +433,7 @@ d	3
 #=        validation:
 #=          - range: 
 #=            min: 0
-boundary	
+boundary	0
 #
 #=     swarmThreads:
 #=        title: swarmThreads
@@ -443,7 +443,7 @@ boundary
 #=        validation:
 #=          - range: 
 #=            min: 1
-swarmThreads	3
+swarmThreads	20
 #
 #  -----------------------------     OLIGOTONS        -------------------------------------
 #
@@ -465,16 +465,14 @@ removeOligotons	Yes
 #=        validation:
 #=          - range: 
 #=            min: 1
-numOligotons	5
+numOligotons	2
 #
 #
 #   --------------------------     CLASSIFIER       --------------------------
 #
 #=     classifierAlgo:
 #=        title: classifier algorithm
-#=        description:  """Select classifier for the taxonomy assignment step.
-#=                      If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. 
-#=                      If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier)."""
+#=        description:  Select classifier for the taxonomy assignment step. If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
 #=        type: string
 #=        required: True
 #=        validation:
@@ -487,7 +485,7 @@ classifierAlgo	CREST
 #=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail. Parameter required if gene: ['16S', '18S', 'ITS'].
 #=        type: string
 #=        required: True 
-taxonomyFolderName	my_taxon_assign
+taxonomyFolderName	ITS_taxon_assign
 #
 #
 #   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
@@ -510,7 +508,7 @@ taxonomyAssignmentMethod	alignment
 #=        validation:
 #=          - range:
 #=            min: 0
-numberOfCoresForPapara	7
+numberOfCoresForPapara	20
 #
 #=     referenceDb:
 #=        title: reference database 
@@ -523,7 +521,7 @@ numberOfCoresForPapara	7
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
-referenceDb	midori_1
+referenceDb	silva_128
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
 #
@@ -542,14 +540,14 @@ cutadapt	Yes
 #=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
 #=        required: True 
-forwardITSPrimer	GATGAAGAACGYAGYRAA
+forwardITSPrimer	CTTGGTCATTTAGAGGAAGTAA
 #
 #=     reverseITSPrimer:
 #=        title: reverse ITS primer
 #=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
 #=        required: True 
-reverseITSPrimer	CTBTTVCCKCTTCACTCG
+reverseITSPrimer	GCTGCGTTCTTCATCGATGC
 #
 #   --------------------------     GENE-SPECIFIC : COI     --------------------------
 #
@@ -613,7 +611,7 @@ tree	No
 #=        validation:
 #=          - range: 
 #=              min: 0  
-raxmlThreads	5
+raxmlThreads	20
 #
 #=     parsTrees:
 #=        title: parsimony trees
@@ -665,7 +663,7 @@ emptyCheckpoints	Yes
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-getNCBITaxId	Yes
+getNCBITaxId	No
 #
 #   --------------------------     PEMA METADATA     --------------------------
 #
