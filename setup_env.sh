@@ -19,6 +19,8 @@ VERSION_ARG=false
   KOFAM_ARG=false
  SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
+SHELL_CONFIG="$HOME/.bashrc"
+
 # Parse options using getopt
 PARSED=$(getopt --options kh --long kofam,help -- "$@")
 if [[ $? -ne 0 ]]; then
@@ -98,6 +100,37 @@ else
     echo -e "$GREEN_TICK A conda environment, called $ENV_NAME, has been built."
 fi
 
+conda activate $ENV_NAME
+
+# Activate case 
+mkdir -p $CONDA_PREFIX/etc/conda/activate.d
+
+cat <<EOF > "$CONDA_PREFIX/etc/conda/activate.d/env_vars.sh"
+#!/bin/bash
+export OLD_PATH="\$PATH"
+export PATH="\$HOME/.pema:\$PATH"
+EOF
+
+chmod +x "$CONDA_PREFIX/etc/conda/activate.d/env_vars.sh"
+
+
+# Deactivate case
+mkdir -p $CONDA_PREFIX/etc/conda/deactivate.d
+
+cat <<EOF > "$CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh"
+#!/bin/bash
+export PATH="\$OLD_PATH"
+unset OLD_PATH
+EOF
+
+chmod +x "$CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh"
+
+
+# ====================================
+# Step 2: Install software
+# ====================================
+
+
 # Build a hidden folder for pema-related software
 INSTALL_DIR=$HOME/.pema/
 mkdir -p "$INSTALL_DIR"
@@ -121,22 +154,21 @@ fi
 
 # Add ~/.pema/.bds to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/.bds:"* ]]; then
-  echo 'export PATH="$HOME/.pema/.bds:$PATH"' >> ~/.bashrc
+  echo 'export PATH="$HOME/.pema/.bds:$PATH"' >> $SHELL_CONFIG
   export PATH="$HOME/.pema/.bds:$PATH"
   echo -e "$GREEN_TICK Added ~/.pema/.bds to PATH. Restart your terminal or run: source ~/.bashrc"
 fi
 
 
 # --------------
-# INSTALL SOFTWARE 
+# Versions
 # --------------
-
-# # Versions
 # FASTP=
 # FASTQC=
 # TRIMMOMATIC=
 # VSEARCH=
 SPADES=3.14.0
+CREST_PEMA="https://zenodo.org/record/5734317/files/crest.tar.gz"
 
 
 # --------------
@@ -167,7 +199,7 @@ fi
 
 # Add ~/.pema/FastQC/fastqc to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/FastQC:"* ]]; then
-  echo 'export PATH="$HOME/.pema/FastQC:$PATH"' >> ~/.bashrc
+  echo 'export PATH="$HOME/.pema/FastQC:$PATH"' >> $SHELL_CONFIG
   export PATH="$HOME/.pema/FastQC:$PATH"
   echo -e "$GREEN_TICK Added ~/.pema/FastQC to PATH. Restart your terminal or run: source ~/.bashrc"
 fi
@@ -187,10 +219,10 @@ else
 fi
 
 # Add ~/.pema/vsearch to PATH if not already included
-if [[ ":$PATH:" != *":$HOME/.pema/vsearch:"* ]]; then
-  echo 'export PATH="$HOME/.pema/vsearch:$PATH"' >> ~/.bashrc
-  export PATH="$HOME/.pema/vsearch:$PATH"
-  echo -e "$GREEN_TICK Added ~/.pema/vsearch to PATH. Restart your terminal or run: source ~/.bashrc"
+if [[ ":$PATH:" != *":$HOME/.pema/vsearch/bin:"* ]]; then
+  echo 'export PATH="$HOME/.pema/vsearch/bin:$PATH"' >> $SHELL_CONFIG
+  export PATH="$HOME/.pema/vsearch/bin:$PATH"
+  echo -e "$GREEN_TICK Added ~/.pema/vsearch/bin to PATH. Restart your terminal or run: source ~/.bashrc"
 fi
 
 
@@ -221,12 +253,10 @@ fi
 
 # Add ~/.pema/SPAdes to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/SPAdes-$SPADES-Linux/bin:"* ]]; then
-  echo "export PATH="$HOME/.pema/SPAdes-$SPADES-Linux/bin:$PATH"" >> ~/.bashrc
+  echo "export PATH="$HOME/.pema/SPAdes-$SPADES-Linux/bin:$PATH"" >> $SHELL_CONFIG
   export PATH="$HOME/.pema/SPAdes-$SPADES-Linux/bin:$PATH"
   echo -e "$GREEN_TICK Added ~/.pema/SPAdes-$SPADES-Linux/bin to PATH. Restart your terminal or run: source ~/.bashrc"
 fi
-
-
 
 
 # --------------
@@ -248,11 +278,86 @@ fi
 
 # Add ~/.pema/PANDAseq to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/PANDAseq/bin:"* ]]; then
-  echo "export PATH="$HOME/.pema/PANDAseq/bin:$PATH"" >> ~/.bashrc
+  echo "export PATH="$HOME/.pema/PANDAseq/bin:$PATH"" >> $SHELL_CONFIG
   export PATH="$HOME/.pema/PANDAseq/bin:$PATH"
   echo -e "$GREEN_TICK Added ~/.pema/PANDAseq/bin to PATH. Restart your terminal or run: source ~/.bashrc"
 fi
 
+
+# --------------
+# Install Swarm
+# --------------
+
+if [[ -x ~/.pema/swarm ]]; then
+    echo -e "$GREEN_TICK Swarm is already installed."
+else
+    echo -e "$HOURGLASS Installing Swarm..."
+    git clone https://github.com/torognes/swarm.git && cd swarm/src/ && make
+    echo -e "$GREEN_TICK Swarm was installed."
+fi
+
+# Add ~/.pema/swarm to PATH if not already included
+if [[ ":$PATH:" != *":$HOME/.pema/swarm/bin:"* ]]; then
+  echo "export PATH="$HOME/.pema/swarm/bin:$PATH"" >> $SHELL_CONFIG
+  export PATH="$HOME/.pema/swarm/bin:$PATH"
+  echo -e "$GREEN_TICK Added ~/.pema/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc"
+fi
+
+
+# -----------------
+# Install Blast tools
+# -----------------
+
+if [[ -x ~/.pema/ncbi-blast-2.8.1+ ]]; then
+  echo -e "$GREEN_TICK Blast+ tools already available"
+
+else 
+  wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.8.1/ncbi-blast-2.8.1+-x64-linux.tar.gz
+  tar -zxvf ncbi-blast-2.8.1+-x64-linux.tar.gz 
+  rm ncbi-blast-2.8.1+-x64-linux.tar.gz
+fi
+
+# Add ~/.pema/ncbi-blast-2.8.1+/bin to PATH if not already included
+if [[ ":$PATH:" != *":$HOME/.pema/ncbi-blast-2.8.1+/bin:"* ]]; then
+  echo "export PATH="$HOME/.pema/ncbi-blast-2.8.1+/bin:$PATH"" >> $SHELL_CONFIG
+  export PATH="$HOME/.pema/ncbi-blast-2.8.1+/bin:$PATH"
+  echo -e "$GREEN_TICK Added ~/.pema/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc"
+fi
+
+
+
+# Get jq
+if command -v jq >/dev/null 2>&1; then
+    echo -e "$GREEN_TICK jq is available"
+else
+    echo -e "$HOURGLASS Getting jq.."
+    wget -O ~/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
+    chmod +x ~/jq
+    export PATH="$HOME:$PATH"
+fi
+
+
+# --------------
+# GET DATABASES 
+# --------------
+
+if [[ -x ~/.pema/CREST ]]; then
+  echo -e "$GREEN_TICK CREST and its PEMA databases are already retrieved from: $CREST_PEMA"
+else
+  echo -e "$HOURGLASS Getting CREST and its PEMA databases..."
+  wget $CREST_PEMA
+  tar -zxvf crest.tar.gz
+  rm crest.tar.gz
+  echo -e ""
+fi
+
+
+# ====================================
+# Step 3: pip 
+# ====================================
+
+# pip install crest4
+# pip install ncbi-taxonomist
 
 
 
@@ -260,7 +365,7 @@ fi
 
 # Add ~/.pema to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema:"* ]]; then
-  echo 'export PATH="$HOME/.pema:$PATH"' >> ~/.bashrc
+  echo 'export PATH="$HOME/.pema:$PATH"' >> $SHELL_CONFIG
   export PATH="$HOME/.pema:$PATH"
   echo -e "$GREEN_TICK Added ~/.pema to PATH. Restart your terminal or run: source ~/.bashrc"
 fi
@@ -269,4 +374,20 @@ cd $SETUP_WD
 
 
 
-source $HOME/.bashrc
+
+# Get the directory where this script resides
+PEMA_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+# Export it for the current session
+export PEMA_HOME="$PEMA_HOME"
+
+# Add to shell config if not already present
+if ! grep -q "export PEMA_HOME=" "$SHELL_CONFIG"; then
+    echo "export PEMA_HOME=\"$PEMA_HOME\"" >> "$SHELL_CONFIG"
+    echo -e "PEMA_HOME added to $SHELL_CONFIG $ROCKET"
+else
+    echo -e "$GREEN_TICK PEMA_HOME already set in $SHELL_CONFIG"
+fi
+
+
+source $SHELL_CONFIG

@@ -64,7 +64,7 @@ string perSampleGeneral(string{} params, string{} globalVars) {
         globalVars{'derePath'}.chdir()
         string[] names = globalVars{'derePath'}.dir()
 
-        # for each sample we make a folder with its name, in order to put PEMA's output concerning each of those
+        # for each sample we make a folder with its name, in order to put PEMAs output concerning each of those
         globalVars{'outputPerSamplePath'}.chdir()
 
         for ( string sample : names ) {
@@ -196,7 +196,7 @@ string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
         params{'assignmentPath'}.chdir()
     }
     
-    sys /usr/bin/python3 $globalVars{'path'}/scripts/getNCBITaxonomyIds.py
+    sys python $globalVars{'scripts'}/getNCBITaxonomyIds.py
 
     wait
 

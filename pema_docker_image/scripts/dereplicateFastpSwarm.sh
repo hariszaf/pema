@@ -10,18 +10,15 @@
 #          You may find the initial script here:
 #          https://github.com/torognes/swarm/wiki/
 
-# Linearize sequences 
-for file in $(ls); 
-do
-    base_filename="${file%%.*}"
-    awk 'NR%4==1 || NR%4==2 {sub(/^@/, ">"); print $0}' $file> ../linearizedSequences/$base_filename.merged.linearized.fa ; 
-done
+
+
+
 
 cd ../linearizedSequences/
 
-## Dereplication at the sample level -- replace following loop with supposingly time efficient
-#for file in $(ls | grep merged.linearized.fa); 
-#do
+# Dereplication at the sample level -- replace following loop with supposingly time efficient
+# for file in $(ls | grep merged.linearized.fa); 
+# do
 #   base_filename="${file%%.*}"
 #   sed 's/ .*_/./g' $file > $file.tmp.fa
 #   grep -v "^>" $file.tmp.fa | \
@@ -34,40 +31,34 @@ cd ../linearizedSequences/
 #   done | \
 #   sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > ../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa ; 
 #   rm $file.tmp.fa
-#done
-#
-
-# -------------   probably wrong --------
-# for file in *merged.linearized.fa; do
-#     base_filename="${file%%.*}"
-#     awk '/^>/ {next} {gsub(/ .*/, ""); if (/^[ACGT]+$/) print}' "$file" | \
-#     sort | uniq -c | \
-#     awk '{hash = $2; $1 = ""; $2 = ""; printf ">%s_%s%s\n", substr(sha1sum($0), 1, 40), $1, $2}' | \
-#     sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/_/\n/2' > "../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa"
 # done
 
 
-parallel --jobs 4 '
-  base_filename="{= s/\..*// =}";
-  awk "/^>/ {next} {gsub(/ .*/, \"\"); if (/^[ACGTacgt]+$/) print}" {} |
-  sort | uniq -c |
+for file in *.merged.linearized.fa; do
+
+  base_filename="${file%%.*}"
+  echo ">> " $base_filename
+  tmp_file="${file}.tmp.fa"
+
+  # Clean up headers
+  sed 's/ .*_/./g' "$file" > "$tmp_file"
+
+  # Count and hash valid sequences
+  grep -v "^>" "$tmp_file" | grep -E '^[ACGTacgt]+$' | sort | uniq -c | \
   while read -r abundance sequence; do
-    hash=$(printf "%s" "$sequence" | sha1sum | cut -d" " -f1)
+    hash=$(printf "%s" "$sequence" | sha1sum | awk '{print $1}')
     printf ">%s_%d_%s\n" "$hash" "$abundance" "$sequence"
-  done |
-  sort -t "_" -k2,2nr -k1.2,1d |
-  sed -e "s/_/\n/2" > ../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa
-' ::: *merged.linearized.fa
+  done | \
+  sort -t "_" -k2,2nr -k1.2,1d | sed 's/_/\n/2' > "../dereplicateSamples/${base_filename}.merged.linearized.dereplicated.fa"
+
+  rm "$tmp_file"
+done
+
+
+
 
 
 cd ../dereplicateSamples/
-# rename.ul .linearized.fasta._dereplicated.fasta "" *_dereplicated.fasta
-
-# for f in * ; 
-# do 
-#     base_filename="${file%%.*}"
-#     mv -- "$f" "dereplicated_linearized_$f" ; 
-# done
 
 
 # Dereplication at the study level

@@ -3,7 +3,6 @@
 # This is P.E.M.A!  A metabarcoding pipenline for environmental DNA samples.
 # Author: Haris Zafeiropoulos 
 # date: 2017-2018
-# This script is meant for the Singularity image version of P.E.M.A.
 
 include "modules/initialize"
 include "modules/preprocess"
@@ -14,27 +13,24 @@ include "modules/phyloseq"
 
 println("Modules loaded.")
 
-string parameterFilePath
-if ( args.size() > 0) {
-    println("Argument provided: " + args[0])
-    parameterFilePath = args[0]
-} else {
-    println("No path to IO directory provided.")
-    parameterFilePath = "/mnt/analysis/"
-}
+string parameterFile = args[0]
+string parameterFilePath = parameterFile.dirName()
 
 println("Using parameter file path: " + parameterFilePath)
 
 # Read parameters file for the first time! 
-parameterFilePath.chdir()
 string f = "parameters.tsv"
-string{} paramsFirstAssignment =  readParameterFile(f)
+string{} paramsFirstAssignment =  readParameterFile(parameterFile)
 paramsFirstAssignment{'paramsFilePath'} = parameterFilePath
 
 
 ###############################################################
-#                 0. Initialize analysis                      #
+#                 Initialize analysis                      #
 ###############################################################
+
+string init_msg = "\n\n" + "******   INITIALIZE VARIABLES   ******"
+println(init_msg)
+
 string{} globalVars = initializeAnalysis(paramsFirstAssignment)
 wait
 
@@ -56,6 +52,9 @@ wait
 ###############################################################
 #              PRE-PROCESSING
 ###############################################################
+
+string prep_msg = "\n\n" + "******   SEQUENCE PREPROCESSING STEP   ******"
+println(prep_msg)
 
 # With the original approach
 if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
@@ -88,7 +87,7 @@ if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
    adjustSeqs(paramsBayesHammerStep, globalVars)
    wait
 
-   # * Merging the paired-end samples
+   # Merging the paired-end samples
    parameterFilePath.chdir()
    string i = "parameters.tsv"
    string{} paramsSpadesMerging = readParameterFile(i)
@@ -107,234 +106,242 @@ if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
 }
 
 
-# ################################################################
-# #          5. Dereplicate sequence samples                     #
-# ################################################################
+################################################################
+#           Dereplicate sequence samples                       #
+################################################################
 
-# ################################################################
-# #      Build subdirectories according to the params file       #
-# ################################################################
+string derepl_msg = "\n\n" + "******   DEREPLICATION STEP   ******"
+println(derepl_msg)
 
-# parameterFilePath.chdir()
-# string j = "parameters.tsv"
-# string{} paramsDereplication =  readParameterFile(j)
+parameterFilePath.chdir()
+string j = "parameters.tsv"
+string{} paramsDereplication =  readParameterFile(j)
 
-# buildDirectories(paramsDereplication, globalVars)
+# Build subdirectories according to the params file
+buildDirectories(paramsDereplication, globalVars)
+wait
 
-# wait
+# Dereplicate
+println('Pema is at the dereplication step; this may take a while.')
 
-# println('Pema is at the dereplication step; this may take a while.')
-# if ( paramsDereplication{'clusteringAlgo'} == 'algo_Swarm' ) {
+if ( paramsDereplication{'clusteringAlgo'} == 'swarm' ) {
 
-#    println("Dereplication for the Swarm case to infer clusters.")
-#    swarmDereplicate(paramsDereplication, globalVars)
-#    wait
+   println("Dereplication for the Swarm case to infer clusters.")
+   swarmDereplicate(paramsDereplication, globalVars)
+   wait
 
+} else {
 
-# } else {
+   println("Dereplications for the case of VSEARCH.")
+   globalVars = obiDereplicate(paramsDereplication, globalVars)
 
-#    println("Dereplications for the case of VSEARCH.")
-#    globalVars = obiDereplicate(paramsDereplication, globalVars)
+   wait
 
-#    wait
+   println("Merging reads from all files in a single file.")
+   mergeFilesNonSwarm(paramsDereplication, globalVars)
 
-#    println("PEMA will merge reads from all files in one.")
-#    mergeFilesNonSwarm(paramsDereplication, globalVars)
+   wait
 
-#    wait
+}
 
-# }
+string clustering = globalVars{'outputPoint'} + "/clustering.chp"
+checkpoint clustering
 
+################################################################
+#           6. OTUs clustering / ASVs inference                #
+################################################################
 
-# string clustering = globalVars{'outputPoint'} + "/clustering.chp"
-# checkpoint clustering
+string denoise_msg = "\n\n" + "******   OTU CLUSTERING / ASV INFERENCE  STEP   ******"
+println(denoise_msg)
 
-# ################################################################
-# #           6. OTUs clustering / ASVs inference                #
-# ################################################################
+parameterFilePath.chdir()
+string k = "parameters.tsv"
+string{} paramsOfTable =  readParameterFile(k)
 
-# println('All the first steps are done! clustering is about to start!')
-# parameterFilePath.chdir()
-# string k = "parameters.tsv"
-# string{} paramsOfTable =  readParameterFile(k)
+if ( paramsDereplication{'clusteringAlgo'} == 'vsearch' ) {
 
-# if ( paramsDereplication{'clusteringAlgo'} == 'algo_vsearch' ) {
+   clusteringVsearch(paramsOfTable, globalVars)
 
-#    clusteringVsearch(paramsOfTable, globalVars)
+} else if (paramsDereplication{'clusteringAlgo'} == 'swarm') {
 
-# } else if (paramsDereplication{'clusteringAlgo'} == 'algo_Swarm') {
+   clusteringSwarm(paramsOfTable, globalVars)
 
-#    clusteringSwarm(paramsOfTable, globalVars)
+}
 
-# }
+println("The OTUs clustering / ASVs inference step has been completed.")
+string taxAssign = globalVars{'outputPoint'} + "/taxAssign.chp"
+checkpoint taxAssign
 
-# println("The OTUs clustering / ASVs inference step has been completed.")
-# string taxAssign = globalVars{'outputPoint'} + "/taxAssign.chp"
-# checkpoint taxAssign
+################################################################
+#                7. Taxonomic assignment                       #
+################################################################
 
-# ################################################################
-# #                7. Taxonomic assignment                       #
-# ################################################################
+string tax_assign_msg = "\n\n" + "******   TAXONOMY ASSIGNMENT STEP   ******"
+println(tax_assign_msg)
 
-# parameterFilePath.chdir()
-# string l = "parameters.tsv"
-# string{} paramsForTaxAssign =  readParameterFile(l)
+parameterFilePath.chdir()
+string l = "parameters.tsv"
+string{} paramsForTaxAssign =  readParameterFile(l)
 
-# if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
+if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
-#    if ( paramsForTaxAssign{'gene'} == 'gene_16S') {
+   if ( paramsForTaxAssign{'gene'} == 'gene_16S') {
 
-#       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
+      if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
 
-#          println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
+         println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
          
-#          globalVars{'classifierAlgo'}         = 'CREST'
-#          paramsForTaxAssign{'classifierAlgo'} = 'CREST'
-#          wait
+         globalVars{'classifierAlgo'}         = 'CREST'
+         paramsForTaxAssign{'classifierAlgo'} = 'CREST'
+         wait
 
-#       }
+      }
 
-#       if (paramsForTaxAssign{'taxonomyAssignmentMethod'} != 'phylogeny') {
+      if (paramsForTaxAssign{'taxonomyAssignmentMethod'} != 'phylogeny') {
 
-#          crestAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
+         crestAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
 
-#       } else {
+      } else {
    
-#             phylogenyAssign(paramsForTaxAssign, globalVars)
-#             wait
-#             println("Phylogeny based taxonomy assignment has been completed.")
+            phylogenyAssign(paramsForTaxAssign, globalVars)
+            wait
+            println("Phylogeny based taxonomy assignment has been completed.")
 
-#       }
+      }
 
-#    } else if ( paramsForTaxAssign{'gene'} == 'gene_COI' ) {
+   } else if ( paramsForTaxAssign{'gene'} == 'gene_COI' ) {
 
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
-#          println('Pema cannot run COI data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
+         println('Pema cannot run COI data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
 
-#          globalVars{'classifierAlgo'}         = 'RDPClassifier'
-#          paramsForTaxAssign{'classifierAlgo'} = 'RDPClassifier'
+         globalVars{'classifierAlgo'}         = 'RDPClassifier'
+         paramsForTaxAssign{'classifierAlgo'} = 'RDPClassifier'
 
-#          wait
+         wait
 
-#       }
+      }
       
-#       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
+      if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
 
-#          rdpAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
+         rdpAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
 
-#       }
+      }
 
-#    } else if (paramsForTaxAssign{'gene'} == 'gene_18S') {
+   } else if (paramsForTaxAssign{'gene'} == 'gene_18S') {
 
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
 
-#          println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
+         println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
 
-#          globalVars{'classifierAlgo'}         = 'CREST'
-#          paramsForTaxAssign{'classifierAlgo'} = 'CREST'
-#          wait
+         globalVars{'classifierAlgo'}         = 'CREST'
+         paramsForTaxAssign{'classifierAlgo'} = 'CREST'
+         wait
 
-#       }
+      }
       
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
  
-#          crestAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
+         crestAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
 
-#       }
+      }
 
-#    } else if (paramsForTaxAssign{'gene'} == 'gene_ITS') {
+   } else if (paramsForTaxAssign{'gene'} == 'gene_ITS') {
 
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
 
-#          println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
+         println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
 
-#          globalVars{'classifierAlgo'}         = 'CREST'
-#          paramsForTaxAssign{'classifierAlgo'} = 'CREST'
-#          wait
-#       } 
+         globalVars{'classifierAlgo'}         = 'CREST'
+         paramsForTaxAssign{'classifierAlgo'} = 'CREST'
+         wait
+      } 
       
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
  
-#          crestAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
+         crestAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
 
-#       }
+      }
 
-#    } else if ( paramsForTaxAssign{'gene'} == 'gene_12S' ) {
+   } else if ( paramsForTaxAssign{'gene'} == 'gene_12S' ) {
 
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
-#          println('Pema cannot run 12S data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
+         println('Pema cannot run 12S data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
 
-#          globalVars{'classifierAlgo'}         = 'RDPClassifier'
-#          paramsForTaxAssign{'classifierAlgo'} = 'RDPClassifier'
+         globalVars{'classifierAlgo'}         = 'RDPClassifier'
+         paramsForTaxAssign{'classifierAlgo'} = 'RDPClassifier'
 
-#          wait
+         wait
 
-#       }
+      }
       
-#       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
+      if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
 
-#          rdpAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
+         rdpAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
 
-#       }
-#    }
+      }
+   }
 
-# } else if ( paramsForTaxAssign{'custom_ref_db'} == 'Yes') {
+} else if ( paramsForTaxAssign{'custom_ref_db'} == 'Yes') {
 
-#    if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+   if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
 
-#       rdpAssign(paramsForTaxAssign, globalVars)
+      rdpAssign(paramsForTaxAssign, globalVars)
 
-#    } else if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+   } else if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
-#       crestAssign(paramsForTaxAssign, globalVars)
+      crestAssign(paramsForTaxAssign, globalVars)
 
-#    } else {
+   } else {
 
-#       println('The classifier you chose is not available in the Pema framework.')
-#    }
+      println('The classifier you chose is not available in the Pema framework.')
+   }
 
-# }
-# println("The taxonomy assignment step has been completed.")
+}
+println("The taxonomy assignment step has been completed.")
 
-# # Check for running the ncbi-taxonomist tool
-# if ( paramsForTaxAssign{'getNCBITaxId'} == 'Yes'){
+# Check for running the ncbi-taxonomist tool
+if ( paramsForTaxAssign{'getNCBITaxId'} == 'Yes'){
 
-#     ncbiTaxonomyMapping(paramsForTaxAssign, globalVars)
+    ncbiTaxonomyMapping(paramsForTaxAssign, globalVars)
 
-#     println("The assignments on the finalTable.tsv file have been linked to NCBI Taxonomy ids.")
-# }
+    println("The assignments on the finalTable.tsv file have been linked to NCBI Taxonomy ids.")
+}
 
-# string communAnal = globalVars{'outputPoint'} + "/communAnal.chp"
-# checkpoint communAnal
+wait
+string communAnal = globalVars{'outputPoint'} + "/communAnal.chp"
+checkpoint communAnal
 
 # ################################################################
-# #                8. Biodiversity analysis                      #
+# #                Biodiversity analysis                      #
 # ################################################################
 
-# parameterFilePath.chdir()
-# string ca = "parameters.tsv"
-# string{} paramsForCA =  readParameterFile(ca)
+string biodiv_msg = "\n\n" + "******   BIODIVERSITY ANALYSIS STEP   ******"
+println(tax_assign_msg)
+
+parameterFilePath.chdir()
+string ca = "parameters.tsv"
+string{} paramsForCA =  readParameterFile(ca)
 
 
-# if ( paramsForCA{'phyloseq'} == 'Yes') {
+if ( paramsForCA{'phyloseq'} == 'Yes') {
 
-#    communityAnalysis(paramsForCA, globalVars)
+   communityAnalysis(paramsForCA, globalVars)
 
-# }
+}
 
-# wait
+wait
 
 # ################################################################
 # #                Pema has been concluded                      #

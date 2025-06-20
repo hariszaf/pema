@@ -10,36 +10,104 @@
 #          You may find the initial script here:
 #          https://github.com/torognes/swarm/wiki/
 
-# Linearize sequences 
-for file in $(ls); 
-do 
-   base_filename="${file%%.*}"
-   awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' $file \
-   > ../../linearizedSequences/$base_filename.merged.linearized.fa ; 
-done
 
-cd ../../linearizedSequences/
+# Access the first argument
+preprocess=$1
+
+# if [ "$preprocess" == "fastp" ]; then
+#     # Linearize sequences -- from within the mergedSequences folder
+#     for file in $(ls); 
+#     do
+#         base_filename="${file%%.*}"
+#         awk 'NR%4==1 || NR%4==2 {sub(/^@/, ">"); print $0}' $file> ../linearizedSequences/$base_filename.merged.linearized.fa ; 
+#     done
+
+# else 
+#     # Linearize sequences 
+#     for file in $(ls); 
+#     do 
+#     base_filename="${file%%.*}"
+#     awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' $file \
+#     > ../../linearizedSequences/$base_filename.merged.linearized.fa ; 
+#     done
+# fi
+if [ "$preprocess" == "fastp" ]; then
+    # Linearize sequences -- from within the mergedSequences folder
+    for file in $(ls); do
+        base_filename="${file%%.*}"
+        output_file="../linearizedSequences/$base_filename.merged.linearized.fa"
+        if [ ! -f "$output_file" ]; then
+            awk 'NR%4==1 || NR%4==2 {sub(/^@/, ">"); print $0}' "$file" > "$output_file"
+        else
+            echo "$output_file already exists. Skipping linearizing."
+        fi
+    done
+
+else 
+    # Linearize sequences -- assuming you're two levels deeper
+    for file in $(ls); do 
+        base_filename="${file%%.*}"
+        output_file="../../linearizedSequences/$base_filename.merged.linearized.fa"
+        if [ ! -f "$output_file" ]; then
+            awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' "$file" > "$output_file"
+        else
+            echo "$output_file already exists. Skipping linearizing."
+        fi
+    done
+fi
+
+
 
 # Dereplication at the sample level
-for file in $(ls | grep merged.linearized.fa); 
-do
-   base_filename="${file%%.*}"
-   grep -v "^>" $file | \
-   grep -v [^ACGTacgt] | sort -d | uniq -c | \
-   while read abundance sequence ; 
-   do     
-      hash=$(printf "${sequence}" | sha1sum); \
-      hash=${hash:0:40}; \
-      printf ">%s_%d_%s\n" "${hash}" "${abundance}" "${sequence}"; 
-   done | \
-   sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > ../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa ; 
+cd ../../linearizedSequences/
+
+# for file in *.merged.linearized.fa; do
+
+#   base_filename="${file%%.*}"
+#   echo ">> " $base_filename
+#   tmp_file="${file}.tmp.fa"
+
+#   # Clean up headers
+#   sed 's/ .*_/./g' "$file" > "$tmp_file"
+
+#   # Count and hash valid sequences
+#   grep -v "^>" "$tmp_file" | grep -E '^[ACGTacgt]+$' | sort | uniq -c | \
+#   while read -r abundance sequence; do
+#     hash=$(printf "%s" "$sequence" | sha1sum | awk '{print $1}')
+#     printf ">%s_%d_%s\n" "$hash" "$abundance" "$sequence"
+#   done | \
+#   sort -t "_" -k2,2nr -k1.2,1d | sed 's/_/\n/2' > "../dereplicateSamples/${base_filename}.merged.linearized.dereplicated.fa"
+
+#   rm "$tmp_file"
+# done
+for file in *.merged.linearized.fa; do
+  base_filename="${file%%.*}"
+  output_file="../dereplicateSamples/${base_filename}.merged.linearized.dereplicated.fa"
+
+  if [ ! -f "$output_file" ]; then
+    echo ">> Processing $base_filename"
+    tmp_file="${file}.tmp.fa"
+
+    # Clean up headers
+    sed 's/ .*_/./g' "$file" > "$tmp_file"
+
+    # Count and hash valid sequences
+    grep -v "^>" "$tmp_file" | grep -E '^[ACGTacgt]+$' | sort | uniq -c | \
+    while read -r abundance sequence; do
+      hash=$(printf "%s" "$sequence" | sha1sum | awk '{print $1}')
+      printf ">%s_%d_%s\n" "$hash" "$abundance" "$sequence"
+    done | \
+    sort -t "_" -k2,2nr -k1.2,1d | sed 's/_/\n/2' > "$output_file"
+
+    rm "$tmp_file"
+  else
+    echo ">> Skipping $base_filename, already dereplicated."
+  fi
 done
+
 
 
 cd ../dereplicateSamples/
-# rename.ul .linearized.fasta._dereplicated.fasta "" *_dereplicated.fasta
-
-# for f in * ; do mv -- "$f" "linearized.dereplicate_$f" ; done
 
 
 # Dereplication at the study level
@@ -99,5 +167,3 @@ awk 'BEGIN {FS = "[>_]"}
                }
                printf "\t%d\n", amplicons[amplicon]
           }}' *.dereplicated.fa > ../amplicon_contingency_table.tsv
-
-

@@ -13,8 +13,8 @@ string{} readParameterFile(string parameter_file) {
 
     string parameters_file = parameter_file
     lines := parameters_file.readLines()
-    string{} my_case
 
+    string{} my_case
     for (string line : lines) {
 
         # I need a map with parameteres as keys and their values as values, hence i do not care about lines starting with '#'
@@ -34,39 +34,47 @@ string{} readParameterFile(string parameter_file) {
     if (my_case{'preprocess'} == 'fastp'){
 
         if (my_case{'disable_adapter_trimming'} == "True") {
+
             my_case{'disable_adapter_trimming'} = "--disable_adapter_trimming"
-            my_case{'detect_adapter_for_pe'} = ""
-            my_case{'adapter_sequence'} = ""
-            my_case{'adapter_sequence_r2'} = ""
+            my_case{'detect_adapter_for_pe'}    = ""
+            my_case{'adapter_sequence'}         = ""
+            my_case{'adapter_sequence_r2'}      = ""
+
         } else {
+
             my_case{'disable_adapter_trimming'} = ""
+
             if (my_case{'detect_adapter_for_pe'} == "True"){
                 my_case{'detect_adapter_for_pe'} = "--detect_adapter_for_pe"
-                my_case{'adapter_sequence'} = ""
-                my_case{'adapter_sequence_r2'} = ""
+                my_case{'adapter_sequence'}      = ""
+                my_case{'adapter_sequence_r2'}   = ""
             } else {
                 my_case{'detect_adapter_for_pe'} = ""
-                my_case{'adapter_sequence'} = "--adapter_sequence=" + my_case{'adapter_sequence'}
-                my_case{'adapter_sequence_r2'} = '--adapter_sequence_r2' + my_case{'adapter_sequence_r2'}
+                my_case{'adapter_sequence'}      = "--adapter_sequence=" + my_case{'adapter_sequence'}
+                my_case{'adapter_sequence_r2'}   = '--adapter_sequence_r2' + my_case{'adapter_sequence_r2'}
             }
         }
+
         if (my_case{'correction'} == "True"){
             my_case{'correction'} = "--correction"
         } else {
             my_case{'correction'} = ""
         }
+
         if (my_case{'overrepresentation_analysis'} == "True"){
+
             my_case{'overrepresentation_analysis'} = "--overrepresentation_analysis"
+
             if (my_case{'overrepresentation_sampling'}.isEmpty()) {
                 my_case{'overlap_diff_percent_limit'} = "--overlap_diff_percent_limit=" + my_case{'overlap_diff_percent_limit'}
             } else {
                 my_case{'overrepresentation_sampling'} = "--overrepresentation_sampling=" + my_case{'overrepresentation_sampling'}
-                my_case{'overlap_diff_percent_limit'} = ""
+                my_case{'overlap_diff_percent_limit'}  = ""
             }
         } else {
             my_case{'overrepresentation_analysis'} = ""
             my_case{'overrepresentation_sampling'} = ""
-            my_case{'overlap_diff_percent_limit'} = ""
+            my_case{'overlap_diff_percent_limit'}  = ""
         }
         if (my_case{'cut_right'} == "True"){
             my_case{'cut_right'} = "--cut_right"
@@ -79,21 +87,21 @@ string{} readParameterFile(string parameter_file) {
         }
         if (my_case{'cut_tail'} == "True"){
             my_case{'cut_tail'} = "--cut_tail"
-            my_case{'cut_tail_window_size'} = "--cut_tail_window_size=" + my_case{'cut_tail_window_size'}
+            my_case{'cut_tail_window_size'}  = "--cut_tail_window_size=" + my_case{'cut_tail_window_size'}
             my_case{'cut_tail_mean_quality'} = "--cut_tail_mean_quality=" + my_case{'cut_tail_mean_quality'}
         } else {
             my_case{'cut_tail'} = ""
-            my_case{'cut_tail_window_size'} = ""
+            my_case{'cut_tail_window_size'}  = ""
             my_case{'cut_tail_mean_quality'} = ""
         }
         if (my_case{'cut_front'} == "True"){
             my_case{'cut_front'} = "--cut_front"
             my_case{'cut_front_mean_quality'} = "--cut_front_mean_quality=" + my_case{'cut_front_mean_quality'}
-            my_case{'cut_front_window_size'} = "--cut_front_window_size=" + my_case{'cut_front_window_size'}
+            my_case{'cut_front_window_size'}  = "--cut_front_window_size=" + my_case{'cut_front_window_size'}
         } else {
             my_case{'cut_front'} = ""
             my_case{'cut_front_mean_quality'} = ""
-            my_case{'cut_front_window_size'} = ""
+            my_case{'cut_front_window_size'}  = ""
         }
         if (my_case{'n_base_limit'}.isEmpty()){
             my_case{'n_base_limit'} = ""
@@ -111,9 +119,13 @@ string{} readParameterFile(string parameter_file) {
             my_case{'complexity_threshold'} = "--complexity_threshold=" + my_case{'complexity_threshold'}
         }
     }
-    string algoCluster1 = my_case{'clusteringAlgo'}
-    string algo1 = algoCluster1.split('_')[1]
-    my_case{'assignmentPath'} = "/mnt/analysis/" + my_case{'outputFolderName'} + '/mainOutput/' + my_case{'gene'} +  '/' + algo1
+
+    string algo1 = my_case{'clusteringAlgo'}
+    if (parameters_file.startsWith("/mnt/analysis")) {
+        my_case{'assignmentPath'} = "/mnt/analysis/" + my_case{'outputFolderName'} + '/mainOutput/' + my_case{'gene'} +  '/' + algo1
+    } else {
+        my_case{'assignmentPath'} = parameters_file.dirName() + "/" + my_case{'outputFolderName'} + '/mainOutput/' + my_case{'gene'} +  '/' + algo1
+    }
 
     if (my_case{'gene'} == "gene_16S") {
         if ((my_case{'referenceDb'} == "midori_1") || (my_case{'referenceDb'} == "midori_2") || (my_case{'referenceDb'} == "pr2") || (my_case{'referenceDb'} == "unite")) {
@@ -130,8 +142,8 @@ string{} readParameterFile(string parameter_file) {
     }
 
     if (my_case{'gene'} == "gene_12S" || my_case{'gene'} == "gene_ITS") {
-        if (my_case{'clusteringAlgo'} != "algo_Swarm") {
-            println('PEMA support only the Swarm algorithm for the clustering step for the case of ' + my_case{'gene'} + ' marker gene. Please set algo_Swarm as your clusteringAlgo.')
+        if (my_case{'clusteringAlgo'} != "swarm") {
+            println('PEMA support only the Swarm algorithm for the clustering step for the case of ' + my_case{'gene'} + ' marker gene. Please set swarm as your clusteringAlgo.')
             exit 1
         }
     }
@@ -154,8 +166,8 @@ string buildDirectories(string{} params, string{} globalVars){
         if (params{'clusteringAlgo'}  == 'algo_CROP') {
             string algo = 'crop'
             algo.mkdir()
-        } else if (params{'clusteringAlgo'} == 'algo_Swarm') {
-            string algo = 'Swarm'
+        } else if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
             algo.mkdir()
         } else {
             println("PEMA cannot handle COI marker gene with the clustering algorithm of your choice. Please use Swarm.")
@@ -167,10 +179,10 @@ string buildDirectories(string{} params, string{} globalVars){
         string sixteenPath = globalVars{'genePath'} + '/' + 'gene_16S'
         sixteenPath.chdir()
 
-        if (params{'clusteringAlgo'} == 'algo_Swarm') {
-            string algo = 'Swarm'
+        if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
             algo.mkdir()
-        } else if (params{'clusteringAlgo'} == 'algo_vsearch') {
+        } else if (params{'clusteringAlgo'} == 'vsearch') {
             string algo = 'vsearch'
             algo.mkdir()
         }
@@ -181,10 +193,10 @@ string buildDirectories(string{} params, string{} globalVars){
         string sixteenPath = globalVars{'genePath'} + '/' + 'gene_18S'
         sixteenPath.chdir()
 
-        if (params{'clusteringAlgo'} == 'algo_Swarm') {
-            string algo = 'Swarm'
+        if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
             algo.mkdir()
-        } else if (params{'clusteringAlgo'} == 'algo_vsearch') {
+        } else if (params{'clusteringAlgo'} == 'vsearch') {
             string algo = 'vsearch'
             algo.mkdir()
         }
@@ -197,8 +209,8 @@ string buildDirectories(string{} params, string{} globalVars){
         if (params{'clusteringAlgo'}  == 'algo_CROP') {
             string algo = 'crop'
             algo.mkdir()
-        } else if (params{'clusteringAlgo'} == 'algo_Swarm') {
-            string algo = 'Swarm'
+        } else if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
             algo.mkdir()
         }
 
@@ -208,10 +220,10 @@ string buildDirectories(string{} params, string{} globalVars){
         string sixteenPath = globalVars{'genePath'} + '/' + 'gene_12S'
         sixteenPath.chdir()
 
-        if (params{'clusteringAlgo'} == 'algo_Swarm') {
-            string algo = 'Swarm'
+        if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
             algo.mkdir()
-        } else if (params{'clusteringAlgo'} == 'algo_vsearch') {
+        } else if (params{'clusteringAlgo'} == 'vsearch') {
             string algo = 'vsearch'
             algo.mkdir()
         }
@@ -226,10 +238,10 @@ string buildDirectories(string{} params, string{} globalVars){
         if (params{'clusteringAlgo'}  == 'algo_CROP') {
             string algo = 'crop'
             algo.mkdir()
-        } else if (params{'clusteringAlgo'} == 'algo_Swarm') {
-            string algo = 'Swarm'
+        } else if (params{'clusteringAlgo'} == 'swarm') {
+            string algo = 'swarm'
             algo.mkdir()
-        } else if (params{'clusteringAlgo'} == 'algo_vsearch') {
+        } else if (params{'clusteringAlgo'} == 'vsearch') {
             string algo = 'vsearch'
             algo.mkdir()
         }
@@ -245,13 +257,17 @@ string buildDirectories(string{} params, string{} globalVars){
 # Function to train classifier based on a local reference database if required
 string{} trainClassifier(string{} params, string{} globalVars){
 
-    globalVars{'customDbFilesPath'} = '/mnt/analysis/custom_ref_db'
+    if (globalVars{'environment'} == "container"){
+        globalVars{'customDbFilesPath'} = '/mnt/analysis/custom_ref_db'
+    } else {
+        globalVars{'customDbFilesPath'} = globalVars{'tools'} + '/custom_ref_db'
+    }
     globalVars{'customDbFilesPath'}.chdir()
 
     if (params{'classifierAlgo'} == 'RDPClassifier') {
 
         # Path for user's files
-        globalVars{'myCustomDbInPema'}  = '/home/tools/RDPTools/TRAIN'
+        globalVars{'myCustomDbInPema'}  = globalVars{'tools'} + "/RDPTools/TRAIN"
         string checkIfAlreadyTrained    = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
 
         # Check if RDPClassifier has already been trained with this custom DB
@@ -266,7 +282,7 @@ string{} trainClassifier(string{} params, string{} globalVars){
             string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
 
             # Train the RDPClassifier using your custom COI ref db
-            sys bash / home / scripts / trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+            sys bash $globalVars{'scripts'} / trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
 
         }
 
@@ -288,7 +304,7 @@ string{} trainClassifier(string{} params, string{} globalVars){
         } else {
 
             # Train CREST using a custom ref db
-            sys bash / home / scripts / trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+            sys bash $globalVars{'scripts'} / trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
         }
     }
 
@@ -302,25 +318,32 @@ string{} initializeAnalysis(string{} params) {
 
     string{} globalVars
 
-    wait
-
     # Main paths
+    globalVars{'environment'} = params{'environment'}
+
     if (params{'environment'} == 'container'){
-        globalVars{'path'}              = '/home'
-        globalVars{'dataPath'}          = '/mnt/analysis/mydata'
+        globalVars{'path'}              = '/home/'
+        globalVars{'dataPath'}          = '/mnt/analysis/mydata/'
         globalVars{'parameterFilePath'} = '/mnt/analysis/'
-        globalVars{'outputPoint'}       = '/mnt/analysis'
+        globalVars{'outputPoint'}       = '/mnt/analysis/'
+        globalVars{'scripts'}           =  globalVars{'path'} + "/scripts/"
+        globalVars{'tools'}             =  globalVars{'path'} + "/tools/"
+
     } else {
-        string tmp = "home_path.txt"
+        string tmp = "/tmp/home_path.txt"
         sys echo $HOME > $tmp
+        sys echo $PEMA_HOME >> $tmp
         lines := tmp.readLines()
-        string home = lines[0]        
-        globalVars{'path'}              = home + "/.pema"
-        globalVars{'dataPath'}          = params{'paramsFilePath'} + 'mydata'
+        string home = lines[0]
+        string pema_home = lines[1]
+        globalVars{'path'}              = home + "/.pema/"
+        globalVars{'dataPath'}          = params{'paramsFilePath'} + '/mydata/'
         globalVars{'parameterFilePath'} = params{'paramsFilePath'}
         globalVars{'outputPoint'}       = params{'paramsFilePath'}
+        globalVars{'scripts'}           = pema_home + "/pema_docker_image/scripts/"
+        globalVars{'tools'}             = globalVars{'path'}
+
     }
-    wait
 
     # If there are Trimlogs in the rawData file, PEMA does not run as it should.
     # Hence, we remove them if there are any!
@@ -335,6 +358,7 @@ string{} initializeAnalysis(string{} params) {
 
     # I create a file where the pipeline's output will be saved
     globalVars{'outputPoint'}.chdir()
+
     globalVars{'analysisName'}    = params{'outputFolderName'}
     globalVars{'geneDependent'}   = 'mainOutput'
     globalVars{'outputPerSample'} = 'outputPerSample'
@@ -425,7 +449,7 @@ string{} initializeAnalysis(string{} params) {
 
     # Convert Illumina data to ENA format
     if (params{'EnaData'} == 'No') {
-        sys bash $globalVars{'path'} / scripts / convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
+        sys bash $globalVars{'scripts'} / convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
     }
 
     # IMPORTANT! Module to train classifiers is enabled through this statement
@@ -434,8 +458,7 @@ string{} initializeAnalysis(string{} params) {
     }
 
     # Taxonomy assignment path
-    string algoCluster1 = params{'clusteringAlgo'}
-    string algo1 = algoCluster1.split('_')[1]
+    string algo1 = params{'clusteringAlgo'}
     globalVars{'assignmentPath'} = globalVars{'genePath'} + '/' + params{'gene'} +  '/' + algo1
 
     # Keep the classifer as a global var so you can change it if needed

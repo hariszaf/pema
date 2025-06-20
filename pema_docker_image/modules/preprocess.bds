@@ -69,21 +69,26 @@ string preprocessWithFastp(string{} params, string{} globalVars){
 # Function to run FASTQC
 string qualityControl(string{} params, string{} globalVars) {
 
-    println('\n\n FastQC.. \n')
-
+    string msg = "\n\n" + ">> FastQC step" + "\n\n"
+    println(msg)
 
     # now FASTQC runs for all files
     string[] rawFiles = globalVars{'dataPath'}.dir()
     for ( string rawFile : rawFiles ) {
 
-        println(rawFile)
-        task fastqc --outdir $globalVars{'fastqcPath'}  $globalVars{'dataPath'}/$rawFile
+        string basename = rawFile.split(".fastq.gz")[0]
+        string check = globalVars{"fastqcPath"} + "/" + basename + "_fastqc.zip"
+        if (check.exists()){
+            continue
+        } else {
+            task fastqc --outdir $globalVars{'fastqcPath'}  $globalVars{'dataPath'}/$rawFile
+        }
     }
 
     wait
 
-    string msg = "\n\n" + "<< FastQC has been completed!" + "\n\n"
-    println(msg)
+    string msg_out = "\n\n" + "<< FastQC has been completed!" + "\n\n"
+    println(msg_out)
 
     # now i create a checkpoint and read again the parameters file.
     # this way if i change any of my parameters, i can do only the steps from here and after with the new ones.
@@ -91,9 +96,7 @@ string qualityControl(string{} params, string{} globalVars) {
         string checkTrim = globalVars{'outputPoint'} + '/trimming.chp'
         checkpoint checkTrim
     }
-
     return 'ok'
-
 }
 
 
@@ -116,7 +119,7 @@ string cutadaptForIts(string{} params, string{} globalVars) {
     }    
     
     wait
-    task /usr/local/bin/Rscript $globalVars{'path'}/scripts/cutadaptITS.R $params{'forwardITSPrimer'} $params{'reverseITSPrimer'} $globalVars{'dataPath'}
+    task /usr/local/bin/Rscript $globalVars{'scripts'}/cutadaptITS.R $params{'forwardITSPrimer'} $params{'reverseITSPrimer'} $globalVars{'dataPath'}
     
     wait
     
@@ -136,6 +139,9 @@ string cutadaptForIts(string{} params, string{} globalVars) {
 
 # Function to run TRIMMOMATIC
 string trimSeqs(string{} params, string{} globalVars){
+
+    string msg_in = "\n\n" + ">>> Trimmomatic" + "\n\n"
+    println(msg_in)
 
     # Make a list with all the file names on `mydata` dir
     string[] data = globalVars{'dataPath'}.dir()
@@ -168,7 +174,14 @@ string trimSeqs(string{} params, string{} globalVars){
 
             if ( params{'maxInfo'} == 'Yes') {
 
-                println('You hace selected Max INFO')
+                println('You have selected Max INFO')
+
+                string check = globalVars{'trimoPath'} + "/filtered_max_" + readF + ".1P.fastq.gz"
+                if (check.exists()) {
+                    println("* Already trimmed sample")
+                    continue
+                }
+
                 wait
                 #  /usr/lib/jvm/java-8-openjdk-amd64/bin/
                 # -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
@@ -193,6 +206,12 @@ string trimSeqs(string{} params, string{} globalVars){
 
                 print('You have selected no Max INFO' + '\n')
 
+                string check = globalVars{'trimoPath'} + "/filtered_" + readF + ".1P.fastq.gz"
+                if (check.exists()) {
+                    println("* Already trimmed sample")
+                    continue
+                }
+
                 # /usr/lib/jvm/java-8-openjdk-amd64/bin/
                 # -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
                 task java \
@@ -216,8 +235,8 @@ string trimSeqs(string{} params, string{} globalVars){
     }
 
     wait
-    string msg = "\n\n" + "Trimmomatic  is done" + "\n\n"
-    println(msg)
+    string msg_out = "\n\n" + "<< Trimmomatic  is done" + "\n\n"
+    println(msg_out)
 
 
     #  Make a CHECKPOINT from which will be able to restart our analysis from the error correction sterp
@@ -278,7 +297,6 @@ string adjustSeqs(string{} params, string{} globalVars){
     string[] newName
     wait
 
-
     for (string prefix : uniquePrefixes) {
 
         readBayesF = prefix + "_1.fastq.gz.1P.fastq.gz"
@@ -293,23 +311,12 @@ string adjustSeqs(string{} params, string{} globalVars){
             }
             newDir = newName[1]
 
-            println("===================================")
-            println("readBayesF:" + readBayesF)
-            println("readBayesR:" + readBayesR)
-            println("newName:" + newName)
-            println("newDir:" + newDir)
-            println("===================================")
-
-
             string check = globalVars{'bayesPath'} + "/" + newDir
-            println(check)
             if (check.exists() && check.isDir()) {
                 string msg = "\n\n" + " **** Directory already exists for sample: " + newDir + "\n\n"
                 println(msg)
                 continue
-            } else {
-                println(">>>>>>>>>>> run forest!")
-            }
+            } 
 
             # Working where the output of BayesHammer is located!
             globalVars{'bayesPath'}.chdir() ; 
@@ -390,7 +397,6 @@ string merging(string{} params, string{} globalVars){
         # In case of re-running, delete the .gz files as they cannot be over-written
         sys if [[ $(find '$uniqPath' -name '*.gz') ]] ; then  rm *gz ; fi     
 
-
         # In the corrected file of each sample there are two files - one for forward, one for reverse -
         # Make two variables with them
         string forward     = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq.gz'
@@ -398,21 +404,24 @@ string merging(string{} params, string{} globalVars){
         string forwardFile = baseName + correctFile + forward ;
         string reverseFile = baseName + correctFile + reverse ;
 
+        # IF FORWARDS DOES NOT EXIST , IT MEANS WE HAVE ALREADY FIXED IT, SO WE CAN NOW SKIP IT 
+        if (! forwardFile.exists()) {
+            println(".. file " + forwardFile + " does not exist, thus we assume the sample files are already merged")
+            continue
+        }
+
         wait
-        
 
         if ( correctFile.startsWith("ERR") == false ) {
 
-            println("~~~~~~~~~~~~~ I AM IN THE WILD LOOP ~~~~~~~~~~~~`")
+            println("Replacing DRR with ERR.")
+
             string deF  = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq'
             string deR  = '_2.fastq.gz.2P.fastq.00.0_0.cor.fastq'
             string fwdF = baseName + correctFile + deF ;
             string rvsF = baseName + correctFile + deR ;
 
-            println("fwdF: " + fwdF)
-            println("rvsF: " + rvsF)
             wait
-            sys pwd
 
             task{
                 sys sed -i 's/DRR/ERR/g' $fwdF
@@ -423,7 +432,7 @@ string merging(string{} params, string{} globalVars){
         }
         wait
 
-        sys /bin/gzip *.fastq 
+        sys gzip *.fastq 
         wait
 
         # Execute pandaseq algorithm for merging 
@@ -441,12 +450,12 @@ string merging(string{} params, string{} globalVars){
 
         if ( correctFile.startsWith("ERR") == false ) {
 
-            println("~~~~~~~~~~~~~ I AM IN THE WILD LOOP for the 2nd time ~~~~~~~~~~~~`")
+            println("Replacing ERR with DRR to go back to the initial case.")
 
             task{
-                sys /bin/gunzip *.fastq.gz
+                sys gunzip *.fastq.gz
                 sys sed -i 's/ERR/DRR/g' *.fastq
-                sys /bin/gzip *cor.fastq
+                sys gzip *cor.fastq
             }
             wait 
         }
@@ -476,6 +485,12 @@ string merging(string{} params, string{} globalVars){
 
     for ( string anyFile : merged ) {
 
+        string newFile = anyFile.baseName('.gz')
+
+        if (newFile.exists()) {
+            print("File already in unzip folder, continue")
+            continue
+        }
 
         # In case of non ENA data, then this step changes the pseudo-names PEMA gives
         # To get these back, we run the following 
@@ -485,12 +500,10 @@ string merging(string{} params, string{} globalVars){
 
             sys sed -e "s/>ERR[0-9]*:/>$SAMPLE_NAME:/g" $anyFile > tmp
             sys mv tmp $anyFile
-
         }
 
         sys cp $anyFile $unzipPath
         unzipPath.chdir() ;
-        string newFile = anyFile.baseName('.gz')
         sys mv $anyFile $newFile
         globalVars{'spaPath'}.chdir()
     }
@@ -574,11 +587,11 @@ string swarmDereplicate(string{} params, string{} globalVars){
     if (params{'preprocess'} == "original") {
 
         globalVars{'unzipPath'}.chdir()
-        sys bash $globalVars{'path'}/scripts/dereplicateSwarm.sh original
+        sys bash $globalVars{'scripts'}/dereplicateSwarm.sh original
 
     } else {
         globalVars{'fastpMergedPath'}.chdir()
-        sys bash $globalVars{'path'}/scripts/dereplicateSwarm.sh fastp
+        sys bash $globalVars{'scripts'}/dereplicateSwarm.sh fastp
     }
 
     println('Sample files have been dereplicated and a contingency table for the amplicons has been built.')
@@ -669,5 +682,3 @@ string mergeFilesNonSwarm(string{} params, string{} globalVars){
     return 'ok'
 
 }
-
-# docker run --rm -it -v /home/luna.kuleuven.be/u0156635/github_repos/HCMR/pema/pema_docker_image/sanity_check/16S/:/mnt/analysis hariszaf/pema:v.2.1.5 bash

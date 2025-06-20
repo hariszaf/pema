@@ -55,7 +55,8 @@ COPY pema_latest.bds .
 
 ## Make a source of the .bashrc file
 WORKDIR /root
-RUN echo "export PATH=$PATH:/home/tools/BDS/.bds" >> /root/.bashrc
+RUN echo "export PATH=$PATH:/home/tools/BDS/.bds" >> /root/.bashrc &&\ 
+    echo "export PATH=$PATH:/home/tools/fastqc/FastQC/" >> /root/.bashrc
 RUN ["/bin/bash", "-c", "-l",  "source /root/.bashrc"]
 
 RUN export PATH=$PATH:/home/tools/BDS/.bds
