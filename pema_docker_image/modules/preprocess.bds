@@ -333,7 +333,10 @@ string adjustSeqs(string{} params, string{} globalVars){
             # $globalVars{'path'}/tools/SPAdes/SPAdes-3.14.0/bin/
             task spades.py --only-error-correction \
                 --threads $params{'threadsTrimmomatic'} \
-                -o $globalVars{'bayesPath'}/$newDir -1 $readBayesF -2 $readBayesR --disable-gzip-output
+                -o $globalVars{'bayesPath'}/$newDir \
+                -1 $readBayesF \
+                -2 $readBayesR \
+                --disable-gzip-output
 
             wait
 
@@ -365,6 +368,8 @@ string adjustSeqs(string{} params, string{} globalVars){
 # Function to run PANDASEQ 
 string merging(string{} params, string{} globalVars){
 
+    # In case of the original preproces, we use PANDAseq to merge forward-reverse reads of a sample
+
     globalVars{'bayesPath'}.chdir()
 
     sys if [ $(find '$globalVars{'bayesPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
@@ -391,6 +396,8 @@ string merging(string{} params, string{} globalVars){
 
         string uniqPath = globalVars{'bayesPath'} + '/' +  correctFile + '/' + 'corrected' ;
 
+        string mergedSample = globalVars{'spaPath'} + '/' + correctFile + ".merged.fasta.gz"
+
         # Enter to the directory of a specific sample each time in the output folder of BayesHammer - previous step
         uniqPath.chdir()
 
@@ -399,14 +406,14 @@ string merging(string{} params, string{} globalVars){
 
         # In the corrected file of each sample there are two files - one for forward, one for reverse -
         # Make two variables with them
-        string forward     = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq.gz'
-        string reverse     = '_2.fastq.gz.2P.fastq.00.0_0.cor.fastq.gz'
-        string forwardFile = baseName + correctFile + forward ;
-        string reverseFile = baseName + correctFile + reverse ;
+        string forward     = '_1.fastq.gz.1P.fastq.00.0_0.cor.fastq'
+        string reverse     = '_2.fastq.gz.2P.fastq.00.0_0.cor.fastq'
+        string forwardFile = uniqPath + "/" + baseName + correctFile + forward ;
+        string reverseFile = uniqPath + "/" + baseName + correctFile + reverse ;
 
         # IF FORWARDS DOES NOT EXIST , IT MEANS WE HAVE ALREADY FIXED IT, SO WE CAN NOW SKIP IT 
-        if (! forwardFile.exists()) {
-            println(".. file " + forwardFile + " does not exist, thus we assume the sample files are already merged")
+        if (mergedSample.exists()) {
+            println("Sample: " + mergedSample + " has already been merged.")
             continue
         }
 
@@ -432,18 +439,29 @@ string merging(string{} params, string{} globalVars){
         }
         wait
 
-        sys gzip *.fastq 
-        wait
-
         # Execute pandaseq algorithm for merging 
         if ( params{'pandaseqMinlen'} !=  '' ) {
-            task pandaseq -f $forwardFile -r $reverseFile -6 \
-                -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
-                -t $params{'threshold'} -l $params{'pandaseqMinlen'} $params{'elimination'}  > $correctFile.merged.fastq
+            task {
+                sys pandaseq \
+                    -f $forwardFile -r $reverseFile -6 \
+                    -A $params{'pandaseqAlgorithm'} \
+                    -a -B \
+                    -T $params{'pandaseqThreads'} \
+                    -o $params{'minoverlap'} \
+                    -t $params{'threshold'} \
+                    -l $params{'pandaseqMinlen'} \
+                    $params{'elimination'}  > $correctFile.merged.fasta
+                }
         } else {
-            task pandaseq -f $forwardFile -r $reverseFile -6 \
-                -A $params{'pandaseqAlgorithm'} -a -B -T $params{'pandaseqThreads'} -o $params{'minoverlap'} \
-                -t $params{'threshold'} $params{'elimination'}  > $correctFile.merged.fastq
+            task {
+                sys pandaseq -f $forwardFile -r $reverseFile -6 \
+                    -A $params{'pandaseqAlgorithm'} \
+                    -a -B \
+                    -T $params{'pandaseqThreads'} \
+                    -o $params{'minoverlap'} \
+                    -t $params{'threshold'} \
+                    $params{'elimination'}  > $correctFile.merged.fasta
+                }
         }
 
         wait
@@ -452,18 +470,13 @@ string merging(string{} params, string{} globalVars){
 
             println("Replacing ERR with DRR to go back to the initial case.")
 
-            task{
-                sys gunzip *.fastq.gz
-                sys sed -i 's/ERR/DRR/g' *.fastq
-                sys gzip *cor.fastq
-            }
+            sys sed -i 's/ERR/DRR/g' *.fastq
             wait 
         }
         wait 
 
         # Move the merged file in the `unzip` folder under the `/4.mergingPairedEndFiles/` path
-        sys mv $correctFile.merged.fastq $correctFile.merged.fastq.gz
-        sys mv *.merged.fastq.gz $globalVars{'spaPath'}
+        sys mv $correctFile.merged.fasta $globalVars{'spaPath'}
         globalVars{'bayesPath'}.chdir()
     }
     wait
@@ -471,9 +484,9 @@ string merging(string{} params, string{} globalVars){
     ### Unzip all my merged files in a new file named 'unzip'
 
     # Go to the folder with the output of SPAdes and make a list with its elements
-    globalVars{'spaPath'}.chdir() ;
-    string[] merged = globalVars{'spaPath'}.dir() ;
-    string unzip = 'unzip' ;
+    globalVars{'spaPath'}.chdir()
+    string[] merged = globalVars{'spaPath'}.dir()
+    string unzip = 'unzip'
 
     # Make a new directory named 'unzip'
     unzip.mkdir() ;
@@ -485,27 +498,29 @@ string merging(string{} params, string{} globalVars){
 
     for ( string anyFile : merged ) {
 
-        string newFile = anyFile.baseName('.gz')
-
-        if (newFile.exists()) {
-            print("File already in unzip folder, continue")
-            continue
-        }
-
         # In case of non ENA data, then this step changes the pseudo-names PEMA gives
         # To get these back, we run the following 
         if ( params{'EnaData'} == "No"){
 
-            string SAMPLE_NAME = anyFile.baseName('.merged.fastq.gz')
+            string SAMPLE_NAME = anyFile.baseName('.merged.fasta.gz')
 
             sys sed -e "s/>ERR[0-9]*:/>$SAMPLE_NAME:/g" $anyFile > tmp
             sys mv tmp $anyFile
         }
 
-        sys cp $anyFile $unzipPath
-        unzipPath.chdir() ;
-        sys mv $anyFile $newFile
-        globalVars{'spaPath'}.chdir()
+        string check = unzipPath + "/" + anyFile.split(".gz")[0]
+        println(check)
+
+        if (check.exists()){
+            continue
+        } else {
+            println("Move merged file for sample: " + anyFile + " to unzip folder, and compress in original")
+            sys cp $anyFile $unzipPath
+            sys gzip $anyFile
+            globalVars{'spaPath'}.chdir()
+        }
+
+
     }
 
     wait
@@ -532,6 +547,8 @@ string merging(string{} params, string{} globalVars){
 # Function to dereplicate using OBITools 
 string{} obiDereplicate(string{} params, string{} globalVars){
 
+    println(">>>>> RUNNING OBITOOLS   <<<<<<<<")
+
     string sampleName
 
     if (params{'preprocess'} == "original") {
@@ -544,17 +561,19 @@ string{} obiDereplicate(string{} params, string{} globalVars){
         # string fileForDerepl
         for ( string nodereplicate : mergedFiles ) {
 
-            string sample = nodereplicate.split("\.merged\.fastq")
+            string sample = nodereplicate.split("\.merged\.fasta")
             sampleName = sample.substr(1, sample.length()-3) ;
 
-            # awk 'NR%4<=2' input.txt > output.txt
-            # Execute OBITools - when new pemabase available: 
-            task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > \
-                $globalVars{'derePath'}/$sampleName\.merged.dereplicated.fa
+            # Execute OBITools4
+            task {
+                sys obiuniq -m sample $nodereplicate > $globalVars{'derePath'}/$sampleName\.merged.dereplicated.fa
+                # sys bash $globalVars{'scripts'}/runObitools3.sh $nodereplicate $globalVars{'derePath'}/$sampleName\.merged.dereplicated.fa
+            }
+
             wait
         }
 
-    } else {
+    } else {  # Preprocessing with fastp 
 
         globalVars{'fastpMergedPath'}.chdir()
         sys if [ $(find '$globalVars{'fastpMergedPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
@@ -567,15 +586,13 @@ string{} obiDereplicate(string{} params, string{} globalVars){
             string sample = nodereplicate.split("\.merged\.fastq")
             sampleName = sample.substr(1, sample.length()-3) ;
 
-            # awk 'NR%4<=2' input.txt > output.txt
-            # Execute OBITools - when new pemabase available: 
-            task $globalVars{'path'}/tools/OBI/OBI-env/bin/obiuniq -m sample $nodereplicate > \
-                $globalVars{'derePath'}/$sampleName\.merged.dereplicated.fa
+            # Execute OBITools4
+            task {
+                sys obiuniq -m sample $nodereplicate > $globalVars{'derePath'}/$sampleName\.merged.dereplicated.fa
+            } 
             wait
         }
-
     }
-
     wait
     return globalVars
 }
@@ -625,8 +642,6 @@ string mergeFilesNonSwarm(string{} params, string{} globalVars){
 
             # we turn all down- to upcases
             sys cat nospace.$derepl | tr '[a-z]' '[A-Z]' > $globalVars{'linearPath'}/$sampleName\.merged.dereplicated.linearized.fa
-
-            # '# JUST to beautify the vscode perl 
         }
     }
     wait

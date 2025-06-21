@@ -96,6 +96,8 @@ if conda info --envs | grep -q "$ENV_NAME"; then
     echo -e "$GREEN_TICK Environment '$ENV_NAME' already exists. Skipping creation."
 else
     # NOTE: SPAdes has compatibility issues with Python -- we need to use Python < 3.10 as long as we stinck with SPAdes 3.14.0
+    # SPADes works fine with Python 3.9
+    # yet, OBITools 3 works with 3.7 -- thus, we need a second env 
     conda create -n $ENV_NAME python=3.9 -y
     echo -e "$GREEN_TICK A conda environment, called $ENV_NAME, has been built."
 fi
@@ -149,14 +151,13 @@ else
   cp $SETUP_WD/pema_docker_image/pemabase/tools/bds_Linux.tgz "$BDS_TGZ"
   tar -xvzf bds_*.tgz
   rm -f "$BDS_TGZ"
-  echo -e "$GREEN_TICK bds installed to $BDS_DIR"
+  echo -e "BigDataScript programming language was installed at: $BDS_DIR  $TADA"
 fi
 
 # Add ~/.pema/.bds to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/.bds:"* ]]; then
   echo 'export PATH="$HOME/.pema/.bds:$PATH"' >> $SHELL_CONFIG
-  export PATH="$HOME/.pema/.bds:$PATH"
-  echo -e "$GREEN_TICK Added ~/.pema/.bds to PATH. Restart your terminal or run: source ~/.bashrc"
+  echo -e "Added ~/.pema/.bds to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
@@ -200,8 +201,24 @@ fi
 # Add ~/.pema/FastQC/fastqc to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/FastQC:"* ]]; then
   echo 'export PATH="$HOME/.pema/FastQC:$PATH"' >> $SHELL_CONFIG
-  export PATH="$HOME/.pema/FastQC:$PATH"
-  echo -e "$GREEN_TICK Added ~/.pema/FastQC to PATH. Restart your terminal or run: source ~/.bashrc"
+  echo -e "Added ~/.pema/FastQC to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+fi
+
+
+# --------------
+# Install  OBItools
+# --------------
+if [[ -x ~/.pema/obitools4 ]]; then
+  echo -e "$GREEN_TICK obitools4 has been installed."
+else
+  echo -e "$HOURGLASS Installing Obitools4..."
+  mkdir obitools4
+  cd obitools4
+  wget -O -L  https://raw.githubusercontent.com/metabarcoding/obitools4/master/install_obitools.sh 
+  bash install_obitools.sh -i .
+  echo 'export PATH="$HOME/.pema/obitools4/bin:$PATH"' >> $SHELL_CONFIG
+  echo -e "Obitools4 is now added on PATH $TADA"
+  cd ..
 fi
 
 
@@ -221,8 +238,7 @@ fi
 # Add ~/.pema/vsearch to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/vsearch/bin:"* ]]; then
   echo 'export PATH="$HOME/.pema/vsearch/bin:$PATH"' >> $SHELL_CONFIG
-  export PATH="$HOME/.pema/vsearch/bin:$PATH"
-  echo -e "$GREEN_TICK Added ~/.pema/vsearch/bin to PATH. Restart your terminal or run: source ~/.bashrc"
+  echo -e "Added ~/.pema/vsearch/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
@@ -248,14 +264,13 @@ else
   wget https://github.com/ablab/spades/releases/download/v$SPADES/SPAdes-$SPADES-Linux.tar.gz
   tar -xzf SPAdes-$SPADES-Linux.tar.gz
   rm SPAdes-$SPADES-Linux.tar.gz 
-  echo -e "$GREEN_TICK SPAdes is now installed."
+  echo -e "SPAdes is now installed. $TADA"
 fi
 
 # Add ~/.pema/SPAdes to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/SPAdes-$SPADES-Linux/bin:"* ]]; then
-  echo "export PATH="$HOME/.pema/SPAdes-$SPADES-Linux/bin:$PATH"" >> $SHELL_CONFIG
-  export PATH="$HOME/.pema/SPAdes-$SPADES-Linux/bin:$PATH"
-  echo -e "$GREEN_TICK Added ~/.pema/SPAdes-$SPADES-Linux/bin to PATH. Restart your terminal or run: source ~/.bashrc"
+  echo 'export PATH="$HOME/.pema/SPAdes-$SPADES-Linux/bin:$PATH"' >> $SHELL_CONFIG
+  echo -e "Added ~/.pema/SPAdes-$SPADES-Linux/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
@@ -273,14 +288,13 @@ else
   make install
   chmod -R +777 /home/tools/PANDAseq/pandaseq/.libs/
   cd ..
-  echo -e "$GREEN_TICK PANDAseq was installed"
+  echo -e "PANDAseq was installed $TADA"
 fi
 
 # Add ~/.pema/PANDAseq to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/PANDAseq/bin:"* ]]; then
-  echo "export PATH="$HOME/.pema/PANDAseq/bin:$PATH"" >> $SHELL_CONFIG
-  export PATH="$HOME/.pema/PANDAseq/bin:$PATH"
-  echo -e "$GREEN_TICK Added ~/.pema/PANDAseq/bin to PATH. Restart your terminal or run: source ~/.bashrc"
+  echo 'export PATH="$HOME/.pema/PANDAseq/bin:$PATH"' >> $SHELL_CONFIG
+  echo -e "Added ~/.pema/PANDAseq/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
@@ -293,14 +307,13 @@ if [[ -x ~/.pema/swarm ]]; then
 else
     echo -e "$HOURGLASS Installing Swarm..."
     git clone https://github.com/torognes/swarm.git && cd swarm/src/ && make
-    echo -e "$GREEN_TICK Swarm was installed."
+    echo -e "Swarm was installed! $TADA"
 fi
 
 # Add ~/.pema/swarm to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/swarm/bin:"* ]]; then
-  echo "export PATH="$HOME/.pema/swarm/bin:$PATH"" >> $SHELL_CONFIG
-  export PATH="$HOME/.pema/swarm/bin:$PATH"
-  echo -e "$GREEN_TICK Added ~/.pema/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc"
+  echo 'export PATH="$HOME/.pema/swarm/bin:$PATH"' >> $SHELL_CONFIG
+  echo -e "Added ~/.pema/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
@@ -319,11 +332,9 @@ fi
 
 # Add ~/.pema/ncbi-blast-2.8.1+/bin to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/ncbi-blast-2.8.1+/bin:"* ]]; then
-  echo "export PATH="$HOME/.pema/ncbi-blast-2.8.1+/bin:$PATH"" >> $SHELL_CONFIG
-  export PATH="$HOME/.pema/ncbi-blast-2.8.1+/bin:$PATH"
-  echo -e "$GREEN_TICK Added ~/.pema/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc"
+  echo 'export PATH="$HOME/.pema/ncbi-blast-2.8.1+/bin:$PATH"' >> $SHELL_CONFIG
+  echo -e "Added ~/.pema/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
-
 
 
 # Get jq
@@ -333,7 +344,8 @@ else
     echo -e "$HOURGLASS Getting jq.."
     wget -O ~/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
     chmod +x ~/jq
-    export PATH="$HOME:$PATH"
+    echo 'export PATH="$HOME:$PATH"' >> $SHELL_CONFIG
+    echo -e "Adde jq in PATH $TADA"
 fi
 
 
@@ -341,38 +353,50 @@ fi
 # GET DATABASES 
 # --------------
 
-if [[ -x ~/.pema/CREST ]]; then
-  echo -e "$GREEN_TICK CREST and its PEMA databases are already retrieved from: $CREST_PEMA"
-else
-  echo -e "$HOURGLASS Getting CREST and its PEMA databases..."
-  wget $CREST_PEMA
-  tar -zxvf crest.tar.gz
-  rm crest.tar.gz
-  echo -e ""
-fi
+# if [[ -x ~/.pema/CREST ]]; then
+#   echo -e "$GREEN_TICK CREST and its PEMA databases are already retrieved from: $CREST_PEMA"
+# else
+#   echo -e "$HOURGLASS Getting CREST and its PEMA databases..."
+#   wget $CREST_PEMA
+#   tar -zxvf crest.tar.gz
+#   rm crest.tar.gz
+#   echo -e ""
+# fi
 
 
 # ====================================
 # Step 3: pip 
 # ====================================
 
-# pip install crest4
-# pip install ncbi-taxonomist
+pip install crest4
+pip install ncbi-taxonomist
 
 
 
+# # Create and activate the phendb environment
+# ENV_NAME="obitools"
+# # Check if the environment already exists
+# if conda info --envs | grep -q "$ENV_NAME"; then
+#     echo -e "$GREEN_TICK Environment '$ENV_NAME' already exists. Skipping creation."
+# else
+#     conda create -n $ENV_NAME python=3.7 -y
+#     echo -e "$GREEN_TICK A conda environment, called $ENV_NAME, has been built."
+# fi
+
+# conda activate $ENV_NAME
+
+# pip install --upgrade pip setuptools wheel Cython
+# pip install OBITools3
 
 
 # Add ~/.pema to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema:"* ]]; then
   echo 'export PATH="$HOME/.pema:$PATH"' >> $SHELL_CONFIG
-  export PATH="$HOME/.pema:$PATH"
-  echo -e "$GREEN_TICK Added ~/.pema to PATH. Restart your terminal or run: source ~/.bashrc"
+  echo -e "Added ~/.pema to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
+
 # Move back to the setup directory
 cd $SETUP_WD
-
-
 
 
 # Get the directory where this script resides
@@ -383,7 +407,7 @@ export PEMA_HOME="$PEMA_HOME"
 
 # Add to shell config if not already present
 if ! grep -q "export PEMA_HOME=" "$SHELL_CONFIG"; then
-    echo "export PEMA_HOME=\"$PEMA_HOME\"" >> "$SHELL_CONFIG"
+    echo 'export PEMA_HOME=\"$PEMA_HOME\"' >> "$SHELL_CONFIG"
     echo -e "PEMA_HOME added to $SHELL_CONFIG $ROCKET"
 else
     echo -e "$GREEN_TICK PEMA_HOME already set in $SHELL_CONFIG"

@@ -28,7 +28,7 @@ gene=gene_16S
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName=TEST_16S_FASTP_SWARM
+outputFolderName=TEST_16S_ORIGINAL_VSEARCH
 #
 #
 #=     EnaData:

@@ -132,7 +132,7 @@ if ( paramsDereplication{'clusteringAlgo'} == 'swarm' ) {
 
 } else {
 
-   println("Dereplications for the case of VSEARCH.")
+   println("Dereplication for the case of VSEARCH.")
    globalVars = obiDereplicate(paramsDereplication, globalVars)
 
    wait
