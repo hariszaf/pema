@@ -169,6 +169,7 @@ fi
 # TRIMMOMATIC=
 # VSEARCH=
 SPADES=3.14.0
+RDPCLASSIFIER=2.14
 CREST_PEMA="https://zenodo.org/record/5734317/files/crest.tar.gz"
 
 
@@ -349,19 +350,39 @@ else
 fi
 
 
-# --------------
-# GET DATABASES 
-# --------------
+# -----------------
+# Install RDP Classifier
+# -----------------
 
-# if [[ -x ~/.pema/CREST ]]; then
-#   echo -e "$GREEN_TICK CREST and its PEMA databases are already retrieved from: $CREST_PEMA"
-# else
-#   echo -e "$HOURGLASS Getting CREST and its PEMA databases..."
-#   wget $CREST_PEMA
-#   tar -zxvf crest.tar.gz
-#   rm crest.tar.gz
-#   echo -e ""
-# fi
+
+if [[ -x ~/.pema/rdp_classifier_$RDPCLASSIFIER ]]; then
+  echo -e "$GREEN_TICK RDP Classifier is already installed"
+else
+
+  echo -e "$HOURGLASS RDP Classifier is being installed.. "
+  wget -L -O rdp_classifier_$RDPCLASSIFIER.zip "https://sourceforge.net/projects/rdp-classifier/files/rdp-classifier/rdp_classifier_$RDPCLASSIFIER.zip/download"
+  unzip rdp_classifier_$RDPCLASSIFIER.zip
+  rm rdp_classifier_$RDPCLASSIFIER.zip
+  echo -e "RDP Classifier has been installed $TADA"
+
+  echo 'export PATH="$HOME/.pema/rdp_classifier_$RDPCLASSIFIER/"'
+fi
+
+
+if [[ -x ~/.pema/rdp_classifier_$RDPCLASSIFIER/TRAIN ]]; then
+  echo -e "$GREEN_TICK PEMA trained databases to be use with RDP Classifier have been already retrieved." 
+else
+  echo -e "$HOURGLASS Download PEMA trained RDP databases..."
+  cd rdp_classifier_$RDPCLASSIFIER/
+
+  # TODO: REPLACE THE URL  
+  wget wget -O TRAIN.zip -L  <URL>
+
+  unzip TRAIN.zip
+
+  rm TRAIN.zip
+  echo -e "PEMA trained RDP databases were retrieved $TADA"
+fi
 
 
 # ====================================
@@ -371,22 +392,6 @@ fi
 pip install crest4
 pip install ncbi-taxonomist
 
-
-
-# # Create and activate the phendb environment
-# ENV_NAME="obitools"
-# # Check if the environment already exists
-# if conda info --envs | grep -q "$ENV_NAME"; then
-#     echo -e "$GREEN_TICK Environment '$ENV_NAME' already exists. Skipping creation."
-# else
-#     conda create -n $ENV_NAME python=3.7 -y
-#     echo -e "$GREEN_TICK A conda environment, called $ENV_NAME, has been built."
-# fi
-
-# conda activate $ENV_NAME
-
-# pip install --upgrade pip setuptools wheel Cython
-# pip install OBITools3
 
 
 # Add ~/.pema to PATH if not already included

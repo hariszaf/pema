@@ -13,13 +13,24 @@ include "modules/phyloseq"
 
 println("Modules loaded.")
 
-string parameterFile = args[0]
-string parameterFilePath = parameterFile.dirName()
+string parameterFileProvided = args[0]
+string parameterFilePath     = parameterFileProvided.dirName()
 
-println("Using parameter file path: " + parameterFilePath)
+string filenameOnly
+if ( parameterFileProvided.indexOf("/") >= 0 ) {
+   # It contains "/", extract part after last "/"
+   filenameOnly = parameterFileProvided.substr(parameterFileProvided.lastIndexOf("/") + 1)
+} else {
+   # No "/", the full string is the filename
+   filenameOnly = parameterFileProvided
+}
+
+string parameterFile  = parameterFilePath + "/" + filenameOnly
+
+string msg1 = "\n\n" + "- Using parameter file path: " + parameterFile
+println(msg1)
 
 # Read parameters file for the first time! 
-string f = "parameters.tsv"
 string{} paramsFirstAssignment =  readParameterFile(parameterFile)
 paramsFirstAssignment{'paramsFilePath'} = parameterFilePath
 
@@ -48,6 +59,7 @@ if ( paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
   string{} globalVars = trainClassifier(paramsFirstAssignment, initGlobalVars)
 }
 wait
+globalVars{'parameterFile'} = parameterFile
 
 ###############################################################
 #              PRE-PROCESSING
@@ -65,8 +77,7 @@ if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
 
    # * Trimming
    parameterFilePath.chdir()
-   string g = "parameters.tsv"
-   string{} paramsTrimmoStep = readParameterFile(g)
+   string{} paramsTrimmoStep = readParameterFile(parameterFile)
 
    globalVars{'dataPath'}.chdir()
 
@@ -74,23 +85,23 @@ if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
    if ( (paramsTrimmoStep{'gene'} == 'gene_ITS') && (paramsTrimmoStep{'cutadapt'} == 'Yes') ) {
       cutadaptForIts(paramsTrimmoStep, globalVars)
    }
+   wait
 
    # Trim fastq files using Trimmomatic
+   println("HELLO FRIEND:")
    trimSeqs(paramsTrimmoStep, globalVars)
    wait
 
    # * Sequence adjustment
    parameterFilePath.chdir()
-   string h = "parameters.tsv"
-   string{} paramsBayesHammerStep = readParameterFile(h)
+   string{} paramsBayesHammerStep = readParameterFile(parameterFile)
    
    adjustSeqs(paramsBayesHammerStep, globalVars)
    wait
 
    # Merging the paired-end samples
    parameterFilePath.chdir()
-   string i = "parameters.tsv"
-   string{} paramsSpadesMerging = readParameterFile(i)
+   string{} paramsSpadesMerging = readParameterFile(parameterFile)
 
    merging(paramsSpadesMerging, globalVars)
    wait
@@ -114,8 +125,7 @@ string derepl_msg = "\n\n" + "******   DEREPLICATION STEP   ******"
 println(derepl_msg)
 
 parameterFilePath.chdir()
-string j = "parameters.tsv"
-string{} paramsDereplication =  readParameterFile(j)
+string{} paramsDereplication =  readParameterFile(parameterFile)
 
 # Build subdirectories according to the params file
 buildDirectories(paramsDereplication, globalVars)
@@ -155,8 +165,7 @@ string denoise_msg = "\n\n" + "******   OTU CLUSTERING / ASV INFERENCE  STEP   *
 println(denoise_msg)
 
 parameterFilePath.chdir()
-string k = "parameters.tsv"
-string{} paramsOfTable =  readParameterFile(k)
+string{} paramsOfTable =  readParameterFile(parameterFile)
 
 if ( paramsDereplication{'clusteringAlgo'} == 'vsearch' ) {
 
@@ -180,8 +189,7 @@ string tax_assign_msg = "\n\n" + "******   TAXONOMY ASSIGNMENT STEP   ******"
 println(tax_assign_msg)
 
 parameterFilePath.chdir()
-string l = "parameters.tsv"
-string{} paramsForTaxAssign =  readParameterFile(l)
+string{} paramsForTaxAssign =  readParameterFile(parameterFile)
 
 if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
@@ -323,29 +331,27 @@ wait
 string communAnal = globalVars{'outputPoint'} + "/communAnal.chp"
 checkpoint communAnal
 
-# ################################################################
-# #                Biodiversity analysis                      #
-# ################################################################
+# # ################################################################
+# # #                Biodiversity analysis                      #
+# # ################################################################
 
-string biodiv_msg = "\n\n" + "******   BIODIVERSITY ANALYSIS STEP   ******"
-println(tax_assign_msg)
+# parameterFilePath.chdir()
+# string{} paramsForCA =  readParameterFile(parameterFile)
 
-parameterFilePath.chdir()
-string ca = "parameters.tsv"
-string{} paramsForCA =  readParameterFile(ca)
+# if ( paramsForCA{'phyloseq'} == 'Yes') {
 
+#    string biodiv_msg = "\n\n" + "******   BIODIVERSITY ANALYSIS STEP   ******"
+#    println(biodiv_msg)
 
-if ( paramsForCA{'phyloseq'} == 'Yes') {
+#    communityAnalysis(paramsForCA, globalVars)
 
-   communityAnalysis(paramsForCA, globalVars)
+# }
 
-}
+# wait
 
-wait
-
-# ################################################################
-# #                Pema has been concluded                      #
-# ################################################################
+# # ################################################################
+# # #                Pema has been concluded                      #
+# # ################################################################
 
 # ###  Make a file where i will move all the checkpoints
 # parameterFilePath.chdir() ;

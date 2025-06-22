@@ -12,8 +12,8 @@ columns = df.columns
 columns = [x.split(".")[0] for x in columns]
 df.columns = columns
 
-# Based on wheather Swarm or VSEARCH was used, we may have ASV or OTUs
-id_col = "ASV" if "ASV" in df.columns else "#OTU ID" if "#OTU ID" in df.columns else None
+# Based on wheather Swarm (ASC) or VSEARCH ("#OTU ID") was used, we may have ASV or OTUs
+id_col = "ASV" if "ASV" in df.columns else "amplicon" if "amplicon" in df.columns else None
 
 if id_col is None:
     raise ValueError("Neither 'ASV' nor '#OTU ID' found in df.columns")

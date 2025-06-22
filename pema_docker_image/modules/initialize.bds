@@ -23,9 +23,9 @@ string{} readParameterFile(string parameter_file) {
 
         } else {
             string pname, pvalue
-
+            # Keep 1st elemenet as key (parameter) and the second as its value (parameter's value)
             (pname, pvalue) = line.split('=')
-            my_case {pname} = pvalue            # keep 1st elemenet as key (parameter) and the second as its value (parameter's value)
+            my_case {pname} = pvalue
             pname = ''
             pvalue = ''
         }
@@ -328,7 +328,7 @@ string{} initializeAnalysis(string{} params) {
         globalVars{'outputPoint'}       = '/mnt/analysis/'
         globalVars{'scripts'}           =  globalVars{'path'} + "/scripts/"
         globalVars{'tools'}             =  globalVars{'path'} + "/tools/"
-
+        globalVars{'crest'}              = globalVars{'path'} + '/.crest4/'
     } else {
         string tmp = "/tmp/home_path.txt"
         sys echo $HOME > $tmp
@@ -342,7 +342,7 @@ string{} initializeAnalysis(string{} params) {
         globalVars{'outputPoint'}       = params{'paramsFilePath'}
         globalVars{'scripts'}           = pema_home + "/pema_docker_image/scripts/"
         globalVars{'tools'}             = globalVars{'path'}
-
+        globalVars{'crest'}             = home + '/.crest4/'
     }
 
     # If there are Trimlogs in the rawData file, PEMA does not run as it should.

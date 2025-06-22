@@ -17,11 +17,12 @@ scripts_OLD_VERSION/
 *.fastq.gz
 
 # Ignore all sanity checks outputs
-pema_docker_image/sanity_check/16S/
-pema_docker_image/sanity_check/18S/
-pema_docker_image/sanity_check/COI/
-pema_docker_image/sanity_check/ITS/
-pema_docker_image/sanity_check/12S/
-pema_docker_image/sanity_check/non_ena_data/
+sanity_check/16S/TEST*/
+sanity_check/18S/TEST*/
+sanity_check/COI/TEST*/
+sanity_check/ITS/TEST*/
+sanity_check/12S/TEST*/
+sanity_check/non_ena_data/TEST.*/
+
 # Ignore any .sif file
 *.sif

@@ -11,27 +11,7 @@
 #          https://github.com/torognes/swarm/wiki/
 
 
-
-
-
 cd ../linearizedSequences/
-
-# Dereplication at the sample level -- replace following loop with supposingly time efficient
-# for file in $(ls | grep merged.linearized.fa); 
-# do
-#   base_filename="${file%%.*}"
-#   sed 's/ .*_/./g' $file > $file.tmp.fa
-#   grep -v "^>" $file.tmp.fa | \
-#   grep -v [^ACGTacgt] | sort -d | uniq -c | \
-#   while read abundance sequence ; 
-#   do
-#      hash=$(printf "${sequence}" | sha1sum); \
-#      hash=${hash:0:40}; \
-#      printf ">%s_%d_%s\n" "${hash}" "${abundance}" "${sequence}"; 
-#   done | \
-#   sort -t "_" -k2,2nr -k1.2,1d | sed -e 's/\_/\n/2' > ../dereplicateSamples/$base_filename.merged.linearized.dereplicated.fa ; 
-#   rm $file.tmp.fa
-# done
 
 
 for file in *.merged.linearized.fa; do
@@ -55,15 +35,11 @@ for file in *.merged.linearized.fa; do
 done
 
 
-
-
-
+# Dereplication at the study level
 cd ../dereplicateSamples/
 
-
-# Dereplication at the study level
 export LC_ALL=C
-cat *.dereplicated.fa | \
+cat *.merged.linearized.dereplicated.fa | \
 awk 'BEGIN {RS = ">" ; FS = "[_\n]"}
      {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}}
      END {for (amplicon in sequences) {
@@ -117,4 +93,4 @@ awk 'BEGIN {FS = "[>_]"}
                    printf "\t%d", contingency[amplicon][samples[j]]
                }
                printf "\t%d\n", amplicons[amplicon]
-          }}' *.dereplicated.fa > ../amplicon_contingency_table.tsv
+          }}' *.merged.linearized.dereplicated.fa > ../amplicon_contingency_table.tsv

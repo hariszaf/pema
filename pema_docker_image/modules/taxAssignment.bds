@@ -26,9 +26,8 @@ string crestAssign(string{} params, string{} globalVars) {
       wait
       searchFile      = params{'assignmentPath'} + '/' + "old." + previousRandomNumber + "." + params{'taxonomyFolderName'} + '/' + "search.hits"
       assignmentsFile = params{'assignmentPath'} + '/' + "old." + previousRandomNumber + "." + params{'taxonomyFolderName'} + '/' + "assignments.txt"
-      println(assignmentsFile)
+
       if (assignmentsFile.exists()){
-         println("HELLO FRIEND: " + assignmentsFile)
          sys cp $assignmentsFile $params{'assignmentPath'}/$params{'taxonomyFolderName'}
       }
    } else {
@@ -39,9 +38,6 @@ string crestAssign(string{} params, string{} globalVars) {
 
    assignmentsFile = params{'assignmentPath'} + '/' + params{'taxonomyFolderName'} + '/' + "assignments.txt"
 
-   println(">>>>>>>>  " + assignmentsFile + "   >>>>>>>>>>>")
-
-
    if (assignmentsFile.exists()){
 
       println("We already have a CREST-based assignment file on this case.")
@@ -50,81 +46,9 @@ string crestAssign(string{} params, string{} globalVars) {
   
       # CASE 1:
       # 16S and 18S alignment-based taxonomy assignment
-      if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
+      if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S' || params{'gene'} == 'gene_COI') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
 
-         # Using Silva 128
-         if ( params{'referenceDb'} == 'silva_128' ) { 
-
-            string msg_in = "\n\n" + ">>>>>>>>> Taxonomy assignment using Silva 128 and crest4.." + "\n\n"
-            println(msg_in)
-
-            task crest4 --fasta all_sequences_grouped.fa \
-               --search_algo $params{'searchAlgo'} \
-               --num_threads $params{'vsearchThreads'} \
-               --search_db  silvamod128 \
-               --search_hits $params{'taxonomyFolderName'} \
-               --output_dir $params{'taxonomyFolderName'}
-
-            string msg_out = "\n\n" + "<<<<  crest4 was completed."
-            println(msg_out)
-            wait
-
-         # Using Silva 138 or PR2: follow the same steps like in the Silva 128 case
-         } else if ( params{'referenceDb'} == 'silva_138' || params{'referenceDb'} == 'pr2' ) {
-
-            string msg_in = "\n\n" + ">>>>>>>>> Taxonomy assignment using Silva 138 and crest4.." + "\n\n"
-            println(msg_in)
-
-            string cmd
-
-            if (searchFile.exists()) {
-               println("Provide previously calculated search hits.")
-               cmd = "crest4 --fasta all_sequences_grouped.fa " +\
-                     "--search_algo " + params{"searchAlgo"} + " " +\
-                     "--num_threads " + params{"vsearchThreads"} + " " +\
-                     "--search_db silvamod138pr2 " +\
-                     "--search_hits " + searchFile + " " +\
-                     "--output_dir " + params{"taxonomyFolderName"}
-
-            } else {
-               cmd = "crest4 --fasta all_sequences_grouped.fa " +\
-                     "--search_algo " + params{"searchAlgo"} + " " +\
-                     "--num_threads " + params{"vsearchThreads"} + " " +\
-                     "--search_db silvamod138pr2 " +\
-                     "--output_dir " + params{"taxonomyFolderName"}
-
-            }
-
-            # taskName:= "Run Crest4"
-            task (taskName:="run-crest", canFail=true) {
-               sys $cmd
-            }
-
-            # If I print something before the wait, it is shown before crest4 is done
-            wait
-
-            # Check output existence
-            if (! assignmentsFile.exists()) {
-               println("crest4 output not found. Aborting.")
-               exit 1
-            } else {
-               println("crest4 output exists. Continuing despite potential failure.")
-            }
-
-         } else if (params{'referenceDb'} == 'midori') {
-
-            string msg = "\n\n" + ">>>>>>>>> Taxonomy assignment using midori + darn and crest4.." + "\n\n"
-            println(msg)
-
-            task crest4 --fasta all_sequences_grouped.fa \
-               --search_algo $params{'searchAlgo'} \
-               --num_threads $params{'vsearchThreads'} \
-               --search_db  midori253darn \
-               --search_hits $params{'taxonomyFolderName'} \
-               --output_dir $params{'taxonomyFolderName'}
-
-            wait
-         }
+         runCrest4(searchFile, params, globalVars)
 
       # CASE 2:
       # Alignment-based taxonomy assignmnet for the ITS marker gene
@@ -181,6 +105,61 @@ string crestAssign(string{} params, string{} globalVars) {
 
    return 'ok'
 }
+
+# Crest4 
+string runCrest4(string searchFile, string{} params, string{} globalVars) {
+
+   string msg_in = "\n\n" + ">>>>>>>>> Taxonomy assignment using " + params{'referenceDb'} + " and crest4.." + "\n\n"
+   println(msg_in)
+
+   string{} gene_db_map 
+   gene_db_map{'midori2'}   = 'midori253darn'  # Our software DARN (https://github.com/hariszaf/darn) was applied for building this! :)
+   gene_db_map{'silva_138'} = 'silvamod138pr2'
+   gene_db_map{'silva_128'} = 'silvamod128'
+   gene_db_map{'silva_132'} = globalVars{'crest'} + '/silvamod132'
+   gene_db_map{'pr2'}       = 'silvamod138pr2'
+
+   println("#################    " + gene_db_map{'silva_132'})
+
+   string cmd
+   if (searchFile.exists()) {
+      println("Provide previously calculated search hits.")
+      cmd = "crest4 --fasta all_sequences_grouped.fa " +\
+            "--search_algo " + params{"searchAlgo"} + " " +\
+            "--num_threads " + params{"vsearchThreads"} + " " +\
+            "--search_db "   + gene_db_map{params{'referenceDb'}} + " " +\
+            "--search_hits " + searchFile + " " +\
+            "--output_dir "  + params{"taxonomyFolderName"}
+
+   } else {
+      cmd = "crest4 --fasta all_sequences_grouped.fa " +\
+            "--search_algo " + params{"searchAlgo"} + " " +\
+            "--num_threads " + params{"vsearchThreads"} + " " +\
+            "--search_db "   + gene_db_map{params{'referenceDb'}} + " " +\
+            "--output_dir "  + params{"taxonomyFolderName"}
+   }
+
+   # taskName:= "Run Crest4"
+   task (taskName:="run-crest", canFail=true) {
+      sys $cmd
+   }
+
+   # If I print something before the wait, it is shown before crest4 is done
+   wait
+
+   # Check output existence: For some reason, crest4 once complete, will maked bds exit by default 
+   # We run this check to avoid this, after making sure assignments have been built.
+   if (! assignmentsFile.exists()) {
+      println("crest4 output not found. Aborting.")
+      exit 1
+   } else {
+      println("crest4 output exists. Continuing despite potential failure.")
+   }
+   return "ok"
+}
+
+
+
 
 # Function to get the phylogeny based taxonomy assignmnent in case of the 16S marker gene
 string phylogenyAssign(string{} params, string{} globalVars) {
@@ -269,8 +248,12 @@ string rdpAssign(string{} params, string{} globalVars) {
 
       if ( params{'gene'} == "gene_COI" ) {
 
-         task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'referenceDb'}/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
-
+         task {
+            sys java -Xmx64g \
+                 -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify \
+                 -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'referenceDb'}/rRNAClassifier.properties \
+                 -o tax_assign_temp.txt all_sequences_grouped.fa
+         }
          wait
 
          rdpBuildingTable(params, globalVars)
@@ -279,8 +262,12 @@ string rdpAssign(string{} params, string{} globalVars) {
 
       } else if ( params{'gene'} == "gene_12S" ) {
 
-         task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/12S_v2.0.0/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
-
+         task { 
+            sys java -Xmx64g \
+                 -jar $globalVars{'tools'}/RDPTools/classifier.jar classify \
+                 -t $globalVars{'tools'}/RDPTools/TRAIN/12S_v2.0.0/rRNAClassifier.properties \
+                 -o tax_assign_temp.txt all_sequences_grouped.fa
+         }
          wait
 
          rdpBuildingTable(params, globalVars)
