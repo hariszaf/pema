@@ -585,7 +585,7 @@ searchAlgo=vsearch
 #=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail. Parameter required if gene: ['16S', '18S', 'ITS'].
 #=        type: string
 #=        required: True 
-taxonomyFolderName=crest4_vsearch
+taxonomyFolderName=crest4_vsearch_132
 #
 #
 #   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
@@ -620,11 +620,12 @@ numberOfCoresForPapara=20
 #=        required: True
 #=        validation: 
 #=          - value: silva_128
+#=          - value: silva_132
 #=          - value: silva_138
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
-referenceDb=silva_138
+referenceDb=silva_132
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
 #
