@@ -33,6 +33,7 @@ string{} readParameterFile(string parameter_file) {
 
     if (my_case{'preprocess'} == 'fastp'){
 
+        # adapters trimming
         if (my_case{'disable_adapter_trimming'} == "True") {
 
             my_case{'disable_adapter_trimming'} = "--disable_adapter_trimming"
@@ -51,55 +52,70 @@ string{} readParameterFile(string parameter_file) {
             } else {
                 my_case{'detect_adapter_for_pe'} = ""
                 my_case{'adapter_sequence'}      = "--adapter_sequence=" + my_case{'adapter_sequence'}
-                my_case{'adapter_sequence_r2'}   = '--adapter_sequence_r2' + my_case{'adapter_sequence_r2'}
+                my_case{'adapter_sequence_r2'}   = '--adapter_sequence_r2=' + my_case{'adapter_sequence_r2'}
             }
         }
-
+        
+        # correction
         if (my_case{'correction'} == "True"){
-            my_case{'correction'} = "--correction"
+            my_case{'correction'}                 = "--correction"
+            if (my_case{'overlap_len_require'}.isEmpty()) {
+                my_case{'overlap_len_require'} = "--overlap_len_require=" + 30 
+            } else {
+                my_case{'overlap_len_require'}        = "--overlap_len_require=" + my_case{'overlap_len_require'}
+            }
+            if (my_case{'overlap_diff_limit'}.isEmpty()) {
+                my_case{'overlap_diff_limit'}         = "--overlap_diff_limit=" + 5
+            } else {
+                my_case{'overlap_diff_limit'}         = "--overlap_diff_limit=" + my_case{'overlap_diff_limit'}
+            }
+            
+            my_case{'overlap_diff_percent_limit'} = "--overlap_diff_percent_limit=" + my_case{'overlap_diff_percent_limit'}
         } else {
-            my_case{'correction'} = ""
+            my_case{'correction'}                 = ""
+            my_case{'overlap_len_require'}        = ""
+            my_case{'overlap_diff_limit'}         = ""
+            my_case{'overlap_diff_percent_limit'} = ""
         }
 
+        # Over-representation
         if (my_case{'overrepresentation_analysis'} == "True"){
-
             my_case{'overrepresentation_analysis'} = "--overrepresentation_analysis"
-
             if (my_case{'overrepresentation_sampling'}.isEmpty()) {
-                my_case{'overlap_diff_percent_limit'} = "--overlap_diff_percent_limit=" + my_case{'overlap_diff_percent_limit'}
+                my_case{'overrepresentation_sampling'} = "--overrepresentation_sampling=" + 20
             } else {
                 my_case{'overrepresentation_sampling'} = "--overrepresentation_sampling=" + my_case{'overrepresentation_sampling'}
-                my_case{'overlap_diff_percent_limit'}  = ""
             }
         } else {
-            my_case{'overrepresentation_analysis'} = ""
-            my_case{'overrepresentation_sampling'} = ""
-            my_case{'overlap_diff_percent_limit'}  = ""
+            my_case{'overrepresentation_analysis'}  = ""
+            my_case{'overrepresentation_sampling'}  = ""
         }
+
+        # per-read cutting
         if (my_case{'cut_right'} == "True"){
-            my_case{'cut_right'} = "--cut_right"
-            my_case{'cut_right_window_size'} = "--cut_right_window_size=" + my_case{'cut_right_window_size'}
+            my_case{'cut_right'}              = "--cut_right"
+            my_case{'cut_right_window_size'}  = "--cut_right_window_size=" + my_case{'cut_right_window_size'}
             my_case{'cut_right_mean_quality'} = "cut_right_mean_quality=" + my_case{'cut_right_mean_quality'}
         } else {
-            my_case{'cut_right'} = ""
-            my_case{'cut_right_window_size'} = ""
+            my_case{'cut_right'}              = ""
+            my_case{'cut_right_window_size'}  = ""
             my_case{'cut_right_mean_quality'} = ""
         }
         if (my_case{'cut_tail'} == "True"){
-            my_case{'cut_tail'} = "--cut_tail"
+            my_case{'cut_tail'}              = "--cut_tail"
             my_case{'cut_tail_window_size'}  = "--cut_tail_window_size=" + my_case{'cut_tail_window_size'}
             my_case{'cut_tail_mean_quality'} = "--cut_tail_mean_quality=" + my_case{'cut_tail_mean_quality'}
         } else {
-            my_case{'cut_tail'} = ""
+            my_case{'cut_tail'}              = ""
             my_case{'cut_tail_window_size'}  = ""
             my_case{'cut_tail_mean_quality'} = ""
         }
         if (my_case{'cut_front'} == "True"){
-            my_case{'cut_front'} = "--cut_front"
+            my_case{'cut_front'}              = "--cut_front"
             my_case{'cut_front_mean_quality'} = "--cut_front_mean_quality=" + my_case{'cut_front_mean_quality'}
             my_case{'cut_front_window_size'}  = "--cut_front_window_size=" + my_case{'cut_front_window_size'}
         } else {
-            my_case{'cut_front'} = ""
+            my_case{'cut_front'}              = ""
             my_case{'cut_front_mean_quality'} = ""
             my_case{'cut_front_window_size'}  = ""
         }
@@ -108,16 +124,60 @@ string{} readParameterFile(string parameter_file) {
         } else {
             my_case{'n_base_limit'} = "--n_base_limit=" + my_case{'n_base_limit'}
         }
-        if (my_case{'length_required'}.isEmpty()){
-            my_case{'length_required'} = ""
+
+        # length filtering options
+        if (my_case{'disable_length_filtering'} == "True") {
+            my_case{'disable_length_filtering'} = "--disable_length_filtering"
+            my_case{'length_required'}          = ""
+            my_case{'length_limit'}             = ""
         } else {
-            my_case{'length_required'} = "--length_required=" + my_case{'length_required'}
+            my_case{'disable_length_filtering'} = ""
+            if (my_case{'length_required'}.isEmpty()) {
+                my_case{'length_required'}          = "--length_required=" + 15
+            } else  {
+                my_case{'length_required'}          = "--length_required=" + my_case{'length_required'}
+            }
+            if (my_case{'length_limit'}.isEmpty()) {
+                my_case{'length_limit'}             = "--length_limit=" + 0
+            } else {
+                my_case{'length_limit'}             = "--length_limit=" + my_case{'length_limit'}
+            } 
+            
         }
-        if (my_case{'complexity_threshold'}.isEmpty()){
-            my_case{'complexity_threshold'} = ""
+
+        # complexity
+        if (my_case{'low_complexity_filter'} == "True") {
+            my_case{'low_complexity_filter'} = "--low_complexity_filter"
+            if (my_case{'complexity_threshold'}.isEmpty()){
+                my_case{'complexity_threshold'}  = "--complexity_threshold=" + 30
+            } else {
+                my_case{'complexity_threshold'}  = "--complexity_threshold=" + my_case{'complexity_threshold'}
+            }
         } else {
-            my_case{'complexity_threshold'} = "--complexity_threshold=" + my_case{'complexity_threshold'}
+            my_case{'low_complexity_filter'} = ""
+            my_case{'complexity_threshold'}  = ""
         }
+
+        # trim poly-G
+        if (my_case{'disable_trim_poly_g'} == "True") {
+            my_case{'disable_trim_poly_g'} = "--disable_trim_poly_g"
+            my_case{'poly_g_min_len'}      = ""
+            my_case{'trim_poly_g'}         = ""
+        } else {
+            my_case{'disable_trim_poly_g'} = ""
+            if (my_case{'poly_g_min_len'}.isEmpty()) {
+                my_case{'poly_g_min_len'} = "--poly_g_min_len=" + 10
+            } else {
+                my_case{'poly_g_min_len'} = "--poly_g_min_len=" + my_case{'poly_g_min_len'}
+            }
+            if (my_case{'trim_poly_g'}.isEmpty()) {
+                my_case{'trim_poly_g'} = "" 
+            } else {
+                my_case{'trim_poly_g'} = "--trim_poly_g"
+            }
+        }
+
+
     }
 
     string algo1 = my_case{'clusteringAlgo'}
@@ -340,7 +400,7 @@ string{} initializeAnalysis(string{} params) {
         globalVars{'dataPath'}          = params{'paramsFilePath'} + '/mydata/'
         globalVars{'parameterFilePath'} = params{'paramsFilePath'}
         globalVars{'outputPoint'}       = params{'paramsFilePath'}
-        globalVars{'scripts'}           = pema_home + "/pema_docker_image/scripts/"
+        globalVars{'scripts'}           = pema_home + "/pema/scripts/"
         globalVars{'tools'}             = globalVars{'path'}
         globalVars{'crest'}             = home + '/.crest4/'
     }
@@ -391,7 +451,7 @@ string{} initializeAnalysis(string{} params) {
     } else {
         globalVars{'qualityControl'}   = 'qualityReports'
         globalVars{'fastpqPath'}       = globalVars{'outputFilePath'} + '/' + globalVars{'qualityControl'}
-        globalVars{'fastpTrimmed'}     = 'trimmedSequences'
+        globalVars{'fastpTrimmed'}     = 'fastp_trimmed_unmergeable'
         globalVars{'fastpTrimmedPath'} = globalVars{'outputFilePath'} + '/' + globalVars{'fastpTrimmed'}
         globalVars{'fastpMerged'}      = 'mergedSequences'
         globalVars{'fastpMergedPath'}  = globalVars{'outputFilePath'} + '/' + globalVars{'fastpMerged'}
@@ -449,7 +509,7 @@ string{} initializeAnalysis(string{} params) {
 
     # Convert Illumina data to ENA format
     if (params{'EnaData'} == 'No') {
-        sys bash $globalVars{'scripts'} / convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
+        sys bash $globalVars{'scripts'}/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
     }
 
     # IMPORTANT! Module to train classifiers is enabled through this statement

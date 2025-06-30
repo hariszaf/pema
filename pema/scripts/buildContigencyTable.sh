@@ -6,54 +6,30 @@
 # Usage:   This script is invoked every time the user selects Swarm, as part of the
 #          PEMA preprocessing module, in the swarmDereplicate() function
 # 
-# Authors: Haris Zafeiropoulos, based on blocks of code from F.Mahe
-#          You may find the initial script here:
-#          https://github.com/torognes/swarm/wiki/
 
-
-cd ../linearizedSequences/
-
-
-for file in *.merged.linearized.fa; do
-
-  base_filename="${file%%.*}"
-  echo ">> " $base_filename
-  tmp_file="${file}.tmp.fa"
-
-  # Clean up headers
-  sed 's/ .*_/./g' "$file" > "$tmp_file"
-
-  # Count and hash valid sequences
-  grep -v "^>" "$tmp_file" | grep -E '^[ACGTacgt]+$' | sort | uniq -c | \
-  while read -r abundance sequence; do
-    hash=$(printf "%s" "$sequence" | sha1sum | awk '{print $1}')
-    printf ">%s_%d_%s\n" "$hash" "$abundance" "$sequence"
-  done | \
-  sort -t "_" -k2,2nr -k1.2,1d | sed 's/_/\n/2' > "../dereplicateSamples/${base_filename}.merged.linearized.dereplicated.fa"
-
-  rm "$tmp_file"
-done
 
 
 # Dereplication at the study level
-cd ../dereplicateSamples/
+echo -e "\n\n * Dereplication at the study level *"
+
+
+# Step 1: Dereplicate at the study level; dereplicate sequences and keep their sum across all samples
+echo -e "==> Build all_samples.fasta file."
 
 export LC_ALL=C
-cat *.merged.linearized.dereplicated.fa | \
-awk 'BEGIN {RS = ">" ; FS = "[_\n]"}
-     {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}}
-     END {for (amplicon in sequences) {
-         print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | \
-sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | \
-sed -e 's/\_/\n/2' > ../all_samples.fasta
 
+cat *.derep.fa | \
+    awk 'BEGIN {RS = ">" ; FS = "[_\n]"}
+        {if (NR != 1) {abundances[$1] += $2 ; sequences[$1] = $3}}
+        END {for (amplicon in sequences) {
+            print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | \
+    sort --temporary-directory=$(pwd) -t "_" -k2,2nr -k1.2,1d | \
+    sed -e 's/\_/\n/2' > ../all_samples.fasta
 
-# HOPEFULLY WE WON'T NEED THIS - IF WE DO WE NEED TO REMOVE SEQS FROM FILES TOO
-# SO THEY WON'T BE IN THE AMPLICONS CONTINGENCY TABLE
-# task awk '/N/{n=2}; n {n--; next}; 1' < $globalVars{'outputFilePath'}/all_samples.fasta  > $globalVars{'outputFilePath'}/final_all_samples.fasta
+# Build a matrix where the hash is the raw name and 
+# the abundance of the corresponding amplicon the value at eash sample (column)
+echo -e "==> Build amplicon contigency table .."
 
-
-# Build contingency table 
 awk 'BEGIN {FS = "[>_]"}
 
      # Parse the sample files
@@ -93,4 +69,4 @@ awk 'BEGIN {FS = "[>_]"}
                    printf "\t%d", contingency[amplicon][samples[j]]
                }
                printf "\t%d\n", amplicons[amplicon]
-          }}' *.merged.linearized.dereplicated.fa > ../amplicon_contingency_table.tsv
+          }}' *.derep.fa > ../amplicon_contingency_table.tsv

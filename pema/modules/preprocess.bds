@@ -7,57 +7,88 @@ string preprocessWithFastp(string{} params, string{} globalVars){
     # Make a list with all the file names on `mydata` dir
     string[] data = globalVars{'dataPath'}.dir()
 
-    # Set two variables readF and readR for the forward and reverse file of each sample  
-    string readF
-    string readR
-
-    for ( string file : data ) {
-        # Here's the trick! i need to tell which file is the forward and which is the reverese. Hence, i try to split a suffix. 
-        string check = file.split('_2\.fastq\.gz')[0]
-
-        string mergedFilename = check + '.merged.fastq'
-
-        # If the split does occure then i know that i have the second file of each sample (reverse)
-        # That is because the 'file' variable will always have a '.fastq.gz' suffix.
-        # Hence, if there is no split, 'file' and 'check'  variables are the same.
-        if ( file == check ) {
-                    readF = file
-                    # if there is a split, then they are different
-                    } else {
-                        readR = file
-                }
-        wait
-
-        if ( readF.isEmpty() == false && readR.isEmpty() == false ) {
-            println('readF is: ' + readF)
-            println('readR is: ' + readR)
-
-            task fastp --in1=$globalVars{'dataPath'}/$readF --in2=$globalVars{'dataPath'}/$readR \
-                --out1=$globalVars{'fastpTrimmedPath'}/$readF \
-                --out2=$globalVars{'fastpTrimmedPath'}/$readR \
-                --merge \
-                --merged_out=$globalVars{'fastpMergedPath'}/$mergedFilename \
-                --thread=$params{'fastpThreads'} \
-                --html=$mergedFilename.html \
-                --json=$mergedFilename.json \
-                $params{'detect_adapter_for_pe'} $params{'adapter_sequence'} $params{'adapter_sequence_r2'} \
-                $params{'correction'} \
-                $params{'overrepresentation_analysis'} $params{'overrepresentation_sampling'} $params{'overlap_diff_percent_limit'} \
-                $params{'complexity_threshold'} $params{'length_required'} $params{'n_base_limit'} \
-                $params{'cut_front'} $params{'cut_front_mean_quality'} $params{'cut_front_window_size'} \
-                $params{'cut_tail'} $params{'cut_tail_window_size'} $params{'cut_tail_mean_quality'} \
-                $params{'cut_right'} $params{'cut_right_window_size'} $params{'cut_right_mean_quality'}
-
-            readF = ''
-            readR = ''
+    # Keep list with sample basenames (i.e. sample_1.fastq.gz, sample_2.fastq.gz, they both correspond to basename 'sample')
+    string[] samples
+    for (string fileName : data) {
+        string sample = fileName.substr(0, fileName.lastIndexOf("_"))
+        if (! samples.has(sample)) {
+            samples.add(sample)
         }
     }
-    wait
-    sys mv *.html *.json $globalVars{'fastpqPath'}
-    println('fastp has been completed!')
+    
+    # Print them
+    for (string sample : samples) {
+        println(sample)
+    }
 
-    # now i create a checkpoint and read again the parameters file.
-    # this way if i change any of my parameters, i can do only the steps from here and after with the new ones.
+    for ( string sample : samples ) {
+
+        # Set two variables readF and readR for the forward and reverse file of each sample  
+        string readF = sample + "_1.fastq.gz"
+        string readR = sample + "_2.fastq.gz"
+
+        string mergedFilename = sample + '.merged.fastq'
+        string check          = globalVars{'fastpqPath'} + "/" + mergedFilename + ".json"
+
+        if ( ! check.exists() ) {
+
+            string fastp_cmd = \
+                "fastp " + \
+                "--in1=" + globalVars{'dataPath'} + "/" + readF + " " +\
+                "--in2=" + globalVars{'dataPath'} + "/" + readR + " " +\
+                "--out1=" + globalVars{'fastpTrimmedPath'} + "/" + readF + " " +\
+                "--out2=" + globalVars{'fastpTrimmedPath'} + "/" + readR + " " +\
+                "--merge " +\
+                "--merged_out=" + globalVars{'fastpMergedPath'} + "/" + mergedFilename + " " +\
+                "--thread=" + params{'fastpThreads'} + " " +\
+                "--html=" + mergedFilename + ".html " +\
+                "--json=" + mergedFilename + ".json " +\
+                params{'low_complexity_filter'} + " " +\
+                params{'complexity_threshold'} + " " +\
+                params{'disable_length_filtering'} + " " +\
+                params{'length_required'} + " " +\
+                params{'length_limit'} + " " +\
+                params{'n_base_limit'} + " " +\
+                params{'disable_adapter_trimming'} + " " +\
+                params{'detect_adapter_for_pe'} + " " +\
+                params{'adapter_sequence'} + " " +\
+                params{'adapter_sequence_r2'} + " " +\
+                params{'correction'} + " " +\
+                params{'overlap_len_require'} + " " +\
+                params{'overlap_diff_limit'} + " " +\
+                params{'overlap_diff_percent_limit'} + " " +\
+                params{'overrepresentation_analysis'} + " " +\
+                params{'overrepresentation_sampling'} + " " +\
+                params{'cut_front'} + " " +\
+                params{'cut_front_mean_quality'} + " " +\
+                params{'cut_front_window_size'} + " " +\
+                params{'cut_tail'} + " " +\
+                params{'cut_tail_window_size'} + " " +\
+                params{'cut_tail_mean_quality'} + " " +\
+                params{'cut_right'} + " " +\
+                params{'cut_right_window_size'} + " " +\
+                params{'cut_right_mean_quality'} + " " +\
+                params{'disable_trim_poly_g'} + " " +\
+                params{'poly_g_min_len'} + " " +\
+                params{'trim_poly_g'};
+
+            println(fastp_cmd)
+
+            task $fastp_cmd
+            wait
+
+            string fastp_msg = "\n\n" + "fastpq for sample" + sample + " is now complete!"
+            println(fastp_msg)
+
+            sys mv *.html *.json $globalVars{'fastpqPath'}
+
+        } else {
+            println("Sample :" + sample + " has already been through quality check with fastp.")
+        }
+    }
+
+    # Create a checkpoint and read again the parameters file.
+    # This way if i change any of my parameters, i can do only the steps from here and after with the new ones.
     if ( globalVars{'fastpqPath'}.isEmpty() == false ) {
         string checkTrim = globalVars{'outputPoint'} + '/fastp.chp'
         checkpoint checkTrim
@@ -603,12 +634,27 @@ string swarmDereplicate(string{} params, string{} globalVars){
     if (params{'preprocess'} == "original") {
 
         globalVars{'unzipPath'}.chdir()
-        sys bash $globalVars{'scripts'}/dereplicateSwarm.sh original
+
+        string[] mergedFiles = globalVars{'fastpMergedPath'}.dir()
+        for (string mergedFile : mergedFiles ) {
+            println("Dereplicate with original process file: " + mergedFile)
+            sys bash $globalVars{'scripts'}/dereplicateSwarm.sh original $mergedFile
+        }
 
     } else {
+
         globalVars{'fastpMergedPath'}.chdir()
-        sys bash $globalVars{'scripts'}/dereplicateSwarm.sh fastp
+
+        string[] mergedFiles = globalVars{'fastpMergedPath'}.dir()
+        for (string mergedFile : mergedFiles ) {
+            println("Dereplicate fastp processed file: " + mergedFile)
+            sys bash $globalVars{'scripts'}/dereplicateSwarm.sh fastp $mergedFile
+        }
     }
+    wait
+    println("-- Execute building contigency table script.")
+    globalVars{'derePath'}.chdir()
+    sys bash $globalVars{'scripts'}/buildContigencyTable.sh
 
     println('Sample files have been dereplicated and a contingency table for the amplicons has been built.')
 
