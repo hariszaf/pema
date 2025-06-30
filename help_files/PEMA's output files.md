@@ -46,6 +46,35 @@ In this folder, another subfolder is created and named after the chosen clusteri
 
 SWARM also produces two files ***“.stats”*** and ***“.swarms”***. The first one is a tab-separated table with one MOTU per row and 8 columns of information, while  the MOTUs are written in the “.swarms” file. In fact, each line of this file, contains as much MOTUs as it is mentioned in the first column of the “.stats” file.
 
+- .stats
+
+1. number of unique amplicons in the cluster,
+2. total abundance of amplicons in the cluster,
+3. label of the initial seed (header without abundance annotations),
+4. abundance of the initial seed,
+5. number of amplicons with an abundance of 1 in the cluster,
+6. maximum number of iterations before the cluster reached its natural limit,
+7. cummulated number of steps along the path joining the seed and the furthermost
+amplicon in the cluster. Please note that the actual number of differences between
+the seed and the furthermost amplicon is usually much smaller. When using the
+option --fastidious (-f), grafted amplicons are not taken into account.
+
+
+=> when I sum column 1, I get the number of entries in the all_samples.fasta
+=> when I sum column 2, I get the number of entries of the total merged files (`/mergedSequences/`)
+
+16S sanity check:
+total merged reads:  67872
+after chimera removal, total abundance : 60860
+
+- .swarms (`-o` argument)
+
+a list of clusters, one cluster per line. 
+A cluster is a list of amplicon headers separated by spaces. Default is to write to standard output.
+
+
+
+
 
 * ### vsearch
 
