@@ -124,10 +124,9 @@ string runCrest4(string searchFile, string{} params, string{} globalVars) {
    }
 
    string{} gene_db_map 
-   gene_db_map{'midori_2'}   = 'midori253darn'  # Our software DARN (https://github.com/hariszaf/darn) was applied for building this! :)
+   gene_db_map{'midori_2'}  = 'midori253darn'  # Our software DARN (https://github.com/hariszaf/darn) was applied for building this! :)
    gene_db_map{'silva_138'} = 'silvamod138pr2'
    gene_db_map{'silva_128'} = 'silvamod128'
-   gene_db_map{'silva_132'} = globalVars{'crest'} + '/silvamod132'
    gene_db_map{'pr2'}       = 'silvamod138pr2'
 
    string cmd

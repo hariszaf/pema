@@ -635,7 +635,7 @@ string swarmDereplicate(string{} params, string{} globalVars){
 
         globalVars{'unzipPath'}.chdir()
 
-        string[] mergedFiles = globalVars{'fastpMergedPath'}.dir()
+        string[] mergedFiles = globalVars{'unzipPath'}.dir()
         for (string mergedFile : mergedFiles ) {
             println("Dereplicate with original process file: " + mergedFile)
             sys bash $globalVars{'scripts'}/dereplicateSwarm.sh original $mergedFile

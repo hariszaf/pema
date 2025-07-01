@@ -15,20 +15,19 @@
 preprocess=$1
 sample=$2
 
-
+base_filename="${sample%%.*}"  # will keep only everything up to the first dot (".")
 
 if [ "$preprocess" == "fastp" ]; then
 
-    base_filename="${sample%%.*}"  # will keep only everything up to the first dot (".")
     linearized_file="../linearizedSequences/$base_filename.linearized.fa"
     dereplicate_file="../dereplicateSamples/$base_filename.derep.fa"
     mapping_file="../dereplicateSamples/$base_filename.derep.mapping"
     merged_file="../mergedSequences/$base_filename.merged.fastq" 
 
     # Linearize sequences -- from within the mergedSequences folder
-    echo -e "\n\n ==> Build linearize sample's $base_filename file .."
+    echo -e "\n\n ==> Build linearize file for sample: $base_filename "
 
-    if [ ! -f "$linearized_file" ]; then
+    if [ ! -s "$linearized_file" ]; then
         awk 'NR%4==1 || NR%4==2 {sub(/^@/, ">"); print $0}' "$sample" > "$linearized_file"
     else
         echo "$linearized_file already exists. Skipping linearizing."
@@ -38,9 +37,9 @@ if [ "$preprocess" == "fastp" ]; then
     # cd ../linearizedSequences/
 
     # Dereplicate sample
-    if [ ! -f "$dereplicate_file" ]; then
+    if [ ! -s "$dereplicate_file" ]; then
 
-        echo -e "\n\n ==> Build dereplicate sample's $base_filename file .."
+        echo -e "\n\n ==> Build dereplicate file for sample: $base_filename "
 
         # Step 0: Build sequence → first header map
         awk '
@@ -88,41 +87,38 @@ if [ "$preprocess" == "fastp" ]; then
 else 
 
     # Linearize sequences -- assuming you're two levels deeper
-    base_filename="${sample%%.*}"
-    output_file="../../linearizedSequences/$base_filename.merged.linearized.fa"
-    if [ ! -f "$output_file" ]; then
-        awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' "$sample" > "$output_file"
-    else
-        echo "$output_file already exists. Skipping linearizing."
-    fi
+    linearized_file="../../linearizedSequences/$base_filename.linearized.fa"
+    dereplicate_file="../../dereplicateSamples/${base_filename}.derep.fa"
 
-    # Continue with dereplication at the sample level
-    cd ../../linearizedSequences/
+    echo -e "\n\n ==> Build linearize file for sample: $base_filename "
+
+    if [ ! -s "$linearized_file" ]; then
+        awk 'NR==1 {print ; next} {printf /^>/ ? "\n"$0"\n" : $1} END {printf "\n"}' "$sample" > "$linearized_file"
+    else
+        echo "$linearized_file already exists. Skipping linearizing."
+    fi
 
     # ------------------
 
-    echo -e "\n\n ==> Build dereplicate samples .."
+    # Continue with dereplication at the sample level
+    echo -e "\n\n ==> Build dereplicate file for sample: $base_filename"
 
-    base_filename="${sample%%.*}"
-    output_file="../dereplicateSamples/${base_filename}.merged.linearized.dereplicated.fa"
+    if [ ! -s "$dereplicate_file" ]; then
 
-    if [ ! -f "$output_file" ]; then
-
-        echo ">> Processing $base_filename"
-        tmp_file="${sample}.tmp.fa"
-
-        # Clean up headers
-        sed 's/ .*_/./g' "$sample" > "$tmp_file"
+        # tmp_file="${linearized_file}.tmp.fa"
+        # # Clean up headers
+        # sed 's/ .*_/./g' "$linearized_file" > "$tmp_file"
 
         # Count and hash valid sequences
-        grep -v "^>" "$tmp_file" | grep -E '^[ACGTacgt]+$' | sort | uniq -c | \
+        # NOTE: Used to grep $tmp_file
+        grep -v "^>" "$linearized_file" | grep -E '^[ACGTacgt]+$' | sort | uniq -c | \
         while read -r abundance sequence; do
             hash=$(printf "%s" "$sequence" | sha1sum | awk '{print $1}')
             printf ">%s_%d_%s\n" "$hash" "$abundance" "$sequence"
         done | \
-        sort -t "_" -k2,2nr -k1.2,1d | sed 's/_/\n/2' > "$output_file"
+        sort -t "_" -k2,2nr -k1.2,1d | sed 's/_/\n/2' > "$dereplicate_file"
 
-        rm "$tmp_file"
+        # rm "$tmp_file"
     else
         echo ">> Skipping $base_filename, already dereplicated."
     fi

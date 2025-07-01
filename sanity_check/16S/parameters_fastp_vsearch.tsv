@@ -1,4 +1,4 @@
-#= pema_version: 2.1.5
+#= pema_version: 2.2.0
 #   --------------------------         GENERAL PARAMETERS       --------------------------
 #
 #
@@ -28,12 +28,15 @@ gene=gene_16S
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName=TEST_16S_ORIGINAL_VSEARCH
+outputFolderName=TEST_16S_FASTP_VSEARCH
 #
 #
 #=     EnaData:
 #=        title: ENA data format
-#=        description: PEMA requires the names of the samples to be in ENA format (e.g "ERR1021912_1.fastq.gz"). In that case EnaData would be "Yes". Otherwise, if the raw data are as returned by the Illumina sequencer PEMA has to make this convertion (EnaData: No) and it will return a mapping file linking the initial filenames to those created for the analysis.
+#=        description: >
+#=          PEMA requires the names of the samples to be in ENA format (e.g "ERR1021912_1.fastq.gz"). In that case EnaData would be "Yes". 
+#=          Otherwise, if the raw data are as returned by the Illumina sequencer PEMA has to make this convertion (EnaData: No) and it will return a mapping file 
+#=          linking the initial filenames to those created for the analysis.
 #=        type: boolean
 #=        required: True
 #=        validation: 
@@ -54,13 +57,15 @@ sequencerPrefix=M0
 #
 #=     preprocess:
 #=        title: preprocess approach
-#=        description: Since the v.2.1.5 of PEMA the user may choose between either the initial PEMA implementation for pre-processing (Trimmomatic, pandaseq) or the latest one (fastp). If you choose the original approach (Trimmomatic) you should skip the fastp-related parameters and vice-versa."""
+#=        description: >
+#=              Since the v2.1.5 of PEMA the user may choose between either the initial PEMA implementation for pre-processing (Trimmomatic, pandaseq) 
+#=              or the latest one (fastp). If you choose the original approach (Trimmomatic) you should skip the fastp-related parameters and vice-versa.
 #=        type: string
 #=        required: True
 #=        validation:
 #=          - value: original
 #=          - value: fastp
-preprocess=original
+preprocess=fastp
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
 #
@@ -117,6 +122,23 @@ adapter_sequence_r2="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 correction=True
 #
 #
+#=     overlap_len_require:
+#=        title: 
+#=        description:
+#=        type:
+#=        required: False
+#=        default: 30
+overlap_len_require=30
+#
+#
+#=     overlap_diff_limit:
+#=        title: 
+#=        description:
+#=        type:
+#=        required: False
+overlap_diff_limit=
+#
+#
 #=     overrepresentation_analysis:
 #=        title:
 #=        description: enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
@@ -135,10 +157,20 @@ overrepresentation_sampling=20
 #
 #=     overlap_diff_percent_limit
 #=        title:
-#=        description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
+#=        description: >
+#=          The maximum percentage of mismatched bases to detect overlapped region of PE reads. 
+#=          This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
 #=        type: integer
 #=        required: False
 overlap_diff_percent_limit=20
+#
+#
+#=      low_complexity_filter:
+#=         title:
+#=         description: enable low complexity filter. The complexity is defined as the percentage of base that is different from its next base (base[i] != base[i+1]).
+#=         type: boolean
+#=         required: False
+low_complexity_filter=true
 #
 #
 #=      complexity_threshold:
@@ -147,6 +179,22 @@ overlap_diff_percent_limit=20
 #=         type: integer
 #=         required: False
 complexity_threshold=30
+#
+#
+#=     disable_length_filtering:
+#=        title:
+#=        description: 
+#=        type: boolean
+#=        required: False
+disable_length_filtering=false
+#
+#
+#=     length_limit:
+#=        title:
+#=        description: reads longer than length_limit will be discarded, default 0 means no limitation. (int [=0])
+#=        type: integer
+#=        required: False
+length_limit=0
 #
 #
 #=     length_required:
@@ -235,6 +283,33 @@ cut_right_window_size=4
 #=        type: integer
 #=        required: False
 cut_right_mean_quality=20
+#
+#
+#=     disable_trim_poly_g:
+#=        title:
+#=        description: 
+#=        type: boleam
+#=        required: False
+#=        default: False
+disable_trim_poly_g=False
+#
+#
+#=     trim_poly_g:
+#=        title:
+#=        description: 
+#=        type: integer
+#=        required: False
+#=        default: True
+trim_poly_g=True
+#
+#
+#=     poly_g_min_len:
+#=        title:
+#=        description: 
+#=        type: integer
+#=        required: False
+#=        default: 10
+poly_g_min_len=10
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : original approach     --------------------------
@@ -535,7 +610,12 @@ numOligotons=2
 #
 #=     classifierAlgo:
 #=        title: classifier algorithm
-#=        description:  Select classifier for the taxonomy assignment step. If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
+#=        description:  >
+#=                Select classifier for the taxonomy assignment step. If you have 16S, 18S, ITS you should choose CREST. 
+#=                If you have COI, 12S you should choose RDPClassifier. 
+#=                If you are about to use custom reference database, please make sure you are following the instructions described here:
+#=                  - https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST), and 
+#=                  - https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
 #=        type: string
 #=        required: True
 #=        validation:
@@ -615,17 +695,21 @@ numberOfCoresForPapara=20
 #
 #=     referenceDb:
 #=        title: reference database 
-#=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_132' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. The parameter is required if custom_ref_db: No and gene: [gene_16S, 'gene_18S', 'gene_COI']
+#=        description: >
+#=            When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, 
+#=            uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. 
+#=            Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_138' depending on the version of your choice. 
+#=            In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. 
+#=            The parameter is required if custom_ref_db: No and gene: [gene_16S, 'gene_18S', 'gene_COI']
 #=        type: string
 #=        required: True
 #=        validation: 
 #=          - value: silva_128
-#=          - value: silva_132
 #=          - value: silva_138
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
-referenceDb=silva_132
+referenceDb=silva_138
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
 #
@@ -674,7 +758,12 @@ abskew=2
 #
 #=     custom_ref_db:
 #=        title: custom reference database
-#=        description: Use a custom reference database for the taxonomy assignment step. In this case, extra input files are required depending on the classifier the user selected. To see more on how these files should be in case of the RDPClassifier, follow this link: https://hariszaf.github.io/pema_documentation/training_rdpclassifier/. In case that the CREST classifier is be used, follow this link: https://hariszaf.github.io/pema_documentation/training_crest_classifier/. Remember that as containers are lost when exit from one, you will have to train the classifier, every time you run a new PEMA container If you are about to use a custom ref db, set the following parameter as 'Yes'. Otherwise, it must be set as 'No'. The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
+#=        description: Use a custom reference database for the taxonomy assignment step. In this case, extra input files are required depending on the classifier the user selected. 
+#=                     To see more on how these files should be in case of the RDPClassifier, follow this link: https://hariszaf.github.io/pema_documentation/training_rdpclassifier/. 
+#=                     In case that the CREST classifier is be used, follow this link: https://hariszaf.github.io/pema_documentation/training_crest_classifier/.
+#=                     Remember that as containers are lost when exit from one, you will have to train the classifier, every time you run a new PEMA container 
+#=                     If you are about to use a custom ref db, set the following parameter as 'Yes'. Otherwise, it must be set as 'No'. 
+#=                     The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
 #=        type: boolean
 #=        required: True
 #=        validation:

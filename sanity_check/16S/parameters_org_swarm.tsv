@@ -1,4 +1,4 @@
-#= pema_version: 2.1.5
+#= pema_version: 2.2.0
 #   --------------------------         GENERAL PARAMETERS       --------------------------
 #
 #
@@ -28,7 +28,7 @@ gene=gene_16S
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName=TEST_16S_ORIGINAL_VSEARCH
+outputFolderName=TEST_16S_ORIGINAL_SWARM
 #
 #
 #=     EnaData:
@@ -443,7 +443,7 @@ elimination=-N
 #=        validation:
 #=          - value: swarm
 #=          - value: vsearch
-clusteringAlgo=vsearch
+clusteringAlgo=swarm
 #
 #   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
 #
@@ -620,12 +620,11 @@ numberOfCoresForPapara=20
 #=        required: True
 #=        validation: 
 #=          - value: silva_128
-#=          - value: silva_132
 #=          - value: silva_138
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
-referenceDb=silva_132
+referenceDb=silva_138
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
 #
