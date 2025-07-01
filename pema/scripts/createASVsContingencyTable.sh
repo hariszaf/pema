@@ -28,53 +28,111 @@
          STATS="asvs.stats"
         SWARMS="asvs.swarms"
 AMPLICON_TABLE="amplicon_contingency_table.tsv"
+ASV_TABLE_HASH="asvs_contingency_hash.tsv"
      ASV_TABLE="asvs_contingency_table.tsv"
 
-# Header
-# echo -e "ASV\t$(head -n 1 "${AMPLICON_TABLE}")" > "${ASV_TABLE}"
-echo -e "$(head -n 1 "${AMPLICON_TABLE}" | \
-    awk -F'\t' '{for (i=2; i<NF; i++) printf "%s%s", $i, (i<NF-1 ? "\t" : "")}')"
+# Step 1
 
+{
+    # Extract header and write it, skipping first column (ASV) only
+    head -n 1 "${AMPLICON_TABLE}" | \
+    awk -F'\t' 'BEGIN {OFS="\t"} {
+        printf "ASV\tSeed"
+        for (i = 2; i < NF; i++) {
+            printf "\t%s", $i
+        }
+        printf "\n"
+    }'
 
-# # Compute "per sample abundance" for each ASV
-awk -v SWARM="${SWARMS}" -v TABLE="${AMPLICON_TABLE}" '
-BEGIN {
-    FS = "\t"
+    # Now run the AWK logic for the grouped data
+    awk -v SWARM="${SWARMS}" -v TABLE="${AMPLICON_TABLE}" '
+    BEGIN {
+        FS = "\t"
+        swarm_line = 0
+    }
 
-    # Load swarms: map each ASV to its seed
-    while ((getline < SWARM) > 0) {
+    FILENAME == SWARM {
+        swarm_line++
         n = split($0, ids, " ")
         split(ids[1], seed_parts, "_")
         seed = seed_parts[1]
+
+        if (!(seed in seed_line)) {
+            seed_line[seed] = swarm_line
+        }
+
         for (i = 1; i <= n; i++) {
             split(ids[i], parts, "_")
             id = parts[1]
             swarms[id] = seed
         }
+        next
     }
 
-    # Load and group table data by seed (only if ASV is in swarms)
-    while ((getline < TABLE) > 0) {
-        line = $0
-        split(line, fields, FS)
+    FILENAME == TABLE {
+        split($0, fields, FS)
         asv = fields[1]
-        if (!(asv in swarms)) {
-            continue  # Use 'continue' instead of 'next' inside BEGIN
-        }
+        if (!(asv in swarms)) next
+
         seed = swarms[asv]
+        used_seeds[seed] = 1
 
         for (i = 2; i <= length(fields); i++) {
             grouped[seed][i] += fields[i]
         }
+        next
     }
 
-    # Print the grouped table (headerless)
-    for (seed in grouped) {
-        printf "%s", seed
-        for (i = 2; i <= length(grouped[seed]); i++) {
-            printf "\t%d", grouped[seed][i]
+    END {
+        for (seed in used_seeds) {
+            printf "ASV_%d\t%s", seed_line[seed], seed
+            for (i = 2; i <= length(grouped[seed]); i++) {
+                printf "\t%d", grouped[seed][i]
+            }
+            printf "\n"
         }
-        printf "\n"
     }
+    ' "${SWARMS}" "${AMPLICON_TABLE}"
+} > "${ASV_TABLE_HASH}"
+
+
+# -------------------
+
+# Step 2
+
+
+awk -F'\t' '
+BEGIN { OFS = "\t" }
+NR == 1 {
+  for (i = 1; i <= NF; i++) gsub(/\.derep\.fa/, "", $i)
 }
-' >> "${ASV_TABLE}"
+NR == 1 || NF > 1 {
+  $2 = ""                     # remove 2nd column (Seed)
+  sub(/\t\t/, "\t")           # collapse the empty column
+  print
+}
+' ${ASV_TABLE_HASH} > ${ASV_TABLE}
+
+
+
+awk -F'\t' '
+  FNR == NR {
+    if (FNR == 1) next                    # skip header of table
+    hash_to_asv[$2] = $1                  # map hash to ASV ID
+    next
+  }
+  /^>/ {
+    if (match($0, /^>([^;]+);size=([0-9]+)/, arr)) {
+      hash = arr[1]
+      size = arr[2]
+      if (hash in hash_to_asv)
+        print ">" hash_to_asv[hash] ";size=" size
+      else
+        print $0                          # leave unchanged if not found
+    } else {
+      print $0                            # malformed header? print as-is
+    }
+    next
+  }
+  { print }                               # sequence lines
+' ${ASV_TABLE_HASH} asvs_representatives_hash.fa > asvs_representatives.fa

@@ -180,172 +180,172 @@ println("The OTUs clustering / ASVs inference step has been completed.")
 string taxAssign = globalVars{'outputPoint'} + "/taxAssign.chp"
 checkpoint taxAssign
 
-# ################################################################
-# #                7. Taxonomic assignment                       #
-# ################################################################
+################################################################
+#                7. Taxonomic assignment                       #
+################################################################
 
-# string tax_assign_msg = "\n\n" + "******   TAXONOMY ASSIGNMENT STEP   ******"
-# println(tax_assign_msg)
+string tax_assign_msg = "\n\n" + "******   TAXONOMY ASSIGNMENT STEP   ******"
+println(tax_assign_msg)
 
-# parameterFilePath.chdir()
-# string{} paramsForTaxAssign =  readParameterFile(parameterFile)
+parameterFilePath.chdir()
+string{} paramsForTaxAssign =  readParameterFile(parameterFile)
 
-# if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
+if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
-#    if ( paramsForTaxAssign{'gene'} == 'gene_16S') {
+   if ( paramsForTaxAssign{'gene'} == 'gene_16S') {
 
-#       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
+      if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
 
-#          string msg_er = "\n\n" + "WARNING: Pema cannot use RDPClassifier for your marker gene." + "\n" +\
-#                      "It will use CREST instead and the relative parameter will change accordingly."
-#          println(msg_er)
+         string msg_er = "\n\n" + "WARNING: Pema cannot use RDPClassifier for your marker gene." + "\n" +\
+                     "It will use CREST instead and the relative parameter will change accordingly."
+         println(msg_er)
          
-#          globalVars{'classifierAlgo'}         = 'CREST'
-#          paramsForTaxAssign{'classifierAlgo'} = 'CREST'
-#          wait
+         globalVars{'classifierAlgo'}         = 'CREST'
+         paramsForTaxAssign{'classifierAlgo'} = 'CREST'
+         wait
 
-#       }
+      }
 
-#       if (paramsForTaxAssign{'taxonomyAssignmentMethod'} != 'phylogeny') {
+      if (paramsForTaxAssign{'taxonomyAssignmentMethod'} != 'phylogeny') {
 
-#          crestAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
+         crestAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
 
-#       } else {
+      } else {
    
-#             phylogenyAssign(paramsForTaxAssign, globalVars)
-#             wait
-#             println("Phylogeny based taxonomy assignment has been completed.")
+            phylogenyAssign(paramsForTaxAssign, globalVars)
+            wait
+            println("Phylogeny based taxonomy assignment has been completed.")
 
-#       }
+      }
 
-#    } else if ( paramsForTaxAssign{'gene'} == 'gene_COI' ) {
+   } else if ( paramsForTaxAssign{'gene'} == 'gene_COI' ) {
 
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
-#          crestAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println(" CREST classifier has been completed for COI data.")
+         crestAssign(paramsForTaxAssign, globalVars)
+         wait
+         println(" CREST classifier has been completed for COI data.")
 
-#       }
+      }
       
-#       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
+      if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
 
-#          rdpAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
+         rdpAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
 
-#       }
+      }
 
-#    } else if (paramsForTaxAssign{'gene'} == 'gene_18S') {
+   } else if (paramsForTaxAssign{'gene'} == 'gene_18S') {
 
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
 
-#          println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
+         println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
 
-#          globalVars{'classifierAlgo'}         = 'CREST'
-#          paramsForTaxAssign{'classifierAlgo'} = 'CREST'
-#          wait
+         globalVars{'classifierAlgo'}         = 'CREST'
+         paramsForTaxAssign{'classifierAlgo'} = 'CREST'
+         wait
 
-#       }
+      }
       
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
  
-#          crestAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
+         crestAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
 
-#       }
+      }
 
-#    } else if (paramsForTaxAssign{'gene'} == 'gene_ITS') {
+   } else if (paramsForTaxAssign{'gene'} == 'gene_ITS') {
 
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
 
-#          println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
+         println('Pema cannot use RDPClassifier for your marker gene. It will use CREST instead and the relative parameter will change accordingly.')
 
-#          globalVars{'classifierAlgo'}         = 'CREST'
-#          paramsForTaxAssign{'classifierAlgo'} = 'CREST'
-#          wait
-#       } 
+         globalVars{'classifierAlgo'}         = 'CREST'
+         paramsForTaxAssign{'classifierAlgo'} = 'CREST'
+         wait
+      } 
       
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
  
-#          crestAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
+         crestAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
 
-#       }
+      }
 
-#    } else if ( paramsForTaxAssign{'gene'} == 'gene_12S' ) {
+   } else if ( paramsForTaxAssign{'gene'} == 'gene_12S' ) {
 
-#       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+      if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
-#          println('Pema cannot run 12S data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
+         println('Pema cannot run 12S data using the CREST classifier. It will use RDPClassifer instead and the relative parameter will change accordingly.')
 
-#          globalVars{'classifierAlgo'}         = 'RDPClassifier'
-#          paramsForTaxAssign{'classifierAlgo'} = 'RDPClassifier'
+         globalVars{'classifierAlgo'}         = 'RDPClassifier'
+         paramsForTaxAssign{'classifierAlgo'} = 'RDPClassifier'
 
-#          wait
+         wait
 
-#       }
+      }
       
-#       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
+      if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
 
-#          rdpAssign(paramsForTaxAssign, globalVars)
-#          wait
-#          println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
+         rdpAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Alignment based taxonomy assignment using the RDPClassifier has been completed.")
 
-#       }
-#    }
+      }
+   }
 
-# } else if ( paramsForTaxAssign{'custom_ref_db'} == 'Yes') {
+} else if ( paramsForTaxAssign{'custom_ref_db'} == 'Yes') {
 
-#    if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+   if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
 
-#       rdpAssign(paramsForTaxAssign, globalVars)
+      rdpAssign(paramsForTaxAssign, globalVars)
 
-#    } else if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+   } else if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
-#       crestAssign(paramsForTaxAssign, globalVars)
+      crestAssign(paramsForTaxAssign, globalVars)
 
-#    } else {
+   } else {
 
-#       println('The classifier you chose is not available in the Pema framework.')
-#    }
+      println('The classifier you chose is not available in the Pema framework.')
+   }
 
-# }
-# println("The taxonomy assignment step has been completed.")
+}
+println("The taxonomy assignment step has been completed.")
 
-# # Check for running the ncbi-taxonomist tool
-# if ( paramsForTaxAssign{'getNCBITaxId'} == 'Yes'){
+# Check for running the ncbi-taxonomist tool
+if ( paramsForTaxAssign{'getNCBITaxId'} == 'Yes'){
 
-#     ncbiTaxonomyMapping(paramsForTaxAssign, globalVars)
+    ncbiTaxonomyMapping(paramsForTaxAssign, globalVars)
 
-#     println("The assignments on the finalTable.tsv file have been linked to NCBI Taxonomy ids.")
-# }
+    println("The assignments on the finalTable.tsv file have been linked to NCBI Taxonomy ids.")
+}
 
-# wait
-# string communAnal = globalVars{'outputPoint'} + "/communAnal.chp"
-# checkpoint communAnal
+wait
+string communAnal = globalVars{'outputPoint'} + "/communAnal.chp"
+checkpoint communAnal
 
-# # ################################################################
-# # #                Biodiversity analysis                      #
-# # ################################################################
+# ################################################################
+# #                Biodiversity analysis                      #
+# ################################################################
 
-# parameterFilePath.chdir()
-# string{} paramsForCA =  readParameterFile(parameterFile)
+parameterFilePath.chdir()
+string{} paramsForCA =  readParameterFile(parameterFile)
 
-# if ( paramsForCA{'phyloseq'} == 'Yes') {
+if ( paramsForCA{'phyloseq'} == 'Yes') {
 
-#    string biodiv_msg = "\n\n" + "******   BIODIVERSITY ANALYSIS STEP   ******"
-#    println(biodiv_msg)
+   string biodiv_msg = "\n\n" + "******   BIODIVERSITY ANALYSIS STEP   ******"
+   println(biodiv_msg)
 
-#    communityAnalysis(paramsForCA, globalVars)
+   communityAnalysis(paramsForCA, globalVars)
 
-# }
+}
 
-# wait
+wait
 
 # # ################################################################
 # # #                Pema has been concluded                      #

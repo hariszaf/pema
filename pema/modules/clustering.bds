@@ -122,18 +122,21 @@ string clusteringSwarm(string{} params, string{} globalVars) {
    string check = params{'assignmentPath'} + "/all_sequences_grouped.fa"
 
    if (check.exists()){
-      string emsg = "An all_sequences_grouped.fa file is already built." +\
-                     "If you wish to run again, please remove or rename the file."
+
+      string emsg = "\n" + "An all_sequences_grouped.fa file is already built." + "\n" + "If you wish to run again, please remove or rename the file."
       println(emsg)
+
       return "ok"
 
    } else if ( d_param < 6 ) {
 
+      # Get clusters, then find chemeras -- and remove chemeric swarms
       swarmMinValues(params, globalVars)
       wait
 
    } else {
 
+      # Get chimeras first, then run Swarm to get clusters
       swarmMaxValues(params, globalVars)
       wait
    }
@@ -144,9 +147,15 @@ string clusteringSwarm(string{} params, string{} globalVars) {
    # Build the ASVs contingency table 
    sys mv ../../../amplicon_contingency_table.tsv .
 
+   wait
+
    # Remove oligotons
    if ( params{'removeOligotons'} == 'Yes' ){
 
+      string olig_msg = "\n" + "-> Removing oligotons .. " + "\n"
+      println(olig_msg)
+
+      # Removing oligotons from swarms .stats and .swarms files
       task {
          sys python $globalVars{'scripts'}/removeOligotonsSwarm.py \
                asvs.stats \
@@ -156,93 +165,77 @@ string clusteringSwarm(string{} params, string{} globalVars) {
 
       wait
 
-      sys mv asvs.stats asvs_oligotong_incl.stats
-      sys mv asvs.swarms asvs_oligotong_incl.swarms
+      # Build representative .fasta
+      task {
+         sys awk '{print $3}' updated_asvs.stats | cat - <(cut -d_ -f1 updated_asvs.swarms) | sort -u > keep_hashes.txt
+         sys awk 'BEGIN { \
+                  while ((getline k < "keep_hashes.txt") > 0) keep[k] = 1; \
+            } \
+            /^>/ { \
+                  split($1, a, "_"); \
+                  sub(/^>/, "", a[1]); \
+                  keep_entry = (a[1] in keep) \
+            } \
+            keep_entry' asvs_representatives_hash.fa > filtered_seqs.fasta
+   
+      }
+      wait
 
-      sys mv updated_asvs.stats asvs.stats
-      sys mv updated_asvs.swarms asvs.swarms
+      # Renaming and cleaning up
+      task {
+         sys mv asvs.stats asvs_oligotong_incl.stats
+         sys mv asvs.swarms asvs_oligotong_incl.swarms
+         sys mv updated_asvs.stats asvs.stats
+         sys mv updated_asvs.swarms asvs.swarms
+   
+         sys mv asvs_representatives_hash.fa asvs_representatives_hash_chimeras_oligotons.fa
+         sys mv filtered_seqs.fasta asvs_representatives_hash.fa
 
+         sys rm keep_hashes.txt
+      }
+
+      wait
+
+      println('✅ Oligotons have been removed from both FASTA and contingency table')
    }
 
    wait
 
+   string conting_msg = "\n" + "-> Building ASV contingency table.. "  + "\n"
+   println(conting_msg)
+
    sys bash $globalVars{'scripts'}/createASVsContingencyTable.sh 
 
+   wait
 
-   # # Builds original asvs_contingency_table.tsv file
-   # sys bash $globalVars{'scripts'}/createOtuContingencyTable.sh
-   # string m1 = "\n" + "> The contigency table with the found ASVs was created successfully."
-   # println(m1)
-
-   # ## Singletons may be removed or not
-   # if ( params{'removeOligotons'} == 'Yes' ){
-
-   #    # Backup the original ASV representative sequences
-   #    sys cp asvs_representatives.fa asvs_repr_with_singletons.fasta
+   # Check if this is a second analysis to remove files not needed and make links to others 
+   task {
       
-   #    # Run the Python script to remove oligotons from the FASTA file based on the threshold
-   #    sys python $globalVars{'scripts'}/removeOligotonsSwarm.py asvs_contingency_table.tsv $params{'numOligotons'}
-      
-   #    # Replace the original FASTA file with the filtered one
-   #    sys mv no_oligotons.tsv asvs_representatives_all_samples.fasta
-      
-   #    # Filter the contingency table to remove rows with low total counts (oligotons)
-   #    # Keep only rows where the total (last column) > threshold or the header (NR == 1)
-   #    sys awk -v threshold=$params{'numOligotons'} '$(NF) > threshold || NR == 1' asvs_contingency_table.tsv > asvs_contingency_table.noOligos
-      
-   #    # Backup the original contingency table (with oligotons)
-   #    sys mv asvs_contingency_table.tsv asvs_contingency_table_oligotons_included.tsv
-      
-   #    # Replace with filtered contingency table
-   #    sys mv asvs_contingency_table.noOligos asvs_contingency_table.tsv
-      
-   #    # Notify the user
-   #    println('✅ Oligotons have been removed from both FASTA and contingency table')
+      sys if [ $(find '$params{'assignmentPath'}' -name 'all_sequences_grouped.fa') ] ; then  rm all_sequences_grouped.fa ; fi
+      # Remove abundance from hashes that will be used for tax assignment
+      sys sed 's/_[0-9]*//' asvs_representatives.fa > tmp 
+      sys mv tmp asvs_representatives.fa
+      sys ln -s asvs_representatives.fa all_sequences_grouped.fa
+   }
 
-   # }
+   wait
 
+   # According to the Clustering step to come, we need to implement some transformations
+   if ( params{'classifierAlgo'} == 'CREST' && ( params{'gene'} != 'gene_12S' ) ) {
 
-   # # Check if this is a second analysis to remove files not needed and make links to others 
-   # task {
-      
-   #    sys if [ $(find '$params{'assignmentPath'}' -name 'all_sequences_grouped.fa') ] ; then  rm all_sequences_grouped.fa ; fi
-   #    sys cp asvs_representatives_all_samples.fasta asvs_representatives_all_samples.fasta.bck  # to remove in the end
-   #    sys ln -s asvs_representatives_all_samples.fasta all_sequences_grouped.fa
-   
-   # }
+      println('Build CREST input once Swarm has been completed')
+      println('Transformations on the Swarm output to align to the CREST input are about to be implemented.')
 
-   # wait
+      # task {
+      #    sys bash $globalVars{'scripts'}/buildAllTableFile.sh
+      # }
 
-   # # According to the Clustering step to come, we need to implement some transformations
-   # if ( params{'classifierAlgo'} == 'CREST' && ( params{'gene'} != 'gene_12S' ) ) {
+      wait
 
-   #    println('Build CREST input once Swarm has been completed')
-   #    println('Transformations on the Swarm output to align to the CREST input are about to be implemented.')
+      sys cp asvs_contingency_table.tsv allTab_$params{'taxonomyFolderName'}.tsv
 
-   #    task {
-   #       sys bash $globalVars{'scripts'}/buildAllTableFile.sh
-   #    }
-
-   #    wait
-
-   #    if (params{'clusteringAlgo'} == "swarm"){
-   #       sys sed -i 's/Otu/ASV/g' asvs_representatives_all_samples.fasta
-   #       sys sed -i 's/Otu/ASV/g' allTab.tsv
-   #    }
-
-   #    sys mv allTab.tsv allTab_$params{'taxonomyFolderName'}.tsv
-
-   #    wait
-
-   # } else if ( params{'classifierAlgo'} == 'CREST' && ( params{'gene'} == 'gene_12S' ) ) {
-
-   #    println('You have selected CREST classifier and your marker gene is 12S. Pema does not support this combination.')
-
-   # } else if (params{'classifierAlgo'} == 'RDPClassifier') {
-
-   #    println('make neccessary steps to run RDPClassifier')
-
-   # }
+      wait
+   }
 
    return 'ok'
 
@@ -264,7 +257,7 @@ string swarmMinValues(string{} params, string{} globalVars) {
          -b $params{'boundary'} \
          -t $params{'swarmThreads'} \
          -s asvs.stats \
-         -w asvs_representatives.fa < all_samples.fasta > asvs.swarms
+         -w asvs_representatives_hash.fa < all_samples.fasta > asvs.swarms
 
       wait
 
@@ -276,7 +269,7 @@ string swarmMinValues(string{} params, string{} globalVars) {
            -d $params{'d'} \
            -t $params{'swarmThreads'} \
            -s asvs.stats \
-           -w asvs_representatives.fa < all_samples.fasta > asvs.swarms
+           -w asvs_representatives_hash.fa < all_samples.fasta > asvs.swarms
 
       wait
    }
@@ -286,28 +279,73 @@ string swarmMinValues(string{} params, string{} globalVars) {
    println(m2)
 
    task{
-      sys sed 's/_/;size=/g' asvs_representatives.fa > tmp
-      sys rm asvs_representatives.fa
-      sys mv tmp asvs_representatives.fa
+      sys sed 's/_/;size=/g' asvs_representatives_hash.fa > tmp
+      sys rm asvs_representatives_hash.fa
+      sys mv tmp asvs_representatives_hash.fa
    }
    # We do not use `sed -i` to make sure it is running as supposed to, across platforms 
 
    wait
 
-   task vsearch \
-      --threads $params{'vsearchThreads'} \
-      --uchime_denovo asvs_representatives.fa \
-      --sizein \
-      --sizeout \
-      --fasta_width 0 \
-      --nonchimeras all.denovo.nonchimeras.fasta
+   string nonchimeras_file = "all.denovo.nonchimeras.fasta"
 
-   wait
+   if (! nonchimeras_file.exists()) {
+
+      task vsearch \
+            --threads $params{'vsearchThreads'} \
+            --uchime_denovo asvs_representatives_hash.fa \
+            --sizein \
+            --sizeout \
+            --fasta_width 0 \
+            --nonchimeras all.denovo.nonchimeras.fasta
+
+      wait
+
+   } else {
+      string prev_chimeras = "\n" + "Chimeras already calculated!"
+      println(prev_chimeras)
+   }
 
    task {
       sys sed 's/;size=/_/g' all.denovo.nonchimeras.fasta > tmp 
       sys rm all.denovo.nonchimeras.fasta
       sys mv tmp all.denovo.nonchimeras.fasta
+   }
+
+   wait
+
+   # Remove chimeric swarms
+   string chimeral_msg = "\n" + "-> Removing chimeras after swarms were inferred.. " + "\n"
+   println(chimeral_msg)
+   task {
+
+      sys grep '^>' all.denovo.nonchimeras.fasta | cut -d'_' -f1 | sed 's/^>//' | sort -u > fasta_hashes.txt
+      sys grep -Ff fasta_hashes.txt asvs.stats > filtered_asvs.stats
+      sys grep -Ff fasta_hashes.txt asvs.swarms > filtered_asvs.swarms
+
+      sys awk '{print $3}' filtered_asvs.stats | cat - <(cut -d_ -f1 filtered_asvs.swarms) | sort -u > keep_hashes.txt
+      sys awk 'BEGIN { \
+               while ((getline k < "keep_hashes.txt") > 0) keep[k] = 1; \
+         } \
+         /^>/ { \
+               split($1, a, "_"); \
+               sub(/^>/, "", a[1]); \
+               keep_entry = (a[1] in keep) \
+         } \
+         keep_entry' all.denovo.nonchimeras.fasta > filtered_seqs.fasta
+
+      # Renaming files
+      sys mv asvs.stats with_chimeras.stats
+      sys mv asvs.swarms with_chimeras.swarms
+      sys mv filtered_asvs.stats asvs.stats
+      sys mv filtered_asvs.swarms asvs.swarms
+      sys mv asvs_representatives_hash.fa asvs_representatives_hash_chimeras.fa
+      sys mv filtered_seqs.fasta asvs_representatives_hash.fa
+
+      # Cleaning up
+      sys rm keep_hashes.txt
+      sys rm fasta_hashes.txt
+
    }
 
    wait
@@ -353,7 +391,7 @@ string swarmMaxValues(string{} params, string{} globalVars){
          -d $params{'d'} \
          -t $params{'swarmThreads'} \
          -s asvs.stats \
-         -w asvs_representatives_all_samples.fasta < all.denovo.nonchimeras.fasta > asvs.swarms
+         -w asvs_representatives_hash.fasta < all.denovo.nonchimeras.fasta > asvs.swarms
 
    wait
 
