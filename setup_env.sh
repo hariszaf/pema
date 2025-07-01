@@ -269,8 +269,9 @@ else
 fi
 
 # Add ~/.pema/SPAdes to PATH if not already included
-if [[ ":$PATH:" != *":$HOME/.pema/SPAdes-$SPADES-Linux/bin:"* ]]; then
-  echo 'export PATH="$HOME/.pema/SPAdes-$SPADES-Linux/bin:$PATH"' >> $SHELL_CONFIG
+if [[ ":$PATH:" != *":$HOME/.pema/SPAdes-${SPADES}-Linux/bin:"* ]]; then
+  # echo 'export PATH="$HOME/.pema/SPAdes-${SPADES}-Linux/bin:$PATH"' >> $SHELL_CONFIG
+  echo "export PATH=\"\$HOME/.pema/SPAdes-${SPADES}-Linux/bin:\$PATH\"" >> "$SHELL_CONFIG"
   echo -e "Added ~/.pema/SPAdes-$SPADES-Linux/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 

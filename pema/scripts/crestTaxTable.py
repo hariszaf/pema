@@ -7,17 +7,27 @@ from pathlib import Path
 
 abd_table         = sys.argv[1]
 crest_assignments = sys.argv[2]
+clustering_algo   = sys.argv[3]
+
 
 main_dir        = Path(abd_table).parent.absolute()
 assignments_dir = Path(crest_assignments).parent.absolute()
 
-hash_table = main_dir / "asvs_contingency_hash.tsv"
-# Abunddance table with both ASV id and hash
-df         = pd.read_csv(hash_table, sep="\t")
 
+if clustering_algo == "vsearch":
 
-#     # Hash abundance table
-#     df         = pd.read_csv(abd_table, sep="\t")
+    df = pd.read_csv(abd_table, sep="\t")
+
+elif clustering_algo == "swarm":
+
+    # Abundance table with both ASV id and hash
+    hash_table = main_dir / "asvs_contingency_hash.tsv"
+    df         = pd.read_csv(hash_table, sep="\t")
+
+else:
+    print("Not applicable clustering algo. Please select either `swarm `or `vsearch`")
+    sys.exit(0)
+
 
 columns    = df.columns
 columns    = [x.split(".")[0] for x in columns]
@@ -29,21 +39,30 @@ id_col = "ASV" if "ASV" in df.columns else "amplicon" if "amplicon" in df.column
 if id_col is None:
     raise ValueError("Neither 'ASV' nor '#OTU ID' found in df.columns")
 
-# Rename the column to 'ASV' temporarily for the merge
-df = df.rename(columns={id_col: "ASV"})
-
 # Load taxonomy table
 tax         = pd.read_csv(crest_assignments, header=None, sep="\t")
-tax.columns = ["Seed", "Taxonomy"]
 
-# Merge
-df = df.merge(tax[["Seed", "Taxonomy"]], on="Seed", how="left")
+if clustering_algo == "swarm":
 
-# Rename back to original
-df = df.rename(columns={"ASV": id_col})
+    # Fix column names as in the hash table
+    tax.columns = ["Seed", "Taxonomy"]
 
-# Drop seed column
-df = df.drop(columns=["Seed"])
+    # Merge
+    df = df.merge(tax[["Seed", "Taxonomy"]], on="Seed", how="left")
+
+    # Drop seed column
+    df = df.drop(columns=["Seed"])
+
+else:
+
+    # Fix column names as in the allTab table
+    tax.columns = ["amplicon", "Taxonomy"]
+
+    # Merge
+    df = df.merge(tax[["amplicon", "Taxonomy"]], on="amplicon", how="left")
+
+    # Renaame
+    df = df.rename(columns={"amplicon": "OTU"})
 
 # Save outfile
 outfile = assignments_dir / "finalTable.tsv"

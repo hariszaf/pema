@@ -101,7 +101,10 @@ string crestAssign(string{} params, string{} globalVars) {
    wait
 
    task {
-      sys python $globalVars{'scripts'}/crestTaxTable.py allTab_$params{'taxonomyFolderName'}.tsv $params{'taxonomyFolderName'}/assignments.txt
+      sys python $globalVars{'scripts'}/crestTaxTable.py \
+            allTab_$params{'taxonomyFolderName'}.tsv \
+            $params{'taxonomyFolderName'}/assignments.txt \
+            $params{'clusteringAlgo'}
    }
 
    wait
