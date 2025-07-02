@@ -1,7 +1,7 @@
 #= pema_version: 2.2.0
 #   --------------------------         GENERAL PARAMETERS       --------------------------
 #
-#=     Study name: This a sanity check for the case of 16S rRNA gene using fastp and swarm
+#      Study: This is a sanity check for 12S rRNA gene using fastp and vsearch
 #
 #
 #=     environment:
@@ -14,7 +14,6 @@
 #=          - value: local
 environment=local
 #
-#
 #=     gene:
 #=        title: marker gene
 #=        description: Indicates the marker gene of the study. Currently PEMA supports the analysis of 16S, 12S, 18S, ITS and COI marker genes. Add the name of the marker gene after the underscore ("_")
@@ -22,16 +21,14 @@ environment=local
 #=        required: True
 #=        validation:
 #=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
-gene=gene_16S
-#
+gene=gene_12S
 #
 #=     outputFolderName:
 #=        title: output folder name
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName=TEST_16S_FASTP_SWARM
-#
+outputFolderName=TEST_12S_FASTP_VSEARCH
 #
 #=     EnaData:
 #=        title: ENA data format
@@ -43,7 +40,6 @@ outputFolderName=TEST_16S_FASTP_SWARM
 #=          - value: No
 EnaData=Yes
 #
-#
 #=     sequencerPrefix:
 #=        title: sequencer prefix
 #=        description: Each sequencer has a special combination of letters with which all its reads start with (e.g., "@M0"). Please provide this pattern if the EnaData is "No". 
@@ -52,7 +48,6 @@ EnaData=Yes
 sequencerPrefix=M0
 #
 # ------------------------------------     PRE-PROCESSING : APPROACH     ------------------------------------
-#
 #
 #=     preprocess:
 #=        title: preprocess approach
@@ -65,6 +60,7 @@ sequencerPrefix=M0
 preprocess=fastp
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
+#   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
 #
 #
 #=     fastpThreads:
@@ -72,7 +68,7 @@ preprocess=fastp
 #=        description: Number of threads to be used by fastp
 #=        type: integer
 #=        required: False
-fastpThreads=10
+fastpThreads=20
 #
 #
 #=     disable_adapter_trimming:
@@ -154,7 +150,9 @@ overrepresentation_sampling=20
 #
 #=     overlap_diff_percent_limit
 #=        title:
-#=        description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
+#=        description: >
+#=          The maximum percentage of mismatched bases to detect overlapped region of PE reads. 
+#=          This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
 #=        type: integer
 #=        required: False
 overlap_diff_percent_limit=20
@@ -197,7 +195,7 @@ length_limit=0
 #=        description: Reads shorter than length_required will be discarded, default is 15.
 #=        type: integer
 #=        required: False
-length_required=
+length_required=50
 #
 #
 #=      n_base_limit:
@@ -280,6 +278,15 @@ cut_right_window_size=4
 cut_right_mean_quality=20
 #
 #
+#=     disable_trim_poly_g:
+#=        title:
+#=        description: 
+#=        type: boleam
+#=        required: False
+#=        default: False
+disable_trim_poly_g=False
+#
+#
 #=     trim_poly_g:
 #=        title:
 #=        description: 
@@ -298,31 +305,9 @@ trim_poly_g=True
 poly_g_min_len=10
 #
 #
-#
-#
-#=     cut_right_mean_quality:
-#=        title:
-#=        description: 
-#=        type: integer
-#=        required: False
-cut_right_mean_quality=20
-#
-#
-#=     disable_trim_poly_g:
-#=        title:
-#=        description: 
-#=        type: boleam
-#=        required: False
-#=        default: False
-disable_trim_poly_g=False
-#
-#
-#
-#
 #   --------------------------     PRE-PROCESSING PARAMETERS : original approach     --------------------------
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : Trimmomatic     --------------------------
-#
 #
 #=     maxInfo:
 #=        title: maximum information
@@ -334,7 +319,6 @@ disable_trim_poly_g=False
 #=          - value: No
 maxInfo=Yes
 #
-#
 #=     targetLength:
 #=        title: maximum information
 #=        description: A Trimmomatic parameter. Specifies the read length which is likely to allow the location of the read within the target sequence to be determined.
@@ -344,7 +328,6 @@ maxInfo=Yes
 #=          - range: 
 #=            min: 1
 targetLength=150
-#
 #
 #=     strictness:
 #=        title: strictness
@@ -357,14 +340,12 @@ targetLength=150
 #=            max: 1.0
 strictness=0.1
 #
-#
 #=     adapters:
 #=        title: adapters
 #=        description: A Trimmomatic parameter. Suggested adapter sequences are provided for TruSeq2 (as used in GAII machines) and TruSeq3 (as used by HiSeq and MiSeq machines),
 #=        type: string
 #=        required: True
 adapters=TruSeq3-PE.fa
-#
 #
 #=     seedMismatches:
 #=        title: adapters
@@ -376,7 +357,6 @@ adapters=TruSeq3-PE.fa
 #=            min: 0 
 seedMismatches=2
 #
-#
 #=     palindromeClipThreshold:
 #=        title: adapters
 #=        description: A Trimmomatic parameter. Specifies how accurate the match between the two 'adapter ligated' reads must be for PE palindrome read alignment.
@@ -386,7 +366,6 @@ seedMismatches=2
 #=          - range: 
 #=            min: 1 
 palindromeClipThreshold=30
-#
 #
 #=     simpleClipThreshold:
 #=        title: simple ClipThreshold
@@ -398,7 +377,6 @@ palindromeClipThreshold=30
 #-             min: 0 
 simpleClipThreshold=30
 #
-#
 #=     leading:
 #=        title: simple ClipThreshold
 #=        description: A Trimmomatic parameter. Removes low quality bases from the beginning. As long as a base has a value below this threshold (value of the 'leading' parameter) the base is removed and the next base will be investigated.
@@ -408,7 +386,6 @@ simpleClipThreshold=30
 #=          - range: 
 #=            min: 0 
 leading=10
-#
 #
 #=     trailing:
 #=        title: trailing
@@ -420,7 +397,6 @@ leading=10
 #=            min: 0 
 trailing=15
 #
-#
 #=     minlen:
 #=        title: minimum length of the amplicon
 #=        description: A Trimmomatic parameter. Removes reads that fall below the specified minimal length.
@@ -431,7 +407,6 @@ trailing=15
 #=            min: 1
 minlen=150
 #
-#
 #=     threadsTrimmomatic:
 #=        title: minimum length of the amplicon
 #=        description: A Trimmomatic parameter. Set how many threads you want Trimmomatic to run into.
@@ -440,11 +415,10 @@ minlen=150
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-threadsTrimmomatic=20
+threadsTrimmomatic=5
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : PANDAseq     --------------------------
-#
 #
 #=     pandaseqAlgorithm:
 #=        title: minimum length of the amplicon
@@ -458,7 +432,6 @@ threadsTrimmomatic=20
 #=          - value: flash
 pandaseqAlgorithm=simple_bayesian
 #
-#
 #=     pandaseqThreads:
 #=        title: pandaseq threads
 #=        description: Set number of threads to be used from pandaseq. PANDAseq is a I/O bound algorithm. That means that it needs severous time in order to handle the ipnut and output files. while the process is quite fast. However, it does support multithreading and here you can set the number of threads it is going to use.
@@ -467,8 +440,7 @@ pandaseqAlgorithm=simple_bayesian
 #=        validation:
 #=          - range:
 #=            min: 0
-pandaseqThreads=20
-#
+pandaseqThreads=5
 #
 #=     pandaseqMinlen:
 #=        title: pandaseq minimum length
@@ -480,7 +452,6 @@ pandaseqThreads=20
 #=            min: 0 
 pandaseqMinlen=-l 150
 #
-#
 #=     minoverlap:
 #=        title: pandaseq minimum overlap
 #=        description: Sets the minimum overlap between forward and reverse reads. Raising this number does not generally increase the quality of the output as alignments with small overlaps tend to score poorly and are discarded anyway.
@@ -490,7 +461,6 @@ pandaseqMinlen=-l 150
 #=          - range: 
 #=            min: 0
 minoverlap=5
-#
 #
 #=     threshold:
 #=        title: threshold
@@ -502,7 +472,6 @@ minoverlap=5
 #=              min:  0.0
 #=              max: 1.0
 threshold=0.6
-#
 #
 #=     elimination:
 #=        title: elimination
@@ -516,7 +485,6 @@ elimination=-N
 #
 #   --------------------------        CLUSTERING PARAMETERS           --------------------------
 #
-#
 #=     clusteringAlgo:
 #=        title: clustering algorithm
 #=        description: For OTU clustering PEMA invokes the vsearch algorithm while for ASVs inference the Swarm. Select which way to go.  
@@ -525,10 +493,9 @@ elimination=-N
 #=        validation:
 #=          - value: swarm
 #=          - value: vsearch
-clusteringAlgo=swarm
+clusteringAlgo=vsearch
 #
 #   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
-#
 #
 #=     vsearchThreads:
 #=        title: vsearch threads
@@ -538,8 +505,7 @@ clusteringAlgo=swarm
 #=        validation:
 #=          - range: 
 #=            min: 0
-vsearchThreads=20
-#
+vsearchThreads=5
 #
 #=     vsearchId:
 #=        title: vsearch threads
@@ -554,7 +520,6 @@ vsearchId=0.9
 #
 #   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
 #
-#
 #=     d:
 #=        title: d
 #=        description: Maximum number of differences allowed between two amplicons, meaning that two amplicons will be grouped if they hav e integer (or less) differences.
@@ -563,8 +528,7 @@ vsearchId=0.9
 #=        validation:
 #=          - range: 
 #=            min: 0 
-d=1
-#
+d=7
 #
 #=     boundary:
 #=        title: boundary
@@ -575,7 +539,6 @@ d=1
 #=          - range: 
 #=            min: 0
 boundary=2
-#
 #
 #=     swarmThreads:
 #=        title: swarmThreads
@@ -589,7 +552,6 @@ swarmThreads=20
 #
 #  -----------------------------     OLIGOTONS        -------------------------------------
 #
-#
 #=     removeOligotons:
 #=        title: removeOligotons
 #=        description:  Remove the oligotons (OTUs that appear with an abuncance less that numOligotons) ?
@@ -599,7 +561,6 @@ swarmThreads=20
 #=          - value: Yes
 #=          - value: No
 removeOligotons=Yes
-#
 #
 #=     numOligotons:
 #=        title: numOligotons
@@ -614,7 +575,6 @@ numOligotons=2
 #
 #   --------------------------     CLASSIFIER       --------------------------
 #
-#
 #=     classifierAlgo:
 #=        title: classifier algorithm
 #=        description:  Select classifier for the taxonomy assignment step. If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
@@ -623,55 +583,17 @@ numOligotons=2
 #=        validation:
 #=          - value: RDPClassifier
 #=          - value: CREST
-classifierAlgo=CREST
-#
-#
-#=     scoreDrop:
-#=        title: score drop
-#=        description:  Determines the range of hits to retain and the range to discard based on a drop in percentage from the score of the best hit. Any hit below the following value: "(100 - score_drop)/100 * best_hit_score" is ignored.
-#=        default 2.0
-#=        type: string
-#=        required: True
-#=        validation:
-#=          - range: 
-#=            min: 0 
-scoreDrop=
-#
-#
-#=     minScore:
-#=        title: minimum bit-score 
-#=        description:  The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. All hits below this score are ignored. When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. The default is `155` for BLAST and `0.75` for VSEARCH.
-#=        type: string
-#=        required: True
-#=        validation:
-#=          - range: 
-#=            min: 0 
-minScore=
-#
-#
-#=     searchAlgo:
-#=        title: minimum bit-score 
-#=        description:  The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. All hits below this score are ignored. When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. The default is `155` for BLAST and `0.75` for VSEARCH.
-#=        type: string
-#=        required: True
-#=        validation:
-#=          - value: vsearch
-#=          - value: blast
-searchAlgo=vsearch
-#
-#
-#
+classifierAlgo=RDPClassifier
 #
 #=     taxonomyFolderName:
 #=        title: number of cores for PaPaRa
 #=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail. Parameter required if gene: ['16S', '18S', 'ITS'].
 #=        type: string
 #=        required: True 
-taxonomyFolderName=crest4_vsearch_132
+taxonomyFolderName=12S_taxon_assign
 #
 #
 #   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
-#
 #
 #=     taxonomyAssignmentMethod:
 #=        title: vsearch threads
@@ -683,7 +605,6 @@ taxonomyFolderName=crest4_vsearch_132
 #=          - value: phylogeny
 taxonomyAssignmentMethod=alignment
 #
-#
 #=     numberOfCoresForPapara:
 #=        title: number of cores for PaPaRa
 #=        description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use. The parameeter is required if axonomyAssignmentMethod: phylogeny and gene: gene_16S
@@ -694,7 +615,6 @@ taxonomyAssignmentMethod=alignment
 #=            min: 0
 numberOfCoresForPapara=20
 #
-#
 #=     referenceDb:
 #=        title: reference database 
 #=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_132' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. The parameter is required if custom_ref_db: No and gene: [gene_16S, 'gene_18S', 'gene_COI']
@@ -702,14 +622,13 @@ numberOfCoresForPapara=20
 #=        required: True
 #=        validation: 
 #=          - value: silva_128
-#=          - value: silva_138
+#=          - value: silva_132
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
-referenceDb=silva_138
+referenceDb=silva_128
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
-#
 #
 #=     cutadapt:
 #=        title: perform a cutadapt script to 
@@ -721,14 +640,12 @@ referenceDb=silva_138
 #=          - value: No 
 cutadapt=Yes
 #
-#
 #=     forwardITSPrimer:
 #=        title: forward ITS primer
 #=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
 #=        required: True 
 forwardITSPrimer=GATGAAGAACGYAGYRAA
-#
 #
 #=     reverseITSPrimer:
 #=        title: reverse ITS primer
@@ -738,7 +655,6 @@ forwardITSPrimer=GATGAAGAACGYAGYRAA
 reverseITSPrimer=CTBTTVCCKCTTCACTCG
 #
 #   --------------------------     GENE-SPECIFIC : COI     --------------------------
-#
 #
 #=     abskew:
 #=        title: abskew
@@ -752,7 +668,6 @@ abskew=2
 #
 #   --------------------------     CUSTOM REFERENCE DATABASE     --------------------------
 #
-#
 #=     custom_ref_db:
 #=        title: custom reference database
 #=        description: Use a custom reference database for the taxonomy assignment step. In this case, extra input files are required depending on the classifier the user selected. To see more on how these files should be in case of the RDPClassifier, follow this link: https://hariszaf.github.io/pema_documentation/training_rdpclassifier/. In case that the CREST classifier is be used, follow this link: https://hariszaf.github.io/pema_documentation/training_crest_classifier/. Remember that as containers are lost when exit from one, you will have to train the classifier, every time you run a new PEMA container If you are about to use a custom ref db, set the following parameter as 'Yes'. Otherwise, it must be set as 'No'. The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
@@ -763,7 +678,6 @@ abskew=2
 #=          - value: No
 custom_ref_db=No
 #
-#
 #=     name_of_custom_db:
 #=        title: name of custom database
 #=        description: Name of how custom reference database will be named. Parameter required only if custom_ref_db: Yes
@@ -771,9 +685,7 @@ custom_ref_db=No
 #=        required: True
 name_of_custom_db=
 #
-#
 #   --------------------------     sum up      --------------------------
-#
 #
 #=     emptyRawDataFile:
 #=        title: empty raw data files 
@@ -785,7 +697,6 @@ name_of_custom_db=
 #=          - value: No
 emptyRawDataFile=Yes
 #
-#
 #=     emptyCheckpoints:
 #=        title: empty check points
 #=        description: Move all check points returned in a separate folder
@@ -796,7 +707,6 @@ emptyRawDataFile=Yes
 #=          - value: No
 emptyCheckpoints=Yes
 #
-#
 #=     getNCBITaxId:
 #=        title: get NCBI Taxonomy Id
 #=        description: Link the OTU/ASV taxonomy assignment to its closest NCBI Taxonomy Id, meaning if there is no NCBI Taxonomy id at the species level, PEMA will search for the one of the genus and so on. 
@@ -805,7 +715,7 @@ emptyCheckpoints=Yes
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-getNCBITaxId=Yes
+getNCBITaxId=No
 #
 #   --------------------------     PEMA METADATA     --------------------------
 #

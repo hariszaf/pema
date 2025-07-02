@@ -65,8 +65,6 @@ if $HELP_ARG; then
   exit 0
 fi
 
-
-
 SETUP_WD=$(pwd)
 
 
@@ -154,10 +152,10 @@ else
   echo -e "BigDataScript programming language was installed at: $BDS_DIR  $TADA"
 fi
 
-# Add ~/.pema/.bds to PATH if not already included
+# Add $INSTALL_DIR/.bds to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/.bds:"* ]]; then
   echo 'export PATH="$HOME/.pema/.bds:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added ~/.pema/.bds to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo -e "Added ${INSTALL_DIR}/.bds to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
@@ -168,6 +166,7 @@ fi
 # FASTQC=
 # TRIMMOMATIC=
 # VSEARCH=
+SWARM=3.1.5        # NOTE: note used so far on the installation process, i.e. would change without noticing
 SPADES=3.14.0
 RDPCLASSIFIER=2.14
 CREST_PEMA="https://zenodo.org/record/5734317/files/crest.tar.gz"
@@ -176,21 +175,21 @@ CREST_PEMA="https://zenodo.org/record/5734317/files/crest.tar.gz"
 # --------------
 # Install fastp
 # --------------
-if [[ -x ~/.pema/fastp ]]; then
-  echo -e "$GREEN_TICK fastp already exists at ~/.pema/fastp"
+if [[ -x $INSTALL_DIR/fastp ]]; then
+  echo -e "$GREEN_TICK fastp already exists at $INSTALL_DIR/fastp"
 else
-  echo -e "$HOURGLASS fastp not found in ~/.pema/. Downloading..."
-  wget http://opengene.org/fastp/fastp -O ~/.pema/fastp && \
-  chmod a+x ~/.pema/fastp && \
-  echo -e "$GREEN_TICK fastp downloaded to ~/.pema/fastp"
+  echo -e "$HOURGLASS fastp not found in $INSTALL_DIR/. Downloading..."
+  wget http://opengene.org/fastp/fastp -O $INSTALL_DIR/fastp && \
+  chmod a+x $INSTALL_DIR/fastp && \
+  echo -e "$GREEN_TICK fastp downloaded to $INSTALL_DIR/fastp"
 fi
 
 
 # --------------
 # Install fastQC
 # --------------
-if [[ -x ~/.pema/FastQC ]]; then
-  echo -e "$GREEN_TICK fasQC already exists at ~/.pema/FastQC"
+if [[ -x $INSTALL_DIR/FastQC ]]; then
+  echo -e "$GREEN_TICK fasQC already exists at $INSTALL_DIR/FastQC"
 else
   wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.8.zip 
   unzip fastqc_v0.11.8.zip
@@ -199,17 +198,17 @@ else
   chmod 755 fastqc
 fi
 
-# Add ~/.pema/FastQC/fastqc to PATH if not already included
+# Add $INSTALL_DIR/FastQC/fastqc to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/FastQC:"* ]]; then
   echo 'export PATH="$HOME/.pema/FastQC:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added ~/.pema/FastQC to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo -e "Added $INSTALL_DIR/FastQC to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
 # --------------
 # Install  OBItools
 # --------------
-if [[ -x ~/.pema/obitools4 ]]; then
+if [[ -x $INSTALL_DIR/obitools4 ]]; then
   echo -e "$GREEN_TICK obitools4 has been installed."
 else
   echo -e "$HOURGLASS Installing Obitools4..."
@@ -226,8 +225,8 @@ fi
 # --------------
 # Install VSEARCH
 # --------------
-if [[ -x ~/.pema/vsearch ]]; then
-  echo -e "$GREEN_TICK VSEARCH already exists at ~/.pema/vsearch"
+if [[ -x $INSTALL_DIR/vsearch ]]; then
+  echo -e "$GREEN_TICK VSEARCH already exists at $INSTALL_DIR/vsearch"
 else
   echo -e "$HOURGLASS Installing VSEARCH.."
   wget https://github.com/torognes/vsearch/releases/download/v2.9.1/vsearch-2.9.1-linux-x86_64.tar.gz
@@ -236,18 +235,18 @@ else
   mv vsearch-2.9.1-linux-x86_64 vsearch
 fi
 
-# Add ~/.pema/vsearch to PATH if not already included
+# Add $INSTALL_DIR/vsearch to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/vsearch/bin:"* ]]; then
   echo 'export PATH="$HOME/.pema/vsearch/bin:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added ~/.pema/vsearch/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo -e "Added $INSTALL_DIR/vsearch/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
 # --------------
 # Install Trimmomatic
 # --------------
-if [[ -x ~/.pema/Trimmomatic-0.38 ]]; then
-  echo -e "$GREEN_TICK Trimmomatic already exists at ~/.pema/fastp"
+if [[ -x $INSTALL_DIR/Trimmomatic-0.38 ]]; then
+  echo -e "$GREEN_TICK Trimmomatic already exists at $INSTALL_DIR/fastp"
 else
   echo -e "$HOURGLASS Installing Trimmomatic.."
   wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.38.zip
@@ -258,8 +257,8 @@ fi
 # --------------
 # Install SPAdes
 # --------------
-if [[ -x ~/.pema/SPAdes-$SPADES-Linux ]]; then
-  echo -e "$GREEN_TICK SPAdes already exists at ~/.pema/SPAdes-$SPADES-Linux"
+if [[ -x $INSTALL_DIR/SPAdes-$SPADES-Linux ]]; then
+  echo -e "$GREEN_TICK SPAdes already exists at $INSTALL_DIR/SPAdes-$SPADES-Linux"
 else
   echo -e "$HOURGLASS Getting SPAdes binary.."
   wget https://github.com/ablab/spades/releases/download/v$SPADES/SPAdes-$SPADES-Linux.tar.gz
@@ -268,19 +267,19 @@ else
   echo -e "SPAdes is now installed. $TADA"
 fi
 
-# Add ~/.pema/SPAdes to PATH if not already included
+# Add $INSTALL_DIR/SPAdes to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/SPAdes-${SPADES}-Linux/bin:"* ]]; then
   # echo 'export PATH="$HOME/.pema/SPAdes-${SPADES}-Linux/bin:$PATH"' >> $SHELL_CONFIG
   echo "export PATH=\"\$HOME/.pema/SPAdes-${SPADES}-Linux/bin:\$PATH\"" >> "$SHELL_CONFIG"
-  echo -e "Added ~/.pema/SPAdes-$SPADES-Linux/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo -e "Added $INSTALL_DIR/SPAdes-$SPADES-Linux/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
 # --------------
 # Install PANDASEQ
 # --------------
-if [[ -x ~/.pema/pandaseq ]]; then
-  echo -e "$GREEN_TICK PANDAseq already exists at ~/.pema/pandaseq"
+if [[ -x $INSTALL_DIR/pandaseq ]]; then
+  echo -e "$GREEN_TICK PANDAseq already exists at $INSTALL_DIR/pandaseq"
 else
   echo -e "$HOURGLASS Installing PANDAseq..."
   git clone http://github.com/neufeld/pandaseq.git
@@ -293,10 +292,10 @@ else
   echo -e "PANDAseq was installed $TADA"
 fi
 
-# Add ~/.pema/PANDAseq to PATH if not already included
+# Add $INSTALL_DIR/PANDAseq to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/PANDAseq/bin:"* ]]; then
   echo 'export PATH="$HOME/.pema/PANDAseq/bin:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added ~/.pema/PANDAseq/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo -e "Added $INSTALL_DIR/PANDAseq/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
@@ -304,7 +303,7 @@ fi
 # Install Swarm
 # --------------
 
-if [[ -x ~/.pema/swarm ]]; then
+if [[ -x $INSTALL_DIR/swarm ]]; then
     echo -e "$GREEN_TICK Swarm is already installed."
 else
     echo -e "$HOURGLASS Installing Swarm..."
@@ -312,10 +311,10 @@ else
     echo -e "Swarm was installed! $TADA"
 fi
 
-# Add ~/.pema/swarm to PATH if not already included
+# Add $INSTALL_DIR/swarm to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/swarm/bin:"* ]]; then
   echo 'export PATH="$HOME/.pema/swarm/bin:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added ~/.pema/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo -e "Added $INSTALL_DIR/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
@@ -323,7 +322,7 @@ fi
 # Install Blast tools
 # -----------------
 
-if [[ -x ~/.pema/ncbi-blast-2.8.1+ ]]; then
+if [[ -x $INSTALL_DIR/ncbi-blast-2.8.1+ ]]; then
   echo -e "$GREEN_TICK Blast+ tools already available"
 
 else 
@@ -332,10 +331,10 @@ else
   rm ncbi-blast-2.8.1+-x64-linux.tar.gz
 fi
 
-# Add ~/.pema/ncbi-blast-2.8.1+/bin to PATH if not already included
+# Add $INSTALL_DIR/ncbi-blast-2.8.1+/bin to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema/ncbi-blast-2.8.1+/bin:"* ]]; then
   echo 'export PATH="$HOME/.pema/ncbi-blast-2.8.1+/bin:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added ~/.pema/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo -e "Added $INSTALL_DIR/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 
@@ -356,7 +355,7 @@ fi
 # -----------------
 
 
-if [[ -x ~/.pema/rdp_classifier_$RDPCLASSIFIER ]]; then
+if [[ -x $INSTALL_DIR/rdp_classifier_$RDPCLASSIFIER ]]; then
   echo -e "$GREEN_TICK RDP Classifier is already installed"
 else
 
@@ -370,7 +369,7 @@ else
 fi
 
 
-if [[ -x ~/.pema/rdp_classifier_$RDPCLASSIFIER/TRAIN ]]; then
+if [[ -x $INSTALL_DIR/rdp_classifier_$RDPCLASSIFIER/TRAIN ]]; then
   echo -e "$GREEN_TICK PEMA trained databases to be use with RDP Classifier have been already retrieved." 
 else
   echo -e "$HOURGLASS Download PEMA trained RDP databases..."
@@ -382,6 +381,9 @@ else
   unzip TRAIN.zip
 
   rm TRAIN.zip
+
+  cp $INSTALL_DIR/rdp_classifier_$RDPCLASSIFIER/TRAIN/midori_1/rRNAClassifier.properties $INSTALL_DIR/rdp_classifier_$RDPCLASSIFIER/TRAIN/12S_v2.0.0/rRNAClassifier.properties
+
   echo -e "PEMA trained RDP databases were retrieved $TADA"
 fi
 
@@ -395,10 +397,10 @@ pip install ncbi-taxonomist
 
 
 
-# Add ~/.pema to PATH if not already included
+# Add $INSTALL_DIR to PATH if not already included
 if [[ ":$PATH:" != *":$HOME/.pema:"* ]]; then
   echo 'export PATH="$HOME/.pema:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added ~/.pema to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo -e "Added $INSTALL_DIR to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 # Move back to the setup directory

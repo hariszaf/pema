@@ -201,7 +201,8 @@ string{} readParameterFile(string parameter_file) {
         }
     }
 
-    if (my_case{'gene'} == "gene_12S" || my_case{'gene'} == "gene_ITS") {
+    # my_case{'gene'} == "gene_12S" ||
+    if ( my_case{'gene'} == "gene_ITS") {
         if (my_case{'clusteringAlgo'} != "swarm") {
             println('PEMA support only the Swarm algorithm for the clustering step for the case of ' + my_case{'gene'} + ' marker gene. Please set swarm as your clusteringAlgo.')
             exit 1
@@ -408,6 +409,16 @@ string{} initializeAnalysis(string{} params) {
     # If there are Trimlogs in the rawData file, PEMA does not run as it should.
     # Hence, we remove them if there are any!
     globalVars{'dataPath'}.chdir()
+
+
+    string[] datafiles = globalVars{'dataPath'}.dir()
+
+    if (datafiles.isEmpty()) {
+        string exit_msg = "\n" + "🔴 No input files were provided, PEMA will exit."
+        println(exit_msg)
+        exit 1
+    }
+
 
     # Check if there is a TrimLog file and IF YES, then delete it
     sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog* ; fi 

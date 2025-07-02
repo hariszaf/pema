@@ -690,63 +690,6 @@ custom_ref_db=No
 name_of_custom_db=
 #
 #
-#   --------------------------     PHYLOSEQ - SPECIFIC     --------------------------
-#
-#
-#=     phyloseq:
-#=        title: phyloseq
-#=        description: To use Phyloseq set the following  parameter 'phyloseq' with 'Yes'. Please remember that in order to use phyloseq a "metadata.csv" file is necessary to be part of your anaylis folder. 
-#=        type: boolean
-#=        required: True
-#=        validation:
-#=          - value: Yes
-#=          - value: No
-phyloseq=No
-#
-#
-#=     tree:
-#=        title: tree
-#=        description: The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees. Do you want to create such a tree with your OTUs? In case you build this once, you can use it as many times as you want. Parameter required if phyloseq: Yes.
-#=        type: boolean
-#=        required: True
-#=        validation:
-#=          - value: Yes
-#=          - value: No
-tree=No
-#
-#
-#=     raxmlThreads:
-#=        title: raxml threads
-#=        description: Set the number of threads raxml is allowed to use. Paameter required if phyloseq: Yes and tree: Yes.
-#=        type: integer
-#=        required: True 
-#=        validation:
-#=          - range: 
-#=              min: 0  
-raxmlThreads=20
-#
-#
-#=     parsTrees:
-#=        title: parsimony trees
-#=        description: Number of parsimony trees raxml-ng will go for. Parameter required if phyloseq: Yes and tree: Yes
-#=        type: integer
-#=        required: True
-#=        validation: 
-#=          - range: 
-#=              min: 0 
-parsTrees=5
-#
-#
-#=     bootstrapTrees:
-#=        title: bootstrap trees
-#=        description: Number of bootstrap trees raxml-ng will go for. Parameter required if phyloseq: Yes and tree: Yes
-#=        type: integer
-#=        required: True 
-#=        validation:
-#=          - range: 
-#=              min: 0 
-bootstrapTrees=5
-#
 #   --------------------------     sum up      --------------------------
 #
 #
@@ -780,7 +723,7 @@ emptyCheckpoints=Yes
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-getNCBITaxId=Yes
+getNCBITaxId=No
 #
 #   --------------------------     PEMA METADATA     --------------------------
 #

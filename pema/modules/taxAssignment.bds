@@ -147,8 +147,8 @@ string runCrest4(string searchFile, string{} params, string{} globalVars) {
             "--output_dir "  + params{"taxonomyFolderName"}
    }
 
-   println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>." + cmd)
-   println("<<<<<<<<<<" + assignmentsFile)
+   string crest_command = "\n" + ">>> 🏷️" + cmd + "\n" + "<<<" + assignmentsFile
+   println(crest_command)
 
    # taskName:= "Run Crest4"
    task (taskName:="run-crest", canFail=true) {
@@ -160,15 +160,13 @@ string runCrest4(string searchFile, string{} params, string{} globalVars) {
    # Check output existence: For some reason, crest4 once complete, will maked bds exit by default 
    # We run this check to avoid this, after making sure assignments have been built.
    if (! assignmentsFile.exists()) {
-      println("crest4 output not found. Aborting.")
+      println("🔴 crest4 output not found. Aborting.")
       exit 1
    } else {
-      println("crest4 output exists. Continuing despite potential failure.")
+      println("🚀 crest4 output exists. Continuing despite potential failure.")
    }
    return "ok"
 }
-
-
 
 
 # Function to get the phylogeny based taxonomy assignmnent in case of the 16S marker gene
@@ -197,7 +195,7 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    wait
 
    # Convert our query msa to fasta format with a script we made because epa-ng can handle only fasta
-   task bash $globalVars{'path'}/scripts/convertPhylipToFasta.sh  papara_alignment.phy
+   task bash $globalVars{'scripts'}/convertPhylipToFasta.sh  papara_alignment.phy
    
    wait
          
@@ -238,7 +236,7 @@ string rdpBuildingTable(string{} params, string{} globalVars) {
    # Create a MOTU table as for the case of 16S
    # Change the swarm output as we have removed some amplicons after the ASV inferring because of the chimera removal
    task {
-      sys bash $globalVars{'path'}/scripts/makeMotuTableForRDPClassifier.sh
+      sys python $globalVars{'scripts'}/RDPClassifierTable.py $params{'clusteringAlgo'}
    }
 
    wait
@@ -264,12 +262,7 @@ string rdpAssign(string{} params, string{} globalVars) {
                  -t $globalVars{'tools'}/rdp_classifier_2.14/TRAIN/$params{'referenceDb'}/rRNAClassifier.properties \
                  -o tax_assign_temp.txt all_sequences_grouped.fa
          }
-         wait
-
-         rdpBuildingTable(params, globalVars)
-
-         wait
-
+         
       } else if ( params{'gene'} == "gene_12S" ) {
 
          task { 
@@ -278,11 +271,7 @@ string rdpAssign(string{} params, string{} globalVars) {
                  -t $globalVars{'tools'}/rdp_classifier_2.14//TRAIN/12S_v2.0.0/rRNAClassifier.properties \
                  -o tax_assign_temp.txt all_sequences_grouped.fa
          }
-         wait
 
-         rdpBuildingTable(params, globalVars)
-
-         wait
 
       } else {
 
@@ -294,16 +283,18 @@ string rdpAssign(string{} params, string{} globalVars) {
    } else {
 
       # That is the case where a custom DB has been asked for the taxonomy step 
-
-      task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'name_of_custom_db'}/rRNAClassifier.properties -o tax_assign_temp.txt all_sequences_grouped.fa
-
-      wait
-
-      rdpBuildingTable(params, globalVars)
-
-      wait
+      task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify \
+            -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'name_of_custom_db'}/rRNAClassifier.properties \
+            -o tax_assign_temp.txt all_sequences_grouped.fa
 
    }
+
+   wait
+
+   # Build finalTable 
+   rdpBuildingTable(params, globalVars)
+
+   wait
 
    return 'ok'
 

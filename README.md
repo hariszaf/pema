@@ -1,6 +1,17 @@
 <p align="center">
-  <img src="https://i.paste.pics/870189fadf668a958c8aac83f38e799c.png"  width="300" align="left" >
+  <img src="https://hariszaf.github.io/pema_documentation/public/pema_logo.png"  width="300" align="left" >
 </p>
+
+
+<!-- TODO (Haris Zafeiropoulos, 2025-07-02): 
+
+for this README
+1. for this README, add the local install of pema 
+
+for the documetnation page, update for v2.2.0 running locally - no container 
+for the documentation page
+
+-->
 
 
 # PEMA: 

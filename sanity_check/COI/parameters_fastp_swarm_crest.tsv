@@ -1,8 +1,6 @@
 #= pema_version: 2.2.0
 #   --------------------------         GENERAL PARAMETERS       --------------------------
 #
-#=     Study name: This a sanity check for the case of 16S rRNA gene using fastp and swarm
-#
 #
 #=     environment:
 #=        title: computing environment
@@ -22,16 +20,14 @@ environment=local
 #=        required: True
 #=        validation:
 #=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
-gene=gene_16S
-#
+gene=gene_COI
 #
 #=     outputFolderName:
 #=        title: output folder name
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName=TEST_16S_FASTP_SWARM
-#
+outputFolderName=test_coi_original_vsearch
 #
 #=     EnaData:
 #=        title: ENA data format
@@ -43,7 +39,6 @@ outputFolderName=TEST_16S_FASTP_SWARM
 #=          - value: No
 EnaData=Yes
 #
-#
 #=     sequencerPrefix:
 #=        title: sequencer prefix
 #=        description: Each sequencer has a special combination of letters with which all its reads start with (e.g., "@M0"). Please provide this pattern if the EnaData is "No". 
@@ -52,7 +47,6 @@ EnaData=Yes
 sequencerPrefix=M0
 #
 # ------------------------------------     PRE-PROCESSING : APPROACH     ------------------------------------
-#
 #
 #=     preprocess:
 #=        title: preprocess approach
@@ -66,30 +60,26 @@ preprocess=fastp
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
 #
-#
 #=     fastpThreads:
 #=        title: fastp threads
 #=        description: Number of threads to be used by fastp
 #=        type: integer
 #=        required: False
-fastpThreads=10
-#
+fastpThreads=3
 #
 #=     disable_adapter_trimming:
 #=        title:
 #=        description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
 #=        type: boolean
 #=        required: False
-disable_adapter_trimming=False
-#
+disable_adapter_trimming=True
 #
 #=     detect_adapter_for_pe:
 #=        title:
 #=        description: Adapter sequence auto-detection.
 #=        type: boolean
 #=        required:
-detect_adapter_for_pe=True
-#
+detect_adapter_for_pe=False
 #
 #=     adapter_sequence:
 #=        title:
@@ -98,8 +88,7 @@ detect_adapter_for_pe=True
 #=        required: False
 #=        validation:
 #=          -value: {A, T, C, G}*n
-adapter_sequence="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
-#
+adapter_sequence="ATCCTC"
 #
 #=     adapter_sequence_r2:
 #=        title:
@@ -108,8 +97,7 @@ adapter_sequence="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
 #=        required: False
 #=        validation:
 #=         -value: {A, T, C, G}*n
-adapter_sequence_r2="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
-#
+adapter_sequence_r2="ATCCTC"
 #
 #=     correction:
 #=        title: Enable base correction in overlapped regions, default is disabled.
@@ -118,31 +106,12 @@ adapter_sequence_r2="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 #=        required: False
 correction=True
 #
-#
-#=     overlap_len_require:
-#=        title: 
-#=        description:
-#=        type:
-#=        required: False
-#=        default: 30
-overlap_len_require=30
-#
-#
-#=     overlap_diff_limit:
-#=        title: 
-#=        description:
-#=        type:
-#=        required: False
-overlap_diff_limit=
-#
-#
 #=     overrepresentation_analysis:
 #=        title:
 #=        description: enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
 #=        type:
 #=        required: False
-overrepresentation_analysis=True
-#
+overrepresentation_analysis=False
 #
 #=     overrepresentation_sampling:
 #=        title:
@@ -151,22 +120,12 @@ overrepresentation_analysis=True
 #=        required: False
 overrepresentation_sampling=20 
 #
-#
 #=     overlap_diff_percent_limit
 #=        title:
 #=        description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
 #=        type: integer
 #=        required: False
 overlap_diff_percent_limit=20
-#
-#
-#=      low_complexity_filter:
-#=         title:
-#=         description: enable low complexity filter. The complexity is defined as the percentage of base that is different from its next base (base[i] != base[i+1]).
-#=         type: boolean
-#=         required: False
-low_complexity_filter=true
-#
 #
 #=      complexity_threshold:
 #=         title:
@@ -175,30 +134,12 @@ low_complexity_filter=true
 #=         required: False
 complexity_threshold=30
 #
-#
-#=     disable_length_filtering:
-#=        title:
-#=        description: 
-#=        type: boolean
-#=        required: False
-disable_length_filtering=false
-#
-#
-#=     length_limit:
-#=        title:
-#=        description: reads longer than length_limit will be discarded, default 0 means no limitation. (int [=0])
-#=        type: integer
-#=        required: False
-length_limit=0
-#
-#
 #=     length_required:
 #=        title:
 #=        description: Reads shorter than length_required will be discarded, default is 15.
 #=        type: integer
 #=        required: False
-length_required=
-#
+length_required=100
 #
 #=      n_base_limit:
 #=         title:
@@ -207,14 +148,12 @@ length_required=
 #=         required:
 n_base_limit=5
 #
-#
 #=     cut_front:
 #=        title:
 #=        description: Move a sliding window from front (5') to tail, drop the bases in the window if its mean quality < threshold, stop otherwise.
 #=        type:
 #=        required:
 cut_front=False
-#
 #
 #=     cut_front_mean_quality:
 #=        title:
@@ -223,14 +162,12 @@ cut_front=False
 #=        required: False
 cut_front_mean_quality=20
 #
-#
 #=     cut_front_window_size:
 #=        title:
 #=        description: The window size option of cut_front. Range: 1~1000, default: 4.
 #=        type: integer
 #=        required: False
 cut_front_window_size=4
-#
 #
 #=     cut_tail:
 #=        title:
@@ -239,14 +176,12 @@ cut_front_window_size=4
 #=        required: False
 cut_tail=False
 #
-#
 #=     cut_tail_window_size:
 #=        title:
 #=        description: The window size option of cut_tail. Range: 1~1000, default: 4.
 #=        type: integer
 #=        required: False
 cut_tail_window_size=4
-#
 #
 #=     cut_tail_mean_quality:
 #=        title:
@@ -255,7 +190,6 @@ cut_tail_window_size=4
 #=        required: False
 cut_tail_mean_quality=20
 #
-#
 #=     cut_right:
 #=        title:
 #=        description: Move a sliding window from front to tail, if meet one window with mean quality < threshold, drop the bases in the window and the right part, and then stop.
@@ -263,14 +197,12 @@ cut_tail_mean_quality=20
 #=        required: False
 cut_right=False
 #
-#
 #=     cut_right_window_size:
 #=        title:
 #=        description: The window size option of cut_right. Range: 1~1000, default: 4.
 #=        type: integer
 #=        required: False
-cut_right_window_size=4
-#
+cut_right_window_size=5
 #
 #=     cut_right_mean_quality:
 #=        title:
@@ -280,49 +212,9 @@ cut_right_window_size=4
 cut_right_mean_quality=20
 #
 #
-#=     trim_poly_g:
-#=        title:
-#=        description: 
-#=        type: integer
-#=        required: False
-#=        default: True
-trim_poly_g=True
-#
-#
-#=     poly_g_min_len:
-#=        title:
-#=        description: 
-#=        type: integer
-#=        required: False
-#=        default: 10
-poly_g_min_len=10
-#
-#
-#
-#
-#=     cut_right_mean_quality:
-#=        title:
-#=        description: 
-#=        type: integer
-#=        required: False
-cut_right_mean_quality=20
-#
-#
-#=     disable_trim_poly_g:
-#=        title:
-#=        description: 
-#=        type: boleam
-#=        required: False
-#=        default: False
-disable_trim_poly_g=False
-#
-#
-#
-#
 #   --------------------------     PRE-PROCESSING PARAMETERS : original approach     --------------------------
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : Trimmomatic     --------------------------
-#
 #
 #=     maxInfo:
 #=        title: maximum information
@@ -334,7 +226,6 @@ disable_trim_poly_g=False
 #=          - value: No
 maxInfo=Yes
 #
-#
 #=     targetLength:
 #=        title: maximum information
 #=        description: A Trimmomatic parameter. Specifies the read length which is likely to allow the location of the read within the target sequence to be determined.
@@ -343,8 +234,7 @@ maxInfo=Yes
 #=        validation: 
 #=          - range: 
 #=            min: 1
-targetLength=150
-#
+targetLength=100
 #
 #=     strictness:
 #=        title: strictness
@@ -355,16 +245,14 @@ targetLength=150
 #=          - range:
 #=            min: 0.0
 #=            max: 1.0
-strictness=0.1
-#
+strictness=0.8
 #
 #=     adapters:
 #=        title: adapters
 #=        description: A Trimmomatic parameter. Suggested adapter sequences are provided for TruSeq2 (as used in GAII machines) and TruSeq3 (as used by HiSeq and MiSeq machines),
 #=        type: string
 #=        required: True
-adapters=TruSeq3-PE.fa
-#
+adapters=adapters_combined_152_unique.fasta
 #
 #=     seedMismatches:
 #=        title: adapters
@@ -374,8 +262,7 @@ adapters=TruSeq3-PE.fa
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-seedMismatches=2
-#
+seedMismatches=0
 #
 #=     palindromeClipThreshold:
 #=        title: adapters
@@ -385,8 +272,7 @@ seedMismatches=2
 #=        validation: 
 #=          - range: 
 #=            min: 1 
-palindromeClipThreshold=30
-#
+palindromeClipThreshold=20
 #
 #=     simpleClipThreshold:
 #=        title: simple ClipThreshold
@@ -398,7 +284,6 @@ palindromeClipThreshold=30
 #-             min: 0 
 simpleClipThreshold=30
 #
-#
 #=     leading:
 #=        title: simple ClipThreshold
 #=        description: A Trimmomatic parameter. Removes low quality bases from the beginning. As long as a base has a value below this threshold (value of the 'leading' parameter) the base is removed and the next base will be investigated.
@@ -407,8 +292,7 @@ simpleClipThreshold=30
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-leading=10
-#
+leading=20
 #
 #=     trailing:
 #=        title: trailing
@@ -418,8 +302,7 @@ leading=10
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-trailing=15
-#
+trailing=2
 #
 #=     minlen:
 #=        title: minimum length of the amplicon
@@ -429,8 +312,7 @@ trailing=15
 #=        validation: 
 #=          - range: 
 #=            min: 1
-minlen=150
-#
+minlen=100
 #
 #=     threadsTrimmomatic:
 #=        title: minimum length of the amplicon
@@ -440,11 +322,10 @@ minlen=150
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-threadsTrimmomatic=20
+threadsTrimmomatic=8
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : PANDAseq     --------------------------
-#
 #
 #=     pandaseqAlgorithm:
 #=        title: minimum length of the amplicon
@@ -458,7 +339,6 @@ threadsTrimmomatic=20
 #=          - value: flash
 pandaseqAlgorithm=simple_bayesian
 #
-#
 #=     pandaseqThreads:
 #=        title: pandaseq threads
 #=        description: Set number of threads to be used from pandaseq. PANDAseq is a I/O bound algorithm. That means that it needs severous time in order to handle the ipnut and output files. while the process is quite fast. However, it does support multithreading and here you can set the number of threads it is going to use.
@@ -467,8 +347,7 @@ pandaseqAlgorithm=simple_bayesian
 #=        validation:
 #=          - range:
 #=            min: 0
-pandaseqThreads=20
-#
+pandaseqThreads=8
 #
 #=     pandaseqMinlen:
 #=        title: pandaseq minimum length
@@ -478,8 +357,7 @@ pandaseqThreads=20
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-pandaseqMinlen=-l 150
-#
+pandaseqMinlen=
 #
 #=     minoverlap:
 #=        title: pandaseq minimum overlap
@@ -489,8 +367,7 @@ pandaseqMinlen=-l 150
 #=        validation:
 #=          - range: 
 #=            min: 0
-minoverlap=5
-#
+minoverlap=1 
 #
 #=     threshold:
 #=        title: threshold
@@ -501,8 +378,7 @@ minoverlap=5
 #=            - range: 
 #=              min:  0.0
 #=              max: 1.0
-threshold=0.6
-#
+threshold=0.6 
 #
 #=     elimination:
 #=        title: elimination
@@ -512,10 +388,9 @@ threshold=0.6
 #=        validation: 
 #=          - value: ''
 #=          - value: -N
-elimination=-N
+elimination=
 #
 #   --------------------------        CLUSTERING PARAMETERS           --------------------------
-#
 #
 #=     clusteringAlgo:
 #=        title: clustering algorithm
@@ -523,12 +398,11 @@ elimination=-N
 #=        type: string
 #=        required: True
 #=        validation:
-#=          - value: swarm
-#=          - value: vsearch
+#=          - value: algo_Swarm
+#=          - value: algo_vsearch
 clusteringAlgo=swarm
 #
 #   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
-#
 #
 #=     vsearchThreads:
 #=        title: vsearch threads
@@ -538,8 +412,7 @@ clusteringAlgo=swarm
 #=        validation:
 #=          - range: 
 #=            min: 0
-vsearchThreads=20
-#
+vsearchThreads=8
 #
 #=     vsearchId:
 #=        title: vsearch threads
@@ -550,10 +423,9 @@ vsearchThreads=20
 #=          - range: 
 #=            min: 0.0
 #=            max: 1.0
-vsearchId=0.9
+vsearchId=0.95
 #
 #   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
-#
 #
 #=     d:
 #=        title: d
@@ -563,8 +435,7 @@ vsearchId=0.9
 #=        validation:
 #=          - range: 
 #=            min: 0 
-d=1
-#
+d=3
 #
 #=     boundary:
 #=        title: boundary
@@ -574,8 +445,7 @@ d=1
 #=        validation:
 #=          - range: 
 #=            min: 0
-boundary=2
-#
+boundary=
 #
 #=     swarmThreads:
 #=        title: swarmThreads
@@ -585,10 +455,9 @@ boundary=2
 #=        validation:
 #=          - range: 
 #=            min: 1
-swarmThreads=20
+swarmThreads=3
 #
 #  -----------------------------     OLIGOTONS        -------------------------------------
-#
 #
 #=     removeOligotons:
 #=        title: removeOligotons
@@ -600,7 +469,6 @@ swarmThreads=20
 #=          - value: No
 removeOligotons=Yes
 #
-#
 #=     numOligotons:
 #=        title: numOligotons
 #=        description:  The minimum number of reads that have been clustered under the same OTUs in order not to skip that OTU
@@ -609,15 +477,16 @@ removeOligotons=Yes
 #=        validation:
 #=          - range: 
 #=            min: 1
-numOligotons=2
+numOligotons=5
 #
 #
 #   --------------------------     CLASSIFIER       --------------------------
 #
-#
 #=     classifierAlgo:
 #=        title: classifier algorithm
-#=        description:  Select classifier for the taxonomy assignment step. If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
+#=        description:  """Select classifier for the taxonomy assignment step.
+#=                      If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. 
+#=                      If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier)."""
 #=        type: string
 #=        required: True
 #=        validation:
@@ -660,18 +529,15 @@ minScore=
 searchAlgo=vsearch
 #
 #
-#
-#
 #=     taxonomyFolderName:
 #=        title: number of cores for PaPaRa
 #=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail. Parameter required if gene: ['16S', '18S', 'ITS'].
 #=        type: string
 #=        required: True 
-taxonomyFolderName=crest4_vsearch_132
+taxonomyFolderName=my_taxon_assign
 #
 #
 #   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
-#
 #
 #=     taxonomyAssignmentMethod:
 #=        title: vsearch threads
@@ -683,7 +549,6 @@ taxonomyFolderName=crest4_vsearch_132
 #=          - value: phylogeny
 taxonomyAssignmentMethod=alignment
 #
-#
 #=     numberOfCoresForPapara:
 #=        title: number of cores for PaPaRa
 #=        description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use. The parameeter is required if axonomyAssignmentMethod: phylogeny and gene: gene_16S
@@ -692,8 +557,7 @@ taxonomyAssignmentMethod=alignment
 #=        validation:
 #=          - range:
 #=            min: 0
-numberOfCoresForPapara=20
-#
+numberOfCoresForPapara=7
 #
 #=     referenceDb:
 #=        title: reference database 
@@ -702,14 +566,13 @@ numberOfCoresForPapara=20
 #=        required: True
 #=        validation: 
 #=          - value: silva_128
-#=          - value: silva_138
+#=          - value: silva_132
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
-referenceDb=silva_138
+referenceDb=midori_1
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
-#
 #
 #=     cutadapt:
 #=        title: perform a cutadapt script to 
@@ -721,14 +584,12 @@ referenceDb=silva_138
 #=          - value: No 
 cutadapt=Yes
 #
-#
 #=     forwardITSPrimer:
 #=        title: forward ITS primer
 #=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
 #=        required: True 
 forwardITSPrimer=GATGAAGAACGYAGYRAA
-#
 #
 #=     reverseITSPrimer:
 #=        title: reverse ITS primer
@@ -738,7 +599,6 @@ forwardITSPrimer=GATGAAGAACGYAGYRAA
 reverseITSPrimer=CTBTTVCCKCTTCACTCG
 #
 #   --------------------------     GENE-SPECIFIC : COI     --------------------------
-#
 #
 #=     abskew:
 #=        title: abskew
@@ -752,7 +612,6 @@ abskew=2
 #
 #   --------------------------     CUSTOM REFERENCE DATABASE     --------------------------
 #
-#
 #=     custom_ref_db:
 #=        title: custom reference database
 #=        description: Use a custom reference database for the taxonomy assignment step. In this case, extra input files are required depending on the classifier the user selected. To see more on how these files should be in case of the RDPClassifier, follow this link: https://hariszaf.github.io/pema_documentation/training_rdpclassifier/. In case that the CREST classifier is be used, follow this link: https://hariszaf.github.io/pema_documentation/training_crest_classifier/. Remember that as containers are lost when exit from one, you will have to train the classifier, every time you run a new PEMA container If you are about to use a custom ref db, set the following parameter as 'Yes'. Otherwise, it must be set as 'No'. The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
@@ -763,7 +622,6 @@ abskew=2
 #=          - value: No
 custom_ref_db=No
 #
-#
 #=     name_of_custom_db:
 #=        title: name of custom database
 #=        description: Name of how custom reference database will be named. Parameter required only if custom_ref_db: Yes
@@ -772,8 +630,59 @@ custom_ref_db=No
 name_of_custom_db=
 #
 #
-#   --------------------------     sum up      --------------------------
+#   --------------------------     PHYLOSEQ - SPECIFIC     --------------------------
 #
+#=     phyloseq:
+#=        title: phyloseq
+#=        description: To use Phyloseq set the following  parameter 'phyloseq' with 'Yes'. Please remember that in order to use phyloseq a "metadata.csv" file is necessary to be part of your anaylis folder. 
+#=        type: boolean
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
+phyloseq=No
+#
+#=     tree:
+#=        title: tree
+#=        description: The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees. Do you want to create such a tree with your OTUs? In case you build this once, you can use it as many times as you want. Parameter required if phyloseq: Yes.
+#=        type: boolean
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
+tree=No
+#
+#=     raxmlThreads:
+#=        title: raxml threads
+#=        description: Set the number of threads raxml is allowed to use. Paameter required if phyloseq: Yes and tree: Yes.
+#=        type: integer
+#=        required: True 
+#=        validation:
+#=          - range: 
+#=              min: 0  
+raxmlThreads=5
+#
+#=     parsTrees:
+#=        title: parsimony trees
+#=        description: Number of parsimony trees raxml-ng will go for. Parameter required if phyloseq: Yes and tree: Yes
+#=        type: integer
+#=        required: True
+#=        validation: 
+#=          - range: 
+#=              min: 0 
+parsTrees=5
+#
+#=     bootstrapTrees:
+#=        title: bootstrap trees
+#=        description: Number of bootstrap trees raxml-ng will go for. Parameter required if phyloseq: Yes and tree: Yes
+#=        type: integer
+#=        required: True 
+#=        validation:
+#=          - range: 
+#=              min: 0 
+bootstrapTrees=5
+#
+#   --------------------------     sum up      --------------------------
 #
 #=     emptyRawDataFile:
 #=        title: empty raw data files 
@@ -785,7 +694,6 @@ name_of_custom_db=
 #=          - value: No
 emptyRawDataFile=Yes
 #
-#
 #=     emptyCheckpoints:
 #=        title: empty check points
 #=        description: Move all check points returned in a separate folder
@@ -796,7 +704,6 @@ emptyRawDataFile=Yes
 #=          - value: No
 emptyCheckpoints=Yes
 #
-#
 #=     getNCBITaxId:
 #=        title: get NCBI Taxonomy Id
 #=        description: Link the OTU/ASV taxonomy assignment to its closest NCBI Taxonomy Id, meaning if there is no NCBI Taxonomy id at the species level, PEMA will search for the one of the genus and so on. 
@@ -805,7 +712,7 @@ emptyCheckpoints=Yes
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-getNCBITaxId=Yes
+getNCBITaxId=No
 #
 #   --------------------------     PEMA METADATA     --------------------------
 #

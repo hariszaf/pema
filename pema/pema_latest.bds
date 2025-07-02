@@ -9,9 +9,8 @@ include "modules/preprocess"
 include "modules/clustering"
 include "modules/taxAssignment"
 include "modules/postAssignment"
-include "modules/phyloseq"
 
-println("Modules loaded.")
+println("✅ Modules loaded.")
 
 string parameterFileProvided = args[0]
 string parameterFilePath     = parameterFileProvided.dirName()
@@ -135,18 +134,18 @@ println('Pema is at the dereplication step; this may take a while.')
 
 if ( paramsDereplication{'clusteringAlgo'} == 'swarm' ) {
 
-   println("Dereplication for the Swarm case to infer clusters.")
+   println("🔨Dereplication for the Swarm case to infer clusters.")
    swarmDereplicate(paramsDereplication, globalVars)
    wait
 
 } else {
 
-   println("Dereplication for the case of VSEARCH.")
+   println("🔨Dereplication for the case of VSEARCH.")
    globalVars = obiDereplicate(paramsDereplication, globalVars)
 
    wait
 
-   println("Merging reads from all files in a single file.")
+   println("🔨 Merging reads from all files in a single file.")
    mergeFilesNonSwarm(paramsDereplication, globalVars)
 
    wait
@@ -329,69 +328,53 @@ wait
 string communAnal = globalVars{'outputPoint'} + "/communAnal.chp"
 checkpoint communAnal
 
-# ################################################################
-# #                Biodiversity analysis                      #
-# ################################################################
+################################################################
+#                Pema has been concluded                      #
+################################################################
 
+###  Move all the checkpoints
 parameterFilePath.chdir()
-string{} paramsForCA =  readParameterFile(parameterFile)
+string{} paramasFormatting =  readParameterFile(parameterFile)
 
-if ( paramsForCA{'phyloseq'} == 'Yes') {
-
-   string biodiv_msg = "\n\n" + "******   BIODIVERSITY ANALYSIS STEP   ******"
-   println(biodiv_msg)
-
-   communityAnalysis(paramsForCA, globalVars)
-
+perSampleGeneral(paramasFormatting, globalVars)
+wait
+if ( globalVars{'classifierAlgo'} == 'CREST') {
+    CrestPerSample(paramasFormatting, globalVars)
+} else if ( globalVars{'classifierAlgo'} == 'RDPClassifier') {
+    println("Get info per sample for RDPClassifier.")
+    RDPClassifierPerSample(paramasFormatting, globalVars)
 }
-
 wait
 
-# # ################################################################
-# # #                Pema has been concluded                      #
-# # ################################################################
+if ( paramasFormatting{'emptyCheckpoints'} == 'Yes' ) {
+   string checkpointsDir = 'checkpoints_for_' + paramasFormatting{'outputFolderName'}
+   globalVars{'outputFilePath'}.chdir()
+   checkpointsDir.mkdir()
+   globalVars{'outputPoint'}.chdir()   
+   sys mv *.chp $globalVars{'outputFilePath'}/$checkpointsDir
+}
+wait
 
-# ###  Make a file where i will move all the checkpoints
-# parameterFilePath.chdir() ;
+if ( (paramasFormatting{'gene'} == 'gene_ITS') && (paramasFormatting{'cutadapt'} == 'Yes') ) {
 
-# perSampleGeneral(paramsForCA, globalVars)
-# wait
-# if ( globalVars{'classifierAlgo'} == 'CREST') {
-#     CrestPerSample(paramsForCA, globalVars)
-# } else if ( globalVars{'classifierAlgo'} == 'RDPClassifier') {
-#     println("Get info per sample for RDPClassifier.")
-#     RDPClassifierPerSample(paramsForCA, globalVars)
-# }
-# wait
-
-# if ( paramsForCA{'emptyCheckpoints'} == 'Yes' ) {
-#    string checkpointsDir = 'checkpoints_for_' + paramsForCA{'outputFolderName'}
-#    globalVars{'outputFilePath'}.chdir()
-#    checkpointsDir.mkdir()
-#    globalVars{'outputPoint'}.chdir()   
-#    sys mv *.chp $globalVars{'outputFilePath'}/$checkpointsDir
-# }
-# wait
-
-# if ( (paramsForCA{'gene'} == 'gene_ITS') && (paramsForCA{'cutadapt'} == 'Yes') ) {
-
-#     globalVars{'dataPath'}.chdir()
+    globalVars{'dataPath'}.chdir()
     
-#     sys mkdir data_after_cutadapt 
-#     sys mv *fastq.gz data_after_cutadapt/
-#     sys mv data_after_cutadapt/ ..
+    sys mkdir data_after_cutadapt 
+    sys mv *fastq.gz data_after_cutadapt/
+    sys mv data_after_cutadapt/ ..
 
-#     sys mv ../initialData/* .
-#     sys rmdir ../initialData
+    sys mv ../initialData/* .
+    sys rmdir ../initialData
 
-# }
-# println('----------------------------------------------------------')
+}
+println('----------------------------------------------------------')
 
-# # make a copy of 'parameters.tsv' file to the output folder.
-# # this way the user will be able to get the parameters he used for analysis, anytime!
-# sys cp $globalVars{'parameterFilePath'}/parameters.tsv $globalVars{'outputFilePath'}/parameters0f.$globalVars{'analysisName'}.tsv
+# make a copy of 'parameters.tsv' file to the output folder.
+# this way the user will be able to get the parameters he used for analysis, anytime!
 
-# println('Pema has been completed successfully. Let biology start!')
-# println('Thanks for using Pema.')
+sys cp $globalVars{'parameterFile'} $globalVars{'outputFilePath'}
+
+println('Pema has been completed successfully. Let biology start!')
+println('Thanks for using Pema.')
 
 
