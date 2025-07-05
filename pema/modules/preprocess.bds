@@ -40,7 +40,7 @@ string preprocessWithFastp(string{} params, string{} globalVars){
                 "--out2=" + globalVars{'fastpTrimmedPath'} + "/" + readR + " " +\
                 "--merge " +\
                 "--merged_out=" + globalVars{'fastpMergedPath'} + "/" + mergedFilename + " " +\
-                "--thread=" + params{'fastpThreads'} + " " +\
+                "--thread=" + params{'threads'} + " " +\
                 "--html=" + mergedFilename + ".html " +\
                 "--json=" + mergedFilename + ".json " +\
                 params{'low_complexity_filter'} + " " +\
@@ -218,7 +218,7 @@ string trimSeqs(string{} params, string{} globalVars){
                 # -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
                 task java \
                     -jar $globalVars{'trimmomatic_jar'} PE \
-                    -threads $params{'threadsTrimmomatic'} \
+                    -threads $params{'threads'} \
                     -trimlog TrimLog $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
                     $globalVars{'trimoPath'}/filtered_max_$readF.1P.fastq.gz \
                     $globalVars{'trimoPath'}/filtered_max_$readF.1U.fastq.gz \
@@ -247,7 +247,7 @@ string trimSeqs(string{} params, string{} globalVars){
                 # -jar $globalVars{'path'}/tools/Trimmomatic/Trimmomatic-0.38/trimmomatic-0.38.jar PE \
                 task java \
                     -jar $globalVars{'trimmomatic_jar'} PE \
-                    -threads $params{'threadsTrimmomatic'} \
+                    -threads $params{'threads'} \
                     -trimlog TrimLog2 $globalVars{'dataPath'}/$readF $globalVars{'dataPath'}/$readR \
                     $globalVars{'trimoPath'}/filtered_$readF.1P.fastq.gz \
                     $globalVars{'trimoPath'}/filtered_$readF.1U.fastq.gz \
@@ -359,11 +359,12 @@ string adjustSeqs(string{} params, string{} globalVars){
             wait
 
             # And execute the BayesHammer algorithm that it is in SPAdes
-            println('readBayesF: ' + readBayesF +'\n' + 'and readBayesR: ' + readBayesR)
+            string bayes_msg = 'readBayesF: ' + readBayesF + "\n" + 'and readBayesR: ' + readBayesR + "\n" 
+            println(bayes_msg)
             
-            # $globalVars{'path'}/tools/SPAdes/SPAdes-3.14.0/bin/
+            # Runs spades
             task spades.py --only-error-correction \
-                --threads $params{'threadsTrimmomatic'} \
+                --threads $params{'threads'} \
                 -o $globalVars{'bayesPath'}/$newDir \
                 -1 $readBayesF \
                 -2 $readBayesR \
@@ -477,7 +478,7 @@ string merging(string{} params, string{} globalVars){
                     -f $forwardFile -r $reverseFile -6 \
                     -A $params{'pandaseqAlgorithm'} \
                     -a -B \
-                    -T $params{'pandaseqThreads'} \
+                    -T $params{'threads'} \
                     -o $params{'minoverlap'} \
                     -t $params{'threshold'} \
                     -l $params{'pandaseqMinlen'} \
@@ -488,7 +489,7 @@ string merging(string{} params, string{} globalVars){
                 sys pandaseq -f $forwardFile -r $reverseFile -6 \
                     -A $params{'pandaseqAlgorithm'} \
                     -a -B \
-                    -T $params{'pandaseqThreads'} \
+                    -T $params{'threads'} \
                     -o $params{'minoverlap'} \
                     -t $params{'threshold'} \
                     $params{'elimination'}  > $correctFile.merged.fasta

@@ -52,7 +52,7 @@ sys if [ $(find '$globalVars{'dataPath'}' -name 'TrimLog*') ] ; then  rm TrimLog
 buildDirectories(paramsFirstAssignment, globalVars)
 
 # IMPORTANT! Module to train classifiers is enabled through this statement
-if ( paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
+if ( paramsFirstAssignment.hasKey('custom_ref_db') && paramsFirstAssignment{'custom_ref_db'} == 'Yes' ){
   string{} initGlobalVars = globalVars
   wait
   string{} globalVars = trainClassifier(paramsFirstAssignment, initGlobalVars)
@@ -81,7 +81,7 @@ if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
    globalVars{'dataPath'}.chdir()
 
    # If ITS as marker gene, remove length variablity with cutadat
-   if ( (paramsTrimmoStep{'gene'} == 'gene_ITS') && (paramsTrimmoStep{'cutadapt'} == 'Yes') ) {
+   if ( (paramsTrimmoStep{'gene'} == 'ITS') && (paramsTrimmoStep{'cutadapt'} == 'Yes') ) {
       cutadaptForIts(paramsTrimmoStep, globalVars)
    }
    wait
@@ -107,7 +107,7 @@ if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
 } else {
 
    # With fastp
-   if ((paramsFirstAssignment{'gene'} == 'gene_ITS') && ( paramsFirstAssignment{'cutadapt'} == 'Yes')) {
+   if ((paramsFirstAssignment{'gene'} == 'ITS') && ( paramsFirstAssignment{'cutadapt'} == 'Yes')) {
       cutadaptForIts(paramsFirstAssignment, globalVars)
    }
    preprocessWithFastp(paramsFirstAssignment, globalVars)
@@ -140,12 +140,14 @@ if ( paramsDereplication{'clusteringAlgo'} == 'swarm' ) {
 
 } else {
 
-   println("🔨Dereplication for the case of VSEARCH.")
+   string obiderep_msg = "\n" + "🔨Dereplication for the case of VSEARCH." + "\n"
+   println(obiderep_msg)
    globalVars = obiDereplicate(paramsDereplication, globalVars)
 
    wait
 
-   println("🔨 Merging reads from all files in a single file.")
+   string merge_msg = "\n" + "🔨 Merging reads from all files in a single file." + "\n"
+   println(merge_msg)
    mergeFilesNonSwarm(paramsDereplication, globalVars)
 
    wait
@@ -189,9 +191,31 @@ println(tax_assign_msg)
 parameterFilePath.chdir()
 string{} paramsForTaxAssign =  readParameterFile(parameterFile)
 
-if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
-   if ( paramsForTaxAssign{'gene'} == 'gene_16S') {
+if ( paramsForTaxAssign.hasKey('custom_ref_db') && paramsForTaxAssign{'custom_ref_db'} == 'Yes') {
+
+   string using_custom_db_msg = "\n" + "Taxonomy assignment using custom database.. " + "\n"
+   println(using_custom_db_msg)
+
+   if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
+
+      rdpAssign(paramsForTaxAssign, globalVars)
+
+   } else if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
+
+      crestAssign(paramsForTaxAssign, globalVars)
+
+   } else {
+
+      println('The classifier you chose is not available in the Pema framework.')
+   }
+
+} else {
+
+   string using_db_msg = "\n" + "Taxonomy assignment using a global database.. " + "\n"
+   println(using_db_msg)
+
+   if ( paramsForTaxAssign{'gene'} == '16S') {
 
       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
 
@@ -219,7 +243,7 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
       }
 
-   } else if ( paramsForTaxAssign{'gene'} == 'gene_COI' ) {
+   } else if ( paramsForTaxAssign{'gene'} == 'COI' ) {
 
       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
@@ -237,7 +261,7 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
       }
 
-   } else if (paramsForTaxAssign{'gene'} == 'gene_18S') {
+   } else if (paramsForTaxAssign{'gene'} == '18S') {
 
       if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
 
@@ -257,7 +281,7 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
       }
 
-   } else if (paramsForTaxAssign{'gene'} == 'gene_ITS') {
+   } else if (paramsForTaxAssign{'gene'} == 'ITS') {
 
       if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
 
@@ -276,7 +300,7 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
 
       }
 
-   } else if ( paramsForTaxAssign{'gene'} == 'gene_12S' ) {
+   } else if ( paramsForTaxAssign{'gene'} == '12S' ) {
 
       if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
 
@@ -298,27 +322,14 @@ if ( paramsForTaxAssign{'custom_ref_db'} != 'Yes'){
       }
    }
 
-} else if ( paramsForTaxAssign{'custom_ref_db'} == 'Yes') {
-
-   if ( paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier' ) {
-
-      rdpAssign(paramsForTaxAssign, globalVars)
-
-   } else if ( paramsForTaxAssign{'classifierAlgo'} == 'CREST' ) {
-
-      crestAssign(paramsForTaxAssign, globalVars)
-
-   } else {
-
-      println('The classifier you chose is not available in the Pema framework.')
-   }
-
-}
+} 
 println("The taxonomy assignment step has been completed.")
 
 # Check for running the ncbi-taxonomist tool
 if ( paramsForTaxAssign{'getNCBITaxId'} == 'Yes'){
 
+    string ncbiId_msg = "\n\n" + "==> Getting NCBI Taxonomy IDs for the taxonomies assigned." + "\n"
+    println(ncbiId_msg)
     ncbiTaxonomyMapping(paramsForTaxAssign, globalVars)
 
     println("The assignments on the finalTable.tsv file have been linked to NCBI Taxonomy ids.")
@@ -336,16 +347,6 @@ checkpoint communAnal
 parameterFilePath.chdir()
 string{} paramasFormatting =  readParameterFile(parameterFile)
 
-perSampleGeneral(paramasFormatting, globalVars)
-wait
-if ( globalVars{'classifierAlgo'} == 'CREST') {
-    CrestPerSample(paramasFormatting, globalVars)
-} else if ( globalVars{'classifierAlgo'} == 'RDPClassifier') {
-    println("Get info per sample for RDPClassifier.")
-    RDPClassifierPerSample(paramasFormatting, globalVars)
-}
-wait
-
 if ( paramasFormatting{'emptyCheckpoints'} == 'Yes' ) {
    string checkpointsDir = 'checkpoints_for_' + paramasFormatting{'outputFolderName'}
    globalVars{'outputFilePath'}.chdir()
@@ -355,7 +356,7 @@ if ( paramasFormatting{'emptyCheckpoints'} == 'Yes' ) {
 }
 wait
 
-if ( (paramasFormatting{'gene'} == 'gene_ITS') && (paramasFormatting{'cutadapt'} == 'Yes') ) {
+if ( (paramasFormatting{'gene'} == 'ITS') && (paramasFormatting{'cutadapt'} == 'Yes') ) {
 
     globalVars{'dataPath'}.chdir()
     
@@ -367,14 +368,10 @@ if ( (paramasFormatting{'gene'} == 'gene_ITS') && (paramasFormatting{'cutadapt'}
     sys rmdir ../initialData
 
 }
-println('----------------------------------------------------------')
 
-# make a copy of 'parameters.tsv' file to the output folder.
-# this way the user will be able to get the parameters he used for analysis, anytime!
-
+# Make a copy of 'parameters.tsv' file to the output folder.
 sys cp $globalVars{'parameterFile'} $globalVars{'outputFilePath'}
 
-println('Pema has been completed successfully. Let biology start!')
-println('Thanks for using Pema.')
-
-
+# Say goodbye
+string success_msg = "\n\n" + "🚀 Pema has been completed successfully. Time for some ecology!" +  "\n" + "Thanks for using PEMA."
+println(success_msg)

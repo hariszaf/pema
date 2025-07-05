@@ -17,7 +17,7 @@ string clusteringVsearch(string{} params, string{} globalVars) {
    
    # Dereplicate -- but basically remove cases with less than minuniquesize
    task vsearch \
-      --threads $params{'vsearchThreads'} \
+      --threads $params{'threads'} \
       --derep_fulllength all_samples.fasta \
       --minuniquesize $params{'numOligotons'} \
       --sizein \
@@ -30,7 +30,7 @@ string clusteringVsearch(string{} params, string{} globalVars) {
    
    # Execute the first clustering step
    task vsearch \
-      --threads $params{'vsearchThreads'} \
+      --threads $params{'threads'} \
       --cluster_size all.derep.fasta \
       --id $params{'vsearchId'} \
       --strand both \
@@ -44,7 +44,7 @@ string clusteringVsearch(string{} params, string{} globalVars) {
 
    # Chimera removal
    task vsearch \
-      --threads $params{'vsearchThreads'} \
+      --threads $params{'threads'} \
       --uchime_denovo all.preclustered.fasta \
       --sizein \
       --sizeout \
@@ -71,7 +71,7 @@ string clusteringVsearch(string{} params, string{} globalVars) {
    # Execute the second clustering step
    # $globalVars{'path'}/tools/VSEARCH/vsearch-2.9.1-linux-x86_64/bin/
    task vsearch \
-      --threads $params{'vsearchThreads'} \
+      --threads $params{'threads'} \
       --cluster_size all.nonchimeras.fasta \
       --id $params{'vsearchId'} \
       --strand both \
@@ -221,7 +221,7 @@ string clusteringSwarm(string{} params, string{} globalVars) {
    wait
 
    # According to the Clustering step to come, we need to implement some transformations
-   if ( params{'classifierAlgo'} == 'CREST' && ( params{'gene'} != 'gene_12S' ) ) {
+   if ( params{'classifierAlgo'} == 'CREST' && ( params{'gene'} != '12S' ) ) {
 
       println('Build CREST input once Swarm has been completed')
       println('Transformations on the Swarm output to align to the CREST input are about to be implemented.')
@@ -255,7 +255,7 @@ string swarmMinValues(string{} params, string{} globalVars) {
          -d 1 \
          -f \
          -b $params{'boundary'} \
-         -t $params{'swarmThreads'} \
+         -t $params{'threads'} \
          -s asvs.stats \
          -w asvs_representatives_hash.fa < all_samples.fasta > asvs.swarms
 
@@ -267,7 +267,7 @@ string swarmMinValues(string{} params, string{} globalVars) {
       println("-- SwarmMinValues() with d != 1.")
       task swarm \
            -d $params{'d'} \
-           -t $params{'swarmThreads'} \
+           -t $params{'threads'} \
            -s asvs.stats \
            -w asvs_representatives_hash.fa < all_samples.fasta > asvs.swarms
 
@@ -292,7 +292,7 @@ string swarmMinValues(string{} params, string{} globalVars) {
    if (! nonchimeras_file.exists()) {
 
       task vsearch \
-            --threads $params{'vsearchThreads'} \
+            --threads $params{'threads'} \
             --uchime_denovo asvs_representatives_hash.fa \
             --sizein \
             --sizeout \
@@ -369,7 +369,7 @@ string swarmMaxValues(string{} params, string{} globalVars){
    wait
 
    task vsearch \
-      --threads $params{'vsearchThreads'} \
+      --threads $params{'threads'} \
       --uchime_denovo all_samples.fasta \
       --sizein --sizeout --fasta_width 0 \
       --nonchimeras all.denovo.nonchimeras.fasta
@@ -389,7 +389,7 @@ string swarmMaxValues(string{} params, string{} globalVars){
 
    task swarm \
          -d $params{'d'} \
-         -t $params{'swarmThreads'} \
+         -t $params{'threads'} \
          -s asvs.stats \
          -w asvs_representatives_hash.fasta < all.denovo.nonchimeras.fasta > asvs.swarms
 

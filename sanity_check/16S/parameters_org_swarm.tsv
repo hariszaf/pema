@@ -19,8 +19,8 @@ environment=local
 #=        type: string
 #=        required: True
 #=        validation:
-#=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
-gene=gene_16S
+#=          - regex: /^(COI|16S|18S|12S|ITS)$/
+gene=16S
 #
 #
 #=     outputFolderName:
@@ -61,181 +61,6 @@ sequencerPrefix=M0
 #=          - value: original
 #=          - value: fastp
 preprocess=original
-#
-#   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
-#
-#
-#=     fastpThreads:
-#=        title: fastp threads
-#=        description: Number of threads to be used by fastp
-#=        type: integer
-#=        required: False
-fastpThreads=20
-#
-#
-#=     disable_adapter_trimming:
-#=        title:
-#=        description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
-#=        type: boolean
-#=        required: False
-disable_adapter_trimming=False
-#
-#
-#=     detect_adapter_for_pe:
-#=        title:
-#=        description: Adapter sequence auto-detection.
-#=        type: boolean
-#=        required:
-detect_adapter_for_pe=True
-#
-#
-#=     adapter_sequence:
-#=        title:
-#=        description: the adapter for read1.This is used if R1/R2 are found not overlapped.
-#=        type: string
-#=        required: False
-#=        validation:
-#=          -value: {A, T, C, G}*n
-adapter_sequence="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
-#
-#
-#=     adapter_sequence_r2:
-#=        title:
-#=        description: the adapter for read2. This is used if R1/R2 are found not overlapped. If not specified, it will be the same as <adapter_sequence>.
-#=        type: string
-#=        required: False
-#=        validation:
-#=         -value: {A, T, C, G}*n
-adapter_sequence_r2="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
-#
-#
-#=     correction:
-#=        title: Enable base correction in overlapped regions, default is disabled.
-#=        description:
-#=        type:
-#=        required: False
-correction=True
-#
-#
-#=     overrepresentation_analysis:
-#=        title:
-#=        description: enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
-#=        type:
-#=        required: False
-overrepresentation_analysis=True
-#
-#
-#=     overrepresentation_sampling:
-#=        title:
-#=        description: One in (--overrepresentation_sampling) reads will be computed for overrepresentation analysis (1~10000), smaller is slower, default is 20.
-#=        type: integer
-#=        required: False
-overrepresentation_sampling=20 
-#
-#
-#=     overlap_diff_percent_limit
-#=        title:
-#=        description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
-#=        type: integer
-#=        required: False
-overlap_diff_percent_limit=20
-#
-#
-#=      complexity_threshold:
-#=         title:
-#=         description: The threshold for low complexity filter (0~100). Default is 30, which means 30% complexity is required. 
-#=         type: integer
-#=         required: False
-complexity_threshold=30
-#
-#
-#=     length_required:
-#=        title:
-#=        description: Reads shorter than length_required will be discarded, default is 15.
-#=        type: integer
-#=        required: False
-length_required=50
-#
-#
-#=      n_base_limit:
-#=         title:
-#=         description: If one read's number of N base is >n_base_limit, then this read/pair is discarded. Default is 5.
-#=         type:
-#=         required:
-n_base_limit=5
-#
-#
-#=     cut_front:
-#=        title:
-#=        description: Move a sliding window from front (5') to tail, drop the bases in the window if its mean quality < threshold, stop otherwise.
-#=        type:
-#=        required:
-cut_front=False
-#
-#
-#=     cut_front_mean_quality:
-#=        title:
-#=        description: The mean quality requirement option for cut_front. Range: 1~36 default: 20 (Q20).
-#=        type: integer
-#=        required: False
-cut_front_mean_quality=20
-#
-#
-#=     cut_front_window_size:
-#=        title:
-#=        description: The window size option of cut_front. Range: 1~1000, default: 4.
-#=        type: integer
-#=        required: False
-cut_front_window_size=4
-#
-#
-#=     cut_tail:
-#=        title:
-#=        description: Move a sliding window from tail (3') to front, drop the bases in the window if its mean quality < threshold, stop otherwise.
-#=        type: boolean
-#=        required: False
-cut_tail=False
-#
-#
-#=     cut_tail_window_size:
-#=        title:
-#=        description: The window size option of cut_tail. Range: 1~1000, default: 4.
-#=        type: integer
-#=        required: False
-cut_tail_window_size=4
-#
-#
-#=     cut_tail_mean_quality:
-#=        title:
-#=        description: The mean quality requirement option for cut_tail. Range: 1~36 default: 20 (Q20)
-#=        type: integer
-#=        required: False
-cut_tail_mean_quality=20
-#
-#
-#=     cut_right:
-#=        title:
-#=        description: Move a sliding window from front to tail, if meet one window with mean quality < threshold, drop the bases in the window and the right part, and then stop.
-#=        type: boolean
-#=        required: False
-cut_right=False
-#
-#
-#=     cut_right_window_size:
-#=        title:
-#=        description: The window size option of cut_right. Range: 1~1000, default: 4.
-#=        type: integer
-#=        required: False
-cut_right_window_size=4
-#
-#
-#=     cut_right_mean_quality:
-#=        title:
-#=        description: The mean quality requirement option for cut_right. Range: 1~36 default: 20 (Q20)
-#=        type: integer
-#=        required: False
-cut_right_mean_quality=20
-#
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : original approach     --------------------------
 #
@@ -358,7 +183,7 @@ minlen=150
 #=        validation: 
 #=          - range: 
 #=            min: 0 
-threadsTrimmomatic=20
+threadsTrimmomatic=5
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : PANDAseq     --------------------------
@@ -385,7 +210,7 @@ pandaseqAlgorithm=simple_bayesian
 #=        validation:
 #=          - range:
 #=            min: 0
-pandaseqThreads=20
+pandaseqThreads=5
 #
 #
 #=     pandaseqMinlen:
@@ -445,31 +270,6 @@ elimination=-N
 #=          - value: vsearch
 clusteringAlgo=swarm
 #
-#   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
-#
-#
-#=     vsearchThreads:
-#=        title: vsearch threads
-#=        description: Set the number of threads PANDAseq to use.
-#=        type: integer
-#=        required: True
-#=        validation:
-#=          - range: 
-#=            min: 0
-vsearchThreads=20
-#
-#
-#=     vsearchId:
-#=        title: vsearch threads
-#=        description: Set a score about the clustering step of the VSEARCH algorithm. Do not add a read into a certain cluster if the pairwise identity with its centroid, is lower than the value of the 'vsearchId' parameter. The pairwise identity is defined as the number of (matching columns) / (alignment length - terminal gaps).
-#=        type: float
-#=        required: True
-#=        validation:
-#=          - range: 
-#=            min: 0.0
-#=            max: 1.0
-vsearchId=0.9
-#
 #   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
 #
 #
@@ -503,7 +303,7 @@ boundary=2
 #=        validation:
 #=          - range: 
 #=            min: 1
-swarmThreads=20
+swarmThreads=5
 #
 #  -----------------------------     OLIGOTONS        -------------------------------------
 #
@@ -578,17 +378,12 @@ minScore=
 searchAlgo=vsearch
 #
 #
-#
-#
 #=     taxonomyFolderName:
 #=        title: number of cores for PaPaRa
 #=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail. Parameter required if gene: ['16S', '18S', 'ITS'].
 #=        type: string
 #=        required: True 
 taxonomyFolderName=crest4_vsearch_132
-#
-#
-#   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
 #
 #
 #=     taxonomyAssignmentMethod:
@@ -600,17 +395,6 @@ taxonomyFolderName=crest4_vsearch_132
 #=          - value: alignment
 #=          - value: phylogeny
 taxonomyAssignmentMethod=alignment
-#
-#
-#=     numberOfCoresForPapara:
-#=        title: number of cores for PaPaRa
-#=        description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use. The parameeter is required if axonomyAssignmentMethod: phylogeny and gene: gene_16S
-#=        type: integer
-#=        required: True 
-#=        validation:
-#=          - range:
-#=            min: 0
-numberOfCoresForPapara=20
 #
 #
 #=     referenceDb:
@@ -625,70 +409,6 @@ numberOfCoresForPapara=20
 #=          - value: midori_1
 #=          - value: midori_2
 referenceDb=silva_138
-#
-#   --------------------------     GENE-SPECIFIC : ITS     --------------------------
-#
-#
-#=     cutadapt:
-#=        title: perform a cutadapt script to 
-#=        description: 
-#=        type: string
-#=        required: False
-#=        validation:
-#=          - value: Yes
-#=          - value: No 
-cutadapt=Yes
-#
-#
-#=     forwardITSPrimer:
-#=        title: forward ITS primer
-#=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
-#=        type: string
-#=        required: True 
-forwardITSPrimer=GATGAAGAACGYAGYRAA
-#
-#
-#=     reverseITSPrimer:
-#=        title: reverse ITS primer
-#=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
-#=        type: string
-#=        required: True 
-reverseITSPrimer=CTBTTVCCKCTTCACTCG
-#
-#   --------------------------     GENE-SPECIFIC : COI     --------------------------
-#
-#
-#=     abskew:
-#=        title: abskew
-#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: gene_COI
-#=        type: integer
-#=        required: True
-#=        validation:
-#=          - range:
-#=            min: 0
-abskew=2
-#
-#   --------------------------     CUSTOM REFERENCE DATABASE     --------------------------
-#
-#
-#=     custom_ref_db:
-#=        title: custom reference database
-#=        description: Use a custom reference database for the taxonomy assignment step. In this case, extra input files are required depending on the classifier the user selected. To see more on how these files should be in case of the RDPClassifier, follow this link: https://hariszaf.github.io/pema_documentation/training_rdpclassifier/. In case that the CREST classifier is be used, follow this link: https://hariszaf.github.io/pema_documentation/training_crest_classifier/. Remember that as containers are lost when exit from one, you will have to train the classifier, every time you run a new PEMA container If you are about to use a custom ref db, set the following parameter as 'Yes'. Otherwise, it must be set as 'No'. The `name_of_custom_db` may be empty or no depending on whether you will use a custom db or not.
-#=        type: boolean
-#=        required: True
-#=        validation:
-#=          - value: Yes
-#=          - value: No
-custom_ref_db=No
-#
-#
-#=     name_of_custom_db:
-#=        title: name of custom database
-#=        description: Name of how custom reference database will be named. Parameter required only if custom_ref_db: Yes
-#=        type: string
-#=        required: True
-name_of_custom_db=
-#
 #
 #   --------------------------     sum up      --------------------------
 #
@@ -723,7 +443,7 @@ emptyCheckpoints=Yes
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-getNCBITaxId=Yes
+getNCBITaxId=No
 #
 #   --------------------------     PEMA METADATA     --------------------------
 #

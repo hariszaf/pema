@@ -1,4 +1,4 @@
-#= pema_version: 2.1.5
+#= pema_version: 2.2.0
 #   --------------------------         GENERAL PARAMETERS       --------------------------
 #
 #
@@ -19,8 +19,8 @@ environment=local
 #=        type: string
 #=        required: True
 #=        validation:
-#=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
-gene=gene_16S
+#=          - regex: /^(COI|16S|18S|12S|ITS)$/
+gene=16S
 #
 #
 #=     outputFolderName:
@@ -70,7 +70,7 @@ preprocess=original
 #=        description: Number of threads to be used by fastp
 #=        type: integer
 #=        required: False
-fastpThreads=20
+fastpThreads=10
 #
 #
 #=     disable_adapter_trimming:
@@ -117,6 +117,23 @@ adapter_sequence_r2="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
 correction=True
 #
 #
+#=     overlap_len_require:
+#=        title: 
+#=        description:
+#=        type:
+#=        required: False
+#=        default: 30
+overlap_len_require=30
+#
+#
+#=     overlap_diff_limit:
+#=        title: 
+#=        description:
+#=        type:
+#=        required: False
+overlap_diff_limit=
+#
+#
 #=     overrepresentation_analysis:
 #=        title:
 #=        description: enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
@@ -141,6 +158,14 @@ overrepresentation_sampling=20
 overlap_diff_percent_limit=20
 #
 #
+#=      low_complexity_filter:
+#=         title:
+#=         description: enable low complexity filter. The complexity is defined as the percentage of base that is different from its next base (base[i] != base[i+1]).
+#=         type: boolean
+#=         required: False
+low_complexity_filter=true
+#
+#
 #=      complexity_threshold:
 #=         title:
 #=         description: The threshold for low complexity filter (0~100). Default is 30, which means 30% complexity is required. 
@@ -149,12 +174,28 @@ overlap_diff_percent_limit=20
 complexity_threshold=30
 #
 #
+#=     disable_length_filtering:
+#=        title:
+#=        description: 
+#=        type: boolean
+#=        required: False
+disable_length_filtering=false
+#
+#
+#=     length_limit:
+#=        title:
+#=        description: reads longer than length_limit will be discarded, default 0 means no limitation. (int [=0])
+#=        type: integer
+#=        required: False
+length_limit=0
+#
+#
 #=     length_required:
 #=        title:
 #=        description: Reads shorter than length_required will be discarded, default is 15.
 #=        type: integer
 #=        required: False
-length_required=50
+length_required=
 #
 #
 #=      n_base_limit:
@@ -235,6 +276,42 @@ cut_right_window_size=4
 #=        type: integer
 #=        required: False
 cut_right_mean_quality=20
+#
+#
+#=     trim_poly_g:
+#=        title:
+#=        description: 
+#=        type: integer
+#=        required: False
+#=        default: True
+trim_poly_g=True
+#
+#
+#=     poly_g_min_len:
+#=        title:
+#=        description: 
+#=        type: integer
+#=        required: False
+#=        default: 10
+poly_g_min_len=10
+#
+#
+#=     cut_right_mean_quality:
+#=        title:
+#=        description: 
+#=        type: integer
+#=        required: False
+cut_right_mean_quality=20
+#
+#
+#=     disable_trim_poly_g:
+#=        title:
+#=        description: 
+#=        type: boleam
+#=        required: False
+#=        default: False
+disable_trim_poly_g=False
+#
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : original approach     --------------------------

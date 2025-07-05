@@ -60,7 +60,6 @@ sequencerPrefix=M0
 preprocess=fastp
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
-#   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
 #
 #
 #=     fastpThreads:

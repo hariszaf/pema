@@ -42,19 +42,19 @@ string crestAssign(string{} params, string{} globalVars) {
 
       println("We already have a CREST-based assignment file on this case.")
    
-   } else if ( params{'custom_ref_db'} != 'Yes') {
+   } else if ( ! params.hasKey('custom_ref_db') || params{'custom_ref_db'} != 'Yes') {
   
       println("-- Search file: " + searchFile)
 
       # CASE 1:
       # 16S and 18S alignment-based taxonomy assignment
-      if ( (params{'gene'} == 'gene_16S' || params{'gene'} == 'gene_18S' || params{'gene'} == 'gene_COI') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
+      if ( (params{'gene'} == '16S' || params{'gene'} == '18S' || params{'gene'} == 'COI') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
 
          runCrest4(searchFile, params, globalVars)
 
       # CASE 2:
       # Alignment-based taxonomy assignmnet for the ITS marker gene
-      } else if (params{'gene'}  == 'gene_ITS') {
+      } else if (params{'gene'}  == 'ITS') {
 
          # $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/
          task blastn -task megablast \
@@ -62,7 +62,7 @@ string crestAssign(string{} params, string{} globalVars) {
             -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/unite/unite.fasta \
             -num_alignments 100 -outfmt 5 \
             -out unite_$params{'taxonomyFolderName'}.xml \
-            -num_threads $params{'vsearchThreads'}
+            -num_threads $params{'threads'}
 
          wait
 
@@ -71,7 +71,6 @@ string crestAssign(string{} params, string{} globalVars) {
             -d unite \
             -t allTab_$params{'taxonomyFolderName'}.tsv \
             -o $params{'taxonomyFolderName'} unite_$params{'taxonomyFolderName'}.xml
-
       }
 
    # CASE 3:
@@ -85,7 +84,7 @@ string crestAssign(string{} params, string{} globalVars) {
          -num_alignments 100 \
          -outfmt 5 \
          -out $params{'name_of_custom_db'}_$params{'taxonomyFolderName'}.xml \
-         -num_threads $params{'vsearchThreads'}
+         -num_threads $params{'threads'}
 
       wait
 
@@ -134,7 +133,7 @@ string runCrest4(string searchFile, string{} params, string{} globalVars) {
       println("Provide previously calculated search hits.")
       cmd = "crest4 --fasta all_sequences_grouped.fa " +\
             "--search_algo " + params{"searchAlgo"} + " " +\
-            "--num_threads " + params{"vsearchThreads"} + " " +\
+            "--num_threads " + params{"threads"} + " " +\
             "--search_db "   + gene_db_map{params{'referenceDb'}} + " " +\
             "--search_hits " + searchFile + " " +\
             "--output_dir "  + params{"taxonomyFolderName"}
@@ -142,7 +141,7 @@ string runCrest4(string searchFile, string{} params, string{} globalVars) {
    } else {
       cmd = "crest4 --fasta all_sequences_grouped.fa " +\
             "--search_algo " + params{"searchAlgo"} + " " +\
-            "--num_threads " + params{"vsearchThreads"} + " " +\
+            "--num_threads " + params{"threads"} + " " +\
             "--search_db "   + gene_db_map{params{'referenceDb'}} + " " +\
             "--output_dir "  + params{"taxonomyFolderName"}
    }
@@ -208,7 +207,7 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    
    wait
 
-   string assignFolder="16S_taxon_assign_phylogeny_assignment"
+   string assignFolder="phylo_tax_assignment"
    assignFolder.mkdir()
    sys mv epa* $assignFolder
 
@@ -233,8 +232,7 @@ string rdpBuildingTable(string{} params, string{} globalVars) {
 
    wait
    
-   # Create a MOTU table as for the case of 16S
-   # Change the swarm output as we have removed some amplicons after the ASV inferring because of the chimera removal
+   # Create a table with the taxonomy assignment column
    task {
       sys python $globalVars{'scripts'}/RDPClassifierTable.py $params{'clusteringAlgo'}
    }
@@ -254,7 +252,7 @@ string rdpAssign(string{} params, string{} globalVars) {
    if ( params{'custom_ref_db'} != 'Yes' ) {
 
 
-      if ( params{'gene'} == "gene_COI" ) {
+      if ( params{'gene'} == "COI" ) {
 
          task {
             sys java -Xmx64g \
@@ -263,7 +261,7 @@ string rdpAssign(string{} params, string{} globalVars) {
                  -o tax_assign_temp.txt all_sequences_grouped.fa
          }
          
-      } else if ( params{'gene'} == "gene_12S" ) {
+      } else if ( params{'gene'} == "12S" ) {
 
          task { 
             sys java -Xmx64g \

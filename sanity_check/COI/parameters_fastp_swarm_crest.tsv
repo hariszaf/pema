@@ -1,6 +1,7 @@
 #= pema_version: 2.2.0
 #   --------------------------         GENERAL PARAMETERS       --------------------------
 #
+#       Study: sanity check for COI marker gene using fastp and swarm (d > 6)
 #
 #=     environment:
 #=        title: computing environment
@@ -22,12 +23,14 @@ environment=local
 #=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
 gene=gene_COI
 #
+#
 #=     outputFolderName:
 #=        title: output folder name
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName=test_coi_original_vsearch
+outputFolderName=TEST_COI_FASTP_SWARM
+#
 #
 #=     EnaData:
 #=        title: ENA data format
@@ -60,26 +63,30 @@ preprocess=fastp
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
 #
+#
 #=     fastpThreads:
 #=        title: fastp threads
 #=        description: Number of threads to be used by fastp
 #=        type: integer
 #=        required: False
-fastpThreads=3
+fastpThreads=20
+#
 #
 #=     disable_adapter_trimming:
 #=        title:
 #=        description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
 #=        type: boolean
 #=        required: False
-disable_adapter_trimming=True
+disable_adapter_trimming=False
+#
 #
 #=     detect_adapter_for_pe:
 #=        title:
 #=        description: Adapter sequence auto-detection.
 #=        type: boolean
 #=        required:
-detect_adapter_for_pe=False
+detect_adapter_for_pe=True
+#
 #
 #=     adapter_sequence:
 #=        title:
@@ -88,7 +95,8 @@ detect_adapter_for_pe=False
 #=        required: False
 #=        validation:
 #=          -value: {A, T, C, G}*n
-adapter_sequence="ATCCTC"
+adapter_sequence="AGATCGGAAGAGCACACGTCTGAACTCCAGTCA"
+#
 #
 #=     adapter_sequence_r2:
 #=        title:
@@ -97,7 +105,8 @@ adapter_sequence="ATCCTC"
 #=        required: False
 #=        validation:
 #=         -value: {A, T, C, G}*n
-adapter_sequence_r2="ATCCTC"
+adapter_sequence_r2="AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT"
+#
 #
 #=     correction:
 #=        title: Enable base correction in overlapped regions, default is disabled.
@@ -106,12 +115,31 @@ adapter_sequence_r2="ATCCTC"
 #=        required: False
 correction=True
 #
+#
+#=     overlap_len_require:
+#=        title: 
+#=        description:
+#=        type:
+#=        required: False
+#=        default: 30
+overlap_len_require=30
+#
+#
+#=     overlap_diff_limit:
+#=        title: 
+#=        description:
+#=        type:
+#=        required: False
+overlap_diff_limit=
+#
+#
 #=     overrepresentation_analysis:
 #=        title:
 #=        description: enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
 #=        type:
 #=        required: False
-overrepresentation_analysis=False
+overrepresentation_analysis=True
+#
 #
 #=     overrepresentation_sampling:
 #=        title:
@@ -120,12 +148,24 @@ overrepresentation_analysis=False
 #=        required: False
 overrepresentation_sampling=20 
 #
+#
 #=     overlap_diff_percent_limit
 #=        title:
-#=        description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
+#=        description: >
+#=          The maximum percentage of mismatched bases to detect overlapped region of PE reads. 
+#=          This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
 #=        type: integer
 #=        required: False
 overlap_diff_percent_limit=20
+#
+#
+#=      low_complexity_filter:
+#=         title:
+#=         description: enable low complexity filter. The complexity is defined as the percentage of base that is different from its next base (base[i] != base[i+1]).
+#=         type: boolean
+#=         required: False
+low_complexity_filter=true
+#
 #
 #=      complexity_threshold:
 #=         title:
@@ -134,12 +174,30 @@ overlap_diff_percent_limit=20
 #=         required: False
 complexity_threshold=30
 #
+#
+#=     disable_length_filtering:
+#=        title:
+#=        description: 
+#=        type: boolean
+#=        required: False
+disable_length_filtering=false
+#
+#
+#=     length_limit:
+#=        title:
+#=        description: reads longer than length_limit will be discarded, default 0 means no limitation. (int [=0])
+#=        type: integer
+#=        required: False
+length_limit=0
+#
+#
 #=     length_required:
 #=        title:
 #=        description: Reads shorter than length_required will be discarded, default is 15.
 #=        type: integer
 #=        required: False
-length_required=100
+length_required=50
+#
 #
 #=      n_base_limit:
 #=         title:
@@ -148,12 +206,14 @@ length_required=100
 #=         required:
 n_base_limit=5
 #
+#
 #=     cut_front:
 #=        title:
 #=        description: Move a sliding window from front (5') to tail, drop the bases in the window if its mean quality < threshold, stop otherwise.
 #=        type:
 #=        required:
 cut_front=False
+#
 #
 #=     cut_front_mean_quality:
 #=        title:
@@ -162,12 +222,14 @@ cut_front=False
 #=        required: False
 cut_front_mean_quality=20
 #
+#
 #=     cut_front_window_size:
 #=        title:
 #=        description: The window size option of cut_front. Range: 1~1000, default: 4.
 #=        type: integer
 #=        required: False
 cut_front_window_size=4
+#
 #
 #=     cut_tail:
 #=        title:
@@ -176,12 +238,14 @@ cut_front_window_size=4
 #=        required: False
 cut_tail=False
 #
+#
 #=     cut_tail_window_size:
 #=        title:
 #=        description: The window size option of cut_tail. Range: 1~1000, default: 4.
 #=        type: integer
 #=        required: False
 cut_tail_window_size=4
+#
 #
 #=     cut_tail_mean_quality:
 #=        title:
@@ -190,6 +254,7 @@ cut_tail_window_size=4
 #=        required: False
 cut_tail_mean_quality=20
 #
+#
 #=     cut_right:
 #=        title:
 #=        description: Move a sliding window from front to tail, if meet one window with mean quality < threshold, drop the bases in the window and the right part, and then stop.
@@ -197,12 +262,14 @@ cut_tail_mean_quality=20
 #=        required: False
 cut_right=False
 #
+#
 #=     cut_right_window_size:
 #=        title:
 #=        description: The window size option of cut_right. Range: 1~1000, default: 4.
 #=        type: integer
 #=        required: False
-cut_right_window_size=5
+cut_right_window_size=4
+#
 #
 #=     cut_right_mean_quality:
 #=        title:
@@ -210,6 +277,33 @@ cut_right_window_size=5
 #=        type: integer
 #=        required: False
 cut_right_mean_quality=20
+#
+#
+#=     disable_trim_poly_g:
+#=        title:
+#=        description: 
+#=        type: boleam
+#=        required: False
+#=        default: False
+disable_trim_poly_g=False
+#
+#
+#=     trim_poly_g:
+#=        title:
+#=        description: 
+#=        type: integer
+#=        required: False
+#=        default: True
+trim_poly_g=True
+#
+#
+#=     poly_g_min_len:
+#=        title:
+#=        description: 
+#=        type: integer
+#=        required: False
+#=        default: 10
+poly_g_min_len=10
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : original approach     --------------------------
