@@ -383,13 +383,14 @@ string{} initializeAnalysis(string{} params) {
     globalVars{'environment'} = params{'environment'}
 
     if (params{'environment'} == 'container'){
-        globalVars{'path'}              = '/home/'
+        globalVars{'path'}              = '/pema/'
         globalVars{'dataPath'}          = '/mnt/analysis/mydata/'
         globalVars{'parameterFilePath'} = '/mnt/analysis/'
         globalVars{'outputPoint'}       = '/mnt/analysis/'
-        globalVars{'scripts'}           =  globalVars{'path'} + "/scripts/"
-        globalVars{'tools'}             =  globalVars{'path'} + "/tools/"
-        globalVars{'crest'}              = globalVars{'path'} + '/.crest4/'
+        globalVars{'scripts'}           = globalVars{'path'} + "/scripts/"
+        globalVars{'tools'}             = globalVars{'path'} + "/tools/"
+        globalVars{'crest'}             = globalVars{'path'} + '/.crest4/'
+        globalVars{'pema_home'}         = globalVars{'path'}
     } else {
         string tmp = "/tmp/home_path.txt"
         sys echo $HOME > $tmp
@@ -404,6 +405,7 @@ string{} initializeAnalysis(string{} params) {
         globalVars{'scripts'}           = pema_home + "/pema/scripts/"
         globalVars{'tools'}             = globalVars{'path'}
         globalVars{'crest'}             = home + '/.crest4/'
+        globalVars{'pema_home'}         = pema_home
     }
 
     # If there are Trimlogs in the rawData file, PEMA does not run as it should.

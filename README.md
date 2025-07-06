@@ -108,6 +108,16 @@ PEMA runs either as a [**Docker**](https://www.docker.com/) or as a [**Singulari
 
 ## Get-set-go PEMA! 
 
+
+### Local install
+
+
+```
+./setup_env.sh --env local
+```
+
+
+
 ### Get
 
 To get PEMA running you first need to make sure you either have **[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )** , 

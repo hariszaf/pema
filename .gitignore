@@ -4,6 +4,9 @@ tools/
 # Ignore the backups directory
 backups/
 
+# Ignore Python bytecode cache files
+__pycache__/
+
 # Ignore old version of scripts
 scripts_OLD_VERSION/
 

@@ -1,7 +1,9 @@
 import sys
-import json
+# import json
 import pandas as pd
 from pathlib import Path
+from utilsForTables import load_vseach_hash, load_swarm_hash
+
 
 # contingency_table = sys.argv[1]  # contingency_table = "asvs_contingency_hash.tsv"
 clustering_algo   = sys.argv[1]
@@ -14,53 +16,55 @@ tax_columns = [x for x in tax_df.columns[1::3]]
 tax_df      = tax_df[[0] + tax_columns]
 tax_df      = tax_df.copy()
 
+# TODO (Haris Zafeiropoulos, 2025-07-02):  Filter based on confidence score
 tax_df['merged'] = tax_df.iloc[:, 1:].agg(';'.join, axis=1)
 tax_df.drop(tax_df.columns[1:-1], axis=1, inplace=True)
 
-# TODO (Haris Zafeiropoulos, 2025-07-02):  Filter based on confidence score
+
 if clustering_algo == "vsearch":
 
-    # Vsearch case of the taxonomy file
-    tax_df.columns = ["OTU", "Taxonomy"]
+    abd_df = load_vseach_hash(tax_df, assignments_dir)
 
-    # Filename of the contigency table on the vsearch case
-    contingency_table = "all.otutab_sha.txt"
+    # # Vsearch case of the taxonomy file
+    # tax_df.columns = ["OTU", "Taxonomy"]
 
-    # Abundance data
-    abd_df         = pd.read_csv(contingency_table, sep="\t")
-    abd_df         = abd_df.rename(columns={"amplicon":"Seed"})
-    abd_df.columns = [x.replace(".derep.fa", "") for x in abd_df.columns]
+    # # Filename of the contigency table on the vsearch case
+    # contingency_table = "all.otutab_sha.txt"
 
-    # In the vsearch case, we keep the mapping of each hash to their corresponding otu
-    # in a json file
-    otu_hash = "map.json"
-    with open(otu_hash, "r") as f:
-        otu_hash_dict = json.load(f)
+    # # Abundance data
+    # abd_df         = pd.read_csv(contingency_table, sep="\t")
+    # abd_df         = abd_df.rename(columns={"amplicon":"Seed"})
+    # abd_df.columns = [x.replace(".derep.fa", "") for x in abd_df.columns]
 
-    abd_df.insert(0, 'OTU', abd_df['Seed'].map(otu_hash_dict))
+    # # In the vsearch case, we keep the mapping of each hash to their corresponding otu
+    # # in a json file
+    # otu_hash = "map.json"
+    # with open(otu_hash, "r") as f:
+    #     otu_hash_dict = json.load(f)
 
-    print(abd_df.head())
+    # # Add column with the hash id
+    # abd_df.insert(0, 'OTU', abd_df['Seed'].map(otu_hash_dict))
 
-    print(tax_df.head())
-
-    # Merge
-    abd_df = abd_df.merge(tax_df[["OTU", "Taxonomy"]], on="OTU", how="left")
-    abd_df = abd_df.drop(columns=["Seed"])
+    # # Merge
+    # abd_df = abd_df.merge(tax_df[["OTU", "Taxonomy"]], on="OTU", how="left")
+    # abd_df = abd_df.drop(columns=["Seed"])
 
 
 elif clustering_algo == "swarm":
 
-    tax_df.columns = ["Seed", "Taxonomy"]
+    abd_df = load_swarm_hash(tax_df, assignments_dir)
 
-    contingency_table = "asvs_contingency_hash.tsv"
+    # tax_df.columns = ["Seed", "Taxonomy"]
 
-    # Abundance data
-    abd_df         = pd.read_csv(contingency_table, sep="\t")
-    abd_df.columns = [x.replace(".derep.fa", "") for x in abd_df.columns]
+    # contingency_table = "asvs_contingency_hash.tsv"
 
-    # Merge
-    abd_df = abd_df.merge(tax_df[["Seed", "Taxonomy"]], on="Seed", how="left")
-    abd_df = abd_df.drop(columns=["Seed"])
+    # # Abundance data
+    # abd_df         = pd.read_csv(contingency_table, sep="\t")
+    # abd_df.columns = [x.replace(".derep.fa", "") for x in abd_df.columns]
+
+    # # Merge
+    # abd_df = abd_df.merge(tax_df[["Seed", "Taxonomy"]], on="Seed", how="left")
+    # abd_df = abd_df.drop(columns=["Seed"])
 
 
 # Save outfile

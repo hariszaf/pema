@@ -181,27 +181,42 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    
    wait
    
-   # PaPaRa returns a msa of our queries that has taken into account info from our ref tree 
-   task $globalVars{'path'}/tools/PaPaRa/papara_static_x86_64 \
-      -t $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree \
-      -s $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy \
-      -q all_sequences_grouped.fa -r #-j 4
-   
-   wait
-   
-   # Remove the ref - msa - THIS IS A BUG OF EPA-ng !!!!
-   sys tail -n +1038 papara_alignment.default > papara_alignment.phy
-   wait
+   string papara_alignment = globalVars{'assignmentPath'} + '/' + "papara_alignment.phy"
 
-   # Convert our query msa to fasta format with a script we made because epa-ng can handle only fasta
-   task bash $globalVars{'scripts'}/convertPhylipToFasta.sh  papara_alignment.phy
+   if (papara_alignment.exists()) {
+
+      string papara_exists_msg = "\n" + "PaPaRa alignment is already available."
+      println(papara_exists_msg)
+
+   } else {
+
+      string papara_msg = "\n" + "-- Running PaPaRa.. " + "\n"
+      println(papara_msg)
+
+      # PaPaRa returns a msa of our queries that has taken into account info from our ref tree 
+      task $globalVars{'tools'}/papara_static_x86_64 \
+      -t $globalVars{'pema_home'}/pema/ext_data/easy_tree/raxml_easy_right_refmsa.raxml.bestTree \
+      -s $globalVars{'pema_home'}/pema/ext_data/easy_tree/raxml_easy_right_refmsa.raxml.reduced.phy \
+      -q all_sequences_grouped.fa -r #-j 4
+    
+      wait
+      
+      # Remove the ref - msa - THIS IS A BUG OF EPA-ng !!!!
+      sys tail -n +1038 papara_alignment.default > papara_alignment.phy
+      wait
    
-   wait
-         
+      # Convert our query msa to fasta format with a script we made because epa-ng can handle only fasta
+      task bash $globalVars{'scripts'}/convertPhylipToFasta.sh papara_alignment.phy
+      
+      wait
+
+   }
+
    # Execute epa-ng algorithm (evolutinary placement) in order to get our phylogenetic-based taxonomy assignment, at last!
-   task $globalVars{'path'}/tools/EPA-ng/epa/bin/epa-ng \
-      -s $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.reduced.phy.fasta \
-      -t $globalVars{'path'}/tools/createTreeTheEasyWay/raxml_easy_right_refmsa.raxml.bestTree \
+   # $globalVars{'path'}/tools/EPA-ng/epa/bin/
+   task epa-ng \
+      -s $globalVars{'pema_home'}/pema/ext_data/easy_tree/raxml_easy_right_refmsa.raxml.reduced.phy.fasta \
+      -t $globalVars{'pema_home'}/pema/ext_data/easy_tree/raxml_easy_right_refmsa.raxml.bestTree \
       -q papara_alignment.fasta \
       --model GTR{0.959447/2.52497/1.45842/1.06213/3.55143/1}+FU{0.237221/0.230211/0.294337/0.238231}+G4m{0.559838} # -w <output_dir>
    
@@ -210,6 +225,14 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    string assignFolder="phylo_tax_assignment"
    assignFolder.mkdir()
    sys mv epa* $assignFolder
+
+   wait 
+
+   # Build taxonomy table
+   task python $globalVars{'scripts'}/phyloTaxTable.py \
+      allTab_$params{'taxonomyFolderName'}.tsv \
+      $assignFolder/epa_result.jplace \
+      $params{'clusteringAlgo'}
 
    println("Phylogenetic based taxonomy assignemnt has been completed.")
 

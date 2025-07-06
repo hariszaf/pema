@@ -40,7 +40,7 @@ if id_col is None:
     raise ValueError("Neither 'ASV' nor '#OTU ID' found in df.columns")
 
 # Load taxonomy table
-tax         = pd.read_csv(crest_assignments, header=None, sep="\t")
+tax = pd.read_csv(crest_assignments, header=None, sep="\t")
 
 if clustering_algo == "swarm":
 

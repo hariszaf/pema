@@ -215,6 +215,9 @@ if ( paramsForTaxAssign.hasKey('custom_ref_db') && paramsForTaxAssign{'custom_re
    string using_db_msg = "\n" + "Taxonomy assignment using a global database.. " + "\n"
    println(using_db_msg)
 
+   string phylo_msg = "\n" + ">> Taxonomy assignmnet using a phylogeny-based approach.."
+   string align_msg = "\n" + ">> Taxonomy assignment using an alignment-based approach"
+
    if ( paramsForTaxAssign{'gene'} == '16S') {
 
       if (paramsForTaxAssign{'classifierAlgo'} == 'RDPClassifier') {
@@ -231,15 +234,17 @@ if ( paramsForTaxAssign.hasKey('custom_ref_db') && paramsForTaxAssign{'custom_re
 
       if (paramsForTaxAssign{'taxonomyAssignmentMethod'} != 'phylogeny') {
 
+         println(align_msg)
          crestAssign(paramsForTaxAssign, globalVars)
          wait
          println("Alignment based taxonomy assignment using the CREST classifier has been completed.")
 
       } else {
    
-            phylogenyAssign(paramsForTaxAssign, globalVars)
-            wait
-            println("Phylogeny based taxonomy assignment has been completed.")
+         println(phylo_msg)
+         phylogenyAssign(paramsForTaxAssign, globalVars)
+         wait
+         println("Phylogeny based taxonomy assignment has been completed.")
 
       }
 

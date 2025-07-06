@@ -144,7 +144,6 @@ chmod +x "$CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh"
 # Step 2: Install software
 # ====================================
 
-
 # Build a hidden folder for pema-related software
 INSTALL_DIR=$HOME/.pema
 
@@ -170,8 +169,8 @@ fi
 
 # Add $INSTALL_DIR/.bds to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/.bds:"* ]]; then
-  echo 'export PATH="$INSTALL_DIR/.bds:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added ${INSTALL_DIR}/.bds to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo "export PATH=\"$INSTALL_DIR/.bds:\$PATH\"" >> $SHELL_CONFIG
+  echo -e "Added ${INSTALL_DIR}/.bds to PATH. $TADA"
 fi
 
 
@@ -217,8 +216,8 @@ fi
 
 # Add $INSTALL_DIR/FastQC/fastqc to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/FastQC:"* ]]; then
-  echo 'export PATH="$INSTALL_DIR/FastQC:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added $INSTALL_DIR/FastQC to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo "export PATH=\"$INSTALL_DIR/FastQC:\$PATH\"" >> $SHELL_CONFIG
+  echo -e "Added $INSTALL_DIR/FastQC to PATH. $TADA"
 fi
 
 
@@ -233,7 +232,7 @@ else
   cd obitools4
   wget -O -L  https://raw.githubusercontent.com/metabarcoding/obitools4/master/install_obitools.sh 
   bash install_obitools.sh -i .
-  echo 'export PATH="$INSTALL_DIR/obitools4/bin:$PATH"' >> $SHELL_CONFIG
+  echo "export PATH=\"$INSTALL_DIR/obitools4/bin:\$PATH\"" >> $SHELL_CONFIG
   echo -e "Obitools4 is now added on PATH $TADA"
   cd ..
 fi
@@ -254,8 +253,8 @@ fi
 
 # Add $INSTALL_DIR/vsearch to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/search/bin:"* ]]; then
-  echo 'export PATH="$INSTALL_DIR/vsearch/bin:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added $INSTALL_DIR/vsearch/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo "export PATH=\"$INSTALL_DIR/vsearch/bin:\$PATH\"" >> $SHELL_CONFIG
+  echo -e "Added $INSTALL_DIR/vsearch/bin to PATH. $TADA"
 fi
 
 
@@ -286,9 +285,8 @@ fi
 
 # Add $INSTALL_DIR/SPAdes to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/SPAdes-${SPADES}-Linux/bin:"* ]]; then
-  # echo 'export PATH="$INSTALL_DIRSPAdes-${SPADES}-Linux/bin:$PATH"' >> $SHELL_CONFIG
-  echo "export PATH=\"\$INSTALL_DIR/SPAdes-${SPADES}-Linux/bin:\$PATH\"" >> "$SHELL_CONFIG"
-  echo -e "Added $INSTALL_DIR/SPAdes-$SPADES-Linux/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo "export PATH=\"$INSTALL_DIR/SPAdes-${SPADES}-Linux/bin:\$PATH\"" >> "$SHELL_CONFIG"
+  echo -e "Added $INSTALL_DIR/SPAdes-$SPADES-Linux/bin to PATH. $TADA"
 fi
 
 
@@ -311,8 +309,8 @@ fi
 
 # Add $INSTALL_DIR/PANDAseq to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/PANDAseq/bin:"* ]]; then
-  echo 'export PATH="$INSTALL_DIR/PANDAseq/bin:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added $INSTALL_DIR/PANDAseq/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo "export PATH=\"$INSTALL_DIR/PANDAseq/bin:\$PATH\"" >> $SHELL_CONFIG
+  echo -e "Added $INSTALL_DIR/PANDAseq/bin to PATH. $TADA"
 fi
 
 
@@ -330,8 +328,8 @@ fi
 
 # Add $INSTALL_DIR/swarm to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/swarm/bin:"* ]]; then
-  echo 'export PATH="$INSTALL_DIR/swarm/bin:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added $INSTALL_DIR/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo "export PATH=\"$INSTALL_DIR/swarm/bin:\$PATH\"" >> $SHELL_CONFIG
+  echo -e "Added $INSTALL_DIR/swarm/bin to PATH. $TADA"
 fi
 
 
@@ -350,8 +348,8 @@ fi
 
 # Add $INSTALL_DIR/ncbi-blast-2.8.1+/bin to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/ncbi-blast-2.8.1+/bin:"* ]]; then
-  echo 'export PATH="$INSTALL_DIR/ncbi-blast-2.8.1+/bin:$PATH"' >> $SHELL_CONFIG
-  echo -e "Added $INSTALL_DIR/swarm/bin to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo "export PATH=\"$INSTALL_DIR/ncbi-blast-2.8.1+/bin:\$PATH\"" >> $SHELL_CONFIG
+  echo -e "Added $INSTALL_DIR/swarm/bin to PATH. $TADA"
 fi
 
 
@@ -362,8 +360,8 @@ else
     echo -e "$HOURGLASS Getting jq.."
     wget -O ~/jq https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
     chmod +x ~/jq
-    echo 'export PATH="$HOME:$PATH"' >> $SHELL_CONFIG
-    echo -e "Adde jq in PATH $TADA"
+    echo "export PATH=\"$HOME:$PATH\"" >> $SHELL_CONFIG
+    echo -e "Added jq in PATH $TADA"
 fi
 
 
@@ -383,7 +381,7 @@ else
   unzip rdp_classifier_$RDPCLASSIFIER.zip
   rm rdp_classifier_$RDPCLASSIFIER.zip
 
-  echo 'export PATH="$INSTALL_DIR/rdp_classifier_$RDPCLASSIFIER/"' >> $SHELL_CONFIG
+  echo "export PATH=\"$INSTALL_DIR/rdp_classifier_$RDPCLASSIFIER/:\$PATH\"" >> $SHELL_CONFIG
   echo -e "RDP Classifier has been installed $TADA"
 
 fi
@@ -433,6 +431,7 @@ fi
 if [[ -x $INSTALL_DIR/epa/ ]]; then
 
   echo -e "$GREEN_TICK Evolutionary Placement Algorithm (EPA)-ng is already available." 
+  echo "export PATH=\"$INSTALL_DIR/epa/bin:\$PATH\"" >> "$SHELL_CONFIG"
 
 else
 
@@ -448,7 +447,7 @@ else
             Make sure you are running this as root to get this option. PEMA installation will now continue anyway..."
     fi
 
-  else 
+  else
 
     apt-get install --"yes" autotools-dev flex bison automake
 
@@ -459,7 +458,8 @@ else
   make
   cd ..
 
-  echo 'export PATH="$INSTALL_DIR/epa/bin/"' >> $SHELL_CONFIG
+  # Add to PATH
+  echo "export PATH=\"$INSTALL_DIR/epa/bin:\$PATH\"" >> "$SHELL_CONFIG"
   echo -e "EPA has been installed $TADA"
 fi
 
@@ -477,7 +477,6 @@ else
   echo -e "$TADA RAxML-ng binary has been downloaded."
 fi
 
-
 # ====================================
 # Step 3: pip 
 # ====================================
@@ -487,13 +486,12 @@ pip install ncbi-taxonomist
 
 # Add $INSTALL_DIR to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/:"* ]]; then
-  echo 'export PATH="$INSTALL_DIR/:$PATH"' >> $SHELL_CONFIG
+  echo "export PATH=\"$INSTALL_DIR/:\$PATH\"" >> $SHELL_CONFIG
   echo -e "Added $INSTALL_DIR to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
 fi
 
 # Move back to the setup directory
 cd $SETUP_WD
-
 
 # Get the directory where this script resides
 PEMA_HOME="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -503,7 +501,7 @@ export PEMA_HOME="$PEMA_HOME"
 
 # Add to shell config if not already present
 if ! grep -q "export PEMA_HOME=" "$SHELL_CONFIG"; then
-    echo 'export PEMA_HOME=\"$PEMA_HOME\"' >> "$SHELL_CONFIG"
+    echo "export PEMA_HOME=\"$PEMA_HOME\"" >> "$SHELL_CONFIG"
     echo -e "PEMA_HOME added to $SHELL_CONFIG $ROCKET"
 else
     echo -e "$GREEN_TICK PEMA_HOME already set in $SHELL_CONFIG"
@@ -516,6 +514,23 @@ if ls *.tar.gz *.zip 1> /dev/null 2>&1; then
   rm *.tar.gz *.zip
 fi
 
-echo -e "\n\n $TADA PEMA installation has been completed successfully!\n"
+# Remove duplicate PATH-related lines from your config file
+# awk '!seen[$0]++ && ($0 ~ "PATH")' "$SHELL_CONFIG" > "$SHELL_CONFIG.tmp" && mv "$SHELL_CONFIG.tmp" "$SHELL_CONFIG"
+cp $SHELL_CONFIG $SHELL_CONFIG.bck
+awk '
+  # For PATH-modifying lines, skip if seen before
+  /^export PATH=/ {
+    if (seen[$0]++) next
+  }
+  # Print all other lines and unique PATH lines
+  { print }
+' "$SHELL_CONFIG" > "$SHELL_CONFIG.tmp" && mv "$SHELL_CONFIG.tmp" "$SHELL_CONFIG"
+
+# Replace extended value of $HOME with the HOME variable
+sed -i "s|$HOME|\$HOME|g" $SHELL_CONFIG
 
 source $SHELL_CONFIG
+
+# Good bye!
+echo -e "\n\n $TADA PEMA installation has been completed successfully!\n"
+
