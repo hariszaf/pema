@@ -41,6 +41,13 @@ mkdir -p ena_format
 mapping_file="$directoryPath/mapping_files_for_PEMA.tsv"
 echo -e "initial_label_from_sequencer\tena_format_label\n" > "$mapping_file"
 
+# Set pigz as compressor if available
+if command -v pigz &> /dev/null; then
+    compressor="pigz"
+else
+    compressor="gzip"
+fi
+
 # Function to convert a single pair
 convert_pair() {
     r1="$1"
@@ -64,7 +71,7 @@ convert_pair() {
                 $0 = $0 NR label
             } 
             { print }
-        ' > "$directoryPath/ena_format/${newName}${suffix}"
+        ' | "$compressor" > "$directoryPath/ena_format/${newName}${suffix}.gz"
     done
 
     echo -e "$sampleId\t$newName" >> "$directoryPath/transformations.tmp"
