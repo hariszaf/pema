@@ -391,7 +391,7 @@ string swarmMaxValues(string{} params, string{} globalVars){
          -d $params{'d'} \
          -t $params{'threads'} \
          -s asvs.stats \
-         -w asvs_representatives_hash.fasta < all.denovo.nonchimeras.fasta > asvs.swarms
+         -w asvs_representatives_hash.fa < all.denovo.nonchimeras.fasta > asvs.swarms
 
    wait
 

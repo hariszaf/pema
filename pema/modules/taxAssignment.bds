@@ -77,26 +77,9 @@ string crestAssign(string{} params, string{} globalVars) {
    # CASE 3:
    # Using the CREST algorithm with a custom reference database
    } else {
+
       params{'referenceDb'} = globalVars{'name_of_custom_db'}
       runCrest4(searchFile, params, globalVars)
-
-      # task blastn \
-      #    -task megablast \
-      #    -query all_sequences_grouped.fa \
-      #    -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/$params{'name_of_custom_db'}/$params{'name_of_custom_db'} \
-      #    -num_alignments 100 \
-      #    -outfmt 5 \
-      #    -out $params{'name_of_custom_db'}_$params{'taxonomyFolderName'}.xml \
-      #    -num_threads $params{'threads'}
-
-      # wait
-
-      # task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
-      #   -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
-      #   -d $params{'name_of_custom_db'} \
-      #   -t allTab_$params{'taxonomyFolderName'}.tsv \
-      #   -o $params{'taxonomyFolderName'} $params{'name_of_custom_db'}_$params{'taxonomyFolderName'}.xml
-
       wait
    }
 

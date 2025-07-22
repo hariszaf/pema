@@ -14,6 +14,7 @@ string{} readParameterFile(string parameter_file) {
     string parameters_file = parameter_file
     lines := parameters_file.readLines()
 
+    # Parse the parameters file
     string{} my_case
     for (string line : lines) {
 
@@ -442,15 +443,18 @@ string{} initializeAnalysis(string{} params) {
     globalVars{'environment'} = params{'environment'}
 
     if (params{'environment'} == 'container'){
+
         globalVars{'path'}              = '/pema/'
-        globalVars{'dataPath'}          = '/mnt/analysis/mydata/'
+        globalVars{'dataPath'}          = '/mnt/analysis/' + params{'sequence_files'}       # mydata
         globalVars{'parameterFilePath'} = '/mnt/analysis/'
         globalVars{'outputPoint'}       = '/mnt/analysis/'
         globalVars{'scripts'}           = globalVars{'path'} + "/scripts/"
         globalVars{'tools'}             = globalVars{'path'} + "/tools/"
         globalVars{'crest'}             = globalVars{'path'} + '/.crest4/'
         globalVars{'pema_home'}         = globalVars{'path'}
+
     } else {
+
         string tmp = "/tmp/home_path.txt"
         sys echo $HOME > $tmp
         sys echo $PEMA_HOME >> $tmp
@@ -458,7 +462,14 @@ string{} initializeAnalysis(string{} params) {
         string home = lines[0]
         string pema_home = lines[1]
         globalVars{'path'}              = home + "/.pema/"
-        globalVars{'dataPath'}          = params{'paramsFilePath'} + '/mydata/'
+
+        # Resolve path to sequence files
+        if ( ! params{'sequence_files'}.startsWith("/") ) {
+            globalVars{'dataPath'} = params{'paramsFilePath'} + '/' + params{'sequence_files'}  # mydata
+        } else {
+            globalVars{'dataPath'} = params{'sequence_files'}  # mydata
+        }
+        # globalVars{'dataPath'}          = params{'paramsFilePath'} + params{'sequence_files'}  # mydata
         globalVars{'parameterFilePath'} = params{'paramsFilePath'}
         globalVars{'outputPoint'}       = params{'paramsFilePath'}
         globalVars{'scripts'}           = pema_home + "/pema/scripts/"

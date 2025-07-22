@@ -19,7 +19,9 @@ VERSION_ARG=false
   KOFAM_ARG=false
  SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-SHELL_CONFIG="$HOME/.bashrc"
+SHELL_CONFIG=$CONDA_PREFIX/etc/conda/activate.d/env_path.sh
+# "$HOME/.bashrc"
+
 
 # Parse options using getopt
 # PARSED=$(getopt --options eh --long env,help -- "$@")
@@ -209,7 +211,7 @@ if [[ -x $INSTALL_DIR/FastQC ]]; then
 else
   wget https://www.bioinformatics.babraham.ac.uk/projects/fastqc/fastqc_v0.11.8.zip 
   unzip fastqc_v0.11.8.zip
-  rm fastqc_v0.11.8.zip 
+  # rm fastqc_v0.11.8.zip 
   cd FastQC 
   chmod 755 fastqc
 fi
@@ -247,7 +249,7 @@ else
   echo -e "$HOURGLASS Installing VSEARCH.."
   wget https://github.com/torognes/vsearch/releases/download/v2.9.1/vsearch-2.9.1-linux-x86_64.tar.gz
   tar -zxvf vsearch-2.9.1-linux-x86_64.tar.gz 
-  rm vsearch-2.9.1-linux-x86_64.tar.gz 
+  # rm vsearch-2.9.1-linux-x86_64.tar.gz 
   mv vsearch-2.9.1-linux-x86_64 vsearch
 fi
 
@@ -267,7 +269,7 @@ else
   echo -e "$HOURGLASS Installing Trimmomatic.."
   wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.38.zip
   unzip Trimmomatic-0.38.zip
-  rm Trimmomatic-0.38.zip
+  # rm Trimmomatic-0.38.zip
 fi
 
 # --------------
@@ -279,7 +281,7 @@ else
   echo -e "$HOURGLASS Getting SPAdes binary.."
   wget https://github.com/ablab/spades/releases/download/v$SPADES/SPAdes-$SPADES-Linux.tar.gz
   tar -xzf SPAdes-$SPADES-Linux.tar.gz
-  rm SPAdes-$SPADES-Linux.tar.gz 
+  # rm SPAdes-$SPADES-Linux.tar.gz 
   echo -e "SPAdes is now installed. $TADA"
 fi
 
@@ -343,13 +345,13 @@ if [[ -x $INSTALL_DIR/ncbi-blast-2.8.1+ ]]; then
 else 
   wget ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/2.8.1/ncbi-blast-2.8.1+-x64-linux.tar.gz
   tar -zxvf ncbi-blast-2.8.1+-x64-linux.tar.gz 
-  rm ncbi-blast-2.8.1+-x64-linux.tar.gz
+  # rm ncbi-blast-2.8.1+-x64-linux.tar.gz
 fi
 
 # Add $INSTALL_DIR/ncbi-blast-2.8.1+/bin to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/ncbi-blast-2.8.1+/bin:"* ]]; then
   echo "export PATH=\"$INSTALL_DIR/ncbi-blast-2.8.1+/bin:\$PATH\"" >> $SHELL_CONFIG
-  echo -e "Added $INSTALL_DIR/swarm/bin to PATH. $TADA"
+  echo -e "Added $INSTALL_DIR/ncbi-blast-2.8.1+/bin to PATH. $TADA"
 fi
 
 
@@ -379,7 +381,7 @@ else
   echo -e "$HOURGLASS RDP Classifier is being installed.. "
   wget -L -O rdp_classifier_$RDPCLASSIFIER.zip "https://sourceforge.net/projects/rdp-classifier/files/rdp-classifier/rdp_classifier_$RDPCLASSIFIER.zip/download"
   unzip rdp_classifier_$RDPCLASSIFIER.zip
-  rm rdp_classifier_$RDPCLASSIFIER.zip
+  # rm rdp_classifier_$RDPCLASSIFIER.zip
 
   echo "export PATH=\"$INSTALL_DIR/rdp_classifier_$RDPCLASSIFIER/:\$PATH\"" >> $SHELL_CONFIG
   echo -e "RDP Classifier has been installed $TADA"
@@ -415,6 +417,7 @@ fi
 # -----------------
 # PaPaRa
 # -----------------
+cd $INSTALL_DIR
 if [[ -x $INSTALL_DIR/papara_static_x86_64 ]]; then
   echo -e "$GREEN_TICK PaPaRa is already available." 
 else
@@ -428,6 +431,7 @@ fi
 # -----------------
 # EPA-ng
 # -----------------
+cd $INSTALL_DIR
 if [[ -x $INSTALL_DIR/epa/ ]]; then
 
   echo -e "$GREEN_TICK Evolutionary Placement Algorithm (EPA)-ng is already available." 
@@ -487,7 +491,7 @@ pip install ncbi-taxonomist
 # Add $INSTALL_DIR to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/:"* ]]; then
   echo "export PATH=\"$INSTALL_DIR/:\$PATH\"" >> $SHELL_CONFIG
-  echo -e "Added $INSTALL_DIR to PATH. Restart your terminal or run: source ~/.bashrc $TADA"
+  echo -e "Added $INSTALL_DIR to PATH. Restart your terminal or run: `source $SHELL_CONFIG` $TADA"
 fi
 
 # Move back to the setup directory
