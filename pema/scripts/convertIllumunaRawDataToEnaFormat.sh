@@ -1,8 +1,8 @@
 #!/bin/bash
 
 
-# Aim:    This script converts Illumina raw data file to the ENA format.
-#        All sample files that are going to be used in PEM., they need to be in the ENA format.
+# Aim:  This script converts Illumina raw data file to the ENA format.
+#       All sample files that are going to be used in PEM., they need to be in the ENA format.
 #
 # Usage:  This script will accomplish this task as long as your paired end raw data files have the following suffixes:
 #        forward read:   "_R1_001.fastq.gz"
@@ -17,116 +17,69 @@
 directory=${1}
 seqPattern=${2}
 
-# set the directoryPath the proper way no matter how the path was given by the user
-if [ ${directory:1} == "/" ]
-then
-	directoryPath=$directory
+#!/bin/bash -l
+
+set -euo pipefail
+
+# Input directory and sequence pattern
+directory=${1}
+seqPattern=${2}
+
+# Resolve absolute path
+if [[ "${directory:0:1}" == "/" ]]; then
+    directoryPath="$directory"
 else
-	cd $directory
-	directoryPath=$(pwd)
+    cd "$directory"
+    directoryPath=$(pwd)
 fi
 
+directoryPath="${directoryPath%/}"
+cd "$directoryPath"
 
-if [ ${directoryPath: -1} == "/" ]
-then
-	directoryPath=${directoryPath::-1}
-fi
+# Create output directory
+mkdir -p ena_format
+mapping_file="$directoryPath/mapping_files_for_PEMA.tsv"
+echo -e "initial_label_from_sequencer\tena_format_label\n" > "$mapping_file"
 
-cd $directoryPath
+# Function to convert a single pair
+convert_pair() {
+    r1="$1"
+    r2="$2"
+    seqPattern="$3"
+    directoryPath="$4"
+    base=$(basename "$r1")
+    sampleId="${base%%_R1_001.fastq.gz}"
 
-# decompress the initial raw data that the sequencer returned
-for file in ./*
-do
-	gunzip "$file"
-done
+    # Generate unique ERR ID (safe to use random here in parallel context or hash)
+    newName=$(printf "ERR%07d" $((1000000 + RANDOM % 8999999)))
 
-# convert them in the ENA format
-let counter=0
-let giveName=1000000
+    for read in 1 2; do
+        if [[ $read == 1 ]]; then file="$r1"; suffix="_1.fastq"; label="/1"; fi
+        if [[ $read == 2 ]]; then file="$r2"; suffix="_2.fastq"; label="/2"; fi
 
-for sample in ./*
-do
+        zcat "$file" | \
+        awk -v new="$newName" -v pat="$seqPattern" -v suf="$suffix" -v label="$label" '
+            NR % 4 == 1 {
+                gsub(/^@.*$/, "@" new ".", $0);
+                $0 = $0 NR label
+            } 
+            { print }
+        ' > "$directoryPath/ena_format/${newName}${suffix}"
+    done
 
-    echo "~~~~~~~~~~~~~~~~~~~~~~~"
-    echo $sample
+    echo -e "$sampleId\t$newName" >> "$directoryPath/transformations.tmp"
+}
 
+export -f convert_pair
 
-    ((counter+=1))
-    echo counter = $counter
-
-    let test=$counter%2
-    echo test = $test
-
-    if [ "$test" -eq "1" ]
-    then
-        let giveName+=1
-    else
-        let giveName=giveName
+# Pair up files
+find . -name "*_R1_001.fastq.gz" | sort | while read -r r1; do
+    r2="${r1/_R1_/_R2_}"
+    if [[ -f "$r2" ]]; then
+        echo "$r1 $r2 $seqPattern $directoryPath"
     fi
+done | parallel --colsep ' ' -j 4 convert_pair
 
-    echo giveName = $giveName
-
-	sampleName=${sample##*/} 
-	sampleId=${sampleName%%_R1_001.fastq.gz}
-
-	newName=$(printf "ERR%07d" $giveName)
-
-	sample="${sample:2}"
-	
-	if [[ $sample == *"_R1_001.fastq"* ]]
-	then
-		
-		echo sample_1 is: $sample
-		
-		sed "s/^@$seqPattern.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${sampleName}_R1_001.fastq"
-		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/1"} else print $0}' half_"${sampleName}"\_R1_001.fastq  > $directoryPath/ena_"${newName}"\_1.fastq 
-	fi
-	
-	if [[ $sample == *"_R2_001.fastq"* ]]
-	then
-
-		echo sample_2 is: $sample
-
-		sed "s/^@$seqPattern.*/@$newName\./g ; s/^@ERR.*/@$newName\./g ; s/^@SRR.*/@$newName\./g" $sample > $directoryPath/"half_${newName}_R2_001.fastq"
-		awk 'BEGIN{b = 1; c = 1} {if (NR % 4 == 1) {print $0 b++ " "c++"/2"} else print $0}' half_"${newName}"\_R2_001.fastq  > $directoryPath/ena_"${newName}"\_2.fastq
-
-	fi
-
-	echo -e $sampleId"\t"$newName >> transformations.txt
-
-
-done
-
-
-cat transformations.txt | sort | uniq > transformations_sort.txt
-rm transformations.txt ; mv transformations_sort.txt mapping_files_for_PEMA.tsv
-sed -i '1s/^/initial_label_from_sequencer\t\ena_format_label\n\n/' mapping_files_for_PEMA.tsv
-
-
-# remove some temp files created and move the converted files to a new folder
-rm half_*
-mkdir rawDataInEnaFormat
-mv ena_* rawDataInEnaFormat
-cd rawDataInEnaFormat
-
-# give the initial samples names to the converted files and compress them
-for filename in ./*; do mv "./$filename" "./$(echo "$filename" | sed -e 's/ena_//g')";  done
-gzip *
-
-# compress the initial files
-cd $directoryPath
-gzip *.fastq
-
-
-# Move initial data files out of the mydata directory
-mkdir initial_data
-mv *.fastq.gz initial_data
-mv initial_data ..
-mv mapping_files_for_PEMA.tsv ..
-mv rawDataInEnaFormat/* .
-rm -r rawDataInEnaFormat/
-
-
-
-
-
+# Final mapping file
+sort -u "$directoryPath/transformations.tmp" >> "$mapping_file"
+rm "$directoryPath/transformations.tmp"
