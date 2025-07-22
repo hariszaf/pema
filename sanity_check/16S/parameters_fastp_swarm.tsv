@@ -444,7 +444,7 @@ taxonomyFolderName=phylo_based_assign
 #
 #
 #=     taxonomyAssignmentMethod:
-#=        title: vsearch threads
+#=        title: 
 #=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used. Parameter required only if gene: gene_16S.
 #=        type: string
 #=        required: True

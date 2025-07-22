@@ -201,7 +201,6 @@ string{} readParameterFile(string parameter_file) {
         }
     }
 
-    # my_case{'gene'} == "12S" ||
     if ( my_case{'gene'} == "ITS") {
         if (my_case{'clusteringAlgo'} != "swarm") {
             println('PEMA support only the Swarm algorithm for the clustering step for the case of ' + my_case{'gene'} + ' marker gene. Please set swarm as your clusteringAlgo.')
@@ -209,7 +208,7 @@ string{} readParameterFile(string parameter_file) {
         }
     }
 
-    # return the map
+    # Return the map
     return (my_case)
 
 }
@@ -318,54 +317,99 @@ string buildDirectories(string{} params, string{} globalVars){
 # Function to train classifier based on a local reference database if required
 string{} trainClassifier(string{} params, string{} globalVars){
 
+
     if (globalVars{'environment'} == "container"){
-        globalVars{'customDbFilesPath'} = '/mnt/analysis/custom_ref_db'
+
+        globalVars{'customDbFilesPath'} = '/mnt/analysis/'  + params{'path_to_custom_db_files'}
+
     } else {
-        globalVars{'customDbFilesPath'} = globalVars{'tools'} + '/custom_ref_db'
+
+        if (params{'path_to_custom_db_files'}.startsWith('/') ) {
+        
+            globalVars{'customDbFilesPath'} = params{'path_to_custom_db_files'}
+
+        } else {
+
+          globalVars{'customDbFilesPath'} = params{'paramsFilePath'} + '/' + params{'path_to_custom_db_files'}
+
+        }
     }
+
+    # Move to custom db files dir
     globalVars{'customDbFilesPath'}.chdir()
+    string[] dbFiles = globalVars{'customDbFilesPath'}.dir()
+
+    # Get database name
+    string taxonomyFile
+    string sequenceFile
+    for (string file : dbFiles) {
+        if (file.endsWith(".fasta")) {
+            sequenceFile = file
+        } else if (file.endsWith(".nds")) {
+            taxonomyFile = file
+        } else if (file.endsWith(".nds") && params{'classifierAlgo'} == 'RDPClassifier' ) {
+            taxonomyFile = file
+        }
+    }
+
+    # Name custom db based on taxonomy's file filename
+    string db_name = taxonomyFile.split('\.')[0]
+    globalVars{'name_of_custom_db'} = db_name
 
     if (params{'classifierAlgo'} == 'RDPClassifier') {
 
-        # Path for user's files
-        globalVars{'myCustomDbInPema'}  = globalVars{'tools'} + "/RDPTools/TRAIN"
-        string checkIfAlreadyTrained    = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
+        # Path for custom db's files in PEMA RDPClassifier 
+        string myRdpDB = globalVars{'myCustomDbInPema'} + '/'  + "/RDPTools/TRAIN/" + db_name
+        globalVars{'myCustomDbInPema'} = myRdpDB
+
+        myRdpDB.mkdir()
 
         # Check if RDPClassifier has already been trained with this custom DB
-        if (checkIfAlreadyTrained.isDir()) {
+        string myRdpDBGenus = globalVars{'myCustomDbInPema'} + '/' + db_name + '/' + 'genus_wordConditionalProbList.txt'
+        if (myRdpDBGenus.exists()) {
 
             println('The RDPClassifier has been already trained with this custom db. Pema will proceed using that.')
 
-            # If not, train it!
+        # If not, train it!
         } else {
+ 
+            string fastaFile = db_name + ".fasta"
+            string taxonFile = db_name + ".tsv"
 
-            string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.tsv'
-            string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
+            # Move to the PEMA RDPClassifier path
+            myRdpDB.chdir()
+            sys cp $taxonomyFile $taxonFile
+            sys cp $sequenceFile $fastaFile
 
             # Train the RDPClassifier using your custom COI ref db
-            sys bash $globalVars{'scripts'} / trainDbForRDPClassifier.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+            sys bash $globalVars{'scripts'}/trainDbForRDPClassifier.sh $taxonFile $fastaFile $db_name
 
         }
 
     } else if (params{'classifierAlgo'} == 'CREST') {
 
-        # Custom files
-        globalVars{'customDbFilesPath'}.chdir()
-        string taxonomyFile = globalVars{'customDbFilesPath'} + '/' + '*.nds'
-        string sequenceFile = globalVars{'customDbFilesPath'} + '/' + '*.fasta'
+        string myCrestDB = globalVars{'crest'} + '/' + db_name
+        globalVars{'myCustomDbInPema'} = myCrestDB
 
-        globalVars{'myCustomDbInPema'} =  '/home/tools/CREST/LCAClassifier/parts/flatdb'
-        string checkIfAlreadyTrained   = globalVars{'myCustomDbInPema'} + '/' + params{'name_of_custom_db'}
+        # Custom files
+        myCrestDB.mkdir()
 
         # Check if CREST has already been trained with this custom db
-        if (checkIfAlreadyTrained.isDir()) {
+        string myCrestDBNames = globalVars{'myCustomDbInPema'} + '/' + db_name + '/' + db_name + '.names'
+        if (myCrestDBNames.exists()) {
 
             println('CREST has already been trained with this custom db. Pema will proceed using that.')
 
         } else {
 
             # Train CREST using a custom ref db
-            sys bash $globalVars{'scripts'} / trainDbForCREST.sh $taxonomyFile $sequenceFile $params{'name_of_custom_db'}
+            myCrestDB.chdir()
+            string fastaFile = db_name + ".fasta"
+            string taxonFile = db_name + ".nds"
+            sys cp $globalVars{'customDbFilesPath'}/$taxonomyFile $taxonFile
+            sys cp $globalVars{'customDbFilesPath'}/$sequenceFile $fastaFile
+            # sys bash $globalVars{'scripts'}/trainDbForCREST.sh $taxonFile $fastaFile $db_name
+            sys python $globalVars{'scripts'}/make_new_crest_db.py $taxonFile
         }
     }
 
@@ -376,6 +420,21 @@ string{} trainClassifier(string{} params, string{} globalVars){
 
 # Function to initialize a PEMA analysis
 string{} initializeAnalysis(string{} params) {
+
+    string[] supported_genes = ["COI", "16S", "18S", "12S", "ITS"]
+
+    if ( ! supported_genes.has(params{'gene'}) ){
+        string genes 
+
+        for (string gene : supported_genes){
+            genes += gene + ","
+        }
+
+        string gene_error_msg = "\n" + "❌ gene provided not supported. PEMA currently supports: " + genes + "\n" 
+        println(gene_error_msg)
+
+        exit 1
+    }
 
     string{} globalVars
 
@@ -523,7 +582,8 @@ string{} initializeAnalysis(string{} params) {
 
     # IMPORTANT! Module to train classifiers is enabled through this statement
     if ( params.hasKey('custom_ref_db') && params{'custom_ref_db'} == 'Yes'){
-        string{} globalVars = trainClassifier(params, globalVars)
+        string{} classVars = trainClassifier(params, globalVars)
+        globalVars = classVars
     }
 
     # Taxonomy assignment path

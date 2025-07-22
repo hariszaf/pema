@@ -25,6 +25,7 @@ sanity_check/18S/TEST*/
 sanity_check/COI/TEST*/
 sanity_check/ITS/TEST*/
 sanity_check/12S/TEST*/
+sanity_check/custom_crest/TEST*/
 sanity_check/non_ena_data/TEST.*/
 
 # Ignore any .sif file

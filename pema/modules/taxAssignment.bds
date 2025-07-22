@@ -36,6 +36,8 @@ string crestAssign(string{} params, string{} globalVars) {
 
    wait
 
+   println("-- Search file: " + searchFile)
+
    assignmentsFile = params{'assignmentPath'} + '/' + params{'taxonomyFolderName'} + '/' + "assignments.txt"
 
    if (assignmentsFile.exists()){
@@ -44,7 +46,6 @@ string crestAssign(string{} params, string{} globalVars) {
    
    } else if ( ! params.hasKey('custom_ref_db') || params{'custom_ref_db'} != 'Yes') {
   
-      println("-- Search file: " + searchFile)
 
       # CASE 1:
       # 16S and 18S alignment-based taxonomy assignment
@@ -76,23 +77,25 @@ string crestAssign(string{} params, string{} globalVars) {
    # CASE 3:
    # Using the CREST algorithm with a custom reference database
    } else {
+      params{'referenceDb'} = globalVars{'name_of_custom_db'}
+      runCrest4(searchFile, params, globalVars)
 
-      task blastn \
-         -task megablast \
-         -query all_sequences_grouped.fa \
-         -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/$params{'name_of_custom_db'}/$params{'name_of_custom_db'} \
-         -num_alignments 100 \
-         -outfmt 5 \
-         -out $params{'name_of_custom_db'}_$params{'taxonomyFolderName'}.xml \
-         -num_threads $params{'threads'}
+      # task blastn \
+      #    -task megablast \
+      #    -query all_sequences_grouped.fa \
+      #    -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/$params{'name_of_custom_db'}/$params{'name_of_custom_db'} \
+      #    -num_alignments 100 \
+      #    -outfmt 5 \
+      #    -out $params{'name_of_custom_db'}_$params{'taxonomyFolderName'}.xml \
+      #    -num_threads $params{'threads'}
 
-      wait
+      # wait
 
-      task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
-        -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
-        -d $params{'name_of_custom_db'} \
-        -t allTab_$params{'taxonomyFolderName'}.tsv \
-        -o $params{'taxonomyFolderName'} $params{'name_of_custom_db'}_$params{'taxonomyFolderName'}.xml
+      # task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
+      #   -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
+      #   -d $params{'name_of_custom_db'} \
+      #   -t allTab_$params{'taxonomyFolderName'}.tsv \
+      #   -o $params{'taxonomyFolderName'} $params{'name_of_custom_db'}_$params{'taxonomyFolderName'}.xml
 
       wait
    }
@@ -127,6 +130,11 @@ string runCrest4(string searchFile, string{} params, string{} globalVars) {
    gene_db_map{'silva_138'} = 'silvamod138pr2'
    gene_db_map{'silva_128'} = 'silvamod128'
    gene_db_map{'pr2'}       = 'silvamod138pr2'
+   if (params{'custom_ref_db'} == "Yes") {
+      gene_db_map{globalVars{'name_of_custom_db'}} = globalVars{'crest'} + "/" + globalVars{'name_of_custom_db'}
+   }
+   wait
+   println(gene_db_map)
 
    string cmd
    if (searchFile.exists()) {
@@ -139,6 +147,7 @@ string runCrest4(string searchFile, string{} params, string{} globalVars) {
             "--output_dir "  + params{"taxonomyFolderName"}
 
    } else {
+
       cmd = "crest4 --fasta all_sequences_grouped.fa " +\
             "--search_algo " + params{"searchAlgo"} + " " +\
             "--num_threads " + params{"threads"} + " " +\
@@ -149,7 +158,7 @@ string runCrest4(string searchFile, string{} params, string{} globalVars) {
    string crest_command = "\n" + ">>> 🏷️" + cmd + "\n" + "<<<" + assignmentsFile
    println(crest_command)
 
-   # taskName:= "Run Crest4"
+   # Run Crest4
    task (taskName:="run-crest", canFail=true) {
       sys $cmd
    }
@@ -272,8 +281,16 @@ string rdpAssign(string{} params, string{} globalVars) {
 
    params{'assignmentPath'}.chdir()
 
-   if ( params{'custom_ref_db'} != 'Yes' ) {
 
+   string tax_assign_file = "tax_assignments.tsv"
+
+   if ( tax_assign_file.exists()){
+      string tax_exist_msg = "\n" + "✅ RPDClassifier has already returned taxonomies (`tax_assignment.tsv`). " + "\n"
+      println(tax_exist_msg)
+      return "ok"
+   }
+
+   if ( params{'custom_ref_db'} != 'Yes' ) {
 
       if ( params{'gene'} == "COI" ) {
 
@@ -305,7 +322,7 @@ string rdpAssign(string{} params, string{} globalVars) {
 
       # That is the case where a custom DB has been asked for the taxonomy step 
       task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify \
-            -t $globalVars{'path'}/tools/RDPTools/TRAIN/$params{'name_of_custom_db'}/rRNAClassifier.properties \
+            -t $globalVars{'path'}/tools/RDPTools/TRAIN/$globalVars{'name_of_custom_db'}/rRNAClassifier.properties \
             -o tax_assign_temp.txt all_sequences_grouped.fa
 
    }

@@ -9,7 +9,6 @@ abd_table         = sys.argv[1]
 crest_assignments = sys.argv[2]
 clustering_algo   = sys.argv[3]
 
-
 main_dir        = Path(abd_table).parent.absolute()
 assignments_dir = Path(crest_assignments).parent.absolute()
 

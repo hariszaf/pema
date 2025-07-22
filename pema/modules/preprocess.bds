@@ -77,7 +77,7 @@ string preprocessWithFastp(string{} params, string{} globalVars){
             task $fastp_cmd
             wait
 
-            string fastp_msg = "\n\n" + "fastpq for sample" + sample + " is now complete!"
+            string fastp_msg = "\n\n" + "fastpq for sample: " + sample + " is now complete!"
             println(fastp_msg)
 
             sys mv *.html *.json $globalVars{'fastpqPath'}
@@ -589,7 +589,7 @@ string{} obiDereplicate(string{} params, string{} globalVars){
         sys if [ $(find '$globalVars{'unzipPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
         string[] mergedFiles = globalVars{'unzipPath'}.dir()
 
-        # string fileForDerepl
+        # Dereplicate sample 
         for ( string nodereplicate : mergedFiles ) {
 
             string sample = nodereplicate.split("\.merged\.fasta")
@@ -604,14 +604,14 @@ string{} obiDereplicate(string{} params, string{} globalVars){
             wait
         }
 
-    } else {  # Preprocessing with fastp 
+    # Preprocessing with fastp 
+    } else {
 
         globalVars{'fastpMergedPath'}.chdir()
         sys if [ $(find '$globalVars{'fastpMergedPath'}' -name '*.DS_Store*') ] ; then  rm .*[DS_]* ; fi
         string[] mergedFiles = globalVars{'fastpMergedPath'}.dir()
-        print(mergedFiles)
 
-        # string fileForDerepl
+        # Dereplicate sample 
         for ( string nodereplicate : mergedFiles ) {
 
             string sample = nodereplicate.split("\.merged\.fastq")
