@@ -57,6 +57,24 @@ convert_pair() {
     base=$(basename "$r1")
     sampleId="${base%%_R1_001.fastq.gz}"
 
+    mapping_file="$directoryPath/mapping_files_for_PEMA.tsv"
+    tmp_file="$directoryPath/transformations.tmp"
+    output_dir="$directoryPath/ena_format"
+
+    # Check if sampleId already in either mapping file or tmp file
+    if grep -q "^${sampleId}[[:space:]]" "$mapping_file" 2>/dev/null || \
+       grep -q "^${sampleId}[[:space:]]" "$tmp_file" 2>/dev/null; then
+
+        # Check if both corresponding output files exist
+        found_1=$(find "$output_dir" -name "${sampleId}"'*_1.fastq.gz' | wc -l)
+        found_2=$(find "$output_dir" -name "${sampleId}"'*_2.fastq.gz' | wc -l)
+
+        if [[ "$found_1" -eq 1 && "$found_2" -eq 1 ]]; then
+            echo "[SKIP] $sampleId already processed."
+            return 0
+        fi
+    fi
+
     # Generate unique ERR ID (safe to use random here in parallel context or hash)
     newName=$(printf "ERR%07d" $((1000000 + RANDOM % 8999999)))
 
@@ -77,6 +95,7 @@ convert_pair() {
     echo -e "$sampleId\t$newName" >> "$directoryPath/transformations.tmp"
 }
 
+# Makes the convert_pair function available to child processes, e.g. parallel 
 export -f convert_pair
 
 # Pair up files
