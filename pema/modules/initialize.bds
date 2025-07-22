@@ -588,7 +588,7 @@ string{} initializeAnalysis(string{} params) {
     # Convert Illumina data to ENA format
     if (params{'EnaData'} == 'No') {
 
-        sys bash $globalVars{'scripts'}/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
+        sys bash $globalVars{'scripts'}/convertIlluminaToEna.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
 
         wait
 
