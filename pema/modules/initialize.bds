@@ -585,10 +585,14 @@ string{} initializeAnalysis(string{} params) {
     globalVars{'genePath'}.chdir()
     params{'gene'}.mkdir()
 
-
     # Convert Illumina data to ENA format
     if (params{'EnaData'} == 'No') {
+
         sys bash $globalVars{'scripts'}/convertIllumunaRawDataToEnaFormat.sh $globalVars{'dataPath'} $params{'sequencerPrefix'}
+
+        wait
+
+        globalVars{'dataPath'} = globalVars{'dataPath'} + '/' + "ena_format"
     }
 
     # IMPORTANT! Module to train classifiers is enabled through this statement
@@ -623,5 +627,4 @@ string{} initializeAnalysis(string{} params) {
         }
     }
     return (globalVars)
-
 }
