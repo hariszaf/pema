@@ -38,8 +38,12 @@ cd "$directoryPath"
 
 # Create output directory
 mkdir -p ena_format
+
+# Create mapping file if not already there
 mapping_file="$directoryPath/mapping_files_for_PEMA.tsv"
-echo -e "initial_label_from_sequencer\tena_format_label\n" > "$mapping_file"
+if [[ ! -f "$mapping_file" ]]; then
+    echo -e "initial_label_from_sequencer\tena_format_label\n" > "$mapping_file"
+fi
 
 # Set pigz as compressor if available
 if command -v pigz &> /dev/null; then
@@ -47,6 +51,7 @@ if command -v pigz &> /dev/null; then
 else
     compressor="gzip"
 fi
+
 export compressor
 
 # Function to convert a single pair
@@ -63,8 +68,8 @@ convert_pair() {
     output_dir="$directoryPath/ena_format"
 
     # Check if sampleId already in either mapping file or tmp file
-    if grep -q "^${sampleId}" "$mapping_file" 2>/dev/null || \
-       grep -q "^${sampleId}" "$tmp_file" 2>/dev/null; then
+    if grep "^${sampleId}" "$mapping_file" 2>/dev/null || \
+       grep "^${sampleId}" "$tmp_file" 2>/dev/null; then
 
         # Try to get the mapped newName from mapping file or tmp file
         newName=$(awk -v sid="$sampleId" '$1 == sid { print $2 }' "$mapping_file" 2>/dev/null || true)
@@ -72,21 +77,16 @@ convert_pair() {
             newName=$(awk -v sid="$sampleId" '$1 == sid { print $2 }' "$tmp_file" 2>/dev/null || true)
         fi
 
-        echo "..." $newName
-
         # If we have a newName, check for existing output files
         if [[ -n "$newName" ]]; then
-            found_1=$(find "$output_dir" -name "ena_${newName}_1.fastq.gz" | wc -l)
-            found_2=$(find "$output_dir" -name "ena_${newName}_2.fastq.gz" | wc -l)
+            found_1=$(find "$output_dir" -name "${newName}_1.fastq.gz" | wc -l)
+            found_2=$(find "$output_dir" -name "${newName}_2.fastq.gz" | wc -l)
 
             if [[ "$found_1" -eq 1 && "$found_2" -eq 1 ]]; then
                 echo "[SKIP] $sampleId already processed as $newName"
                 return 0
             fi
         fi
-
-
-
     fi
 
     # Generate unique ERR ID (safe to use random here in parallel context or hash)
@@ -96,7 +96,7 @@ convert_pair() {
         if [[ $read == 1 ]]; then file="$r1"; suffix="_1.fastq"; label="/1"; fi
         if [[ $read == 2 ]]; then file="$r2"; suffix="_2.fastq"; label="/2"; fi
 
-        echo "[DEBUG] compressor = '$compressor'" >&2
+        echo ">> Converting sample: $sampleId"
 
         zcat "$file" | \
         awk -v new="$newName" -v pat="$seqPattern" -v suf="$suffix" -v label="$label" '
@@ -123,5 +123,7 @@ find . -name "*_R1_001.fastq.gz" | sort | while read -r r1; do
 done | parallel --colsep ' ' -j 4 convert_pair
 
 # Final mapping file
-sort -u "$directoryPath/transformations.tmp" >> "$mapping_file"
-rm "$directoryPath/transformations.tmp"
+if [[ -f "$directoryPath/transformations.tmp" ]]; then
+    sort -u "$directoryPath/transformations.tmp" >> "$mapping_file"
+    rm "$directoryPath/transformations.tmp"
+fi
