@@ -19,9 +19,6 @@ VERSION_ARG=false
   KOFAM_ARG=false
  SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
-SHELL_CONFIG=$CONDA_PREFIX/etc/conda/activate.d/env_path.sh
-# "$HOME/.bashrc"
-
 
 # Parse options using getopt
 # PARSED=$(getopt --options eh --long env,help -- "$@")
@@ -59,7 +56,7 @@ done
 
 # Validate ENV value and that --env value is provided
 if ! $HELP_ARG && [[ -z "$RUN_ENV" ]]; then
-  echo -e "$RED_CROSS Error: --env is required."
+  echo -e "$RED_CROSS Error: --env is required; it can take either 'local' or 'container' value."
   exit 1
 fi
 
@@ -68,7 +65,19 @@ if [[ -n "$RUN_ENV" && "$RUN_ENV" != "local" && "$RUN_ENV" != "container" ]]; th
   exit 1
 fi
 
-# 
+if [[ -z "$CONDA_PREFIX" ]]; then
+    echo "❌ Error: CONDA_PREFIX is not set" >&2
+    exit 1
+fi
+
+
+get_shell_config() {
+    echo "$CONDA_PREFIX/etc/conda/activate.d/env_path.sh"
+}
+
+SHELL_CONFIG="$(get_shell_config)"
+echo "Shell config path: $SHELL_CONFIG"
+ 
 echo -e "\n Building conda environment and installing required dependencies to enable pema ${ROCKET} \n\n"
 
 if $HELP_ARG; then
@@ -147,34 +156,37 @@ chmod +x "$CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh"
 # ====================================
 
 # Build a hidden folder for pema-related software
-INSTALL_DIR=$HOME/.pema
-
-echo $INSTALL_DIR
-mkdir -p "$INSTALL_DIR"
+if [[ "$RUN_ENV" == "local" ]]; then
+  INSTALL_DIR=$HOME/.pema
+  mkdir -p "$INSTALL_DIR"
+else
+  INSTALL_DIR=/opt
+fi
 cd "$INSTALL_DIR"
 
 # --------------
 # Install BDS
 # --------------
-BDS_DIR="$INSTALL_DIR/.bds"
-BDS_TGZ="$INSTALL_DIR/bds_Linux.tgz"
+if [[ "$RUN_ENV" == "local" ]]; then
+  BDS_DIR="$INSTALL_DIR/.bds"
+  BDS_TGZ="$INSTALL_DIR/bds_Linux.tgz"
 
-if [[ -x "$BDS_DIR/bds" ]]; then
-  echo -e "$GREEN_TICK bds is already installed at $BDS_DIR"
-else
-  echo -e "$HOURGLASS Installing bds to $BDS_DIR..."
-  cp $SETUP_WD/pema/ext_data/bds_Linux.tgz "$BDS_TGZ"
-  tar -xvzf bds_*.tgz
-  rm -f "$BDS_TGZ"
-  echo -e "BigDataScript programming language was installed at: $BDS_DIR  $TADA"
+  if [[ -x "$BDS_DIR/bds" ]]; then
+    echo -e "$GREEN_TICK bds is already installed at $BDS_DIR"
+  else
+    echo -e "$HOURGLASS Installing bds to $BDS_DIR..."
+    cp $SETUP_WD/pema/ext_data/bds_Linux.tgz "$BDS_TGZ"
+    tar -xvzf bds_*.tgz
+    rm -f "$BDS_TGZ"
+    echo -e "BigDataScript programming language was installed at: $BDS_DIR  $TADA"
+  fi
+
+  # Add $INSTALL_DIR/.bds to PATH if not already included
+  if [[ ":$PATH:" != *":$INSTALL_DIR/.bds:"* ]]; then
+    echo "export PATH=\"$INSTALL_DIR/.bds:\$PATH\"" >> $SHELL_CONFIG
+    echo -e "Added ${INSTALL_DIR}/.bds to PATH. $TADA"
+  fi
 fi
-
-# Add $INSTALL_DIR/.bds to PATH if not already included
-if [[ ":$PATH:" != *":$INSTALL_DIR/.bds:"* ]]; then
-  echo "export PATH=\"$INSTALL_DIR/.bds:\$PATH\"" >> $SHELL_CONFIG
-  echo -e "Added ${INSTALL_DIR}/.bds to PATH. $TADA"
-fi
-
 
 # --------------
 # Versions
@@ -188,6 +200,11 @@ SPADES=3.14.0
 RDPCLASSIFIER=2.14
 RAXML=1.2.2
 CREST_PEMA="https://zenodo.org/record/5734317/files/crest.tar.gz"
+
+
+
+SHELL_CONFIG="$(get_shell_config)"
+echo "Shell config path: $SHELL_CONFIG"
 
 
 # --------------
@@ -222,6 +239,13 @@ if [[ ":$PATH:" != *":$INSTALL_DIR/FastQC:"* ]]; then
   echo -e "Added $INSTALL_DIR/FastQC to PATH. $TADA"
 fi
 
+# --------------
+# Install cutadapt
+# --------------
+
+pipx install cutadapt
+pipx ensurepath
+
 
 # --------------
 # Install  OBItools
@@ -232,7 +256,7 @@ else
   echo -e "$HOURGLASS Installing Obitools4..."
   mkdir obitools4
   cd obitools4
-  wget -O -L  https://raw.githubusercontent.com/metabarcoding/obitools4/master/install_obitools.sh 
+  wget -L -O install_obitools.sh https://raw.githubusercontent.com/metabarcoding/obitools4/master/install_obitools.sh
   bash install_obitools.sh -i .
   echo "export PATH=\"$INSTALL_DIR/obitools4/bin:\$PATH\"" >> $SHELL_CONFIG
   echo -e "Obitools4 is now added on PATH $TADA"
@@ -370,8 +394,6 @@ fi
 # -----------------
 # Install RDP Classifier
 # -----------------
-
-
 if [[ -x $INSTALL_DIR/rdp_classifier_$RDPCLASSIFIER ]]; then
 
   echo -e "$GREEN_TICK RDP Classifier is already installed"
