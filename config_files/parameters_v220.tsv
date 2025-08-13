@@ -33,7 +33,7 @@ gene=16S
 #=          If a relative path is given, it will be resolved relative to the location of this parameters file.
 #=        type: string
 #=        required: True
-sequence_files=
+sequence_files=mydata
 #
 #
 #=     outputFolderName:
@@ -646,50 +646,6 @@ numOligotons=2
 classifierAlgo=CREST
 #
 #
-#=     scoreDrop:
-#=        title: score drop
-#=        description:  >
-#=          Determines the range of hits to retain and the range to discard based on a drop in percentage from the score of the best hit. 
-#=          Any hit below the following value: "(100 - score_drop)/100 * best_hit_score" is ignored.
-#=        default 2.0
-#=        type: string
-#=        required: True
-#=        validation:
-#=          - range: 
-#=            min: 0 
-scoreDrop=
-#
-#
-#=     minScore:
-#=        title: minimum bit-score 
-#=        description: >
-#=          The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. 
-#=          All hits below this score are ignored. 
-#=          When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. 
-#=          The default is `155` for BLAST and `0.75` for VSEARCH.
-#=        type: string
-#=        required: True
-#=        validation:
-#=          - range: 
-#=            min: 0 
-minScore=
-#
-#
-#=     searchAlgo:
-#=        title: minimum bit-score 
-#=        description: >
-#=          The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. 
-#=          All hits below this score are ignored. 
-#=          When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. 
-#=          The default is `155` for BLAST and `0.75` for VSEARCH.
-#=        type: string
-#=        required: True
-#=        validation:
-#=          - value: vsearch
-#=          - value: blast
-searchAlgo=vsearch
-#
-#
 #=     taxonomyFolderName:
 #=        title: number of cores for PaPaRa
 #=        description: > 
@@ -734,6 +690,53 @@ taxonomyAssignmentMethod=alignment
 #=          - value: midori_1
 #=          - value: midori_2
 referenceDb=silva_138
+#
+#			----------   CREST   --------------
+#
+#
+#=     scoreDrop:
+#=        title: score drop
+#=        description:  >
+#=          Determines the range of hits to retain and the range to discard based on a drop in percentage from the score of the best hit. 
+#=          Any hit below the following value: "(100 - score_drop)/100 * best_hit_score" is ignored.
+#=        default 2.0
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0 
+scoreDrop=
+#
+#
+#=     minScore:
+#=        title: minimum bit-score 
+#=        description: >
+#=          The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. 
+#=          All hits below this score are ignored. 
+#=          When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. 
+#=          The default is `155` for BLAST and `0.75` for VSEARCH.
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0 
+minScore=
+#
+#
+#=     searchAlgo:
+#=        title: minimum bit-score 
+#=        description: >
+#=          The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. 
+#=          All hits below this score are ignored. 
+#=          When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. 
+#=          The default is `155` for BLAST and `0.75` for VSEARCH.
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - value: vsearch
+#=          - value: blast
+searchAlgo=vsearch
+#
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
 #

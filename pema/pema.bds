@@ -82,7 +82,7 @@ if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
 
    # If ITS as marker gene, remove length variablity with cutadat
    if ( (paramsTrimmoStep{'gene'} == 'ITS') && (paramsTrimmoStep{'cutadapt'} == 'Yes') ) {
-      cutadaptForIts(paramsTrimmoStep, globalVars)
+      globalVars = cutadaptForIts(paramsTrimmoStep, globalVars)
    }
    wait
 
@@ -113,7 +113,6 @@ if ( paramsFirstAssignment{'preprocess'} == 'original' ) {
    preprocessWithFastp(paramsFirstAssignment, globalVars)
    wait
 }
-
 
 ################################################################
 #           Dereplicate sequence samples                       #

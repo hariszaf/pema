@@ -97,6 +97,7 @@ string preprocessWithFastp(string{} params, string{} globalVars){
     
 }
 
+
 # Function to run FASTQC
 string qualityControl(string{} params, string{} globalVars) {
 
@@ -132,38 +133,74 @@ string qualityControl(string{} params, string{} globalVars) {
 
 
 # Function to run CUTADAPT
-string cutadaptForIts(string{} params, string{} globalVars) {
+string{} cutadaptForIts(string{} params, string{} globalVars) {
 
     globalVars{'dataPath'}.chdir()
 
-    string cutadaptOutputDirectory = 'cutadapt'
-    string initialData = 'initialData'
+    string cutadaptOutDir = globalVars{'dataPath'} + "/" + 'cutadapt'
+    bool   alreadyDone    = false
 
-    if ( cutadaptOutputDirectory.isDir() && initialData.isDir() ) {
+    if ( cutadaptOutDir.isDir()  ) {  # && initialDataDir.isDir()
+
         println('A directory for the cutadapt output is already there.') 
 
+        string[] outputFiles
+        string[] datafiles = globalVars{'dataPath'}.dir()
+        
+        outputFiles = cutadaptOutDir.dir()
+
+        if (outputFiles.isEmpty()) {
+            println("Empty cutadapt output directory.")
+            alreadyDone = false
+
+        } else {
+            alreadyDone = true
+
+            if (outputFiles.size() != datafiles.size() - 1) {
+                println("File count mismatch between original and cutadapt folders.")
+                alreadyDone = false
+                sys mv $cutadaptOutDir /tmp
+            } else {
+                println("Same number of datafiles in original and cutadapt folders.")
+
+                for (string filename : outputFiles) {
+                    string file = cutadaptOutDir + "/" + filename
+                    if (file.size() == 0) {
+                        println("Found empty file: " + filename)
+                        alreadyDone = false
+                        sys mv $cutadaptOutDir /tmp
+                        break
+                    }
+                }
+            }
+        }
+        if (!alreadyDone) {
+            cutadaptOutDir.mkdir()
+            sys chmod 777 $globalVars{'outputFilePath'} -R
+            println('The previous cutadapt folder was moved under /tmp and a new one was built.')
+        }
+
     } else {
-        cutadaptOutputDirectory.mkdir()
-        initialData.mkdir()
+        cutadaptOutDir.mkdir()
         sys chmod 777 $globalVars{'outputFilePath'} -R
         println('An output directory for cutadapt was just made.')
     }    
     
     wait
-    task /usr/local/bin/Rscript $globalVars{'scripts'}/cutadaptITS.R $params{'forwardITSPrimer'} $params{'reverseITSPrimer'} $globalVars{'dataPath'}
+    if (alreadyDone == false ) {
+        task {
+            # sys Rsc=$(which Rscript) 
+            sys $(which Rscript) $globalVars{'scripts'}/cutadaptITS.R $params{'forwardITSPrimer'} $params{'reverseITSPrimer'} $globalVars{'dataPath'}
+        }    
+    }
     
     wait
-    
-    sys mv *.fastq.gz initialData
-    sys mv $initialData ../  #$globalVars{'outputPoint'}/$globalVars{'analysisName'}
-    sys mv cutadapt/* .
-    sys rm -r cutadapt
-    
-    wait
+
+    globalVars{'dataPath'} = cutadaptOutDir
 
     println 'Cutadapt has been completed successfully.'
 
-    return 'ok'
+    return globalVars
 
 }
 
@@ -662,6 +699,7 @@ string swarmDereplicate(string{} params, string{} globalVars){
     return 'ok'
 
 }
+
 
 # Function to merge all samples in one; it goes with the obiDereplicate() function
 string mergeFilesNonSwarm(string{} params, string{} globalVars){

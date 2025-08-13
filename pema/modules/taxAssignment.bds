@@ -45,34 +45,8 @@ string crestAssign(string{} params, string{} globalVars) {
       println("We already have a CREST-based assignment file on this case.")
    
    } else if ( ! params.hasKey('custom_ref_db') || params{'custom_ref_db'} != 'Yes') {
-  
-
-      # CASE 1:
-      # 16S and 18S alignment-based taxonomy assignment
-      if ( (params{'gene'} == '16S' || params{'gene'} == '18S' || params{'gene'} == 'COI') && params{'taxonomyAssignmentMethod'} != 'phylogeny' ) {
 
          runCrest4(searchFile, params, globalVars)
-
-      # CASE 2:
-      # Alignment-based taxonomy assignmnet for the ITS marker gene
-      } else if (params{'gene'}  == 'ITS') {
-
-         # $globalVars{'path'}/tools/ncbi-blast-2.8.1+/bin/
-         task blastn -task megablast \
-            -query all_sequences_grouped.fa \
-            -db $globalVars{'path'}/tools/CREST/LCAClassifier/parts/flatdb/unite/unite.fasta \
-            -num_alignments 100 -outfmt 5 \
-            -out unite_$params{'taxonomyFolderName'}.xml \
-            -num_threads $params{'threads'}
-
-         wait
-
-         task $globalVars{'path'}/tools/CREST/LCAClassifier/bin/classify \
-            -c $globalVars{'path'}/tools/CREST/LCAClassifier/parts/etc/lcaclassifier.conf \
-            -d unite \
-            -t allTab_$params{'taxonomyFolderName'}.tsv \
-            -o $params{'taxonomyFolderName'} unite_$params{'taxonomyFolderName'}.xml
-      }
 
    # CASE 3:
    # Using the CREST algorithm with a custom reference database
@@ -113,7 +87,8 @@ string runCrest4(string searchFile, string{} params, string{} globalVars) {
    gene_db_map{'silva_138'} = 'silvamod138pr2'
    gene_db_map{'silva_128'} = 'silvamod128'
    gene_db_map{'pr2'}       = 'silvamod138pr2'
-   if (params{'custom_ref_db'} == "Yes") {
+   gene_db_map{'unite'}     = 'unite2025'
+   if ( params.hasKey('custom_ref_db') && params{'custom_ref_db'} == "Yes") {
       gene_db_map{globalVars{'name_of_custom_db'}} = globalVars{'crest'} + "/" + globalVars{'name_of_custom_db'}
    }
    wait
