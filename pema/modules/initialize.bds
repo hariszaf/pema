@@ -346,7 +346,7 @@ string{} trainClassifier(string{} params, string{} globalVars){
     for (string file : dbFiles) {
         if (file.endsWith(".fasta")) {
             sequenceFile = file
-        } else if (file.endsWith(".nds")) {
+        } else if (file.endsWith("_nds.tsv") || file.endsWith(".nds")) {
             taxonomyFile = file
         } else if (file.endsWith(".nds") && params{'classifierAlgo'} == 'RDPClassifier' ) {
             taxonomyFile = file

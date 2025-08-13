@@ -360,19 +360,6 @@ if ( paramasFormatting{'emptyCheckpoints'} == 'Yes' ) {
 }
 wait
 
-if ( (paramasFormatting{'gene'} == 'ITS') && (paramasFormatting{'cutadapt'} == 'Yes') ) {
-
-    globalVars{'dataPath'}.chdir()
-    
-    sys mkdir data_after_cutadapt 
-    sys mv *fastq.gz data_after_cutadapt/
-    sys mv data_after_cutadapt/ ..
-
-    sys mv ../initialData/* .
-    sys rmdir ../initialData
-
-}
-
 # Make a copy of 'parameters.tsv' file to the output folder.
 sys cp $globalVars{'parameterFile'} $globalVars{'outputFilePath'}
 
