@@ -64,19 +64,6 @@ if [[ -n "$RUN_ENV" && "$RUN_ENV" != "local" && "$RUN_ENV" != "container" ]]; th
   echo -e "$RED_CROSS Error: --env must be either 'local' or 'container'."
   exit 1
 fi
-
-if [[ -z "$CONDA_PREFIX" ]]; then
-    echo "❌ Error: CONDA_PREFIX is not set" >&2
-    exit 1
-fi
-
-
-get_shell_config() {
-    echo "$CONDA_PREFIX/etc/conda/activate.d/env_path.sh"
-}
-
-SHELL_CONFIG="$(get_shell_config)"
-echo "Shell config path: $SHELL_CONFIG"
  
 echo -e "\n Building conda environment and installing required dependencies to enable pema ${ROCKET} \n\n"
 
@@ -94,22 +81,43 @@ SETUP_WD=$(pwd)
 
 
 # ====================================
-# Step 1: Set up base Conda environment
+# Step 0: Set up conda
 # ====================================
 
 # Exit immediately if a command exits with a non-zero status
 set -e
 
-# Check if conda is installed
+# Check if conda is available
 if ! command -v conda &> /dev/null; then
-    echo -e "Error: Conda is not installed or not in the PATH. $RED_CROSS"
+    echo "❌ Error: conda is not available in PATH" >&2
     exit 1
 fi
 
-# Ensure Conda is initialized for the current shell
+# Initialize Conda for this shell
 eval "$(conda shell.bash hook)"
 echo -e "$WHITE_CIRCLE conda is available and ready to go!"
 
+# Ensure CONDA_PREFIX is set
+if [[ -z "$CONDA_PREFIX" ]]; then
+    export CONDA_PREFIX="$(conda info --base)"
+    if ! grep -Fxq 'export CONDA_PREFIX="$(conda info --base)"' ~/.bashrc; then
+        echo 'export CONDA_PREFIX="$(conda info --base)"' >> ~/.bashrc
+    fi
+    echo "ℹ️ CONDA_PREFIX set to base env: $CONDA_PREFIX"
+fi
+
+
+get_shell_config() {
+    echo "$CONDA_PREFIX/etc/conda/activate.d/env_path.sh"
+}
+
+SHELL_CONFIG="$(get_shell_config)"
+echo "Shell config path: $SHELL_CONFIG"
+
+
+# ====================================
+# Step 1: Set up base conda env
+# ====================================
 
 # Create and activate the phendb environment
 ENV_NAME="pema"

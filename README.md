@@ -271,26 +271,26 @@ In addition, the ***metadata.tsv*** file is also required when the phyloseq opti
 
 
 ## Acknowledgments
-PEMA uses a series of tools, datasets as well as Big Data Script language. We thank all the groups that developed them.
-The tools & databases that PEMA uses are: 
-* BigDataScript programming language - https://pcingola.github.io/BigDataScript/
+
+PEMA is implemented in [Big Data Script language (BDS)](https://pcingola.github.io/BigDataScript/),
+invokes a series of tools and makes use of several databases.
+
+Tools:
+
 * FASTQC - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 * Trimmomatic - http://www.usadellab.org/cms/?page=trimmomatic
 * fastp - https://github.com/OpenGene/fastp
 * Cutadapt - https://cutadapt.readthedocs.io/en/stable/
 * BayesHammer - included in SPAdes - http://cab.spbu.ru/software/spades/
 * PANDAseq - https://github.com/neufeld/pandaseq
-* OBITools - https://pythonhosted.org/OBITools/welcome.html
+* OBITools4 - https://obitools4.metabarcoding.org/
 * BLAST Command Line Applications - https://www.ncbi.nlm.nih.gov/books/NBK52640/
 * VSEARCH-2.9.1 - https://github.com/torognes/vsearch/releases/tag/v2.9.1
 * SWARM - https://github.com/torognes/swarm
 * CROP - https://github.com/tingchenlab/CROP
-* CREST - https://github.com/lanzen/CREST
+* crest4 - https://github.com/xapple/crest4
 * RDPClassifier - https://github.com/rdpstaff/classifier
 (RPDtools are required in order to execute RDPClassifier)
-* SILVA db - https://www.arb-silva.de/no_cache/download/archive/current/Exports/
-* MIDORI db - http://reference-midori.info/index.html
-* PR2 db - https://pr2-database.org/
 * "phat" algorithm, from the "gappa" package - https://github.com/lczech/gappa/wiki/Subcommand:-phat
 * MAFFT - https://mafft.cbrc.jp/alignment/software/
 * RAxML -ng - https://github.com/amkozlov/raxml-ng
@@ -300,7 +300,15 @@ The tools & databases that PEMA uses are:
 * vegan R package - https://cran.r-project.org/web/packages/vegan/index.html 
 * ncbi-taxonomist - https://ncbi-taxonomist.readthedocs.io/en/latest/
 
+Databases
+
+* SILVA db - https://www.arb-silva.de/no_cache/download/archive/current/Exports/
+* MIDORI db - http://reference-midori.info/index.html
+* PR2 db - https://pr2-database.org/
+* Unite db -- https://unite.ut.ee/
+
 And of course the container-based technologies:
+
 * Docker - https://www.docker.com/
 * Singularity - https://sylabs.io/singularity/
 
