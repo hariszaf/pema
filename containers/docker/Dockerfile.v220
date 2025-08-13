@@ -2,11 +2,91 @@ FROM ubuntu:20.04
 
 LABEL maintainer = "Haris Zafeiropoulos" 
 LABEL contact    = "haris-zaf@hcmr.gr"
-LABEL build_date = "2024-07-22"
+LABEL build_date = "2025-08-13"
 LABEL version    = "v2.2.0"
 
+# Global
+RUN apt-get update && apt-get install -y \
+    vim \
+    tar \
+    git \
+    wget \
+    bzip2 \
+    unzip \
+    python3 \
+    python3-venv \
+    python3-pip \
+    && rm -rf /var/lib/apt/lists/*
 
-RUN apt-get update 
-RUN apt-get install -y apt-transport-https && apt-get install -y vim && \
+RUN python3 -m pip install --upgrade pip
+RUN python3 -m pip install --user pipx
+RUN python3 -m pipx ensurepath
+
+# ----- Java (required for BDS) ---- 
+
+RUN rm -rf /var/lib/apt/lists/* && \
     apt-get clean && \
+    apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y --no-install-recommends curl ca-certificates && \ 
     rm -rf /var/lib/apt/lists/*
+
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive TZ=Europe/Brussels apt-get install -y tzdata software-properties-common && \
+    rm -rf /var/lib/apt/lists/*
+
+RUN  add-apt-repository ppa:openjdk-r/ppa && \
+    apt-get update -q
+
+RUN apt-get install -y openjdk-11-jdk
+
+ENV JAVA_HOME /usr/lib/jvm/java-11-oracle 
+ENV PATH="/opt/java/openjdk/bin:$PATH"
+
+ENV JAVA_TOOL_OPTIONS="-XX:+UseContainerSupport"
+RUN export JAVA_HOME
+
+## Fixing "core dump"
+RUN ulimit -c unlimited
+
+# ----- conda ---- 
+
+# Download and install Miniconda
+ENV CONDA_DIR=/opt/conda
+RUN wget --quiet https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p $CONDA_DIR && \
+    rm /tmp/miniconda.sh
+
+# Make conda available in PATH
+ENV PATH=$CONDA_DIR/bin:$PATH
+
+# Accept TOS licensing of conda
+RUN conda config --set always_yes yes && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main && \
+    conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r && \
+    conda update -n base -c defaults conda
+
+# ----- BDS ---- 
+
+COPY pema/ext_data/bds_Linux.tgz /tmp/bds_Linux.tgz
+RUN mkdir -p /opt/bds && \
+    tar -xvzf /tmp/bds_Linux.tgz -C /opt/bds
+ENV PATH="$PATH:/opt/bds/.bds"
+
+
+# ----- pema ---- 
+WORKDIR /opt/pema
+
+COPY pema/ ./pema/
+COPY setup_env.sh .
+
+# Run setup_env.sh (if it installs or modifies things)
+RUN chmod +x setup_env.sh 
+#&& bash setup_env.sh --env container
+
+ENV PATH="/opt/pema:${PATH}"
+
+SHELL ["/bin/bash", "-c"]
+RUN conda init bash
+
+# CMD ["bds", "pema/pema.bds"]
