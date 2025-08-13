@@ -24,6 +24,14 @@ environment=local
 #=          - regex: /^(COI|16S|18S|12S|ITS)$/
 gene=16S
 #
+#=     sequence_files:
+#=        title: Path to sequence files
+#=        description: >
+#=          Path to paired-end sequence files to be used as input for PEMA analysis. Please provide an absolute path to the directory containing the input files.
+#=          If a relative path is given, it will be resolved relative to the location of this parameters file.
+#=        type: string
+#=        required: True
+sequence_files=mydata
 #
 #=     outputFolderName:
 #=        title: output folder name

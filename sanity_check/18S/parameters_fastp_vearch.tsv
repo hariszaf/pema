@@ -1,8 +1,6 @@
 #= pema_version: 2.2.0
 #   --------------------------         GENERAL PARAMETERS       --------------------------
 #
-#      Study: This is a sanity check for 12S rRNA gene using fastp and swarm > 6
-#
 #
 #=     environment:
 #=        title: computing environment
@@ -14,6 +12,7 @@
 #=          - value: local
 environment=local
 #
+#
 #=     gene:
 #=        title: marker gene
 #=        description: Indicates the marker gene of the study. Currently PEMA supports the analysis of 16S, 12S, 18S, ITS and COI marker genes. Add the name of the marker gene after the underscore ("_")
@@ -21,7 +20,7 @@ environment=local
 #=        required: True
 #=        validation:
 #=          - regex: /^(COI|16S|18S|12S|ITS)$/
-gene=12S
+gene=18S
 #
 #=     sequence_files:
 #=        title: Path to sequence files
@@ -32,13 +31,13 @@ gene=12S
 #=        required: True
 sequence_files=mydata
 #
-#
 #=     outputFolderName:
 #=        title: output folder name
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName=TEST_12S_FASTP_SWARM
+outputFolderName=TEST_18S_FASTP_SWARM
+#
 #
 #=     EnaData:
 #=        title: ENA data format
@@ -50,6 +49,7 @@ outputFolderName=TEST_12S_FASTP_SWARM
 #=          - value: No
 EnaData=Yes
 #
+#
 #=     sequencerPrefix:
 #=        title: sequencer prefix
 #=        description: Each sequencer has a special combination of letters with which all its reads start with (e.g., "@M0"). Please provide this pattern if the EnaData is "No". 
@@ -57,17 +57,8 @@ EnaData=Yes
 #=        required: True
 sequencerPrefix=M0
 #
-#
-#=     threads:
-#=        title: Threads allowed to use
-#=        description: 
-#=        type: int
-#=        required: True
-#=        default: 4
-threads=4
-#
-
 # ------------------------------------     PRE-PROCESSING : APPROACH     ------------------------------------
+#
 #
 #=     preprocess:
 #=        title: preprocess approach
@@ -79,7 +70,18 @@ threads=4
 #=          - value: fastp
 preprocess=fastp
 #
+#
+#=     threads:
+#=        title: Threads allowed to use
+#=        description: 
+#=        type: int
+#=        required: True
+#=        default: 4
+threads=4
+#
+#
 #   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
+#
 #
 #=     disable_adapter_trimming:
 #=        title:
@@ -160,9 +162,7 @@ overrepresentation_sampling=20
 #
 #=     overlap_diff_percent_limit
 #=        title:
-#=        description: >
-#=          The maximum percentage of mismatched bases to detect overlapped region of PE reads. 
-#=          This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
+#=        description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
 #=        type: integer
 #=        required: False
 overlap_diff_percent_limit=20
@@ -205,7 +205,7 @@ length_limit=0
 #=        description: Reads shorter than length_required will be discarded, default is 15.
 #=        type: integer
 #=        required: False
-length_required=50
+length_required=
 #
 #
 #=      n_base_limit:
@@ -288,15 +288,6 @@ cut_right_window_size=4
 cut_right_mean_quality=20
 #
 #
-#=     disable_trim_poly_g:
-#=        title:
-#=        description: 
-#=        type: boleam
-#=        required: False
-#=        default: False
-disable_trim_poly_g=False
-#
-#
 #=     trim_poly_g:
 #=        title:
 #=        description: 
@@ -315,7 +306,25 @@ trim_poly_g=True
 poly_g_min_len=10
 #
 #
+#=     cut_right_mean_quality:
+#=        title:
+#=        description: 
+#=        type: integer
+#=        required: False
+cut_right_mean_quality=20
+#
+#
+#=     disable_trim_poly_g:
+#=        title:
+#=        description: 
+#=        type: boleam
+#=        required: False
+#=        default: False
+disable_trim_poly_g=False
+#
+#
 #   --------------------------        CLUSTERING PARAMETERS           --------------------------
+#
 #
 #=     clusteringAlgo:
 #=        title: clustering algorithm
@@ -330,6 +339,7 @@ clusteringAlgo=swarm
 #
 #   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
 #
+#
 #=     d:
 #=        title: d
 #=        description: Maximum number of differences allowed between two amplicons, meaning that two amplicons will be grouped if they hav e integer (or less) differences.
@@ -338,7 +348,8 @@ clusteringAlgo=swarm
 #=        validation:
 #=          - range: 
 #=            min: 0 
-d=7
+d=2
+#
 #
 #=     boundary:
 #=        title: boundary
@@ -353,6 +364,7 @@ boundary=2
 #
 #  -----------------------------     OLIGOTONS        -------------------------------------
 #
+#
 #=     removeOligotons:
 #=        title: removeOligotons
 #=        description:  Remove the oligotons (OTUs that appear with an abuncance less that numOligotons) ?
@@ -362,6 +374,7 @@ boundary=2
 #=          - value: Yes
 #=          - value: No
 removeOligotons=Yes
+#
 #
 #=     numOligotons:
 #=        title: numOligotons
@@ -376,6 +389,7 @@ numOligotons=2
 #
 #   --------------------------     CLASSIFIER       --------------------------
 #
+#
 #=     classifierAlgo:
 #=        title: classifier algorithm
 #=        description:  Select classifier for the taxonomy assignment step. If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
@@ -384,21 +398,59 @@ numOligotons=2
 #=        validation:
 #=          - value: RDPClassifier
 #=          - value: CREST
-classifierAlgo=RDPClassifier
+classifierAlgo=CREST
+#
+#
+#=     scoreDrop:
+#=        title: score drop
+#=        description:  Determines the range of hits to retain and the range to discard based on a drop in percentage from the score of the best hit. Any hit below the following value: "(100 - score_drop)/100 * best_hit_score" is ignored.
+#=        default 2.0
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0 
+scoreDrop=
+#
+#
+#=     minScore:
+#=        title: minimum bit-score 
+#=        description:  The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. All hits below this score are ignored. When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. The default is `155` for BLAST and `0.75` for VSEARCH.
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0 
+minScore=
+#
+#
+#=     searchAlgo:
+#=        title: minimum bit-score 
+#=        description:  The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. All hits below this score are ignored. When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. The default is `155` for BLAST and `0.75` for VSEARCH.
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - value: vsearch
+#=          - value: blast
+searchAlgo=vsearch
+#
+#
+#
 #
 #=     taxonomyFolderName:
 #=        title: number of cores for PaPaRa
 #=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail. Parameter required if gene: ['16S', '18S', 'ITS'].
 #=        type: string
 #=        required: True 
-taxonomyFolderName=12S_taxon_assign
+taxonomyFolderName=crest4_vsearch_138
 #
 #
 #   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
 #
+#
 #=     taxonomyAssignmentMethod:
 #=        title: 
-#=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used. Parameter required only if gene: 16S.
+#=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used. Parameter required only if gene: gene_16S.
 #=        type: string
 #=        required: True
 #=        validation: 
@@ -409,7 +461,7 @@ taxonomyAssignmentMethod=alignment
 #
 #=     referenceDb:
 #=        title: reference database 
-#=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_138' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. The parameter is required if custom_ref_db: No and gene: [16S, 18S, COI]
+#=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_138' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. The parameter is required if custom_ref_db: No and gene: [gene_16S, 'gene_18S', 'gene_COI']
 #=        type: string
 #=        required: True
 #=        validation: 
@@ -418,9 +470,10 @@ taxonomyAssignmentMethod=alignment
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
-referenceDb=silva_128
+referenceDb=silva_138
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
+#
 #
 #=     cutadapt:
 #=        title: perform a cutadapt script to 
@@ -432,25 +485,28 @@ referenceDb=silva_128
 #=          - value: No 
 cutadapt=Yes
 #
+#
 #=     forwardITSPrimer:
 #=        title: forward ITS primer
-#=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: ITS.
+#=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
 #=        required: True 
 forwardITSPrimer=GATGAAGAACGYAGYRAA
 #
+#
 #=     reverseITSPrimer:
 #=        title: reverse ITS primer
-#=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: ITS.
+#=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
 #=        type: string
 #=        required: True 
 reverseITSPrimer=CTBTTVCCKCTTCACTCG
 #
 #   --------------------------     GENE-SPECIFIC : COI     --------------------------
 #
+#
 #=     abskew:
 #=        title: abskew
-#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: COI
+#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: gene_COI
 #=        type: integer
 #=        required: True
 #=        validation:
@@ -459,6 +515,7 @@ reverseITSPrimer=CTBTTVCCKCTTCACTCG
 abskew=2
 #
 #   --------------------------     CUSTOM REFERENCE DATABASE     --------------------------
+#
 #
 #=     custom_ref_db:
 #=        title: custom reference database
@@ -470,6 +527,7 @@ abskew=2
 #=          - value: No
 custom_ref_db=No
 #
+#
 #=     name_of_custom_db:
 #=        title: name of custom database
 #=        description: Name of how custom reference database will be named. Parameter required only if custom_ref_db: Yes
@@ -477,7 +535,9 @@ custom_ref_db=No
 #=        required: True
 name_of_custom_db=
 #
+#
 #   --------------------------     sum up      --------------------------
+#
 #
 #=     emptyRawDataFile:
 #=        title: empty raw data files 
@@ -489,6 +549,7 @@ name_of_custom_db=
 #=          - value: No
 emptyRawDataFile=Yes
 #
+#
 #=     emptyCheckpoints:
 #=        title: empty check points
 #=        description: Move all check points returned in a separate folder
@@ -498,6 +559,7 @@ emptyRawDataFile=Yes
 #=          - value: Yes
 #=          - value: No
 emptyCheckpoints=Yes
+#
 #
 #=     getNCBITaxId:
 #=        title: get NCBI Taxonomy Id

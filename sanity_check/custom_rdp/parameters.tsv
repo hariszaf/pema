@@ -6,10 +6,18 @@
 #=        type: string
 #=        required: True
 #=        validation:
-#=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
+#=          - regex: /^(COI|16S|18S|12S|ITS)$/
 #
-gene	gene_COI
+gene=COI
 #
+#=     sequence_files:
+#=        title: Path to sequence files
+#=        description: >
+#=          Path to paired-end sequence files to be used as input for PEMA analysis. Please provide an absolute path to the directory containing the input files.
+#=          If a relative path is given, it will be resolved relative to the location of this parameters file.
+#=        type: string
+#=        required: True
+sequence_files=mydata
 #
 #=     outputFolderName:
 #=        title: output folder name
@@ -17,7 +25,7 @@ gene	gene_COI
 #=        type: string
 #=        required: True
 #
-outputFolderName	custom_db_rdp_coi
+outputFolderName=custom_db_rdp_coi
 #
 #
 #=     EnaData:
@@ -29,7 +37,7 @@ outputFolderName	custom_db_rdp_coi
 #=          - value: Yes
 #=          - value: No
 #
-EnaData	Yes
+EnaData=Yes
 #
 #
 #=     sequencerPrefix:
@@ -38,7 +46,7 @@ EnaData	Yes
 #=        type: string
 #=        required: True
 #
-sequencerPrefix	M0
+sequencerPrefix=M0
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : Trimmomatic     --------------------------
@@ -52,7 +60,7 @@ sequencerPrefix	M0
 #=          - value: Yes
 #=          - value: No
 #
-maxInfo	Yes
+maxInfo=Yes
 #
 #
 #=     targetLength:
@@ -64,7 +72,7 @@ maxInfo	Yes
 #=          - range: 
 #=            min: 1
 #
-targetLength	100
+targetLength=100
 #
 #
 #=     strictness:
@@ -77,7 +85,7 @@ targetLength	100
 #=            min: 0.0
 #=            max: 1.0
 #
-strictness	0.8
+strictness=0.8
 #
 #
 #=     adapters:
@@ -86,7 +94,7 @@ strictness	0.8
 #=        type: string
 #=        required: True
 #
-adapters	TruSeq2-PE.fa
+adapters=TruSeq2-PE.fa
 #
 #
 #=     seedMismatches:
@@ -98,7 +106,7 @@ adapters	TruSeq2-PE.fa
 #=          - range: 
 #=            min: 0 
 #
-seedMismatches	0
+seedMismatches=0
 #
 #
 #=     palindromeClipThreshold:
@@ -110,7 +118,7 @@ seedMismatches	0
 #=          - range: 
 #=            min: 1 
 #
-palindromeClipThreshold	20
+palindromeClipThreshold=20
 #
 #
 #=     simpleClipThreshold:
@@ -122,7 +130,7 @@ palindromeClipThreshold	20
 #=          - range: 
 #-             min: 0 
 #
-simpleClipThreshold	30
+simpleClipThreshold=30
 #
 #
 #=     leading:
@@ -134,7 +142,7 @@ simpleClipThreshold	30
 #=          - range: 
 #=            min: 0 
 #
-leading	20
+leading=20
 #
 #
 #=     trailing:
@@ -146,7 +154,7 @@ leading	20
 #=          - range: 
 #=            min: 0 
 #
-trailing	2
+trailing=2
 #
 #
 #=     minlen:
@@ -158,7 +166,7 @@ trailing	2
 #=          - range: 
 #=            min: 1
 #
-minlen	100
+minlen=100
 #
 #
 #=     threadsTrimmomatic:
@@ -170,7 +178,7 @@ minlen	100
 #=          - range: 
 #=            min: 0 
 #
-threadsTrimmomatic	8
+threadsTrimmomatic=8
 #
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : PANDAseq     --------------------------
@@ -187,7 +195,7 @@ threadsTrimmomatic	8
 #=          - value: stich
 #=          - value: flash
 #
-pandaseqAlgorithm	simple_bayesian
+pandaseqAlgorithm=simple_bayesian
 #
 #
 #=     pandaseqThreads:
@@ -199,7 +207,7 @@ pandaseqAlgorithm	simple_bayesian
 #=          - range:
 #=            min: 0
 #
-pandaseqThreads	8
+pandaseqThreads=8
 #
 #
 #=     pandaseqMinlen:
@@ -211,7 +219,7 @@ pandaseqThreads	8
 #=          - range: 
 #=            min: 0 
 #
-pandaseqMinlen	
+pandaseqMinlen=
 #
 #
 #=     minoverlap:
@@ -223,7 +231,7 @@ pandaseqMinlen
 #=          - range: 
 #=            min: 0
 #
-minoverlap	1 
+minoverlap=1 
 #
 #
 #=     threshold:
@@ -236,7 +244,7 @@ minoverlap	1
 #=              min:  0.0
 #=              max: 1.0
 #
-threshold	0.6 
+threshold=0.6 
 #
 #
 #=     elimination:
@@ -248,7 +256,7 @@ threshold	0.6
 #=          - value: ''
 #=          - value: -N
 #
-elimination	
+elimination=
 #
 #
 #   --------------------------        CLUSTERING PARAMETERS           --------------------------
@@ -263,7 +271,7 @@ elimination
 #=          - value: algo_Swarm
 #=          - value: algo_vsearch
 #
-clusteringAlgo	algo_Swarm
+clusteringAlgo=algo_Swarm
 #
 #
 #   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
@@ -278,7 +286,7 @@ clusteringAlgo	algo_Swarm
 #=          - range: 
 #=            min: 0
 #
-vsearchThreads	8
+vsearchThreads=8
 #
 #
 #=     vsearchId:
@@ -291,7 +299,7 @@ vsearchThreads	8
 #=            min: 0.0
 #=            max: 1.0
 #
-vsearchId	0.95
+vsearchId=0.95
 #
 #   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
 #
@@ -305,7 +313,7 @@ vsearchId	0.95
 #=          - range: 
 #=            min: 0 
 #
-d	12
+d=12
 #
 #
 #=     boundary:
@@ -317,7 +325,7 @@ d	12
 #=          - range: 
 #=            min: 0
 #
-boundary	
+boundary=
 #
 #
 #=     swarmThreads:
@@ -329,7 +337,7 @@ boundary
 #=          - range: 
 #=            min: 1
 #
-swarmThreads	5
+swarmThreads=5
 #
 #
 # ------------------------------------    OLIGOTONS        -------------------
@@ -343,7 +351,7 @@ swarmThreads	5
 #=          - value: Yes
 #=          - value: No
 #
-removeOligotons	Yes
+removeOligotons=Yes
 #
 #=     numOligotons:
 #=        title: numOligotons
@@ -354,7 +362,7 @@ removeOligotons	Yes
 #=          - range: 
 #=            min: 1
 #
-numOligotons	5
+numOligotons=5
 #
 #   --------------------------     CLASSIFIER-SPECIFIC : CREST      --------------------------
 #
@@ -368,7 +376,7 @@ numOligotons	5
 #=          - value: RDPClassifier
 #=          - value: CREST
 #
-classifierAlgo	RDPClassifier	
+classifierAlgo=RDPClassifier=
 #
 #
 #=     taxonomyFolderName:
@@ -377,7 +385,7 @@ classifierAlgo	RDPClassifier
 #=        type: string
 #=        required: True 
 #
-taxonomyFolderName	my_taxon_assign
+taxonomyFolderName=my_taxon_assign
 #
 #
 #   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
@@ -385,31 +393,31 @@ taxonomyFolderName	my_taxon_assign
 #
 #=     taxonomyAssignmentMethod:
 #=        title: vsearch threads
-#=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used. Parameter required only if gene: gene_16S.
+#=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used. Parameter required only if gene: 16S.
 #=        type: string
 #=        required: True
 #=        validation: 
 #=          - value: alignment
 #=          - value: phylogeny
 #
-taxonomyAssignmentMethod	alignment
+taxonomyAssignmentMethod=alignment
 #
 #
 #=     numberOfCoresForPapara:
 #=        title: number of cores for PaPaRa
-#=        description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use. The parameeter is required if axonomyAssignmentMethod: phylogeny and gene: gene_16S
+#=        description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use. The parameeter is required if axonomyAssignmentMethod: phylogeny and gene: 16S
 #=        type: integer
 #=        required: True 
 #=        validation:
 #=          - range:
 #=            min: 0
 #
-numberOfCoresForPapara	7
+numberOfCoresForPapara=7
 #
 #
 #=     referenceDb:
 #=        title: reference database 
-#=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_138' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. The parameter is required if custom_ref_db: No and gene: [gene_16S, 'gene_18S', 'gene_COI']
+#=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_138' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. The parameter is required if custom_ref_db: No and gene: [16S, 18S, COI]
 #=        type: string
 #=        required: True
 #=        validation: 
@@ -419,7 +427,7 @@ numberOfCoresForPapara	7
 #=          - value: midori_1
 #=          - value: midori_2
 #
-referenceDb	midori_1
+referenceDb=midori_1
 #
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
@@ -427,34 +435,34 @@ referenceDb	midori_1
 #
 #=     forwardITSPrimer:
 #=        title: forward ITS primer
-#=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
+#=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: ITS.
 #=        type: string
 #=        required: True 
 #
-forwardITSPrimer	GATGAAGAACGYAGYRAA
+forwardITSPrimer=GATGAAGAACGYAGYRAA
 #
 #
 #=     reverseITSPrimer:
 #=        title: reverse ITS primer
-#=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
+#=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: ITS.
 #=        type: string
 #=        required: True 
 #
-reverseITSPrimer	CTBTTVCCKCTTCACTCG
+reverseITSPrimer=CTBTTVCCKCTTCACTCG
 #
 #
 #   --------------------------     GENE-SPECIFIC : COI     --------------------------
 #
 #=     abskew:
 #=        title: abskew
-#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: gene_COI
+#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: COI
 #=        type: integer
 #=        required: True
 #=        validation:
 #=          - range:
 #=            min: 0
 #
-abskew	2
+abskew=2
 #
 #
 #   --------------------------     CUSTOM REFERENCE DATABASE     --------------------------
@@ -469,7 +477,7 @@ abskew	2
 #=          - value: Yes
 #=          - value: No
 #
-custom_ref_db	Yes
+custom_ref_db=Yes
 #
 #
 #=     name_of_custom_db:
@@ -478,7 +486,7 @@ custom_ref_db	Yes
 #=        type: string
 #=        required: True
 #
-name_of_custom_db	amvrakikos
+name_of_custom_db=amvrakikos
 #
 #
 #   --------------------------     PHYLOSEQ - SPECIFIC     --------------------------
@@ -492,7 +500,7 @@ name_of_custom_db	amvrakikos
 #=          - value: Yes
 #=          - value: No
 #
-phyloseq	No
+phyloseq=No
 #
 #
 #=     tree:
@@ -504,7 +512,7 @@ phyloseq	No
 #=          - value: Yes
 #=          - value: No
 #
-tree	No
+tree=No
 #
 #
 #=     raxmlThreads:
@@ -516,7 +524,7 @@ tree	No
 #=          - range: 
 #=              min: 0  
 #
-raxmlThreads	5
+raxmlThreads=5
 #
 #
 #=     parsTrees:
@@ -528,7 +536,7 @@ raxmlThreads	5
 #=          - range: 
 #=              min: 0 
 #
-parsTrees	5
+parsTrees=5
 #
 #
 #=     bootstrapTrees:
@@ -540,7 +548,7 @@ parsTrees	5
 #=          - range: 
 #=              min: 0 
 #
-bootstrapTrees	5
+bootstrapTrees=5
 #
 #
 #   --------------------------     sum up      --------------------------
@@ -555,7 +563,7 @@ bootstrapTrees	5
 #=          - value: Yes
 #=          - value: No
 #
-emptyRawDataFile	Yes
+emptyRawDataFile=Yes
 #
 #
 #=     emptyCheckpoints:
@@ -567,7 +575,7 @@ emptyRawDataFile	Yes
 #=          - value: Yes
 #=          - value: No
 #
-emptyCheckpoints	Yes
+emptyCheckpoints=Yes
 #
 #
 #=     getNCBITaxId:
@@ -579,7 +587,7 @@ emptyCheckpoints	Yes
 #=          - value: Yes
 #=          - value: No
 #
-getNCBITaxId	Yes
+getNCBITaxId=Yes
 #
 #
 #

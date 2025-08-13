@@ -1,5 +1,5 @@
 #= pema_version: 2.2.0
-#   --------------------------         GENERAL PARAMETERS       --------------------------
+#   --------------------------         /ENERAL PARAMETERS       --------------------------
 #
 #=     Study name: This a sanity check for the case of 18S rRNA gene using fastp and swarm using the crest4 example files for custom db
 #
@@ -22,7 +22,16 @@ environment=local
 #=        required: True
 #=        validation:
 #=          - regex: /^(COI|16S|18S|12S|ITS)$/
-gene=18S
+gene=ITS
+#
+#=     sequence_files:
+#=        title: Path to sequence files
+#=        description: >
+#=          Path to paired-end sequence files to be used as input for PEMA analysis. Please provide an absolute path to the directory containing the input files.
+#=          If a relative path is given, it will be resolved relative to the location of this parameters file.
+#=        type: string
+#=        required: True
+sequence_files=my_its_data
 #
 #
 #=     outputFolderName:
@@ -30,7 +39,7 @@ gene=18S
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName=TEST_18S_CUSTOM_CREST
+outputFolderName=TEST_ITS_CUSTOM_CREST
 #
 #
 #=     EnaData:
@@ -495,11 +504,38 @@ custom_ref_db=Yes
 #=        description: Name of how custom reference database will be named. Parameter required only if custom_ref_db: Yes
 #=        type: string
 #=        required: True
-name_of_custom_db=my_crest_db
+name_of_custom_db=my_crest_unite
 #
 #
 #
-path_to_custom_db_files=crest_example
+path_to_custom_db_files=custom_unite
+#
+#   --------------------------     GENE-SPECIFIC : ITS     --------------------------
+#
+#=     cutadapt:
+#=        title: perform a cutadapt script to 
+#=        description: 
+#=        type: string
+#=        required: False
+#=        validation:
+#=          - value: Yes
+#=          - value: No 
+cutadapt=Yes
+#
+#=     forwardITSPrimer:
+#=        title: forward ITS primer
+#=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: ITS.
+#=        type: string
+#=        required: True 
+forwardITSPrimer=CTTGGTCATTTAGAGGAAGTAA
+#
+#=     reverseITSPrimer:
+#=        title: reverse ITS primer
+#=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: ITS.
+#=        type: string
+#=        required: True 
+reverseITSPrimer=GCTGCGTTCTTCATCGATGC
+#
 #   --------------------------     sum up      --------------------------
 #
 #

@@ -1,0 +1,8 @@
+initial_label_from_sequencer	ena_format_label
+
+A-miCOI_R1_001.fastq	ERR1000001
+A-miCOI_R2_001.fastq	ERR1000001
+B-miCOI_R1_001.fastq	ERR1000002
+B-miCOI_R2_001.fastq	ERR1000002
+C-miCOI_R1_001.fastq	ERR1000003
+C-miCOI_R2_001.fastq	ERR1000003

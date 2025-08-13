@@ -1,8 +1,7 @@
 #= pema_version: 2.2.0
 #   --------------------------         GENERAL PARAMETERS       --------------------------
 #
-#      Study: This is a sanity check for 12S rRNA gene using fastp and swarm > 6
-#
+#       Study: sanity check for COI marker gene using fastp and vsearch
 #
 #=     environment:
 #=        title: computing environment
@@ -14,6 +13,7 @@
 #=          - value: local
 environment=local
 #
+#
 #=     gene:
 #=        title: marker gene
 #=        description: Indicates the marker gene of the study. Currently PEMA supports the analysis of 16S, 12S, 18S, ITS and COI marker genes. Add the name of the marker gene after the underscore ("_")
@@ -21,7 +21,7 @@ environment=local
 #=        required: True
 #=        validation:
 #=          - regex: /^(COI|16S|18S|12S|ITS)$/
-gene=12S
+gene=COI
 #
 #=     sequence_files:
 #=        title: Path to sequence files
@@ -32,13 +32,13 @@ gene=12S
 #=        required: True
 sequence_files=mydata
 #
-#
 #=     outputFolderName:
 #=        title: output folder name
 #=        description: Name of the output folder PEMA will save its results
 #=        type: string
 #=        required: True
-outputFolderName=TEST_12S_FASTP_SWARM
+outputFolderName=TEST_COI_FASTP_VSEARCH
+#
 #
 #=     EnaData:
 #=        title: ENA data format
@@ -57,16 +57,6 @@ EnaData=Yes
 #=        required: True
 sequencerPrefix=M0
 #
-#
-#=     threads:
-#=        title: Threads allowed to use
-#=        description: 
-#=        type: int
-#=        required: True
-#=        default: 4
-threads=4
-#
-
 # ------------------------------------     PRE-PROCESSING : APPROACH     ------------------------------------
 #
 #=     preprocess:
@@ -80,6 +70,7 @@ threads=4
 preprocess=fastp
 #
 #   --------------------------     PRE-PROCESSING PARAMETERS : fastp     --------------------------
+#
 #
 #=     disable_adapter_trimming:
 #=        title:
@@ -314,7 +305,6 @@ trim_poly_g=True
 #=        default: 10
 poly_g_min_len=10
 #
-#
 #   --------------------------        CLUSTERING PARAMETERS           --------------------------
 #
 #=     clusteringAlgo:
@@ -323,10 +313,23 @@ poly_g_min_len=10
 #=        type: string
 #=        required: True
 #=        validation:
-#=          - value: swarm
-#=          - value: vsearch
-clusteringAlgo=swarm
+#=          - value: algo_Swarm
+#=          - value: algo_vsearch
+clusteringAlgo=vsearch
 #
+#   --------------------------     CLUSTERING PARAMETERS : VSEARCH     --------------------------
+#
+#
+#=     vsearchId:
+#=        title: vsearch threads
+#=        description: Set a score about the clustering step of the VSEARCH algorithm. Do not add a read into a certain cluster if the pairwise identity with its centroid, is lower than the value of the 'vsearchId' parameter. The pairwise identity is defined as the number of (matching columns) / (alignment length - terminal gaps).
+#=        type: float
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0.0
+#=            max: 1.0
+vsearchId=0.95
 #
 #   --------------------------     CLUSTERING PARAMETERS : Swarm     --------------------------
 #
@@ -338,7 +341,7 @@ clusteringAlgo=swarm
 #=        validation:
 #=          - range: 
 #=            min: 0 
-d=7
+d=3
 #
 #=     boundary:
 #=        title: boundary
@@ -348,8 +351,7 @@ d=7
 #=        validation:
 #=          - range: 
 #=            min: 0
-boundary=2
-#
+boundary=
 #
 #  -----------------------------     OLIGOTONS        -------------------------------------
 #
@@ -371,33 +373,70 @@ removeOligotons=Yes
 #=        validation:
 #=          - range: 
 #=            min: 1
-numOligotons=2
+numOligotons=5
 #
 #
 #   --------------------------     CLASSIFIER       --------------------------
 #
 #=     classifierAlgo:
 #=        title: classifier algorithm
-#=        description:  Select classifier for the taxonomy assignment step. If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier).
+#=        description:  """Select classifier for the taxonomy assignment step.
+#=                      If you have 16S, 18S, ITS you should choose CREST. If you have COI, 12S you should choose RDPClassifier. 
+#=                      If you are about to use custom reference database, please make sure you are following the instructions described here  https://hariszaf.github.io/pema_documentation/training_crest_classifier/ (for CREST) and here https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ (for RDPClassifier)."""
 #=        type: string
 #=        required: True
 #=        validation:
 #=          - value: RDPClassifier
 #=          - value: CREST
-classifierAlgo=RDPClassifier
+classifierAlgo=CREST
+#
+#
+#=     scoreDrop:
+#=        title: score drop
+#=        description:  Determines the range of hits to retain and the range to discard based on a drop in percentage from the score of the best hit. Any hit below the following value: "(100 - score_drop)/100 * best_hit_score" is ignored.
+#=        default 2.0
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0 
+scoreDrop=
+#
+#
+#=     minScore:
+#=        title: minimum bit-score 
+#=        description:  The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. All hits below this score are ignored. When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. The default is `155` for BLAST and `0.75` for VSEARCH.
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - range: 
+#=            min: 0 
+minScore=
+#
+#
+#=     searchAlgo:
+#=        title: minimum bit-score 
+#=        description:  The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm. All hits below this score are ignored. When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered. The default is `155` for BLAST and `0.75` for VSEARCH.
+#=        type: string
+#=        required: True
+#=        validation:
+#=          - value: vsearch
+#=          - value: blast
+searchAlgo=vsearch
+#
 #
 #=     taxonomyFolderName:
 #=        title: number of cores for PaPaRa
 #=        description: Name of the output folder CREST returns. In case you run an analysis for a second, make sure you change this parameter otherwise PEMA will fail. Parameter required if gene: ['16S', '18S', 'ITS'].
 #=        type: string
 #=        required: True 
-taxonomyFolderName=12S_taxon_assign
+taxonomyFolderName=my_taxon_assign
 #
 #
 #   --------------------------     GENE-SPECIFIC : 16S/18S     --------------------------
 #
 #=     taxonomyAssignmentMethod:
-#=        title: 
+#=        title: vsearch threads
 #=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used. Parameter required only if gene: 16S.
 #=        type: string
 #=        required: True
@@ -418,7 +457,7 @@ taxonomyAssignmentMethod=alignment
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
-referenceDb=silva_128
+referenceDb=midori_1
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
 #
@@ -450,7 +489,7 @@ reverseITSPrimer=CTBTTVCCKCTTCACTCG
 #
 #=     abskew:
 #=        title: abskew
-#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: COI
+#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: COI.
 #=        type: integer
 #=        required: True
 #=        validation:
@@ -476,6 +515,50 @@ custom_ref_db=No
 #=        type: string
 #=        required: True
 name_of_custom_db=
+#
+#
+#   --------------------------     PHYLOSEQ - SPECIFIC     --------------------------
+#
+#=     phyloseq:
+#=        title: phyloseq
+#=        description: To use Phyloseq set the following  parameter 'phyloseq' with 'Yes'. Please remember that in order to use phyloseq a "metadata.csv" file is necessary to be part of your anaylis folder. 
+#=        type: boolean
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
+phyloseq=No
+#
+#=     tree:
+#=        title: tree
+#=        description: The phyloseq object can handle phylogenetic trees as well. PEMA uses RAxML-ng in order to build such trees. Do you want to create such a tree with your OTUs? In case you build this once, you can use it as many times as you want. Parameter required if phyloseq: Yes.
+#=        type: boolean
+#=        required: True
+#=        validation:
+#=          - value: Yes
+#=          - value: No
+tree=No
+#
+#
+#=     parsTrees:
+#=        title: parsimony trees
+#=        description: Number of parsimony trees raxml-ng will go for. Parameter required if phyloseq: Yes and tree: Yes
+#=        type: integer
+#=        required: True
+#=        validation: 
+#=          - range: 
+#=              min: 0 
+parsTrees=5
+#
+#=     bootstrapTrees:
+#=        title: bootstrap trees
+#=        description: Number of bootstrap trees raxml-ng will go for. Parameter required if phyloseq: Yes and tree: Yes
+#=        type: integer
+#=        required: True 
+#=        validation:
+#=          - range: 
+#=              min: 0 
+bootstrapTrees=5
 #
 #   --------------------------     sum up      --------------------------
 #
