@@ -20,8 +20,8 @@ environment=local
 #=        type: string
 #=        required: True
 #=        validation:
-#=          - regex: /^gene_(COI|16S|18S|12S|ITS)$/
-gene=gene_12S
+#=          - regex: /^(COI|16S|18S|12S|ITS)$/
+gene=12S
 #
 #=     outputFolderName:
 #=        title: output folder name
@@ -596,7 +596,7 @@ taxonomyFolderName=12S_taxon_assign
 #
 #=     taxonomyAssignmentMethod:
 #=        title: vsearch threads
-#=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used. Parameter required only if gene: gene_16S.
+#=        description: Select between 2 different approaches of taxonomy assignment (alignment & phylogenetic based). Alignment based taxonomy is based on Silva database (versions 128 or 132). a phylogenetic based assignment, by putting 'phylogeny' in this parameter. In the case of phylogeny based taxonomy assignment, a reference tree created by the PEMA group and based on Silva v.128 is used. Parameter required only if gene: 16S.
 #=        type: string
 #=        required: True
 #=        validation: 
@@ -606,7 +606,7 @@ taxonomyAssignmentMethod=alignment
 #
 #=     numberOfCoresForPapara:
 #=        title: number of cores for PaPaRa
-#=        description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use. The parameeter is required if axonomyAssignmentMethod: phylogeny and gene: gene_16S
+#=        description: In case of phylogeny based taxonomy assignment, set the number of threads the PaPaRa software will use. The parameeter is required if axonomyAssignmentMethod: phylogeny and gene: 16S
 #=        type: integer
 #=        required: True 
 #=        validation:
@@ -616,12 +616,12 @@ numberOfCoresForPapara=20
 #
 #=     referenceDb:
 #=        title: reference database 
-#=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_132' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. The parameter is required if custom_ref_db: No and gene: [gene_16S, 'gene_18S', 'gene_COI']
+#=        description: When you use the alignment-based taxonomy assignment, then the LCAClassifier from the CREST algorithm, uses a Silva version for the assignment. PEMA allows you to choose between the two last version of Silva. Hence, set the "silvaVersion" parameter either as 'silva_128' or as 'silva_138' depending on the version of your choice. In case you are running 18S rRNA data, you may also use the PR2 database, by setting the referenceDb parametera as 'pr2'. The parameter is required if custom_ref_db: No and gene: [16S, 18S, COI]
 #=        type: string
 #=        required: True
 #=        validation: 
 #=          - value: silva_128
-#=          - value: silva_132
+#=          - value: silva_138
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
@@ -641,14 +641,14 @@ cutadapt=Yes
 #
 #=     forwardITSPrimer:
 #=        title: forward ITS primer
-#=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
+#=        description: Provide the forward primer used (only in case of ITS). The parameter is required only in case that gene: ITS.
 #=        type: string
 #=        required: True 
 forwardITSPrimer=GATGAAGAACGYAGYRAA
 #
 #=     reverseITSPrimer:
 #=        title: reverse ITS primer
-#=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: gene_ITS.
+#=        description: Provide the reverse primer used (only in case of ITS). The parameter is required only in case that gene: ITS.
 #=        type: string
 #=        required: True 
 reverseITSPrimer=CTBTTVCCKCTTCACTCG
@@ -657,7 +657,7 @@ reverseITSPrimer=CTBTTVCCKCTTCACTCG
 #
 #=     abskew:
 #=        title: abskew
-#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: gene_COI
+#=        description: PEMA invokes the UCHIME_DENOVO3 algorithm for the chimera removal in the case of the COI marker gene. Probably, for environmental studies a low abskew is better, while in more specific studies a larger one would fit most. The parameter is required only if gene: COI
 #=        type: integer
 #=        required: True
 #=        validation:
