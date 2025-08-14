@@ -43,6 +43,10 @@ while true; do
       RUN_ENV="$2"
       shift 2
       ;;
+    -p|--prefix)
+      PREFIX="$2"
+      shift 2
+      ;;
     --)
       shift
       break
@@ -71,6 +75,7 @@ if $HELP_ARG; then
   echo "Usage: bash setup_env.sh [options]"
   echo "  -h, --help     Show this help message"
   echo "  -e, --env      Running environment [container, local]"
+  echo "  -p, --prefix   Directory where the software will be installed"
   echo ""
   echo -e "${RED_CIRCLE} Either conda or miniconda is considered to be available. If not, setup_environment.sh will fail."
   echo -e "${RED_CIRCLE} Make sure you run the script from the root folder of the pema repository."
@@ -112,7 +117,7 @@ get_shell_config() {
 }
 
 SHELL_CONFIG="$(get_shell_config)"
-echo "Shell config path: $SHELL_CONFIG"
+echo ">> Shell config path: $SHELL_CONFIG"
 
 
 # ====================================
@@ -134,6 +139,8 @@ else
 fi
 
 conda activate $ENV_NAME
+echo ">> Shell config path after activating pema: $SHELL_CONFIG"
+
 
 # Activate case 
 mkdir -p $CONDA_PREFIX/etc/conda/activate.d
@@ -165,11 +172,16 @@ chmod +x "$CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh"
 
 # Build a hidden folder for pema-related software
 if [[ "$RUN_ENV" == "local" ]]; then
-  INSTALL_DIR=$HOME/.pema
+  if [[ -n "$PREFIX" ]]; then
+    INSTALL_DIR=$PREFIX
+  else
+    INSTALL_DIR=$HOME/.pema
+  fi
   mkdir -p "$INSTALL_DIR"
 else
   INSTALL_DIR=/opt
 fi
+
 cd "$INSTALL_DIR"
 
 # --------------
@@ -251,8 +263,16 @@ fi
 # Install cutadapt
 # --------------
 
-pipx install cutadapt
-pipx ensurepath
+if command -v pipx &> /dev/null; then
+    echo "✅ pipx is available: $(pipx --version)"
+    pipx install cutadapt
+    pipx ensurepath
+else
+    echo "❌ pipx is not installed or not in PATH"
+    echo "pema will not install cutadapt which is required only for the case of ITS"
+    echo "If you have sudo rights, follow instructions here: https://github.com/pypa/pipx"
+    echo "If not, you may ask your sys-admin to add pipx."
+fi
 
 
 # --------------
@@ -336,7 +356,7 @@ else
   ./configure --prefix=$INSTALL_DIR"/PANDAseq"
   make
   make install
-  chmod -R +777 /home/tools/PANDAseq/pandaseq/.libs/
+  chmod -R +777 $INSTALL_DIR/PANDAseq/pandaseq/.libs/
   cd ..
   echo -e "PANDAseq was installed $TADA"
 fi
