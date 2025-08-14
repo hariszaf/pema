@@ -35,7 +35,7 @@ jobs:
 
       - name: Run setup_env.sh
         run: |
-          sudo bash -e setup_env.sh --env local
+          bash -e setup_env.sh --env local
 
       - name: Record versions
         run: |

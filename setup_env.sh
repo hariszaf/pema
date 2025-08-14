@@ -307,7 +307,7 @@ else
   wget https://github.com/torognes/vsearch/releases/download/v$VSEARCH/vsearch-$VSEARCH-linux-x86_64.tar.gz
   tar -zxvf vsearch-$VSEARCH-linux-x86_64.tar.gz 
   rm vsearch-$VSEARCH-linux-x86_64.tar.gz 
-  mv vsearch-$VSEARCH-linux-x86_64 vsearch
+  mv -f vsearch-$VSEARCH-linux-x86_64 vsearch
 fi
 
 # Add $INSTALL_DIR/vsearch to PATH if not already included
@@ -453,7 +453,7 @@ else
 
   curl -L -o rdp_dbs_v220.tar.gz -L $RDP_PEMA
   tar -zxvf rdp_dbs_v220.tar.gz
-  mv TRAIN/ $RDP_TRAIN_DIR/
+  mv -f TRAIN/ $RDP_TRAIN_DIR/
   # rm rdp_dbs_v220.tar.gz
 
   echo -e "PEMA trained RDP databases were retrieved $TADA"
@@ -542,7 +542,7 @@ cd $HOME
 cd .crest4/
 curl -L -o crest_dbs.tar.gz $CREST_PEMA 
 tar -zxvf crest_dbs.tar.gz
-mv crest_dbs/* .
+mv -f crest_dbs/* .
 rmdir crest_dbs
 rm crest_dbs.tar.gz
 
