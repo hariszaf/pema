@@ -18,11 +18,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: |
-          apt-get update
-          apt-get install -y libbz2-dev bzip2
-
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
@@ -31,7 +26,7 @@ jobs:
       - name: Install dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y curl wget git build-essential
+          sudo apt-get install -y curl wget git build-essential libbz2-dev bzip2
 
       - name: Accept Anaconda ToS
         run: |

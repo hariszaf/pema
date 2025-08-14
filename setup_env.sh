@@ -601,14 +601,18 @@ source $SHELL_CONFIG
 cd $SCRIPT_DIR
 echo -e "$HOURGLASS Download data files for pema sanity checks.."
 curl -L -o sanity_data.tar.gz "https://zenodo.org/records/16873455/files/sanity_data.tar.gz"
+
+echo -e "$HOURGLASS Decompress sanity data... \n\n"
 tar xzvf sanity_data.tar.gz
 
-mv -f sanity_data/mydata12s sanity_check/12S/
-mv -f sanity_data/mydata16s sanity_check/16S/
-mv -f sanity_data/mydata18s sanity_check/18S/
-mv -f sanity_data/mydataCOI sanity_check/COI/
-mv -f sanity_data/mydataITS sanity_check/ITS/
-mv -f sanity_data/train_crest/* sanity_check/custom_crest/
+echo -e "Move sanity data to according checks"
+for d in 12s 16s 18s COI ITS; do
+    rm -rf "sanity_check/$d/mydata$d"
+    mv "sanity_data/mydata$d" "sanity_check/$d/"
+done
+
+rm -rf sanity_check/custom_crest/*
+mv sanity_data/train_crest/* sanity_check/custom_crest/
 
 rm -r sanity_data/
 rm sanity_data.tar.gz
