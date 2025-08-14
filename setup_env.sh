@@ -542,7 +542,11 @@ cd $HOME
 cd .crest4/
 curl -L -o crest_dbs.tar.gz $CREST_PEMA 
 tar -zxvf crest_dbs.tar.gz
-mv -f crest_dbs/* .
+for item in crest_dbs/*; do
+    # The -f here, also makes sure it will not fail if folder not already there
+    rm -rf "./$(basename "$item")"
+    mv "$item" .
+done
 rmdir crest_dbs
 rm crest_dbs.tar.gz
 
