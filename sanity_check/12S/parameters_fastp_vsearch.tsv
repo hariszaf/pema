@@ -30,7 +30,7 @@ gene=12S
 #=          If a relative path is given, it will be resolved relative to the location of this parameters file.
 #=        type: string
 #=        required: True
-sequence_files=mydata
+sequence_files=mydata12s
 #
 #
 #=     outputFolderName:
