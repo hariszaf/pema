@@ -215,17 +215,14 @@ fi
 # FASTQC=
 # TRIMMOMATIC=
 # VSEARCH=
-SWARM=3.1.5        # NOTE: note used so far on the installation process, i.e. would change without noticing
-SPADES=3.14.0
+        SWARM=3.1.5        # NOTE: note used so far on the installation process, i.e. would change without noticing
+       SPADES=3.14.0
 RDPCLASSIFIER=2.14
-RAXML=1.2.2
-CREST_PEMA="https://zenodo.org/record/5734317/files/crest.tar.gz"
-
-
+        RAXML=1.2.2
+   CREST_PEMA="https://zenodo.org/record/5734317/files/crest.tar.gz"
 
 SHELL_CONFIG="$(get_shell_config)"
 echo "Shell config path: $SHELL_CONFIG"
-
 
 # --------------
 # Install fastp
@@ -238,7 +235,6 @@ else
   chmod a+x $INSTALL_DIR/fastp && \
   echo -e "$GREEN_TICK fastp downloaded to $INSTALL_DIR/fastp"
 fi
-
 
 # --------------
 # Install fastQC
@@ -274,7 +270,6 @@ else
     echo "If not, you may ask your sys-admin to add pipx."
 fi
 
-
 # --------------
 # Install  OBItools
 # --------------
@@ -290,7 +285,6 @@ else
   echo -e "Obitools4 is now added on PATH $TADA"
   cd ..
 fi
-
 
 # --------------
 # Install VSEARCH
@@ -310,7 +304,6 @@ if [[ ":$PATH:" != *":$INSTALL_DIR/search/bin:"* ]]; then
   echo "export PATH=\"$INSTALL_DIR/vsearch/bin:\$PATH\"" >> $SHELL_CONFIG
   echo -e "Added $INSTALL_DIR/vsearch/bin to PATH. $TADA"
 fi
-
 
 # --------------
 # Install Trimmomatic
@@ -343,7 +336,6 @@ if [[ ":$PATH:" != *":$INSTALL_DIR/SPAdes-${SPADES}-Linux/bin:"* ]]; then
   echo -e "Added $INSTALL_DIR/SPAdes-$SPADES-Linux/bin to PATH. $TADA"
 fi
 
-
 # --------------
 # Install PANDASEQ
 # --------------
@@ -367,7 +359,6 @@ if [[ ":$PATH:" != *":$INSTALL_DIR/PANDAseq/bin:"* ]]; then
   echo -e "Added $INSTALL_DIR/PANDAseq/bin to PATH. $TADA"
 fi
 
-
 # --------------
 # Install Swarm
 # --------------
@@ -385,7 +376,6 @@ if [[ ":$PATH:" != *":$INSTALL_DIR/swarm/bin:"* ]]; then
   echo "export PATH=\"$INSTALL_DIR/swarm/bin:\$PATH\"" >> $SHELL_CONFIG
   echo -e "Added $INSTALL_DIR/swarm/bin to PATH. $TADA"
 fi
-
 
 # -----------------
 # Install Blast tools
@@ -418,7 +408,6 @@ else
     echo -e "Added jq in PATH $TADA"
 fi
 
-
 # -----------------
 # Install RDP Classifier
 # -----------------
@@ -437,7 +426,6 @@ else
   echo -e "RDP Classifier has been installed $TADA"
 
 fi
-
 
 RDP_TRAIN_DIR="$INSTALL_DIR/rdp_classifier_$RDPCLASSIFIER/TRAIN"
 
@@ -495,7 +483,8 @@ else
 
   if [[ "$RUN_ENV" == "local" ]]; then
 
-    if ! sudo apt-get install --yes autotools-dev flex bison automake; then
+    if ! sudo apt-get install --yes autotools-dev flex bison automake; 
+    then
       echo -e "$RED_CROSS Warning: Evolutionary Placement Algorithm installation failed. \
             PEMA will not be able to run phylogeny-based taxonomy assignmnet. \
             Make sure you are running this as root to get this option. PEMA installation will now continue anyway..."
@@ -516,7 +505,6 @@ else
   echo "export PATH=\"$INSTALL_DIR/epa/bin:\$PATH\"" >> "$SHELL_CONFIG"
   echo -e "EPA has been installed $TADA"
 fi
-
 
 # -----------------
 # RAxML-ng
@@ -584,6 +572,18 @@ awk '
 sed -i "s|$HOME|\$HOME|g" $SHELL_CONFIG
 
 source $SHELL_CONFIG
+
+# Download sanity checks data files
+cd $SCRIPT_DIR
+echo -e "$HOURGLASS Download data files for pema sanity checks.."
+wget 
+tar czvf sanity_data.tar.gz
+mv sanity_data/mydata12s sanity_check/12S/
+mv sanity_data/mydata16s sanity_check/16S/
+mv sanity_data/mydata18s sanity_check/18S/
+mv sanity_data/mydataCOI sanity_check/COI/
+mv sanity_data/mydataITS sanity_check/ITS/
+mv sanity_data/train_crest/* sanity_check/custom_crest/
 
 # Good bye!
 echo -e "\n\n $TADA PEMA installation has been completed successfully!\n"

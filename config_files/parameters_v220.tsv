@@ -813,6 +813,13 @@ custom_ref_db=No
 name_of_custom_db=
 #
 #
+#=     path_to_custom_db_files:
+#=        title: Path to custom database files
+#=        description: Directory with input files for classifier's training step. Parameter required only if custom_ref_db: Yes
+#=        type: string
+#=        required: True
+path_to_custom_db_files=
+#
 #   --------------------------     sum up      --------------------------
 #
 #

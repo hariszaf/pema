@@ -28,5 +28,9 @@ sanity_check/12S/TEST*/
 sanity_check/custom_crest/TEST*/
 sanity_check/non_ena_data/TEST.*/
 
+# Ignore custom db input fules
+sanity_check/custom_crest/greek_bac/
+sanity_check/custom_crest/unite10_raw/
+
 # Ignore any .sif file
 *.sif
