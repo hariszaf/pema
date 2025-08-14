@@ -576,14 +576,16 @@ source $SHELL_CONFIG
 # Download sanity checks data files
 cd $SCRIPT_DIR
 echo -e "$HOURGLASS Download data files for pema sanity checks.."
-wget 
-tar czvf sanity_data.tar.gz
+curl -L -o sanity_data.tar.gz "https://zenodo.org/records/16873455/files/sanity_data.tar.gz?download=1"
+tar xzvf sanity_data.tar.gz
 mv sanity_data/mydata12s sanity_check/12S/
 mv sanity_data/mydata16s sanity_check/16S/
 mv sanity_data/mydata18s sanity_check/18S/
 mv sanity_data/mydataCOI sanity_check/COI/
 mv sanity_data/mydataITS sanity_check/ITS/
 mv sanity_data/train_crest/* sanity_check/custom_crest/
+rm -r sanity_data/
+rm sanity_data.tar.gz
 
 # Good bye!
 echo -e "\n\n $TADA PEMA installation has been completed successfully!\n"

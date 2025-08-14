@@ -1,9 +1,48 @@
 #!/usr/bin/env bds
 
 # This is P.E.M.A!  A metabarcoding pipenline for environmental DNA samples.
-# Author: Haris Zafeiropoulos 
-# date: 2017-2018
+# Author: Haris Zafeiropoulos
+# date  : 2017-2018
 
+
+help Hello friend. 
+# If you need an empty line, make sure you levave a space (blank) after the `help` command.
+help 
+help This is PEMA, a pipeline to run your amplicon sequence analysis
+help starting from a set of paired-end sequencing files, up to a taxonomically assigned OTU/ASV table.
+help 
+help For any trouble you get, feel free to contact us through our Matrix community https://matrix.to/#/#pema-helpdesk_community:gitter.im
+help or leave an issue on our GitHub repo: https://github.com/hariszaf/pema 
+
+help Required parameters
+config := ""    help Path to your configuaration file. You may see for templates on the config_files folder or under the sanity_check for more specific cases
+
+help Other parameters
+bool v, version    help Returns pema version.
+
+pema_version := 2.2.0       
+
+
+if ( args.isEmpty() ) {
+    printHelp()
+    exit(1)
+} 
+
+if ( v  || version) {
+   print(pema_version)
+   print("\n")
+   exit(1)
+}
+
+print(args)
+
+if ( ! args.has("-config") ) {
+   print("No configuration file was provided. Please provide one. \n ")
+   printHelp()
+   exit(1)
+}
+
+# Load BDS pema modules
 include "modules/initialize"
 include "modules/preprocess"
 include "modules/clustering"
@@ -12,16 +51,17 @@ include "modules/postAssignment"
 
 println("✅ Modules loaded.")
 
-string parameterFileProvided = args[0]
-string parameterFilePath     = parameterFileProvided.dirName()
+string parameterFilePath     = config.dirName()
+print("config parameters' file directory:\n $parameterFilePath \n")
+
 
 string filenameOnly
-if ( parameterFileProvided.indexOf("/") >= 0 ) {
+if ( config.indexOf("/") >= 0 ) {
    # It contains "/", extract part after last "/"
-   filenameOnly = parameterFileProvided.substr(parameterFileProvided.lastIndexOf("/") + 1)
+   filenameOnly = config.substr(config.lastIndexOf("/") + 1)
 } else {
    # No "/", the full string is the filename
-   filenameOnly = parameterFileProvided
+   filenameOnly = config
 }
 
 string parameterFile  = parameterFilePath + "/" + filenameOnly
@@ -59,6 +99,7 @@ if ( paramsFirstAssignment.hasKey('custom_ref_db') && paramsFirstAssignment{'cus
 }
 wait
 globalVars{'parameterFile'} = parameterFile
+
 
 ###############################################################
 #              PRE-PROCESSING
@@ -157,7 +198,7 @@ string clustering = globalVars{'outputPoint'} + "/clustering.chp"
 checkpoint clustering
 
 ################################################################
-#           6. OTUs clustering / ASVs inference                #
+#             OTUs clustering / ASVs inference                #
 ################################################################
 
 string denoise_msg = "\n\n" + "******   OTU CLUSTERING / ASV INFERENCE  STEP   ******"
@@ -181,7 +222,7 @@ string taxAssign = globalVars{'outputPoint'} + "/taxAssign.chp"
 checkpoint taxAssign
 
 ################################################################
-#                7. Taxonomic assignment                       #
+#                   Taxonomic assignment                       #
 ################################################################
 
 string tax_assign_msg = "\n\n" + "******   TAXONOMY ASSIGNMENT STEP   ******"
@@ -189,7 +230,9 @@ println(tax_assign_msg)
 
 parameterFilePath.chdir()
 string{} paramsForTaxAssign =  readParameterFile(parameterFile)
-
+print("~~~")
+print(paramsForTaxAssign)
+print("~~~")
 
 if ( paramsForTaxAssign.hasKey('custom_ref_db') && paramsForTaxAssign{'custom_ref_db'} == 'Yes') {
 

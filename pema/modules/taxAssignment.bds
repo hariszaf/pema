@@ -162,10 +162,10 @@ string phylogenyAssign(string{} params, string{} globalVars) {
 
       # PaPaRa returns a msa of our queries that has taken into account info from our ref tree 
       task $globalVars{'tools'}/papara_static_x86_64 \
-      -t $globalVars{'pema_home'}/pema/ext_data/easy_tree/raxml_easy_right_refmsa.raxml.bestTree \
-      -s $globalVars{'pema_home'}/pema/ext_data/easy_tree/raxml_easy_right_refmsa.raxml.reduced.phy \
-      -q all_sequences_grouped.fa -r #-j 4
-    
+         -t $globalVars{'pema_home'}/pema/ext_data/easy_tree/raxml_easy_right_refmsa.raxml.bestTree \
+         -s $globalVars{'pema_home'}/pema/ext_data/easy_tree/raxml_easy_right_refmsa.raxml.reduced.phy \
+         -q all_sequences_grouped.fa -r #-j 4
+      
       wait
       
       # Remove the ref - msa - THIS IS A BUG OF EPA-ng !!!!
@@ -189,7 +189,7 @@ string phylogenyAssign(string{} params, string{} globalVars) {
    
    wait
 
-   string assignFolder="phylo_tax_assignment"
+   string assignFolder = params{'taxonomyFolderName'}
    assignFolder.mkdir()
    sys mv epa* $assignFolder
 
@@ -282,7 +282,6 @@ string rdpAssign(string{} params, string{} globalVars) {
       task java -Xmx64g -jar $globalVars{'path'}/tools/RDPTools/classifier.jar classify \
             -t $globalVars{'path'}/tools/RDPTools/TRAIN/$globalVars{'name_of_custom_db'}/rRNAClassifier.properties \
             -o tax_assign_temp.txt all_sequences_grouped.fa
-
    }
 
    wait

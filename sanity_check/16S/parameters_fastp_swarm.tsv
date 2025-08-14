@@ -508,7 +508,7 @@ emptyCheckpoints=Yes
 #=        validation: 
 #=          - value: Yes
 #=          - value: No
-getNCBITaxId=Yes
+getNCBITaxId=No
 #
 #   --------------------------     PEMA METADATA     --------------------------
 #

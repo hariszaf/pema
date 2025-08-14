@@ -461,6 +461,7 @@ searchAlgo=vsearch
 #=          - value: pr2
 #=          - value: midori_1
 #=          - value: midori_2
+#=          - value: unite
 referenceDb=silva_128
 #
 #   --------------------------     GENE-SPECIFIC : ITS     --------------------------
