@@ -74,7 +74,7 @@ string crestAssign(string{} params, string{} globalVars) {
 # Crest4 
 string runCrest4(string searchFile, string{} params, string{} globalVars) {
 
-   string msg_in = "\n\n" + ">>>>>>>>> Taxonomy assignment using " + params{'referenceDb'} + " and crest4.." + "\n\n"
+   string msg_in = "\n\n" + "-- Taxonomy assignment using " + params{'referenceDb'} + " and crest4.." + "\n\n"
    println(msg_in)
 
    if (params{'referenceDb'} == "midori_1") {
