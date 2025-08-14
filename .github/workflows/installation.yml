@@ -2,38 +2,6 @@
 # Author: Haris Zafeiropoulos
 # Licensed under GNU LGPL.3, see LICENCE file
 
-# name: dingo-ubuntu
-
-# on: [push, pull_request]
-
-# jobs:
-#   # Install PEMA on Linux
-#   install-linux:
-#     name: Instlal on Linux OS
-
-#     runs-on: ubuntu-latest
-#     permissions:
-#       id-token: write
-
-#     strategy:
-#       matrix:
-#         python-version: ["3.11"]
-
-#     steps:
-#       - uses: actions/checkout@v2
-#       - name: Set up Python ${{ matrix.python-version }}
-#         uses: actions/setup-python@v2
-#         with:
-#           python-version: ${{ matrix.python-version }}
-
-#       - name: Install dependencies
-#         run: |
-#           sudo apt-get update -y
-
-#       - name: Run setup_env.sh
-#         run: |
-#           sudo bash setup_env.sh --env local
-
 name: dingo-ubuntu
 
 on: [push, pull_request]
@@ -59,6 +27,11 @@ jobs:
         run: |
           sudo apt-get update -y
           sudo apt-get install -y curl wget git build-essential
+
+      - name: Accept Anaconda ToS
+        run: |
+          conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/main
+          conda tos accept --override-channels --channel https://repo.anaconda.com/pkgs/r
 
       - name: Run setup_env.sh
         run: |

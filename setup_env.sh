@@ -56,6 +56,10 @@ while true; do
       HELP_ARG=true
       shift
       ;;
+    -s|--skip-rdp)
+      SKIP_RDP_DBS=true
+      shift
+      ;;
     -e|--env)
       RUN_ENV="$2"
       shift 2
@@ -447,7 +451,7 @@ else
 
   cd rdp_classifier_$RDPCLASSIFIER/
 
-  curl -L -o rdp_dbs_v220.tar.gz -L https://zenodo.org/records/16876159/files/rdp_dbs_v220.tar.gz?download=1
+  curl -L -o rdp_dbs_v220.tar.gz -L $RDP_PEMA
   tar -zxvf rdp_dbs_v220.tar.gz
   mv TRAIN/ $RDP_TRAIN_DIR/
   # rm rdp_dbs_v220.tar.gz
@@ -594,18 +598,16 @@ cd $SCRIPT_DIR
 echo -e "$HOURGLASS Download data files for pema sanity checks.."
 curl -L -o sanity_data.tar.gz "https://zenodo.org/records/16873455/files/sanity_data.tar.gz"
 tar xzvf sanity_data.tar.gz
-mv sanity_data/mydata12s sanity_check/12S/
-mv sanity_data/mydata16s sanity_check/16S/
-mv sanity_data/mydata18s sanity_check/18S/
-mv sanity_data/mydataCOI sanity_check/COI/
-mv sanity_data/mydataITS sanity_check/ITS/
-mv sanity_data/train_crest/* sanity_check/custom_crest/
+
+mv -f sanity_data/mydata12s sanity_check/12S/
+mv -f sanity_data/mydata16s sanity_check/16S/
+mv -f sanity_data/mydata18s sanity_check/18S/
+mv -f sanity_data/mydataCOI sanity_check/COI/
+mv -f sanity_data/mydataITS sanity_check/ITS/
+mv -f sanity_data/train_crest/* sanity_check/custom_crest/
+
 rm -r sanity_data/
 rm sanity_data.tar.gz
-
-echo -e "$HOURGLASS Download data files for pema sanity checks.."
-curl -L -o sanity_data.tar.gz "https://zenodo.org/records/16873455/files/sanity_data.tar.gz?download=1"
-tar xzvf sanity_data.tar.gz
 
 # Good bye!
 echo -e "\n\n $TADA PEMA installation has been completed successfully!\n"
