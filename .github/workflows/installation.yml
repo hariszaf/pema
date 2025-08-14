@@ -1,0 +1,80 @@
+# PEMA : a Pipeline for Environmental DNA Metabarcoding Analysis
+# Author: Haris Zafeiropoulos
+# Licensed under GNU LGPL.3, see LICENCE file
+
+# name: dingo-ubuntu
+
+# on: [push, pull_request]
+
+# jobs:
+#   # Install PEMA on Linux
+#   install-linux:
+#     name: Instlal on Linux OS
+
+#     runs-on: ubuntu-latest
+#     permissions:
+#       id-token: write
+
+#     strategy:
+#       matrix:
+#         python-version: ["3.11"]
+
+#     steps:
+#       - uses: actions/checkout@v2
+#       - name: Set up Python ${{ matrix.python-version }}
+#         uses: actions/setup-python@v2
+#         with:
+#           python-version: ${{ matrix.python-version }}
+
+#       - name: Install dependencies
+#         run: |
+#           sudo apt-get update -y
+
+#       - name: Run setup_env.sh
+#         run: |
+#           sudo bash setup_env.sh --env local
+
+name: dingo-ubuntu
+
+on: [push, pull_request]
+
+jobs:
+  install-linux:
+    name: Install on Linux OS
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y curl wget git build-essential
+
+      - name: Run setup_env.sh
+        run: |
+          sudo bash -e setup_env.sh --env local
+
+      - name: Record versions
+        run: |
+          echo "OS INFORMATION:" > VERSIONS.txt
+          cat /etc/os-release >> VERSIONS.txt
+          echo "\nAPT PACKAGES:" >> VERSIONS.txt
+          dpkg -l >> VERSIONS.txt
+          echo "\nPYTHON PACKAGES:" >> VERSIONS.txt
+          pip list >> VERSIONS.txt
+
+      - name: Upload versions
+        uses: actions/upload-artifact@v4
+        with:
+          name: versions
+          path: VERSIONS.txt

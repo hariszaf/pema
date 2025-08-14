@@ -34,6 +34,8 @@ sanity_check/custom_crest/greek_bac/
 sanity_check/custom_crest/unite10_raw/
 
 # Ignore training files for RDPClassifier
+crest_dbs.tar.gz
+sanity_data.tar.gz
 rdp_dbs_v220.tar.gz
 
 # Ignore any .sif file

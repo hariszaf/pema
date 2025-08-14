@@ -19,6 +19,23 @@ VERSION_ARG=false
   KOFAM_ARG=false
  SCRIPT_DIR=$(dirname "$(realpath "$0")")
 
+# --------------
+# Versions
+# --------------
+PEMA_VERSION=$(awk -F':= *' '/pema_version/ {print $2; exit}' $SCRIPT_DIR/pema/pema.bds)
+ ZENODO_BASE="https://zenodo.org/records/16876159/files/"
+
+#         FASTP=
+#        FASTQC=
+        VSEARCH=2.9.1
+    TRIMMOMATIC=0.38
+          SWARM=3.1.5        # NOTE: note used so far on the installation process, i.e. would change without noticing
+         SPADES=3.14.0
+  RDPCLASSIFIER=2.14
+          RAXML=1.2.2
+   SANNITY_DATA=$ZENODO_BASE"sanity_data.tar.gz"
+     CREST_PEMA=$ZENODO_BASE"crest_dbs.tar.gz"
+       RDP_PEMA=$ZENODO_BASE"rdp_dbs_v220.tar.gz"
 
 # Parse options using getopt
 # PARSED=$(getopt --options eh --long env,help -- "$@")
@@ -165,6 +182,8 @@ EOF
 
 chmod +x "$CONDA_PREFIX/etc/conda/deactivate.d/env_vars.sh"
 
+SHELL_CONFIG="$(get_shell_config)"
+echo "Shell config path: $SHELL_CONFIG"
 
 # ====================================
 # Step 2: Install software
@@ -209,24 +228,9 @@ if [[ "$RUN_ENV" == "local" ]]; then
 fi
 
 # --------------
-# Versions
-# --------------
-# FASTP=
-# FASTQC=
-# TRIMMOMATIC=
-# VSEARCH=
-        SWARM=3.1.5        # NOTE: note used so far on the installation process, i.e. would change without noticing
-       SPADES=3.14.0
-RDPCLASSIFIER=2.14
-        RAXML=1.2.2
-   CREST_PEMA="https://zenodo.org/record/5734317/files/crest.tar.gz"
-
-SHELL_CONFIG="$(get_shell_config)"
-echo "Shell config path: $SHELL_CONFIG"
-
-# --------------
 # Install fastp
 # --------------
+cd "$INSTALL_DIR"
 if [[ -x $INSTALL_DIR/fastp ]]; then
   echo -e "$GREEN_TICK fastp already exists at $INSTALL_DIR/fastp"
 else
@@ -239,6 +243,7 @@ fi
 # --------------
 # Install fastQC
 # --------------
+cd "$INSTALL_DIR"
 if [[ -x $INSTALL_DIR/FastQC ]]; then
   echo -e "$GREEN_TICK fastQC already exists at $INSTALL_DIR/FastQC"
 else
@@ -258,7 +263,7 @@ fi
 # --------------
 # Install cutadapt
 # --------------
-
+cd "$INSTALL_DIR"
 if command -v pipx &> /dev/null; then
     echo "✅ pipx is available: $(pipx --version)"
     pipx install cutadapt
@@ -273,6 +278,7 @@ fi
 # --------------
 # Install  OBItools
 # --------------
+cd "$INSTALL_DIR"
 if [[ -x $INSTALL_DIR/obitools4 ]]; then
   echo -e "$GREEN_TICK obitools4 has been installed."
 else
@@ -289,14 +295,15 @@ fi
 # --------------
 # Install VSEARCH
 # --------------
+cd "$INSTALL_DIR"
 if [[ -x $INSTALL_DIR/vsearch ]]; then
   echo -e "$GREEN_TICK VSEARCH already exists at $INSTALL_DIR/vsearch"
 else
   echo -e "$HOURGLASS Installing VSEARCH.."
-  wget https://github.com/torognes/vsearch/releases/download/v2.9.1/vsearch-2.9.1-linux-x86_64.tar.gz
-  tar -zxvf vsearch-2.9.1-linux-x86_64.tar.gz 
-  # rm vsearch-2.9.1-linux-x86_64.tar.gz 
-  mv vsearch-2.9.1-linux-x86_64 vsearch
+  wget https://github.com/torognes/vsearch/releases/download/v$VSEARCH/vsearch-$VSEARCH-linux-x86_64.tar.gz
+  tar -zxvf vsearch-$VSEARCH-linux-x86_64.tar.gz 
+  rm vsearch-$VSEARCH-linux-x86_64.tar.gz 
+  mv vsearch-$VSEARCH-linux-x86_64 vsearch
 fi
 
 # Add $INSTALL_DIR/vsearch to PATH if not already included
@@ -308,13 +315,14 @@ fi
 # --------------
 # Install Trimmomatic
 # --------------
-if [[ -x $INSTALL_DIR/Trimmomatic-0.38 ]]; then
+cd "$INSTALL_DIR"
+if [[ -x $INSTALL_DIR/Trimmomatic-$TRIMMOMATIC ]]; then
   echo -e "$GREEN_TICK Trimmomatic already exists at $INSTALL_DIR/fastp"
 else
   echo -e "$HOURGLASS Installing Trimmomatic.."
-  wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-0.38.zip
-  unzip Trimmomatic-0.38.zip
-  # rm Trimmomatic-0.38.zip
+  wget http://www.usadellab.org/cms/uploads/supplementary/Trimmomatic/Trimmomatic-$TRIMMOMATIC.zip
+  unzip Trimmomatic-$TRIMMOMATIC.zip
+  rm Trimmomatic-$TRIMMOMATIC.zip
 fi
 
 # --------------
@@ -439,11 +447,10 @@ else
 
   cd rdp_classifier_$RDPCLASSIFIER/
 
-  # TODO: REPLACE THE URL  
-  # wget -O TRAIN.zip -L  <URL>
-  unzip TRAIN.zip
-  rm TRAIN.zip
-  cp $RDP_TRAIN_DIR/midori_1/rRNAClassifier.properties $RDP_TRAIN_DIR/12S_v2.0.0/rRNAClassifier.properties
+  curl -L -o rdp_dbs_v220.tar.gz -L https://zenodo.org/records/16876159/files/rdp_dbs_v220.tar.gz?download=1
+  tar -zxvf rdp_dbs_v220.tar.gz
+  mv TRAIN/ $RDP_TRAIN_DIR/
+  # rm rdp_dbs_v220.tar.gz
 
   echo -e "PEMA trained RDP databases were retrieved $TADA"
 fi
@@ -526,6 +533,15 @@ fi
 pip install crest4
 pip install ncbi-taxonomist
 
+# Get crest trained dbs
+cd $HOME
+cd .crest4/
+curl -L -o crest_dbs.tar.gz $CREST_PEMA 
+tar -zxvf crest_dbs.tar.gz
+mv crest_dbs/* .
+rmdir crest_dbs
+rm crest_dbs.tar.gz
+
 # Add $INSTALL_DIR to PATH if not already included
 if [[ ":$PATH:" != *":$INSTALL_DIR/:"* ]]; then
   echo "export PATH=\"$INSTALL_DIR/:\$PATH\"" >> $SHELL_CONFIG
@@ -576,7 +592,7 @@ source $SHELL_CONFIG
 # Download sanity checks data files
 cd $SCRIPT_DIR
 echo -e "$HOURGLASS Download data files for pema sanity checks.."
-curl -L -o sanity_data.tar.gz "https://zenodo.org/records/16873455/files/sanity_data.tar.gz?download=1"
+curl -L -o sanity_data.tar.gz "https://zenodo.org/records/16873455/files/sanity_data.tar.gz"
 tar xzvf sanity_data.tar.gz
 mv sanity_data/mydata12s sanity_check/12S/
 mv sanity_data/mydata16s sanity_check/16S/
@@ -586,6 +602,10 @@ mv sanity_data/mydataITS sanity_check/ITS/
 mv sanity_data/train_crest/* sanity_check/custom_crest/
 rm -r sanity_data/
 rm sanity_data.tar.gz
+
+echo -e "$HOURGLASS Download data files for pema sanity checks.."
+curl -L -o sanity_data.tar.gz "https://zenodo.org/records/16873455/files/sanity_data.tar.gz?download=1"
+tar xzvf sanity_data.tar.gz
 
 # Good bye!
 echo -e "\n\n $TADA PEMA installation has been completed successfully!\n"
