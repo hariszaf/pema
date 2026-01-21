@@ -265,7 +265,7 @@ if [[ ":$PATH:" != *":$INSTALL_DIR/FastQC:"* ]]; then
 fi
 
 # --------------
-# Install cutadapt
+# Install cutadapt  ---   TODO: MAKE SURE R IS AVAILABLE!
 # --------------
 cd "$INSTALL_DIR"
 if command -v pipx &> /dev/null; then
@@ -360,7 +360,7 @@ else
   ./configure --prefix=$INSTALL_DIR"/PANDAseq"
   make
   make install
-  chmod -R +777 $INSTALL_DIR/PANDAseq/pandaseq/.libs/
+  chmod -R +777 $INSTALL_DIR/pandaseq/.libs/
   cd ..
   echo -e "PANDAseq was installed $TADA"
 fi
