@@ -42,7 +42,7 @@ process FASTP {
     tag "FASTP QC and merging"
 
     publishDir { "${params.outdir}/fastp" }, mode: 'copy'
-    container "quay.io/biocontainers/1.0.1--heae3180_0"
+    container "quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 
     input:
     tuple val(sampleName), path(readF), path(readR)

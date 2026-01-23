@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Builds an abundance table with a Taxonomy column based on Crest4 findinigs
 
 import os
@@ -5,27 +7,16 @@ import sys
 import pandas as pd
 from pathlib import Path
 
-abd_table         = sys.argv[1]
-crest_assignments = sys.argv[2]
-clustering_algo   = sys.argv[3]
+input_file        = sys.argv[1]  # Abundance table (allTab.tsv) or (asvs_contingency_hash.tsv)
+crest_assignments = sys.argv[2]  # Taxonomy assignments from CREST (assignments.txt)
+clustering_algo   = sys.argv[3]  # "swarm" or "vsearch"
 
-main_dir        = Path(abd_table).parent.absolute()
+main_dir        = Path(input_file).parent.absolute()
 assignments_dir = Path(crest_assignments).parent.absolute()
 
 
-if clustering_algo == "vsearch":
-
-    df = pd.read_csv(abd_table, sep="\t")
-
-elif clustering_algo == "swarm":
-
-    # Abundance table with both ASV id and hash
-    hash_table = main_dir / "asvs_contingency_hash.tsv"
-    df         = pd.read_csv(hash_table, sep="\t")
-
-else:
-    print("Not applicable clustering algo. Please select either `swarm `or `vsearch`")
-    sys.exit(0)
+# input_file is the abd_table in the vsearch case, and the asvs_contingency_hash in the swarm case
+df = pd.read_csv(input_file, sep="\t")
 
 
 columns    = df.columns

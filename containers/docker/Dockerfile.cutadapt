@@ -1,0 +1,36 @@
+FROM rocker/r-ver:4.3.1  
+
+# System dependencies required by Bioconductor
+RUN apt-get update && apt-get install -y \
+    zlib1g-dev \
+    libbz2-dev \
+    liblzma-dev \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+#  Install Bioconductor packages 
+RUN R -e "install.packages('BiocManager', repos='https://cloud.r-project.org')" && \
+    R -e "BiocManager::install(version = '3.18')" 
+RUN R -e "BiocManager::install(c('Biostrings','ShortRead'), ask=FALSE, update=FALSE)" && \
+    R -e "library(Biostrings); library(ShortRead)"
+
+
+# System deps
+RUN apt-get update && apt-get install -y \
+    python3 \
+    python3-pip \
+    python3-venv \
+    && rm -rf /var/lib/apt/lists/*
+
+# Optional: make python3 default
+RUN ln -s /usr/bin/python3 /usr/bin/python
+
+# Install pipx and cutadapt
+RUN python -m pip install --user pipx && \
+    python -m pipx ensurepath 
+
+RUN python -m pipx install cutadapt
+
+WORKDIR /opt

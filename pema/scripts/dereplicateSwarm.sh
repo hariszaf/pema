@@ -19,10 +19,10 @@ base_filename="${sample%%.*}"  # will keep only everything up to the first dot (
 
 if [ "$preprocess" == "fastp" ]; then
 
-    linearized_file="../linearizedSequences/$base_filename.linearized.fa"
+     linearized_file="../linearizedSequences/$base_filename.linearized.fa"
     dereplicate_file="../dereplicateSamples/$base_filename.derep.fa"
-    mapping_file="../dereplicateSamples/$base_filename.derep.mapping"
-    merged_file="../mergedSequences/$base_filename.merged.fastq" 
+        mapping_file="../dereplicateSamples/$base_filename.derep.mapping"
+         merged_file="../mergedSequences/$base_filename.merged.fastq"
 
     # Linearize sequences -- from within the mergedSequences folder
     echo -e "\n\n ==> Build linearize file for sample: $base_filename "
