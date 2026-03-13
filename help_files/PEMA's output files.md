@@ -111,7 +111,7 @@ The chosen classifier algorithm for the taxonomy assignment step is also going t
 
 * ### RDPClassifier
 
-In ***"finalTable.tsv"*** file, the user can find the final MOTU-table. The first column is the ASV identifier, the following columns contain the counts of each ASVs in each sample, and the last column contains the taxonomy.
+In ***"tax_assigned_table.tsv"*** file, the user can find the final MOTU-table. The first column is the ASV identifier, the following columns contain the counts of each ASVs in each sample, and the last column contains the taxonomy.
 
 ***"extenedFinalTable.tsv"*** contains the same information with an additional column which is the NCBI ID of the identified taxa.
 
@@ -134,7 +134,7 @@ The ***“Relative_Abundance.tsv”*** file contains relative abundance values a
 
 The total counts of OTUs for each taxon can be found in ***“Richness.tsv”***. 
 
-Finally, ***“finalTable.tsv"*** is the OTU-table that PEMA ends up with. The OTU-table contains all information about how OTUs are distributed, and hence it contains the taxonomic composition across each sample of the dataset.
+Finally, ***“tax_assigned_table.tsv"*** is the OTU-table that PEMA ends up with. The OTU-table contains all information about how OTUs are distributed, and hence it contains the taxonomic composition across each sample of the dataset.
 
 
 If **phylogeny-based taxonomy approach** has also been performed, another folder called **my_taxon_assign_phylogeny_assignment** has been created;  two output files are included in this folder: the “epa_info.log” which includes all parameters as they were set in EPA-ng and the “epa_result.jplace” file which is the final output of this approach and can be used as an input to a series of different tools (e.g. iTOL) in order to visualize the assignments of the OTUs found to the reference tree of 1000 taxa.

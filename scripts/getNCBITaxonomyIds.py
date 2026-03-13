@@ -2,13 +2,13 @@
 
 """
 This script makes use of the ncbi-taxonomist tool to get the NCBI Taxonomy id of the 
-lowest possible taxon level in each taxonomic assignment mentioned in the finalTable.tsv
+lowest possible taxon level in each taxonomic assignment mentioned in the tax_assigned_table.tsv
 """
 
 import subprocess
 import time
 
-final_table         = open("finalTable.tsv", "r")
+final_table         = open("tax_assigned_table.tsv", "r")
 final_table_ncbiIds = open("extenedFinalTable.tsv", "w")
 
 taxa_ncbiIds = {}

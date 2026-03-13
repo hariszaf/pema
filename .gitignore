@@ -19,6 +19,10 @@ scripts_OLD_VERSION/
 # Ignore all fastq.gz files
 *.fastq.gz
 
+# Ignore nextflow
+.nextflow/
+work/
+
 # Ignore all sanity checks outputs
 sanity_check/16S/TEST*/
 sanity_check/18S/TEST*/

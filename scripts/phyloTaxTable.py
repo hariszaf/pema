@@ -160,5 +160,5 @@ elif clustering_algo == "swarm":
     abd_df = load_swarm_hash(tax_df, main_dir)
 
 # Write table to file
-outfile        = placements_dir / "finalTable.tsv"
+outfile        = placements_dir / "tax_assigned_table.tsv"
 abd_df.to_csv(outfile, sep="\t", index=False)

@@ -55,5 +55,5 @@ else:
     df = df.rename(columns={"amplicon": "OTU"})
 
 # Save outfile
-outfile = assignments_dir / "finalTable.tsv"
+outfile = assignments_dir / "tax_assigned_table.tsv"
 df.to_csv(outfile, sep="\t", index=False)

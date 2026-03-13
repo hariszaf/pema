@@ -1,6 +1,6 @@
 #!/usr/bin/env bds
 
-# Get NCBI Taxonomy Id for the taxonomies found in the finalTable.tsv file
+# Get NCBI Taxonomy Id for the taxonomies found in the tax_assigned_table.tsv file
 string ncbiTaxonomyMapping(string{} params, string{} globalVars) {
 
     # Move to dir of finaTable.tsv

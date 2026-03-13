@@ -379,7 +379,7 @@ if ( paramsForTaxAssign{'getNCBITaxId'} == 'Yes'){
     println(ncbiId_msg)
     ncbiTaxonomyMapping(paramsForTaxAssign, globalVars)
 
-    println("The assignments on the finalTable.tsv file have been linked to NCBI Taxonomy ids.")
+    println("The assignments on the tax_assigned_table.tsv file have been linked to NCBI Taxonomy ids.")
 }
 
 wait

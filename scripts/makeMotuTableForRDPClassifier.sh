@@ -31,7 +31,7 @@ awk -F "\t" '{print "ASV_"$1 ":" $2}' asvs_contingency_table.tsv | sed -e 's/ASV
 
 sed -i 's/\(.*\)_/\1 /' taxonomies_sorted.txt
 
-paste -d "\t" asvs TMP taxonomies_sorted.txt > finalTable.tsv
+paste -d "\t" asvs TMP taxonomies_sorted.txt > tax_assigned_table.tsv
 
 rm asvs TMP taxonomies_sorted.txt almost
 

@@ -1,23 +1,23 @@
 library(ShortRead)
 library(Biostrings)
 
-check_cutadapt <- function(cutadapt_path = "cutadapt") {
-  version <- tryCatch({
-    system2(cutadapt_path, args="--version", stdout=TRUE, stderr=TRUE)
-  }, error = function(e) {
-    stop("ERROR: cutadapt not found! Please make sure cutadapt is installed and in your PATH.")
-  })
-  message("Using cutadapt version: ", version)
-}
+# check_cutadapt <- function(cutadapt_path = "cutadapt") {
+#   version <- tryCatch({
+#     system2(cutadapt_path, args="--version", stdout=TRUE, stderr=TRUE)
+#   }, error = function(e) {
+#     stop("ERROR: cutadapt not found! Please make sure cutadapt is installed and in your PATH.")
+#   })
+#   message("Using cutadapt version: ", version)
+# }
 
-# (let us hope) singularity version
-cutadapt <- Sys.which("cutadapt")
-check_cutadapt(cutadapt)
+# # (let us hope) singularity version
+# cutadapt <- Sys.which("cutadapt")
+# check_cutadapt(cutadapt)
 
 
-cmd <- paste(commandArgs(), collapse=" ")
-cat("How cutadaptITS.R was invoked:\n");
-cat(cmd, "\n")
+# cmd <- paste(commandArgs(), collapse=" ")
+# cat("How cutadaptITS.R was invoked:\n");
+# cat(cmd, "\n")
 
 # Get all arguments
 args           <- commandArgs()

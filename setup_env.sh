@@ -232,7 +232,7 @@ if [[ "$RUN_ENV" == "local" ]]; then
 fi
 
 # --------------
-# Install fastp
+# Install fastp -- docker pull quay.io/biocontainers/fastp:1.0.1--heae3180_0
 # --------------
 cd "$INSTALL_DIR"
 if [[ -x $INSTALL_DIR/fastp ]]; then
@@ -297,7 +297,7 @@ else
 fi
 
 # --------------
-# Install VSEARCH
+# Install VSEARCH -- docker pull quay.io/biocontainers/vsearch:2.30.4--hd6d6fdc_0
 # --------------
 cd "$INSTALL_DIR"
 if [[ -x $INSTALL_DIR/vsearch ]]; then
@@ -372,7 +372,7 @@ if [[ ":$PATH:" != *":$INSTALL_DIR/PANDAseq/bin:"* ]]; then
 fi
 
 # --------------
-# Install Swarm
+# Install Swarm - docker pull quay.io/biocontainers/swarm:3.1.6--h9948957_0
 # --------------
 
 if [[ -x $INSTALL_DIR/swarm ]]; then
