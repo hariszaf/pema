@@ -1,0 +1,21 @@
+# configs:
+#   - global.yaml
+#   - fastp.yaml
+#   - crest.yaml
+#   - swarm.yaml
+#   - vsearch.yaml
+#   - rdpclassifier.yaml
+
+# The pattern *_{1,2}.fastq.gz means:
+# The * is the sample name (everything before _1 or _2)
+# {1,2} matches R1 and R2
+raw_reads: sanity_check/16S/mydata16s
+
+threads: 3
+
+outdir: buildingPemaNf
+
+fastp:
+  # description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
+  # type: boolean
+  disable_adapter_trimming: False

@@ -8,22 +8,9 @@ RUN apt-get update && \
     vsearch && \
     rm -rf /var/lib/apt/lists/*
 
-# RUN pip install crest4 
-# TODO: When my PR is merged, replace my repo with the official one of use the pip install if they release new version on PyPI.
-RUN apt-get update && \
-    apt-get install -y git  && \
-    git clone https://github.com/hariszaf/crest4.git && \
-    cd crest4 && \
-    git checkout patch-1 && \
-    pip install --no-cache-dir -e . && \
-    rm -rf /var/lib/apt/lists/*
+RUN pip install crest4==4.4.5
 
 # Set environment variable
 WORKDIR crest4
 RUN mkdir .crest4
 ENV CREST4_DIR=/crest4/.crest4
-
-
-# RUN sed -i \
-#     's/self.min_score[[:space:]]*=[[:space:]]*min_score/self.min_score = float(min_score) if min_score is not None else None/' \
-#     /usr/local/lib/python3.10/site-packages/crest4/classify.py

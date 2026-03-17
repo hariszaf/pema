@@ -64,20 +64,18 @@ process SWARM {
 workflow {
 
     // -------------------- PARAMETERS --------------------
-    params.input_fasta = params.input_fasta ?: error("Please provide a fasta file with the amplicons to be clustered (--input_fasta).")
+    params.input_fasta = params.input_fasta ?: error(
+        "Please provide a fasta file with the amplicons to be clustered (--input_fasta)."
+    )
     params.threads     = params.threads ?: 3
     params.outdir      = params.outdir ?: "results"
-
     params.differences = params.differences ?: 1
     params.boundary    = params.boundary ?: 2
-
     params.case        = params.case ?: "fastidious"
 
     def input_seq = Channel.fromPath(params.input_fasta)
 
     // Run process 
     SWARM(input_seq)
+
 }
-
-
-

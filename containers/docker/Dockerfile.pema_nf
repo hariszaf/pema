@@ -1,6 +1,6 @@
 FROM debian:bookworm-slim
 
-LABEL maintainer="Haris Zafeiropoulos <haris.zafr@gmail.com"
+LABEL maintainer="Haris Zafeiropoulos <haris.zafeiropoulos@atomicmail.io>"
 
 # venv required since debian
 RUN apt-get update && apt-get install -y \
@@ -32,5 +32,8 @@ RUN pip install --no-cache-dir \
     pandas \
     numpy
 
+RUN apt-get update && apt-get install -y \
+    vim \
+    gawk 
 # To build the image, run:
 # docker build -f Dockerfile.pema_nf -t hariszaf/pema-nf:0.1.0 ~/github_repos/HCMR/pema/

@@ -4,6 +4,12 @@
 # correction: 
 # This would set correction to the default value of fastp.
 
+raw_reads: test_data/fastp
+
+threads: 4
+
+outdir: testingNfModules
+
 fastp:
   # description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
   # type: boolean
@@ -124,4 +130,3 @@ fastp:
   # type: bolean
   # default: False
   disable_trim_poly_g: False
-  
