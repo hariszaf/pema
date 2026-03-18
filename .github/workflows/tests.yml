@@ -9,27 +9,33 @@ on: [push, pull_request]
 jobs:
   nextflow-tests:
     runs-on: ubuntu-latest
-
     steps:
-      # 1️⃣ Checkout repository
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2️⃣ Set up Java (required by Nextflow)
-      - name: Set up Java
+      - name: Set up Java 17
         uses: actions/setup-java@v3
         with:
           distribution: temurin
           java-version: "17"
 
-      # 3️⃣ Install Nextflow
-      - name: Install Nextflow
+      - name: Install Nextflow 24.10.0
         run: |
-          curl -s https://get.nextflow.io | bash
+          wget -q https://github.com/nextflow-io/nextflow/releases/download/v24.10.0/nextflow
+          chmod +x nextflow
           sudo mv nextflow /usr/local/bin/
           nextflow -version
 
-      # 4️⃣ Verify Nextflow can run a dry test
-      - name: Nextflow dry run
+      # ✅ Create a persistent isolated Nextflow home
+      - name: Setup isolated Nextflow home
+        id: nxfhome
+        run: echo "NXF_HOME=$(mktemp -d)" >> $GITHUB_ENV
+
+      # ✅ Warm up dependencies in the same NXF_HOME
+      - name: Warm up Nextflow
+        run: nextflow info
+
+      # ✅ Run the workflow in the same NXF_HOME
+      - name: Run fastp workflow
         run: |
-          nextflow run modules/fastp.nf --params-file config_files/fastp.yaml -resume -nobanner -profile test -stub-run
+          nextflow run modules/fastp.nf --params-file config_files/fastp.yaml

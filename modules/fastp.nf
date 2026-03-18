@@ -53,13 +53,13 @@ process FASTP {
 workflow {
 
     // -------------------- PARAMETERS --------------------
-    params.yaml = params.paramsFile ?: error(
+    params.yaml = params['params-file'] ?: error(
         "Please provide YAML file with fastp parameters (--params-file)."
     )
     //  Loading parameters from YAML file. 
     // If a parameter is not provided in the YAML, it will be set to a default value 
     // or an error will be thrown if it's required.
-    def fastpParams = loadYamlParams(params.yaml, 'fastp')
+    def fastpParams   = loadYamlParams(params.yaml, 'fastp')
     params.raw_reads  = loadYamlParams(params.yaml, 'raw_reads') ?: error(
         "Please provide folder with raw reads (--raw_reads)"
     )

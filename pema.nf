@@ -76,7 +76,9 @@ workflow {
         swarmParams["gap-opening-penalty"]   = null
         swarmParams["gap-extension-penalty"] = null
     } 
-    // -------------------- QUALITY CONTROL --------------------
+    println(params)
+    println(swarmParams)
+    // // -------------------- QUALITY CONTROL --------------------
     qc = FASTP(paired_raw_reads, fastpParams)
 
     // -------------------- DEREPLICATION --------------------
@@ -96,7 +98,7 @@ workflow {
     //  -------------------- CLUSTERING --------------------
     swarm = SWARM(all_samples_fasta.all_samples, swarmParams)
 
-    // -------------------- REMOVE OLIGOTONS -------------------- 
+    // // -------------------- REMOVE OLIGOTONS -------------------- 
 
 
     // -------------------- TAXONOMY ASSIGNMENT -------------------- 

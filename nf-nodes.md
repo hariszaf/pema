@@ -1,4 +1,8 @@
 
+# Nextflow version requirement
+This workflow is tested with **Nextflow 24.10.0**.  
+Nextflow 25.x currently has an Ivy dependency bug that may cause failures.
+
 
 
 When Nextflow starts, it does roughly this:

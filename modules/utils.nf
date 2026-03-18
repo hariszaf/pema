@@ -1,33 +1,53 @@
 #!/usr/bin/env nextflow
 
-@Grab('org.yaml:snakeyaml:1.33')
-import org.yaml.snakeyaml.Yaml
+// @Grab('org.yaml:snakeyaml:1.33')
+// import org.yaml.snakeyaml.Yaml
+
+import groovy.yaml.YamlSlurper
 
 // Convert loaded arguments from the YAML file to CLI arguments, 
 // e.g. --adapter_sequence AGATCGGAAGAGCACACGTCTGAACTCCAGTCA 
 // Attention! We assume whole parameter names and tools that expet two `-` for them
+// def paramsToCliArgs(Map p) {
+//     if( !p ) return ""
+
+//     return p.collect { k, v ->
+//         if (v == null)
+//             return null
+
+//         if (v instanceof Boolean)
+//             return v ? "--$k" : null
+
+//         return "--$k $v"
+//     }.findAll { it }.join(' ')
+// }
 def paramsToCliArgs(Map p) {
-    if( !p ) return ""
-
-    return p.collect { k, v ->
-        if (v == null)
-            return null
-
-        if (v instanceof Boolean)
-            return v ? "--$k" : null
-
-        return "--$k $v"
-    }.findAll { it }.join(' ')
+    if (!p) return ""
+    return p.collectMany { k, v ->
+        if (v == null) return []       // skip nulls
+        if (v instanceof Boolean) return v ? ["--$k"] : []
+        if (v instanceof Collection) return v.collect { "--$k $it" }
+        return ["--$k $v"]             // scalar
+    }.join(' ')
 }
+
 
 // The `section` corresponds to the nested nature of the YAML file, so you load the part of it you wish.
-def loadYamlParams( String yamlFilePath, String section ) {
-    def yamlText = new File(yamlFilePath).text
-    def yaml     = new Yaml()
-    def params   = yaml.load(yamlText)
+// def loadYamlParams( String yamlFilePath, String section ) {
+//     def yamlText = new File(yamlFilePath).text
+//     def yaml     = new Yaml()
+//     def params   = yaml.load(yamlText)
+//     return params[section] ?: [:]
+// }
+def loadYamlParams(String yamlFilePath, String section) {
+    def yamlFile = new File(yamlFilePath)
+    if (!yamlFile.exists()) {
+        println "Warning: YAML file '${yamlFilePath}' not found."
+        return [:]
+    }
+    def params = new YamlSlurper().parse(yamlFile)
     return params[section] ?: [:]
 }
-
 
 def stripAllExtensions(filePath) {
     def name = filePath.name        // full filename with extensions
