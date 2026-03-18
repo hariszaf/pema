@@ -1,0 +1,35 @@
+# PEMA : a Pipeline for Environmental DNA Metabarcoding Analysis
+# Author: Haris Zafeiropoulos
+# Licensed under GNU LGPL.3, see LICENCE file
+
+name: pema-nf
+
+on: [push, pull_request]
+
+jobs:
+  nextflow-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      # 2️⃣ Set up Java (required by Nextflow)
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      # 3️⃣ Install Nextflow
+      - name: Install Nextflow
+        run: |
+          curl -s https://get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+          nextflow -version
+
+      # 4️⃣ Verify Nextflow can run a dry test
+      - name: Nextflow dry run
+        run: |
+          nextflow run modules/fastp.nf --params-file config_files/fastp.yaml -resume -nobanner -profile test -stub-run

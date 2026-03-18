@@ -1,0 +1,40 @@
+input_fasta: test_data/swarm/all_samples.fa
+
+outdir: buildingPemaNf
+
+threads: 4
+
+swarm:
+  differences: 1
+
+  # ---
+  # Fastidious options (only when d = 1):
+  # ---
+
+  # Fastidious options (only when d = 1):
+  fastidious: true
+
+  #  min mass of large clusters
+  boundary: 2
+
+  # max memory in MB for Bloom filter (unlim.)
+  ceiling:
+
+  # bits used per Bloom filter entry
+  bloom-bits: 16
+
+  # ---
+  # Pairwise alignment advanced options (only when d > 1, all integers):
+  # ---
+
+  # reward for nucleotide match
+  match-reward:
+
+  # penalty for nucleotide mismatch
+  mismatch-penalty:
+
+  # gap open penalty
+  gap-opening-penalty:
+
+  # gap extension penalty
+  gap-extension-penalty:

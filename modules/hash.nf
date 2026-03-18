@@ -19,7 +19,7 @@ process LINEARIZE {
     BASENAME=${multiline_fasta.baseName}
     LINEARIZED_FILE="\${BASENAME}.fa"
 
-    # LINEARIZE. Build sequence → first header map
+    # 'sequence → first header' map
     awk '
         /^>/ {
             if (seq) print seq; print; seq=""; next
@@ -30,7 +30,7 @@ process LINEARIZE {
 
 process CONCATENATE_FASTA {
 
-    tag "Combine all dereplicated fasta files into one."
+    tag "Combine all hash fasta files in one, keeping total abundance of amplicon in the study."
 
     publishDir "${params.outdir}", mode: 'copy'
 
@@ -40,7 +40,7 @@ process CONCATENATE_FASTA {
     path derep_files
 
     output:
-    path "all_samples.fa", emit: all_samples
+    path "*.fa", emit: all_samples
 
     script:
     """
@@ -50,13 +50,13 @@ process CONCATENATE_FASTA {
         END {for (amplicon in sequences) {
             print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | \
     sort --temporary-directory=\$(pwd) -t "_" -k2,2nr -k1.2,1d | \
-    sed -e 's/\\_/\\n/2' > all_samples.fa
+    sed -e 's/\\_/\\n/2' > hash_all_samples.fa
     """
 }
 
 process HASH_DEREP_FASTA {
 
-    tag "Dereplicate linearized fasta file."
+    tag "Hash each sample to use it across all samples."
 
     publishDir "${params.outdir}/hashing", mode: 'copy'
 
@@ -66,12 +66,12 @@ process HASH_DEREP_FASTA {
     path linearized_fasta
 
     output:
-    path "hash*.fa", emit: hash_fasta
+    path "*.hash", emit: hash_fasta
 
     script:
     """
-    BASENAME=${linearized_fasta.baseName}
-    HASH_FILE="hash_\${BASENAME}.fa"
+     BASENAME=${linearized_fasta.baseName}
+    HASH_FILE="\${BASENAME}.hash"
 
     awk '
         /^>/ {
@@ -81,6 +81,7 @@ process HASH_DEREP_FASTA {
         }
         {print abundance "\\t" \$0}
     ' "$linearized_fasta" | \
+
     while IFS=\$'\\t' read -r abundance sequence; do
         hash=\$(printf "%s" "\$sequence" | sha1sum | awk '{print \$1}')
         printf ">%s_%d\\n%s\\n" "\$hash" "\$abundance" "\$sequence"
@@ -98,55 +99,38 @@ process HASH_MAP {
     path nonderep_fasta
 
     output:
-    path "hash_map_*", emit: hash_map
+    path "*.tsv", emit: hash_map
 
     script:
     """
     BASENAME=${nonderep_fasta.baseName}
-    MAPPING_FILE="hash_map_\${BASENAME}.tsv"
+    MAPPING_FILE="\${BASENAME}.tsv"
 
-    # Step 1: Build sequence → first header map (for fasta files)
     awk '
+        # Step 1: read dereplicated fasta and build sequence -> hash map
+        FNR==NR {
+            if (/^>/) {
+                split(substr(\$0,2), parts, "_")
+                hash = parts[1]
+                next
+            }
+            seq[\$0] = hash
+            next
+        }
+        # Step 2: read non-dereplicated fasta and output mapping
         /^>/ {
-            # Extract ID before ";size="
-            split(\$0, a, ";size=")
-            header = substr(a[1], 2)   # remove ">" from start
+            split(substr(\$0,2), a, ";size=")
+            header = a[1]
             abundance = a[2]
             next
         }
         {
-            # sequence line
-            print header "\t" abundance "\t" \$0
+            if (\$0 in seq)
+                print seq[\$0], header, \$0
         }
-    ' "$nonderep_fasta" > headers_and_seqs.tsv
-
-    # Step 2: Build sequence → header map
-    awk '
-        /^>/ {
-            header = substr(\$0, 2)  
-            split(header, parts, "_")
-            hash = parts[1]
-            next
-        }
-        {
-            print hash "\t" \$0
-        }
-    ' "$derep_fasta" > hash_to_seq.tsv
-
-
-    # Step 3: Join with original headers
-    # note:  The `join` command combines lines from two files based on a shared key (common value in a specified field).
-
-    join -t \$'\t' -1 2 -2 2 <(LC_ALL=C sort -t \$'\t' -k2,2 hash_to_seq.tsv) \
-        <(LC_ALL=C sort -t \$'\t' -k2,2 headers_and_seqs.tsv) |\
-        awk -F'\t' '{for (i=2; i<=NF; i++) printf "%s%s", \$i, (i<NF ? FS : ORS)}'\
-        > "\${MAPPING_FILE}"
-    
-    #rm headers_and_seqs.tsv hash_to_seq.tsv
-
+    ' "$derep_fasta" "$nonderep_fasta" > "\${MAPPING_FILE}"
     """
 }
-
 
 // -----------------------   TESTING MODULES ------------------
 

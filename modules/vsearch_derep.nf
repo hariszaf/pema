@@ -29,7 +29,7 @@ process VSEARCH_DEREP {
     SAMPLE_NAME=\$(basename $underep_fastq .fastq.gz)
 
     vsearch --fastx_uniques ${underep_fastq} \
-            --fastaout derep_\$SAMPLE_NAME.fasta \
+            --fastaout \$SAMPLE_NAME.fasta \
             --sizeout
     """
 }

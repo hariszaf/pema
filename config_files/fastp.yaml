@@ -13,11 +13,11 @@ outdir: testingNfModules
 fastp:
   # description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
   # type: boolean
-  disable_adapter_trimming: False
+  disable_adapter_trimming: false
 
   # description: Adapter sequence auto-detection.
   # type: boolean
-  detect_adapter_for_pe: True
+  detect_adapter_for_pe: true
 
   # description: the adapter for read1.This is used if R1/R2 are found not overlapped.
   # type: string
@@ -29,7 +29,7 @@ fastp:
 
   # description: Enable base correction in overlapped regions, default is disabled.
   # type: boolean
-  correction: True
+  correction: true
 
   # description:
   # type: int
@@ -42,7 +42,7 @@ fastp:
 
   # description: Enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
   # type: boolean
-  overrepresentation_analysis: True
+  overrepresentation_analysis: true
 
   # description: One in (--overrepresentation_sampling) reads will be computed for overrepresentation analysis (1~10000), smaller is slower, default is 20.
   # type: integer
@@ -62,7 +62,7 @@ fastp:
 
   # description: 
   # type: boolean
-  disable_length_filtering: False
+  disable_length_filtering: false
 
   # description: reads longer than length_limit will be discarded, default 0 means no limitation. (int [=0])
   # type: integer
@@ -78,7 +78,7 @@ fastp:
 
   # description: Move a sliding window from front (5') to tail, drop the bases in the window if its mean quality < threshold, stop otherwise.
   # type: boolean
-  cut_front: False
+  cut_front: false
 
   # description: The mean quality requirement option for cut_front. Range: 1~36 default: 20 (Q20).
   # type: integer
@@ -90,7 +90,7 @@ fastp:
 
   # description: Move a sliding window from tail (3') to front, drop the bases in the window if its mean quality < threshold, stop otherwise.
   # type: boolean
-  cut_tail: False
+  cut_tail: false
 
   # description: The window size option of cut_tail. Range: 1~1000, default: 4.
   # type: integer
@@ -102,7 +102,7 @@ fastp:
 
   # description: Move a sliding window from front to tail, if meet one window with mean quality < threshold, drop the bases in the window and the right part, and then stop.
   # type: boolean
-  cut_right: False
+  cut_right: false
 
   # description: The window size option of cut_right. Range: 1~1000, default: 4.
   # type: integer
@@ -114,8 +114,8 @@ fastp:
 
   # description: 
   # type: integer
-  # default: True
-  trim_poly_g: True
+  # default: true
+  trim_poly_g: true
 
   # description: 
   # type: integer
@@ -128,5 +128,5 @@ fastp:
 
   # description: 
   # type: bolean
-  # default: False
-  disable_trim_poly_g: False
+  # default: false
+  disable_trim_poly_g: false

@@ -16,3 +16,8 @@ include { FASTP } from './modules/fastp.nf'
 4️⃣ Only after that, the `workflow {}` block is executed
 
 
+The `--resume` needs to be in the end of the command.
+
+```
+nextflow run pema.nf --params-file config_files/pema.yaml -resume
+```

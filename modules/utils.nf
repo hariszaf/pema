@@ -28,6 +28,18 @@ def loadYamlParams( String yamlFilePath, String section ) {
     return params[section] ?: [:]
 }
 
+
+def stripAllExtensions(filePath) {
+    def name = filePath.name        // full filename with extensions
+    int dotIndex = name.indexOf('.') 
+    if (dotIndex >= 0) {
+        return name[0..dotIndex-1] // everything before the first dot
+    } else {
+        return name                // no extension found
+    }
+}
+
+
 process GUNZIP {
 
     tag "Unzip .gz files to original format."

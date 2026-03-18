@@ -10,7 +10,9 @@
 // The full modules will be included later in the workflow when they are actually needed to allow 
 // params to be available for all modules since they are loaded at the beginning of the workflow. 
 
-include { paramsToCliArgs; loadYamlParams } from './modules/utils.nf'
+include { 
+    paramsToCliArgs; loadYamlParams; stripAllExtensions 
+} from './modules/utils.nf'
 
 params.yaml = params.paramsFile ?: error(
     "Please provide a YAML config file with the required parameters using --params-file."
@@ -21,9 +23,9 @@ params.yaml = params.paramsFile ?: error(
 params.raw_reads = loadYamlParams(params.yaml, 'raw_reads') ?: error(
     "Please provide folder with raw reads in the YAML config file (raw_reads_dir)."
 )
-params.threads    = loadYamlParams(params.yaml, 'threads') ?: 3
-params.outdir     = loadYamlParams(params.yaml, 'outdir') ?: "results"
-
+params.threads         = loadYamlParams(params.yaml, 'threads') ?: 3
+params.outdir          = loadYamlParams(params.yaml, 'outdir') ?: "results"
+params.clustering_algo = loadYamlParams(params.yaml, 'clustering_algo') ?: "swarm"
 
 
 // -------------------- MODULES --------------------
@@ -46,9 +48,35 @@ workflow {
 
     def paired_raw_reads = Channel.empty().mix(paired1).mix(paired2)
 
-    // -------------------- QUALITY CONTROL --------------------
+    // -------------------- ADJUST PARAMS  --------------------
     def fastpParams = loadYamlParams(params.yaml, 'fastp')
 
+    if (params.clustering_algo == "swarm") {
+        fastpParams.n_base_limit = 0
+        log.warn "clustering_algo=swarm → forcing fastp --n_base_limit 0 (Swarm does not accept Ns)"
+    }
+
+    def swarmParams = loadYamlParams(params.yaml, 'swarm')
+   
+    if (swarmParams.differences > 1) {
+        if (swarmParams.fastidious == true) {
+            swarmParams.fastidious = false
+            log.warn "Fastidious was set to false. The fastidious option can be applied only if 'differences' equals 1."
+        }
+        swarmParams.boundary      = null
+        swarmParams.ceiling       = null
+        swarmParams['bloom-bits'] = null
+    } else if (swarmParams.differences == 1) {
+        log.warn(
+            """Since differences is set to 1, match-reward, mismatch-penalty,
+            gap-opening-penalty and gap-extension-penalty parameters were set to null."""
+        )
+        swarmParams["match-reward"]          = null
+        swarmParams["mismatch-penalty"]      = null
+        swarmParams["gap-opening-penalty"]   = null
+        swarmParams["gap-extension-penalty"] = null
+    } 
+    // -------------------- QUALITY CONTROL --------------------
     qc = FASTP(paired_raw_reads, fastpParams)
 
     // -------------------- DEREPLICATION --------------------
@@ -65,12 +93,8 @@ workflow {
     //  -------------------- CONTINGENCY TABLE --------------------
     contingency_table = CONTINGENCY_TABLE(hashed.hash_fasta.collect())
 
-
-
     //  -------------------- CLUSTERING --------------------
-    swarm = SWARM(all_samples_fasta.all_samples)
-
-
+    swarm = SWARM(all_samples_fasta.all_samples, swarmParams)
 
     // -------------------- REMOVE OLIGOTONS -------------------- 
 

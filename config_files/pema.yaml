@@ -15,7 +15,161 @@ threads: 3
 
 outdir: buildingPemaNf
 
+# values_from: ["swarm", "vsearch"]
+clustering_algo: swarm  
+
+
 fastp:
-  # description: Adapter trimming is enabled by default. If this option is specified, adapter trimming is disabled
+  # description: Adapter sequence auto-detection.
   # type: boolean
-  disable_adapter_trimming: False
+  detect_adapter_for_pe: 
+
+  # description: the adapter for read1.This is used if R1/R2 are found not overlapped.
+  # type: string
+  adapter_sequence: 
+
+  # description: The adapter for read2. This is used if R1/R2 are found not overlapped. If not specified, it will be the same as <adapter_sequence>.
+  # type: string
+  adapter_sequence_r2: 
+
+  # description: Enable base correction in overlapped regions, default is disabled.
+  # type: boolean
+  correction: 
+
+  # description:
+  # type: int
+  # default: 30
+  overlap_len_require: 
+
+  # description:
+  # type:
+  overlap_diff_limit:
+
+  # description: Enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
+  # type: boolean
+  overrepresentation_analysis: 
+
+  # description: One in (--overrepresentation_sampling) reads will be computed for overrepresentation analysis (1~10000), smaller is slower, default is 20.
+  # type: integer
+  overrepresentation_sampling:
+
+  # description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
+  # type: integer
+  overlap_diff_percent_limit: 
+
+  # description: Enable low complexity filter. The complexity is defined as the percentage of base that is different from its next base (base[i] != base[i+1]).
+  # type: boolean
+  low_complexity_filter: 
+
+  # description: The threshold for low complexity filter (0~100). Default is 30, which means 30% complexity is required. 
+  # type: integer
+  complexity_threshold: 
+
+  # description: 
+  # type: boolean
+  disable_length_filtering: 
+
+  # description: reads longer than length_limit will be discarded, default 0 means no limitation. (int [=0])
+  # type: integer
+  length_limit: 
+
+  # description: Reads shorter than length_required will be discarded, default is 15.
+  # type: integer
+  length_required: 
+
+  # description: If one read's number of N base is >n_base_limit, then this read/pair is discarded. Default is 5.
+  # type: int
+  n_base_limit: 
+
+  # description: Move a sliding window from front (5') to tail, drop the bases in the window if its mean quality < threshold, stop otherwise.
+  # type: boolean
+  cut_front: 
+
+  # description: The mean quality requirement option for cut_front. Range: 1~36 default: 20 (Q20).
+  # type: integer
+  cut_front_mean_quality: 
+
+  # description: The window size option of cut_front. Range: 1~1000, default: 4.
+  # type: integer
+  cut_front_window_size: 
+
+  # description: Move a sliding window from tail (3') to front, drop the bases in the window if its mean quality < threshold, stop otherwise.
+  # type: boolean
+  cut_tail: 
+
+  # description: The window size option of cut_tail. Range: 1~1000, default: 4.
+  # type: integer
+  cut_tail_window_size: 
+
+  # description: The mean quality requirement option for cut_tail. Range: 1~36 default: 20 (Q20)
+  # type: integer
+  cut_tail_mean_quality: 
+
+  # description: Move a sliding window from front to tail, if meet one window with mean quality < threshold, drop the bases in the window and the right part, and then stop.
+  # type: boolean
+  cut_right: 
+
+  # description: The window size option of cut_right. Range: 1~1000, default: 4.
+  # type: integer
+  cut_right_window_size: 
+
+  # description: The mean quality requirement option for cut_right. Range: 1~36 default: 20 (Q20)
+  # type: integer
+  cut_right_mean_quality: 
+
+  # description: 
+  # type: integer
+  # default: true
+  trim_poly_g: 
+
+  # description: 
+  # type: integer
+  # default: 10
+  poly_g_min_len: 
+
+  # description: 
+  # type: integer
+  cut_right_mean_quality: 
+
+  # description: 
+  # type: bolean
+  # default: false
+  disable_trim_poly_g: 
+
+
+
+swarm:
+  differences: 3
+
+  # ---
+  # Fastidious options (only when d = 1). If you set any of the following with a d > 1, pema will fail
+  # ---
+
+  # Fastidious options (only when d = 1)
+  fastidious: true
+
+  #  min mass of large clusters
+  boundary: 2
+
+  # max memory in MB for Bloom filter (unlim.)
+  ceiling:
+
+  # bits used per Bloom filter entry
+  bloom-bits: 16
+
+  # ---
+  # Pairwise alignment advanced options (only when d > 1, all integers):
+  # if you set any of the following with a d == 1, pema will fail
+  # ---
+
+  # reward for nucleotide match
+  match-reward:
+
+  # penalty for nucleotide mismatch
+  mismatch-penalty:
+
+  # gap open penalty
+  gap-opening-penalty:
+
+  # gap extension penalty
+  gap-extension-penalty:
