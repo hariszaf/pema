@@ -35,7 +35,7 @@ jobs:
       - name: Warm up Nextflow
         run: nextflow info
 
-      # ✅ Run the workflow in the same NXF_HOME
+      # ✅ Run the tests
       - name: Run fastp workflow
         run: |
           nextflow run modules/fastp.nf --params-file config_files/fastp.yaml

@@ -21,10 +21,12 @@ process CONTINGENCY_TABLE {
 
 
 process OLIGOTONS_FROM_SWARM {
+
     tag "Remove oligotons from Swarm findings."
 
     publishDir "${params.outdir}"
-    // container
+
+    container "hariszaf/pema-nf:0.0.1"
 
     input:
     path swarm_stats
@@ -50,7 +52,8 @@ process ASVS_CONTINGENCY_TABLE {
     tag "Build contingency table using the ASVs returned"
 
     publishDir "${params.outdir}", mode: 'copy'
-    // container ""
+
+    container "hariszaf/pema-nf:0.0.1"
 
     // Usage:
     // nextflow run modules/utils.nf --asvs_stats testingNfModules/swarm/asvs.stats 
