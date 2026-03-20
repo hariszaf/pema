@@ -15,37 +15,40 @@ process FASTP {
     tag "FASTP QC and merging"
 
     publishDir { "${params.outdir}/fastp" }, mode: 'copy'
+
     container "quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 
     input:
-    tuple val(sampleName), path(readF), path(readR)
-    val fastpArgs
+
+        tuple val(sampleName), path(readF), path(readR)
+        val fastpArgs
 
     output:
-    // QC files into qc subfolder
-    path("qc/${sampleName}.html"), emit: qc_html
-    path("qc/${sampleName}.json"), emit: qc_json
-    // Merged reads into merged subfolder
-    path("merged/${sampleName}.fastq.gz"), emit: merged_reads
+
+        path("qc/${sampleName}.html"), emit: qc_html
+        path("qc/${sampleName}.json"), emit: qc_json
+        path("merged/${sampleName}.fastq.gz"), emit: merged_reads
 
     script:
-    // -------------------- BUILD FASTP ARGS --------------------
-    def fastpParamsStr = paramsToCliArgs(fastpArgs)
-    """
-    mkdir -p qc merged
 
-    fastp \
-        --in1 $readF \
-        --in2 $readR \
-        --out1 ${sampleName}_proc_R1.fastq.gz \
-        --out2 ${sampleName}_proc_R2.fastq.gz \
-        --merge \
-        --merged_out merged/${sampleName}.fastq.gz \
-        --thread ${params.threads} \
-        --html qc/${sampleName}.html \
-        --json qc/${sampleName}.json \
-        $fastpParamsStr
-    """
+        // -------------------- BUILD FASTP ARGS --------------------
+        def fastpParamsStr = paramsToCliArgs(fastpArgs)
+
+        """
+        mkdir -p qc merged
+
+        fastp \
+            --in1 $readF \
+            --in2 $readR \
+            --out1 ${sampleName}_proc_R1.fastq.gz \
+            --out2 ${sampleName}_proc_R2.fastq.gz \
+            --merge \
+            --merged_out merged/${sampleName}.fastq.gz \
+            --thread ${params.threads} \
+            --html qc/${sampleName}.html \
+            --json qc/${sampleName}.json \
+            $fastpParamsStr
+        """
 }
 
 

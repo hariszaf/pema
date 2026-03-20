@@ -13,22 +13,26 @@ process TRAIN_CREST_DB {
     tag "Training CREST database."
 
     publishDir { "${params.outdir}/crest_database_training" }, mode: 'copy'
+
     container "hariszaf/crest4:4.4.2"
 
     input:
-    path database_fasta
-    path database_taxonomy
+
+        path database_fasta
+        path database_taxonomy
 
     output:
-    path "trained_database", emit: trained_db
+
+        path "trained_database", emit: trained_db
 
     script:
-    """
-    crest4 --train_db \
-           --db_fasta ${database_fasta} \
-           --db_taxonomy ${database_taxonomy} \
-           --output_dir trained_database
-    """
+
+        """
+        crest4 --train_db \
+            --db_fasta ${database_fasta} \
+            --db_taxonomy ${database_taxonomy} \
+            --output_dir trained_database
+        """
 }
 
 
@@ -42,33 +46,35 @@ process CREST_TAXONOMY_ASSIGNMENT {
     containerOptions "-v ${params.mount_crest_dbs}:/crest4/.crest4:rw"
 
     input:
-    path fasta
-    val database
+
+        path fasta
+        val database
 
     output:
-    path "crest_assignment/assignments.txt", emit: assignments
-    path "crest_assignment/search.hits", emit: search_hits
+
+        path "crest_assignment/assignments.txt", emit: assignments
+        path "crest_assignment/search.hits", emit: search_hits
 
     script:
 
-    """
-    if [[ -e "$database" ]]; then
-        # Treat as input directory
-        echo "Using a custom database"
-    else
-        # Treat as database name / keyword / identifier
-        echo "Using a predefined database part of Crest4."
-    fi
+        """
+        if [[ -e "$database" ]]; then
+            # Treat as input directory
+            echo "Using a custom database"
+        else
+            # Treat as database name / keyword / identifier
+            echo "Using a predefined database part of Crest4."
+        fi
 
-    crest4 --fasta ${fasta} \
-        --search_algo ${params.search_algo ?: 'vsearch'} \
-        --num_threads ${task.cpus} \
-        --min_score ${params.min_score} \
-        --score_drop ${params.score_drop} \
-        --min_smlrty ${params.min_smlrty} \
-        --search_db $database \
-        --output_dir crest_assignment || true
-    """
+        crest4 --fasta ${fasta} \
+            --search_algo ${params.search_algo ?: 'vsearch'} \
+            --num_threads ${task.cpus} \
+            --min_score ${params.min_score} \
+            --score_drop ${params.score_drop} \
+            --min_smlrty ${params.min_smlrty} \
+            --search_db $database \
+            --output_dir crest_assignment || true
+        """
 }
 
 
@@ -77,20 +83,23 @@ process BUILD_TAXONOMY_TABLE {
     tag "Building taxonomy table from CREST assignments."
 
     publishDir { "${params.outdir}/taxonomy_assignment" }, mode: 'copy'
+
     container "hariszaf/pema-nf:0.0.1"
 
     input:
-    path asvs_contingency_table  // asvs_contingency_table.tsv
-    path assignments
+
+        path asvs_contingency_table  // asvs_contingency_table.tsv
+        path assignments
 
     output:
-    // path "taxonomy_assigned_abd_table.tsv", emit: tax_table
-    path "tax_assigned_table.tsv", emit: tax_assigned_table
+
+        path "tax_assigned_table.tsv", emit: tax_assigned_table
 
     script:
-    """
-    crestTaxTable.py $asvs_contingency_table $assignments ${params.clustering_algo}
-    """
+
+        """
+        crestTaxTable.py $asvs_contingency_table $assignments ${params.clustering_algo}
+        """
 }
 
 // Workflow for running the Crest4 taxonomy assignment and building the taxonomy table.

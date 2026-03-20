@@ -5,23 +5,23 @@ outdir: buildingPemaNf
 threads: 4
 
 swarm:
-  differences: 1
+  differences: 3
 
   # ---
   # Fastidious options (only when d = 1):
   # ---
 
   # Fastidious options (only when d = 1):
-  fastidious: true
+  fastidious: false
 
   #  min mass of large clusters
-  boundary: 2
+  boundary:
 
   # max memory in MB for Bloom filter (unlim.)
   ceiling:
 
   # bits used per Bloom filter entry
-  bloom-bits: 16
+  bloom-bits:
 
   # ---
   # Pairwise alignment advanced options (only when d > 1, all integers):

@@ -4,20 +4,7 @@
 
 Usage: 
 
-nextflow run modules/swarm.nf --input_fasta path/to/amplicons.fasta --case fastidious --threads 3 --outdir results/swarm_results 
-
-nextflow run modules/swarm.nf --params-file config_files/swarm.yaml
-
-
-(optional )
---boundary 2    (only for fastidious case) 
-                By default, an ASV with a mass of 3 or more is considered large. Conversely, an ASV is small if it has a mass of less than 3, 
-                meaning that it is composed of either one amplicon of abundance 2, or two amplicons of abundance 1. Any positive value greater than 1 can be specified.
-                Using higher boundary values will speed up the second pass, but also reduce the taxonomical resolution of swarm results.  
-
---differences 7 (only for non-fastidious case) 
-                Maximum number of differences allowed between two amplicons so they would be groouped together,  
-                i.e. two amplicons will be grouped together if they have d (or less) differences.
+    nextflow run modules/swarm.nf --params-file config_files/swarm.yaml
 
 */
 
@@ -32,55 +19,37 @@ process SWARM {
     container "quay.io/biocontainers/swarm:3.1.6--h9948957_0"
 
     input:
-    path(input_fasta)
-    val swarm_params
+
+        path input_fasta
+        val swarm_params
 
     output:
-    path("asvs_representatives_hash.fa")
-    path("asvs.stats")
-    path("asvs.swarms")
+
+        path("asvs.stats"), emit: swarm_stats
+        path("asvs.swarms"), emit: swarm_swarms
+        path("asvs_representatives_hash.fa"), emit: hash_fasta
 
     script:
-    def swarm_params_str =  paramsToCliArgs(swarm_params)
-    """
-    swarm \
-        --threads ${params.threads} \
-        --statistics-file asvs.stats \
-        --seeds asvs_representatives_hash.fa \
-        $swarm_params_str < ${input_fasta} > asvs.swarms
-    """
+
+        def swarm_params_str =  paramsToCliArgs(swarm_params)
+
+        """
+        swarm \
+            --threads ${params.threads} \
+            --statistics-file asvs.stats \
+            --seeds asvs_representatives_hash.fa \
+            $swarm_params_str < ${input_fasta} > asvs.swarms
+        """
 }
-    // if [[ "${params.case}" == "fastidious" ]]; then
 
-    //     swarm \
-    //         --differences 1 \
-    //         --fastidious \
-    //         --boundary ${params.boundary} \
-    //         --threads ${params.threads} \
-    //         --statistics-file asvs.stats \
-    //         --seeds asvs_representatives_hash.fa \
-    //         < ${input_fasta} > asvs.swarms
-
-    // else
-
-    //     swarm \
-    //         --differences ${params.differences} \
-    //         --threads ${params.threads} \
-    //         --statistics-file asvs.stats \
-    //         --seeds asvs_representatives_hash.fa \
-    //         < ${input_fasta} > asvs.swarms
-    // fi
 
 workflow {
 
-    params.yaml = params.paramsFile ?: error(
-        "No parameters file"
-    )
+    params.yaml = params.paramsFile ?: error("No parameters file")
 
     // -------------------- PARAMETERS --------------------
     params.input_fasta = loadYamlParams(params.yaml, 'input_fasta') ?: error(
-        "Please provide a fasta file with the amplicons to be clustered (--input_fasta)."
-    )
+        "Please provide a fasta file with the amplicons to be clustered (--input_fasta).")
     params.threads     = loadYamlParams(params.yaml, 'threads') ?: 3
     params.outdir      = loadYamlParams(params.yaml, 'outdir') ?: "results"
 
@@ -91,8 +60,9 @@ workflow {
 
     def input_seq = Channel.fromPath(params.input_fasta)
 
+    println(swarm_params)
+
     // Run process 
-    // SWARM(input_seq)
     SWARM(input_seq, swarm_params)
 
 }

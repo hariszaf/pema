@@ -18,6 +18,8 @@ outdir: buildingPemaNf
 # values_from: ["swarm", "vsearch"]
 clustering_algo: swarm  
 
+min_oligotons: 10
+
 
 fastp:
   # description: Adapter sequence auto-detection.
@@ -139,7 +141,7 @@ fastp:
 
 
 swarm:
-  differences: 3
+  differences: 10
 
   # ---
   # Fastidious options (only when d = 1). If you set any of the following with a d > 1, pema will fail

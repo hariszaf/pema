@@ -9,23 +9,23 @@ process LINEARIZE {
     container "hariszaf/pema-nf:0.0.1"
 
     input:
-    path multiline_fasta
+        path multiline_fasta
 
     output:
-    path "*.fa", emit: linearized_fasta
+        path "*.fa", emit: linearized_fasta
 
     script:
-    """
-    BASENAME=${multiline_fasta.baseName}
-    LINEARIZED_FILE="\${BASENAME}.fa"
+        """
+        BASENAME=${multiline_fasta.baseName}
+        LINEARIZED_FILE="\${BASENAME}.fa"
 
-    # 'sequence → first header' map
-    awk '
-        /^>/ {
-            if (seq) print seq; print; seq=""; next
-        } {seq=seq \$0} END {if (seq) print seq}
-    ' "$multiline_fasta" >> "\${LINEARIZED_FILE}"
-    """
+        # 'sequence → first header' map
+        awk '
+            /^>/ {
+                if (seq) print seq; print; seq=""; next
+            } {seq=seq \$0} END {if (seq) print seq}
+        ' "$multiline_fasta" >> "\${LINEARIZED_FILE}"
+        """
 }
 
 process CONCATENATE_FASTA {
@@ -37,21 +37,21 @@ process CONCATENATE_FASTA {
     container "hariszaf/pema-nf:0.0.1"
 
     input:
-    path derep_files
+        path derep_files
 
     output:
-    path "*.fa", emit: all_samples
+        path "*.fa", emit: all_samples
 
     script:
-    """
-    cat ${derep_files} | \
-    awk 'BEGIN {RS = ">" ; FS = "[_\\n]"}
-        {if (NR != 1) {abundances[\$1] += \$2 ; sequences[\$1] = \$3}}
-        END {for (amplicon in sequences) {
-            print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | \
-    sort --temporary-directory=\$(pwd) -t "_" -k2,2nr -k1.2,1d | \
-    sed -e 's/\\_/\\n/2' > hash_all_samples.fa
-    """
+        """
+        cat ${derep_files} | \
+        awk 'BEGIN {RS = ">" ; FS = "[_\\n]"}
+            {if (NR != 1) {abundances[\$1] += \$2 ; sequences[\$1] = \$3}}
+            END {for (amplicon in sequences) {
+                print ">" amplicon "_" abundances[amplicon] "_" sequences[amplicon]}}' | \
+        sort --temporary-directory=\$(pwd) -t "_" -k2,2nr -k1.2,1d | \
+        sed -e 's/\\_/\\n/2' > hash_all_samples.fa
+        """
 }
 
 process HASH_DEREP_FASTA {
@@ -63,73 +63,76 @@ process HASH_DEREP_FASTA {
     container "hariszaf/pema-nf:0.0.1"
 
     input:
-    path linearized_fasta
+        path linearized_fasta
 
     output:
-    path "*.hash", emit: hash_fasta
+        path "*.hash", emit: hash_fasta
 
     script:
-    """
-     BASENAME=${linearized_fasta.baseName}
-    HASH_FILE="\${BASENAME}.hash"
+        """
+        BASENAME=${linearized_fasta.baseName}
+        HASH_FILE="\${BASENAME}.hash"
 
-    awk '
-        /^>/ {
-            split(\$0, a, ";size=")
-            abundance = a[2]
-            next
-        }
-        {print abundance "\\t" \$0}
-    ' "$linearized_fasta" | \
+        awk '
+            /^>/ {
+                split(\$0, a, ";size=")
+                abundance = a[2]
+                next
+            }
+            {print abundance "\\t" \$0}
+        ' "$linearized_fasta" | \
 
-    while IFS=\$'\\t' read -r abundance sequence; do
-        hash=\$(printf "%s" "\$sequence" | sha1sum | awk '{print \$1}')
-        printf ">%s_%d\\n%s\\n" "\$hash" "\$abundance" "\$sequence"
-    done > "\${HASH_FILE}"
-    """
+        while IFS=\$'\\t' read -r abundance sequence; do
+            hash=\$(printf "%s" "\$sequence" | sha1sum | awk '{print \$1}')
+            printf ">%s_%d\\n%s\\n" "\$hash" "\$abundance" "\$sequence"
+        done > "\${HASH_FILE}"
+        """
 }
 
 process HASH_MAP {
     
     tag "Generate mapping file from dereplication."
+
+    container "hariszaf/pema-nf:0.0.1"
+
     publishDir "${params.outdir}/hashing", mode: 'copy'
 
     input:
-    path derep_fasta
-    path nonderep_fasta
+        path derep_fasta
+        path nonderep_fasta
 
     output:
-    path "*.tsv", emit: hash_map
+        path "*.tsv", emit: hash_map
 
     script:
-    """
-    BASENAME=${nonderep_fasta.baseName}
-    MAPPING_FILE="\${BASENAME}.tsv"
+        """
+        BASENAME=${nonderep_fasta.baseName}
+        MAPPING_FILE="\${BASENAME}.tsv"
 
-    awk '
-        # Step 1: read dereplicated fasta and build sequence -> hash map
-        FNR==NR {
-            if (/^>/) {
-                split(substr(\$0,2), parts, "_")
-                hash = parts[1]
+        awk '
+            # Step 1: read dereplicated fasta and build sequence -> hash map
+            FNR==NR {
+                if (/^>/) {
+                    split(substr(\$0,2), parts, "_")
+                    hash = parts[1]
+                    next
+                }
+                seq[\$0] = hash
                 next
             }
-            seq[\$0] = hash
-            next
-        }
-        # Step 2: read non-dereplicated fasta and output mapping
-        /^>/ {
-            split(substr(\$0,2), a, ";size=")
-            header = a[1]
-            abundance = a[2]
-            next
-        }
-        {
-            if (\$0 in seq)
-                print seq[\$0], header, \$0
-        }
-    ' "$derep_fasta" "$nonderep_fasta" > "\${MAPPING_FILE}"
-    """
+            # Step 2: read non-dereplicated fasta and output mapping
+            /^>/ {
+                split(substr(\$0,2), a, ";size=")
+                header = a[1]
+                abundance = a[2]
+                next
+            }
+            {
+                if (\$0 in seq)
+                    print seq[\$0], header, \$0
+            }
+        ' "$derep_fasta" "$nonderep_fasta" > "\${MAPPING_FILE}"
+        """
 }
 
 // -----------------------   TESTING MODULES ------------------
@@ -137,9 +140,7 @@ process HASH_MAP {
 workflow {
 
     def underep_ch = Channel.fromPath("${params.input_dir}/*")
-
-    def to_dererp = GUNZIP(underep_ch) \
-
+    def to_dererp  = GUNZIP(underep_ch) \
 
     // DEREPLICATE_IN_ONE_STEP(to_dererp)
 
@@ -154,9 +155,9 @@ workflow {
     // ----------   NOW WE CLUSTER AND THEN MOVE ON TO THE NEXT   ----- 
 
     // If remove_oligotons, then this is now
-    def asvs_stats                 = Channel.fromPath("${params.asvs_stats}")
-    def asvs_swarms                = Channel.fromPath("${params.asvs_swarms}")
-    def asvs_repr_has              = Channel.fromPath("${params.asvs_repr_hash}")
+    def asvs_stats    = Channel.fromPath("${params.asvs_stats}")
+    def asvs_swarms   = Channel.fromPath("${params.asvs_swarms}")
+    def asvs_repr_has = Channel.fromPath("${params.asvs_repr_hash}")
 
     def threshold    = params.threshold
     def oligo_script = Channel.fromPath("${params.oligo_script}")
@@ -165,14 +166,19 @@ workflow {
     def asv_cont_script            = Channel.fromPath("${params.asv_cont_script}")
 
     def tas = OLIGOTONS_FROM_SWARM(
-        asvs_stats, asvs_swarms, asvs_repr_has, threshold, oligo_script
+        asvs_stats, 
+        asvs_swarms, 
+        asvs_repr_has, 
+        threshold, 
+        oligo_script
     )
 
     // Build ASVS contingency table (after removing oligotons if asked)
-
     def asvs_contingency_table = ASVS_CONTINGENCY_TABLE(
-        tas.swarm_stats, tas.swarm_seeds, tas.asvs_hash, amplicon_contingency_table, asv_cont_script
-        // asvs_stats, asvs_swarms, asvs_repr_has, amplicon_contingency_table, asv_cont_script
+        tas.swarm_stats, 
+        tas.swarm_seeds, 
+        tas.asvs_hash, 
+        amplicon_contingency_table, 
+        asv_cont_script
     )
-
 }

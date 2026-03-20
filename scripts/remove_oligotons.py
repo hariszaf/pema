@@ -31,20 +31,16 @@ def parse_args():
     parser.add_argument("--clustering-algo",
                         choices=["swarm", "vsearch"],
                         required=True)
-    parser.add_argument("--suffix", default="_original")
+    parser.add_argument("--suffix", default="filtered_")
     return parser.parse_args()
 
 
 # --------------------------------------------------
 # Common utils
 # --------------------------------------------------
-def backup_file(path: Path, suffix: str) -> Path:
-    backup = path.with_name(path.stem + suffix + path.suffix)
-    if backup.exists():
-        raise FileExistsError(f"Backup already exists: {backup}")
-    shutil.move(path, backup)
-    return backup
-
+def new_filename(path: Path, suffix: str) -> Path:
+    new = path.with_name(suffix + path.stem + path.suffix)
+    return new
 
 def fasta_iter(path: Path):
     header = None
@@ -68,9 +64,9 @@ def fasta_iter(path: Path):
 # SWARM LOGIC
 # --------------------------------------------------
 def run_swarm(stats_file, swarms_file, fasta_file, threshold, suffix):
-    stats_backup  = backup_file(stats_file, suffix)
-    swarms_backup = backup_file(swarms_file, suffix)
-    fasta_backup  = backup_file(fasta_file, suffix)
+    new_stats  = new_filename(stats_file, suffix)
+    new_swarms = new_filename(swarms_file, suffix)
+    new_fasta  = new_filename(fasta_file, suffix)
 
     cols = [
         "unique_amplicons",
@@ -82,23 +78,23 @@ def run_swarm(stats_file, swarms_file, fasta_file, threshold, suffix):
         "number_of_steps"
     ]
 
-    stats = pd.read_csv(stats_backup, sep="\t", header=None, names=cols)
+    stats = pd.read_csv(stats_file, sep="\t", header=None, names=cols)
 
     kept_stats = stats[stats["total_abundance"] >= threshold]
     kept_seeds = set(kept_stats["initial_seed"])
 
-    kept_stats.to_csv(stats_file, sep="\t", header=False, index=False)
+    kept_stats.to_csv(new_stats, sep="\t", header=False, index=False)
 
     # Filter swarms
-    with open(swarms_backup) as inp, open(swarms_file, "w") as out:
+    with open(swarms_file) as inp, open(new_swarms, "w") as out:
         for line in inp:
             seed = line.strip().split()[0].split("_")[0]
             if seed in kept_seeds:
                 out.write(line)
 
     # Filter FASTA
-    with open(fasta_file, "w") as out:
-        for header, seq in fasta_iter(fasta_backup):
+    with open(new_fasta, "w") as out:
+        for header, seq in fasta_iter(fasta_file):
             seed = header[1:].split("_")[0]
             if seed in kept_seeds:
                 out.write(f"{header}\n{seq}\n")
@@ -108,12 +104,12 @@ def run_swarm(stats_file, swarms_file, fasta_file, threshold, suffix):
 # VSEARCH LOGIC
 # --------------------------------------------------
 def run_vsearch(otu_table_file, fasta_file, threshold, suffix):
-    otu_backup   = backup_file(otu_table_file, suffix)
-    fasta_backup = backup_file(fasta_file, suffix)
+    new_otu   = new_filename(otu_table_file, suffix)
+    new_fasta = new_filename(fasta_file, suffix)
 
     otus_to_remove = set()
 
-    with open(otu_backup) as inp, open(otu_table_file, "w") as out:
+    with open(otu_table_file) as inp, open(new_otu, "w") as out:
         for i, line in enumerate(inp):
             if i == 0:
                 out.write(line)
@@ -130,8 +126,8 @@ def run_vsearch(otu_table_file, fasta_file, threshold, suffix):
                 out.write(line)
 
     # Filter FASTA (robust, not assuming 2-line format)
-    with open(fasta_file, "w") as out:
-        for header, seq in fasta_iter(fasta_backup):
+    with open(new_fasta, "w") as out:
+        for header, seq in fasta_iter(fasta_file):
             otu_id = header[1:].strip()
             if otu_id not in otus_to_remove:
                 out.write(f"{header}\n{seq}\n")
