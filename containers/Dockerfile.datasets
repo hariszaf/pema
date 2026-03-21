@@ -1,0 +1,5 @@
+FROM biocontainers/ncbi-datasets-cli:16.22.1_cv1
+
+RUN pip install pandas
+
+COPY scripts/ncbi_taxonomy_table.py /opt

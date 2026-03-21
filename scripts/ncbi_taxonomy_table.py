@@ -23,7 +23,7 @@ parser.add_argument(
 
 parser.add_argument(
     "--ncbi-taxonomies", "-n",
-    default="taxonomies_merged.json",
+    default="taxonomies.json",
     help="Path to the NCBI merged taxonomies JSON file"
 )
 
@@ -64,11 +64,6 @@ print("NCBI taxonomies:", ncbi_taxonomies_file)
 print("NCBI errors:", ncbi_error_file)
 print("Output file:", output_file)
 
-# ncbi_taxonomies_file = "taxonomies_merged.json"
-# ncbi_error_file      = "not_found.tsv"
-# taxonomy_table_file  = "tax_assigned_table.tsv"
-
-# output_file          = "tax_assigned_with_ncbi.tsv"
 
 ranks  = ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
 ignore = {"root", "main genome"}
@@ -122,7 +117,8 @@ errors = parse_blocks(ncbi_error_file)
 regex  = re.compile(r"exact match.*more than one taxid", re.IGNORECASE)
 
 filtered_errors = [
-    error for error in errors if regex.search(error.splitlines()[0])
+    error for error in errors
+    if any(regex.search(line) for line in error.splitlines())
 ]
 
 taxon_ncbi_taxonomies = {}
@@ -139,7 +135,10 @@ for error in filtered_errors:
         )
 
         try:
-            data = [json.loads(line) for line in result.stdout.splitlines()]
+            data = [
+                json.loads(line)
+                for line in result.stdout.splitlines()
+            ]
         except json.JSONDecodeError:
             continue
 
@@ -234,4 +233,3 @@ tax_table = tax_table.apply(get_ncbi_filtered_tax, axis=1)
 # Save enhanced table
 # ---------------------------
 tax_table.to_csv(output_file, sep="\t", index=False)
-print(f"Saved enhanced table to {output_file}")
