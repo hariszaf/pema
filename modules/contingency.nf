@@ -65,9 +65,8 @@ process ASVS_CONTINGENCY_TABLE {
     input:
     path asvs_stats
     path asvs_swarms
-    path asvs_repr_hash
+    path asvs_hash
     path contingency_table
-    path build_sh
 
     output:
     path "asvs_contingency_hash.tsv", emit: asvs_contingency_hash
@@ -76,7 +75,12 @@ process ASVS_CONTINGENCY_TABLE {
 
     script:
     """
-    bash $build_sh
+    bash /opt/pema/scripts/asv_contingency_table.sh \
+        --stats $asvs_stats \
+        --swarms $asvs_swarms \
+        --hash-fasta $asvs_hash \
+        --amplicon-table $contingency_table
+
     sed -i 's/_[0-9]*//' asvs_representatives.fa
     """
 }

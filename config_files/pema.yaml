@@ -13,10 +13,13 @@ raw_reads: sanity_check/16S/mydata16s
 
 threads: 3
 
-outdir: buildingPemaNf
+outdir: buildingPemaNf2
 
 # values_from: ["swarm", "vsearch"]
 clustering_algo: swarm  
+
+# values from: ["crest", "rdp"]
+classifier: crest
 
 min_oligotons: 10
 
@@ -139,7 +142,6 @@ fastp:
   disable_trim_poly_g: 
 
 
-
 swarm:
   differences: 10
 
@@ -175,3 +177,47 @@ swarm:
 
   # gap extension penalty
   gap-extension-penalty:
+
+
+crest:
+
+  # The database used for the sequence similarity search.
+  # Either `ssuome`, `silvamod138pr2`, `mitofish`, or `midori253darn`.
+  # In case of a custom database, e.g. unite_19_02_2025, please make sure you provide the `mount_crest_dbs` too.
+  database: silvamod138pr2
+
+  # Directory containing all the custom CREST databases, if any (optional, e.g. /home/luna.kuleuven.be/u0156635/.crest4/).
+  # It is good practice to provide a path even when using one of the crest databases, so you do not download it every time.  !!!!
+  mount_crest_dbs: /home/luna.kuleuven.be/u0156635/.crest4/
+
+  # The algorithm used for the sequence similarity search
+  # that will be run to match the sequences against the database chosen. Either `blast` or `vsearch`. By default, `blast`.
+  search_algo: vsearch
+
+  # The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm.
+  # All hits below this score are ignored. When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered.
+  # The default is `155` for BLAST and `0.75` for VSEARCH.
+  min_score: 0.75
+
+  # Boolean: Determines if the minimum similarity filter is turned on or off.
+  # The minimum similarity filter prevents classification to higher ranks when a minimum rank-identity is not met.
+  min_smlrty: true
+
+  # Determines the range of hits to retain and the range to discard based on a drop in percentage from the score of the best hit.
+  # Any hit below the following value: "(100 - score_drop)/100 * best_hit_score" is ignored.
+  score_drop: 2.0
+
+  threads: 
+
+
+ncbi_taxonomy:
+
+  get_ncbi_taxonomy: true
+
+  # When To get one:  https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/
+  ncbi_api_key: 4fab68323a62356af3bbb7471d9120153c08
+
+  max_parallel: 1
+
+  sleep: 
+

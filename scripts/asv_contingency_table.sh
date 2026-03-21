@@ -13,23 +13,22 @@
 #       elements of that ASV (i.e. amplicons) have been seen in 
 #       each sample (columns).
 #
-# Usage: PEMA invokes this script every time Swarm v2 has been asked for by the user,
-#        once Swarm has been completed, in the clusteringSwarm function of the clustering module.
-# 
-# Authors: Frédéric Mahé, edited by Haris Zafeiropoulos
-#           initial script available at: 
-#           https://github.com/torognes/swarm/wiki/Working-with-several-samples#produce-a-contingency-table-for-otus
-# 
-# Note: 
-# In the asvs.swarms file, each line has a cluster where the first element is the seed, and the others are the amplicons 
-# that were cluster to that. There is a "_xx" part with the abundance of each amplicon
 
+while [[ "$#" -gt 0 ]]; do
+    case $1 in
+        --stats) STATS="$2"; shift ;;
+        --swarms) SWARMS="$2"; shift ;;
+        --hash-fasta) HASH_FASTA="$2"; shift ;;
+        --amplicon-table) AMPLICON_TABLE="$2"; shift ;;
+        *) echo "Unknown parameter: $1"; exit 1 ;;
+    esac
+    shift
+done
 
-         STATS="asvs.stats"
-        SWARMS="asvs.swarms"
-AMPLICON_TABLE="amplicon_contingency_table.tsv"
-ASV_TABLE_HASH="asvs_contingency_hash.tsv"
-     ASV_TABLE="asvs_contingency_table.tsv"
+# OUTPUT FILENAMES
+REPRESENTATIVE_ASVS="asvs_representatives.fa"
+     ASV_TABLE_HASH="asvs_contingency_hash.tsv"
+          ASV_TABLE="asvs_contingency_table.tsv"
 
 # Step 1
 
@@ -135,4 +134,4 @@ awk -F'\t' '
     next
   }
   { print }                               # sequence lines
-' ${ASV_TABLE_HASH} asvs_representatives_hash.fa > asvs_representatives.fa
+' ${ASV_TABLE_HASH} ${HASH_FASTA} > ${REPRESENTATIVE_ASVS}

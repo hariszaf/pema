@@ -1,6 +1,8 @@
 threads: 4
 
-asvs_contingency_table: test_data/crest/asvs_contingency_hash.tsv
+asvs_contingency_table:
+  buildingPemaNf2/asvs_contingency_hash.tsv
+  # test_data/crest/asvs_contingency_hash.tsv
 
 clustering_algo: swarm
 
@@ -8,15 +10,16 @@ outdir: MORELES
 
 crest:
   # Fasta file containing the sequences to be classified.
-  fasta: test_data/crest/all_sequences_grouped.fa
+  fasta: buildingPemaNf2/asvs_representatives.fa
+  # test_data/crest/all_sequences_grouped.fa
 
   # Directory containing all the custom CREST databases, if any (optional).
   mount_crest_dbs: /home/luna.kuleuven.be/u0156635/.crest4/
 
   # The database used for the sequence similarity search.
-  # Either `ssuome`, `silavamod138pr2`, `mitofish`, or `midori253darn`.
+  # Either `ssuome`, `silvamod138pr2`, `mitofish`, or `midori253darn`.
   # In case of a custom database, please make sure you provide the `mount_crest_dbs` too.
-  database: unite_19_02_2025
+  database: silvamod138pr2
 
   # The algorithm used for the sequence similarity search
   # that will be run to match the sequences against the database chosen. Either `blast` or `vsearch`. By default, `blast`.

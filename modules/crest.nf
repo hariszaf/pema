@@ -43,12 +43,12 @@ process CREST_TAXONOMY_ASSIGNMENT {
     publishDir { "${params.outdir}" }, mode: 'copy'
 
     container "hariszaf/crest4:4.4.5"
-    containerOptions "-v ${params.mount_crest_dbs}:/crest4/.crest4:rw"
+    containerOptions "-v ${crest_params.mount_crest_dbs}:/crest4/.crest4:rw"
 
     input:
 
         path fasta
-        val database
+        val crest_params
 
     output:
 
@@ -58,7 +58,7 @@ process CREST_TAXONOMY_ASSIGNMENT {
     script:
 
         """
-        if [[ -e "$database" ]]; then
+        if [[ -e "${crest_params.database}" ]]; then
             # Treat as input directory
             echo "Using a custom database"
         else
@@ -67,12 +67,12 @@ process CREST_TAXONOMY_ASSIGNMENT {
         fi
 
         crest4 --fasta ${fasta} \
-            --search_algo ${params.search_algo ?: 'vsearch'} \
-            --num_threads ${task.cpus} \
-            --min_score ${params.min_score} \
-            --score_drop ${params.score_drop} \
-            --min_smlrty ${params.min_smlrty} \
-            --search_db $database \
+            --search_algo ${crest_params.search_algo ?: 'vsearch'} \
+            --num_threads ${crest_params.threads} \
+            --min_score ${crest_params.min_score} \
+            --score_drop ${crest_params.score_drop} \
+            --min_smlrty ${crest_params.min_smlrty} \
+            --search_db ${crest_params.database} \
             --output_dir crest_assignment || true
         """
 }
@@ -82,14 +82,14 @@ process BUILD_TAXONOMY_TABLE {
 
     tag "Building taxonomy table from CREST assignments."
 
-    publishDir { "${params.outdir}/taxonomy_assignment" }, mode: 'copy'
+    publishDir { "${params.outdir}/crest_assignment" }, mode: 'copy'
 
     container "hariszaf/pema-nf:0.0.1"
 
     input:
 
-        path asvs_contingency_table  // asvs_contingency_table.tsv
-        path assignments
+        path asvs_contingency_hash_table
+        path crest_assignments
 
     output:
 
@@ -98,7 +98,10 @@ process BUILD_TAXONOMY_TABLE {
     script:
 
         """
-        crestTaxTable.py $asvs_contingency_table $assignments ${params.clustering_algo}
+        /opt/pema/scripts/crest_tax_table.py \
+            --asvs-hash ${asvs_contingency_hash_table} \
+            --crest-assignments ${crest_assignments} \
+            --clustering-algo ${params.clustering_algo}
         """
 }
 
@@ -112,7 +115,7 @@ workflow {
 
     // Crest params
     def crest_params = loadYamlParams(params.yaml, 'crest')
-    def crest_supported_DBs = ['ssuome', 'silavamod138pr2', 'mitofish', 'midori253darn']
+    def crest_supported_DBs = ['ssuome', 'silvamod138pr2', 'mitofish', 'midori253darn']
 
     // Load the input fasta file containing the sequences to be classified.
     def fasta_file  = crest_params.fasta ?: error(
@@ -129,17 +132,20 @@ workflow {
     // Load the database parameter, which can be either a predefined database name 
     // or a custom path to a directory containing the database files. 
     // If it's a custom path, make sure to prepend the mount point for the CREST databases.
+
+    crest_params.mount_crest_dbs = crest_params.mount_crest_dbs
+
     def db = crest_params.database ?: error(
         """
         The database used for the sequence similarity search.
-        Either `ssuome`, `silavamod138pr2`, `mitofish`, or `midori253darn`. By default, `ssuome`.
+        Either `ssuome`, `silvamod138pr2`, `mitofish`, or `midori253darn`. By default, `ssuome`.
         In case of a custom database, please specify the full path to a directory containing 
         all required files, making sure that is under the `mount_crest_dbs`.
         """
     )
     if( !crest_supported_DBs.contains(db) ) {
-        params.database = "/crest4/.crest4/${db}"
-        params.mount_crest_dbs = crest_params.mount_crest_dbs ?: error(
+        crest_params.database = "/crest4/.crest4/${db}"
+        crest_params.mount_crest_dbs = crest_params.mount_crest_dbs ?: error(
         """
         Since you are using a custom database, you need to specify the mount point for the CREST databases.
         Please provide the path to the directory containing the CREST databases on your system (--mount_crest_dbs).
@@ -158,23 +164,24 @@ workflow {
         """
         )
     } else {
-        params.database = db
+        crest_params.database = db
     }
 
-    params.search_algo = crest_params.search_algo ?: 'blast' // 'blast' or 'vsearch'
-    params.min_score   = crest_params.min_score ?: (params.search_algo == 'blast' ? 155.0 : 0.75)
-    params.min_smlrty  = crest_params.min_smlrty ?: true
-    params.score_drop  = crest_params.score_drop ?: 2.0
+    crest_params.threads     = loadYamlParams(params.yaml, 'threads') ?: 4
+
+    crest_params.search_algo = crest_params.search_algo ?: 'blast'                                       // 'blast' or 'vsearch'
+    crest_params.min_score   = crest_params.min_score ?: (params.search_algo == 'blast' ? 155.0 : 0.75)
+    crest_params.min_smlrty  = crest_params.min_smlrty ?: true
+    crest_params.score_drop  = crest_params.score_drop ?: 2.0
 
     // General parameters
-    params.outdir          = loadYamlParams(params.yaml, 'outdir') ?: "results"
-    params.threads         = loadYamlParams(params.yaml, 'threads') ?: 4
+    params.outdir          = loadYamlParams(params.yaml, 'outdir') ?: "results"    
     params.clustering_algo = loadYamlParams(params.yaml, 'clustering_algo') ?: 'swarm' // 'vsearch' or 'swarm'
 
     // Run the CREST taxonomy assignment.
     def crest_taxonomy_assignment = CREST_TAXONOMY_ASSIGNMENT(
         fasta,
-        params.database
+        crest_params
     )
 
     // Build the taxonomy table by combining the ASV contingency table and the CREST taxonomy assignments.
