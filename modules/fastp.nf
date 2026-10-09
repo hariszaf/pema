@@ -8,7 +8,7 @@ Usage:
 
 */
 
-include { paramsToCliArgs; loadYamlParams } from './utils.nf'
+include { paramsToCliArgs; loadYamlParams; findReadPairs } from './utils.nf'
 
 process FASTP {
 
@@ -72,10 +72,7 @@ workflow {
     params.outdir     = loadYamlParams(params.yaml, 'outdir') ?: "results"
 
     // -------------------- CHANNELS --------------------
-    def paired1 = channel.fromFilePairs("${params.raw_reads}/*_{1,2}.fastq.gz", flat: true)
-    def paired2 = channel.fromFilePairs("${params.raw_reads}/*_R{1,2}_*.fastq.gz", flat: true)
-
-    def paired_raw_reads = channel.empty().mix(paired1).mix(paired2)
+    def paired_raw_reads = channel.fromList(findReadPairs(params.raw_reads.toString()))
 
     // -------------------- RUN FASTP --------------------
     FASTP(paired_raw_reads, fastpParams)

@@ -79,14 +79,29 @@ All container images are pulled automatically on the first run.
 
 ### Input data
 
-A folder with paired-end, gzipped fastq files. Two naming patterns are recognised:
+A folder (`raw_reads`) with paired-end fastq files (`.fastq`, `.fq`, `.fastq.gz` or `.fq.gz`).
+Other files in the folder are ignored.
 
-```
-<sample>_1.fastq.gz        <sample>_2.fastq.gz
-<sample>_R1_<any>.fastq.gz <sample>_R2_<any>.fastq.gz
-```
+The two files of a pair are recognised by a `1`/`2` (or `R1`/`R2`, any case) between separators (`_`, `.` or `-`) in their names;
+the last such marker in the name is used, and the part before it becomes the sample name. For example:
 
-Everything before `_1`/`_R1` is used as the sample name.
+| Read 1 | Read 2 | Sample |
+|--------|--------|--------|
+| `S1_1.fastq.gz` | `S1_2.fastq.gz` | `S1` |
+| `S1_R1.fq.gz` | `S1_R2.fq.gz` | `S1` |
+| `S1.R1.fastq` | `S1.R2.fastq` | `S1` |
+| `S1_S1_L001_R1_001.fastq.gz` | `S1_S1_L001_R2_001.fastq.gz` | `S1_S1_L001` |
+| `site_1_1.fastq.gz` | `site_1_2.fastq.gz` | `site_1` |
+
+PEMA stops before running anything, and lists all the problems found, if:
+
+* the folder does not exist or contains no fastq files;
+* a file has no `1`/`2` marker, or no sample name before it;
+* a file has no mate, or two files claim to be the same read of a sample;
+* two pairs end up with the same sample name (e.g. `S1_R1_001` and `S1_R1_002`).
+
+Sample names may not contain whitespace.
+Samples sequenced on several lanes (`_L001`, `_L002`, ...) are treated as separate samples.
 
 
 ### Run
@@ -130,7 +145,7 @@ Parameters left empty are not passed to the tool, so the tool's own default appl
 
 | Section / key | Description | Default |
 |---------------|-------------|---------|
-| `raw_reads` | Folder with the input `.fastq.gz` files | **required** |
+| `raw_reads` | Folder with the paired-end fastq files (see [Input data](#input-data)) | **required** |
 | `outdir` | Output folder | `results` |
 | `threads` | Threads for fastp, Swarm and crest4 | `3` |
 | `clustering_algo` | `swarm` | `swarm` |

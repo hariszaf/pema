@@ -7,7 +7,7 @@
 // Only top-level params live here; params are available to all modules included below.
 // The tool-specific sections (fastp, swarm, crest) are resolved inside the workflow.
 
-include { loadYamlParams; valueOr } from './modules/utils.nf'
+include { loadYamlParams; valueOr; findReadPairs } from './modules/utils.nf'
 
 params.yaml = params.paramsFile ?: error(
     "Please provide a YAML config file with the required parameters using --params-file."
@@ -151,10 +151,7 @@ workflow {
     def crest_params = resolveCrestParams()
 
     // -------------------- CHANNELS --------------------
-    def paired1 = channel.fromFilePairs("${params.raw_reads}/*_{1,2}.fastq.gz", flat: true)
-    def paired2 = channel.fromFilePairs("${params.raw_reads}/*_R{1,2}_*.fastq.gz", flat: true)
-
-    def paired_raw_reads = channel.empty().mix(paired1).mix(paired2)
+    def paired_raw_reads = channel.fromList(findReadPairs(params.raw_reads.toString()))
 
     // -------------------- QUALITY CONTROL --------------------
     qc = FASTP(paired_raw_reads, fastpParams)
