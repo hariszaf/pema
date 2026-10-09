@@ -147,6 +147,8 @@ You also need to run your version locally to make sure that your contribution wo
 
 * check the code with `nextflow lint pema.nf modules/ nextflow.config`;
 * run the pipeline on a small dataset, e.g. `nextflow run pema.nf --params-file <your yaml>`;
+* run the sanity check, `sanity_check/run_sanity_check.sh`, which downloads the test dataset if needed and runs
+  the pipeline on the 16S, 18S, 12S and COI samples (`--help` for the options);
 * if you changed anything under `scripts/`, re-build the `pema-nf` image (see [containers/README.md](containers/README.md))
   and use it in the modules, since the scripts are copied into the image.
 

@@ -32,6 +32,10 @@ sanity_check/12S/TEST*/
 sanity_check/custom_crest/TEST*/
 sanity_check/non_ena_data/TEST.*/
 sanity_check/sanity_data/
+sanity_check/*/mydata*/
+sanity_check/*/TEST_*
+sanity_check/*/work/
+sanity_check/*/.nextflow*
 
 # Ignore custom db input fules
 sanity_check/custom_crest/greek_bac/
