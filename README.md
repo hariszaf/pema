@@ -198,7 +198,9 @@ rdp_databases/
 ```
 
 Set `database` to the folder name and `databases_dir` to the folder that contains it (here `rdp_databases`), or `database` to the full path.
-The PEMA-trained databases (e.g. 12S, and MIDORI for COI) are available on [Zenodo](https://zenodo.org/records/16876159) (`rdp_dbs_v220.tar.gz`).
+The PEMA-trained databases `12S_v2.0.0` (12S), `midori_1` and `midori_2` (COI) are downloaded from [Zenodo](https://zenodo.org/records/16876159)
+into `databases_dir` the first time they are used (`DOWNLOAD_RDP_DB`), and reused afterwards.
+They are fetched as `<download_url>/<database>.tar.gz`, or, if that file is not there, from the archive with all of them (`rdp_dbs_v220.tar.gz`, ~1.2 GB).
 Ranks are kept from the top down while RDPClassifier's confidence is at least `confidence` (default 0.8; for short amplicons a lower value such as 0.5 is common).
 Rank prefixes such as `g__` and placeholder ranks such as `k__undef_Eukaryota` are removed from the taxonomy.
 

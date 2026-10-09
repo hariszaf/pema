@@ -13,6 +13,54 @@
        └── wordConditionalProbIndexArr.txt
 */
 
+// Download a PEMA-trained database from Zenodo: <download_url>/<database>.tar.gz, or, if that file
+// is not there, the database's folder from <download_url>/rdp_dbs_v220.tar.gz (all databases, ~1.2 GB).
+process DOWNLOAD_RDP_DB {
+
+    tag "Download the RDPClassifier database ${rdp_params.database}."
+
+    // Saved in databases_dir; pema.nf finds it there in the next runs and does not download it again
+    publishDir { rdp_params.databases_dir }, mode: 'copy'
+
+    container "hariszaf/pema-nf:0.2.2"
+
+    input:
+        val rdp_params
+
+    output:
+        path "${rdp_params.database}", emit: database
+
+    script:
+        def db  = rdp_params.database
+        def url = rdp_params.download_url.toString().replaceAll('/+$', '')
+        """
+        download() {
+            wget --quiet --tries 10 --waitretry 10 --continue --output-document "\$2" "\$1"
+        }
+
+        if download "${url}/${db}.tar.gz" ${db}.tar.gz; then
+            tar -xzf ${db}.tar.gz
+        else
+            rm -f ${db}.tar.gz
+            echo "${url}/${db}.tar.gz not available; extracting ${db} from ${url}/rdp_dbs_v220.tar.gz" >&2
+            download "${url}/rdp_dbs_v220.tar.gz" rdp_dbs_v220.tar.gz
+            tar -xzf rdp_dbs_v220.tar.gz --wildcards "*${db}/*"
+        fi
+
+        # Move the database folder (wherever it is in the archive) to ./${db}
+        properties=\$(find . -path "*${db}/rRNAClassifier.properties" -not -path "./${db}/*" | head -n 1)
+        if [[ -n "\$properties" ]]; then
+            mv "\$(dirname "\$properties")" ${db}_tmp && rm -rf ${db} && mv ${db}_tmp ${db}
+        fi
+        if [[ ! -f ${db}/rRNAClassifier.properties ]]; then
+            echo "The downloaded archive has no ${db}/rRNAClassifier.properties." >&2
+            exit 1
+        fi
+        rm -f ${db}.tar.gz rdp_dbs_v220.tar.gz
+        """
+}
+
+
 // Training a custom database (https://hariszaf.github.io/pema_documentation/training_rdpclassifier/):
 // the user provides a taxonomy file (tsv: id, then one column per rank, with a header line)
 // and a sequence file (fasta, ids as in the taxonomy file).

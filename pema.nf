@@ -37,7 +37,9 @@ params.sleep        = valueOr(params.ncbi_taxonomy.sleep, 0.4)
 include { FASTP } from './modules/fastp.nf'
 include { SWARM } from './modules/swarm.nf'
 include { CREST_TAXONOMY_ASSIGNMENT; BUILD_TAXONOMY_TABLE } from './modules/crest.nf'
-include { PREPARE_RDP_TRAINING; TRAIN_RDP_DB; RDP_CLASSIFY; BUILD_RDP_TAXONOMY_TABLE } from './modules/rdpclassifier.nf'
+include {
+    DOWNLOAD_RDP_DB; PREPARE_RDP_TRAINING; TRAIN_RDP_DB; RDP_CLASSIFY; BUILD_RDP_TAXONOMY_TABLE
+} from './modules/rdpclassifier.nf'
 include { LINEARIZE; HASH_DEREP_FASTA; HASH_MAP; CONCATENATE_FASTA } from './modules/hash.nf'
 include { CONTINGENCY_TABLE; ASVS_CONTINGENCY_TABLE } from './modules/contingency.nf'
 include { REMOVE_OLIGOS_SWARM } from './modules/oligos.nf'
@@ -171,8 +173,12 @@ def resolveRdpParams() {
         : file(db.toString())
     def trained = file("${db_path}/rRNAClassifier.properties").exists()
 
+    // PEMA-trained databases that can be downloaded from Zenodo
+    def pemaTrainedRdpDBs = ['12S_v2.0.0', 'midori_1', 'midori_2']
+
     // Train the database first, if training files are given and it is not trained yet
     rdp_params.needs_training = false
+    rdp_params.needs_download = false
     if (rdp_params.train?.taxonomy || rdp_params.train?.sequences) {
         if (!rdp_params.databases_dir || db.toString().contains('/')) {
             error "To train an RDP database, set `databases_dir` (where it is saved) and `database` to the name of the new database."
@@ -192,8 +198,18 @@ def resolveRdpParams() {
             file(rdp_params.databases_dir.toString()).mkdirs()
             log.info "RDP database '${db}' will be trained and saved in '${rdp_params.databases_dir}'."
         }
+    } else if (!trained && db.toString() in pemaTrainedRdpDBs) {
+        // A PEMA-trained database not downloaded yet
+        if (!rdp_params.databases_dir) {
+            error "To download the RDP database '${db}', set `databases_dir` in the 'rdp' section (where it is saved)."
+        }
+        rdp_params.download_url    = valueOr(rdp_params.download_url, 'https://zenodo.org/records/16876159/files')
+        rdp_params.needs_download  = true
+        file(rdp_params.databases_dir.toString()).mkdirs()
+        log.info "RDP database '${db}' will be downloaded and saved in '${rdp_params.databases_dir}'."
     } else if (!db_path.isDirectory()) {
-        error "RDP database folder '${db_path}' not found. Check `database` and `databases_dir` in the 'rdp' section."
+        error """RDP database folder '${db_path}' not found. Check `database` and `databases_dir` in the 'rdp' section.
+            PEMA can download these databases: ${pemaTrainedRdpDBs.join(', ')}; or train one (rdp.train)."""
     } else if (!trained) {
         error "No rRNAClassifier.properties in the RDP database folder '${db_path}'."
     }
@@ -302,6 +318,11 @@ workflow {
                 rdp_params
             )
             rdp_database = TRAIN_RDP_DB(training_files.taxonomy, training_files.sequences, rdp_params).database
+        }
+
+        // Download a PEMA-trained database, if it is not in databases_dir yet
+        if (rdp_params.needs_download) {
+            rdp_database = DOWNLOAD_RDP_DB(rdp_params).database
         }
 
         rdp_assignment = RDP_CLASSIFY(
