@@ -172,10 +172,10 @@ workflow {
     HASH_MAP(hash_by_sample.join(linearized_by_sample))
 
     // -------------------- CONCATENATE --------------------
-    all_samples_fasta = CONCATENATE_FASTA(hashed.hash_fasta.collect())
+    all_samples_fasta = CONCATENATE_FASTA(hashed.hash_fasta.collect(sort: { a, b -> a.name <=> b.name }))
 
     //  -------------------- CONTINGENCY TABLE --------------------
-    contingency_table = CONTINGENCY_TABLE(hashed.hash_fasta.collect())
+    contingency_table = CONTINGENCY_TABLE(hashed.hash_fasta.collect(sort: { a, b -> a.name <=> b.name }))
 
     //  -------------------- CLUSTERING --------------------
     swarm_ch = SWARM(all_samples_fasta.all_samples, swarmParams)

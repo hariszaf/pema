@@ -36,6 +36,7 @@ RUN pip install \
 RUN apt-get update && apt-get install -y \
     vim \
     gawk \
+    procps \
     bc
 # To build the image, run:
 # docker build -f Dockerfile.pema_nf -t hariszaf/pema-nf:0.1.0 ~/github_repos/HCMR/pema/

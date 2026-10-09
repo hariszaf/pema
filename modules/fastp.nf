@@ -12,11 +12,13 @@ include { paramsToCliArgs; loadYamlParams } from './utils.nf'
 
 process FASTP {
 
-    tag "FASTP QC and merging"
+    tag "${sampleName}"
 
     publishDir { "${params.outdir}/fastp" }, mode: 'copy'
 
     container "quay.io/biocontainers/fastp:1.0.1--heae3180_0"
+
+    cpus params.threads
 
     input:
 
@@ -44,7 +46,7 @@ process FASTP {
             --out2 ${sampleName}_proc_R2.fastq.gz \
             --merge \
             --merged_out merged/${sampleName}.fastq.gz \
-            --thread ${params.threads} \
+            --thread ${task.cpus} \
             --html qc/${sampleName}.html \
             --json qc/${sampleName}.json \
             $fastpParamsStr

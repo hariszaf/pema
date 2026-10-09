@@ -68,7 +68,13 @@ process UNIQUE_TAXA {
 
     script:
         """
-        awk -F';' '{gsub(/^[ \t]+|[ \t]+\$/,"",\$NF); print \$NF}' ${assignments} | sort | uniq > unique_taxa.tsv
+        # assignments.txt: <sequence id> TAB <lineage separated by ';'>. Keep the lowest rank only.
+        awk -F'\t' '{
+            n = split(\$2, ranks, ";")
+            taxon = ranks[n]
+            gsub(/^[ \t]+|[ \t]+\$/, "", taxon)
+            if (taxon != "" && taxon != "No hits") print taxon
+        }' ${assignments} | sort -u > unique_taxa.tsv
         """
 }
 
@@ -77,7 +83,7 @@ process NCBI_TAXONOMY_QUERY {
 
     tag "${taxon}"
 
-    container "hariszaf/datasets"  // based on: biocontainers/ncbi-datasets-cli:16.22.1_cv1
+    container "staphb/ncbi-datasets:18.36.0"
 
     // Limit parallelism
     maxForks params.max_parallel
@@ -107,6 +113,9 @@ process NCBI_TAXONOMY_QUERY {
         datasets summary taxonomy taxon "\$taxon_clean" \
             > "ncbi_ids/\$output_filename.tsv" \
             2> "ncbi_ids/\$output_filename.err" || true
+
+        # Drop the client update notice, so the .err file only holds real errors
+        sed -i '/^New version of client/d' "ncbi_ids/\$output_filename.err"
 
         sleep ${sleep_time}
         """

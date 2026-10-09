@@ -2,7 +2,7 @@
 
 process LINEARIZE {
 
-    tag "Convert a multiline fasta to a single line fasta file."
+    tag "${multiline_fasta.baseName}"
 
     publishDir "${params.outdir}/linearized", mode: 'copy'
 
@@ -56,7 +56,7 @@ process CONCATENATE_FASTA {
 
 process HASH_DEREP_FASTA {
 
-    tag "Hash each sample to use it across all samples."
+    tag "${linearized_fasta.baseName}"
 
     publishDir "${params.outdir}/hashing", mode: 'copy'
 
@@ -70,22 +70,7 @@ process HASH_DEREP_FASTA {
 
     script:
         """
-        BASENAME=${linearized_fasta.baseName}
-        HASH_FILE="\${BASENAME}.hash"
-
-        awk '
-            /^>/ {
-                split(\$0, a, ";size=")
-                abundance = a[2]
-                next
-            }
-            {print abundance "\\t" \$0}
-        ' "$linearized_fasta" | \
-
-        while IFS=\$'\\t' read -r abundance sequence; do
-            hash=\$(printf "%s" "\$sequence" | sha1sum | awk '{print \$1}')
-            printf ">%s_%d\\n%s\\n" "\$hash" "\$abundance" "\$sequence"
-        done > "\${HASH_FILE}"
+        python3 /opt/pema/scripts/hash_fasta.py ${linearized_fasta} ${linearized_fasta.baseName}.hash
         """
 }
 

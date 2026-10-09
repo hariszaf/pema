@@ -12,7 +12,7 @@ include { paramsToCliArgs; loadYamlParams } from './utils.nf'
 
 process VSEARCH_DEREP {
 
-    tag "Dereplicate fastq files using VSEARCH.."
+    tag "${underep_fastq.simpleName}"
 
     publishDir { "${params.outdir}/derep_samples" }, mode: 'copy'
 

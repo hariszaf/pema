@@ -18,6 +18,8 @@ process SWARM {
 
     container "quay.io/biocontainers/swarm:3.1.6--h9948957_0"
 
+    cpus params.threads
+
     input:
 
         path input_fasta
@@ -35,7 +37,7 @@ process SWARM {
 
         """
         swarm \
-            --threads ${params.threads} \
+            --threads ${task.cpus} \
             --statistics-file asvs.stats \
             --seeds asvs_representatives_hash.fa \
             $swarm_params_str < ${input_fasta} > asvs.swarms

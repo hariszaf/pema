@@ -46,7 +46,9 @@ process CREST_TAXONOMY_ASSIGNMENT {
 
     publishDir { "${params.outdir}" }, mode: 'copy'
 
-    container "hariszaf/crest4:4.4.5"
+    container "hariszaf/crest4:4.3.8"
+
+    cpus { crest_params.threads }
     // Mount the local CREST databases folder only when one is given
     containerOptions { crest_params.mount_crest_dbs ? "-v ${crest_params.mount_crest_dbs}:/crest4/.crest4:rw" : '' }
 
@@ -71,14 +73,20 @@ process CREST_TAXONOMY_ASSIGNMENT {
             echo "Using a predefined database part of Crest4."
         fi
 
-        crest4 --fasta ${fasta} \
-            --search_algo ${crest_params.search_algo} \
-            --num_threads ${crest_params.threads} \
-            --min_score ${crest_params.min_score} \
-            --score_drop ${crest_params.score_drop} \
-            --min_smlrty ${crest_params.min_smlrty} \
-            --search_db ${crest_params.database} \
-            --output_dir crest_assignment
+        # Use the Python API: the crest4 CLI passes numbers and booleans as strings (crest4 4.3.8)
+        python - <<'EOF'
+        from crest4 import Classify
+        Classify(
+            fasta       = "${fasta}",
+            search_algo = "${crest_params.search_algo}",
+            num_threads = ${task.cpus},
+            search_db   = "${crest_params.database}",
+            output_dir  = "crest_assignment",
+            min_score   = ${crest_params.min_score as double},
+            score_drop  = ${crest_params.score_drop as double},
+            min_smlrty  = ${crest_params.min_smlrty ? 'True' : 'False'},
+        )()
+        EOF
         """
 }
 
