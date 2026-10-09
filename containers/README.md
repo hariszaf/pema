@@ -1,33 +1,42 @@
-# PEMA as a Docker-based container 
+# PEMA containers
+
+Every step of the Nextflow pipeline runs in its own container. The images are set with the `container`
+directive of each process in [`modules/`](../modules) and are pulled automatically on the first run.
+
+| Image | Used by | Built from |
+|-------|---------|------------|
+| `hariszaf/pema-nf:0.2.1` | hashing, contingency tables, oligoton removal, taxonomy tables, NCBI merging | [`Dockerfile.pema_nf`](Dockerfile.pema_nf) |
+| `hariszaf/crest4:4.3.8` | `CREST_TAXONOMY_ASSIGNMENT` | published image |
+| `quay.io/biocontainers/fastp:1.0.1--heae3180_0` | `FASTP` | BioContainers |
+| `quay.io/biocontainers/vsearch:2.30.4--hd6d6fdc_0` | `VSEARCH_DEREP` | BioContainers |
+| `quay.io/biocontainers/swarm:3.1.6--h9948957_0` | `SWARM` | BioContainers |
+| `staphb/ncbi-datasets:18.36.0` | `NCBI_TAXONOMY_QUERY` | StaPH-B |
 
 
-# From v2.2.0
+## `pema-nf`
 
-PEMA is now available in a containerized version only optionally. 
-You can install it locally as explain in the main [README](../../README.md) of this repo.
+The `pema-nf` image holds PEMA's [`scripts/`](../scripts) (under `/opt/pema/scripts`) and what they need:
+Python 3 with pandas and numpy, `gawk`, and `procps` (`ps` is needed by Nextflow to collect task metrics).
 
-However, it is also available as a container and from now on, it is independent of the ```pemabase``` image.
-
+The scripts are copied into the image, so **any change in `scripts/` needs a new image**:
+build it, push it with a new tag, and update the tag in the modules.
 
 > **ATTENTION!**
 >
-> You need to run the `docker build` command, from the root folder of the repo ! 
+> You need to run the `docker build` command from the root folder of the repo!
 
+```bash
+docker build -f containers/Dockerfile.pema_nf -t hariszaf/pema-nf:<tag> .
+docker push hariszaf/pema-nf:<tag>
 ```
-docker build -t pema:v220 -f containers/docker/Dockerfile.v220 .
-```
 
 
+## Other Dockerfiles
 
-## Up to v1.1.4
+* [`Dockerfile.crest4`](Dockerfile.crest4) builds crest4 4.4.5. The pipeline currently uses the published `hariszaf/crest4:4.3.8`;
+  `TRAIN_CREST_DB` (not yet part of the pipeline) refers to `hariszaf/crest4:4.4.2`.
+* [`Dockerfile.cutadapt`](Dockerfile.cutadapt) and [`Dockerfile.rdpclassifier`](Dockerfile.rdpclassifier) are for the
+  Cutadapt (ITS) and RDPClassifier steps, which are not yet ported to the Nextflow pipeline.
 
-PEMA used to be solely a container-based pipeline, and there were 
-two Dockerfiles that were used to build the PEMA image. 
-
-The Dockerfile shown here is the one to build the ```pema``` Docker image. 
-It builds on the ```pemabase``` image and adds the actual PEMA code.
-
-In the ```pemabase``` subdirectory, you may find the Dockerfile that builds the ```pemabase``` Docker image.
-This is the software base of PEMA, setting all the dependencies, tools and databases needed. 
-
-
+The Docker and Singularity images of PEMA v2.x (BigDataScript) are described on the
+[`master`](https://github.com/hariszaf/pema/tree/master) branch.

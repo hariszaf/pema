@@ -3,20 +3,8 @@
 </p>
 
 
-<!-- TODO (Haris Zafeiropoulos, 2025-07-02): 
-
-for this README
-1. for this README, add the local install of pema 
-
-for the documetnation page, update for v2.2.0 running locally - no container 
-for the documentation page
-
--->
-
-
-# PEMA: 
-### a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S rRNA, ITS and COI marker genes 
-*PEMA is reposited in* [*Docker Hub*](https://hub.docker.com/r/hariszaf/pema) 
+# PEMA:
+### a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S rRNA, ITS and COI marker genes
 #### PEMA website along with *how to* documentation can be found [**here**](https://hariszaf.github.io/pema_documentation/).
 
 #### For any troubles you may have when running PEMA or for any potential improvevments you would like to suggest, please share on the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community).
@@ -25,39 +13,27 @@ for the documentation page
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 
+> **This is the Nextflow version of PEMA, under development.**
+> The BigDataScript-based PEMA (v2.x), with its Docker and Singularity images and its `parameters.tsv` file,
+> is available on the [`master`](https://github.com/hariszaf/pema/tree/master) branch.
+
+
 Table of Contents
 =================
 
    * [PEMA: biodiversity in all its different levels](#pema-biodiversity-in-all-its-different-levels)
-   * [A container-based tool](#a-container-based-tool)
-   * [How to run PEMA](#get-set-go-pema)
-      * [Get](#get)
-      * [Set](#set)
-      * [Go](#go)
-   * [The Parameters' file](#parameters-file)
-   * [Downstream ecological analysis](#downstream-ecological-analysis)
+   * [What the Nextflow pipeline does](#what-the-nextflow-pipeline-does)
+   * [How to run PEMA](#how-to-run-pema)
+      * [Requirements](#requirements)
+      * [Input data](#input-data)
+      * [Run](#run)
+      * [Resume a run](#resume-a-run)
+   * [The parameters file](#the-parameters-file)
+   * [Output](#output)
+   * [Running single modules](#running-single-modules)
    * [Acknowledgments](#acknowledgments)
    * [License](#license)
    * [Citation](#citation)
-
-<!--   * [PEMA on HPC](#pema-on-hpc)
-      * [Prerequisites](#prerequisites-1)
-      * [Installing](#installing-1)
-      * [Running PEMA](#running-pema-1)
-        * [Example](#example)
-   * [PEMA on a simple PC](#pema-on-a-simple-pc)
-      * [Prerequisites](#prerequisites)
-      * [Installing](#installing)
-      * [Running PEMA](#running-pema)
-         * [Step 1 - Build a Docker container](#step-1---build-a-docker-container)
-         * [Step 2 - Run PEMA](#step-2---run-pema) -->
-
-
-<!-- ![Anurag's GitHub stats](https://github-readme-stats.vercel.app/api?username=hariszaf&show_icons=true&theme=onedark) -->
-<!-- [![Readme Card](https://github-readme-stats.vercel.app/api/pin/?username=hariszaf&repo=pema)](https://github.com/hariszaf/pema) -->
-
-
-<!---  ################   FIRST CHAPTER     ########################          -->
 
 
 
@@ -67,228 +43,182 @@ PEMA supports the metabarcoding analysis of four marker genes, **16S rRNA** (Bac
 
 Since the `v.2.1.4` release, PEMA supports also the analysis of the 12S rRNA marker gene!
 
-PEMA processes the reads from each sample and **returns an OTU- or an ASV-table with the taxonomies** of the taxa found and their abundances in each sample. It also returns statistics and a FASTQC diagram about the quality of the reads for each sample. Finally, PEMA supports **downstream ecological analysis** of the profiles retrieved, facilitated by the [phyloseq](http://joey711.github.io/phyloseq/index.html) R package.
+PEMA processes the reads from each sample and **returns an OTU- or an ASV-table with the taxonomies** of the taxa found and their abundances in each sample, along with quality reports for the reads of each sample.
 
-PEMA supports both OTU clustering (VSEARCH) and ASV inference (Swarm).
-
-More specifically: 
-<!-- &#9744; unchecked -->
-<!-- &#9745; checked -->
-| Marker gene | OTUs /VSEARCH    | ASVs / Swarm   | 
-|-------------|------------------|----------------|
-| 16S rRNA    |    &#9745;       |    &#9745;     |
-| 18S rRNA    |    &#9745;       |    &#9745;     |
-| 12S rRNA    |    &#9744;       |    &#9745;     |
-| ITS         |    &#9745;       |    &#9745;     |
-| COI         |    &#9744;       |    &#9745;     |
-
-
-For the case of the 16S rRNA marker gene, PEMA includes two separate approaches for taxonomy assignment: alignment-based and phylogenetic-based. 
-For the latter, a reference tree of 1000 taxa was created using SILVA_132_SSURef, EPA-ng and RaxML-ng.
-
-PEMA has been implemented in [BigDataScript](https://pcingola.github.io/BigDataScript/) programming language. BDS’s ad hoc task parallelism and task synchronization, supports heavyweight computation. Thus, PEMA inherits such features and it also supports roll-back checkpoints and on-demand partial pipeline execution. In addition, PEMA takes advantage of all the computational power available on a specific machine; for example, if PEMA is executed on a personal laptop with 4 cores, it is going to use all four of them. 
-
-Finally, container-based technologies such as Docker and Singularity, make PEMA easy accessible for all operating systems.
-As you can see in the [PEMA documentation](https://hariszaf.github.io/pema_documentation/2.running_general/), once you have either Docker or Singularity on your computational environment (see below which suits your case better), running PEMA is cakewalk. You can also find the [**PEMA tutorial**](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?usp=sharing) as a Google Slides file.
-
-## A container-based tool
-
-PEMA can run either on a HPC environment (server, cluster etc) or on a simple PC. 
-However, we definitely suggest to run it on an HPC environment to exploit the full potential of PEMA. Running on a powerful server or a cluster can be time-saving since it would require significantly 
-less computational time than in a common PC. 
-However, in some cases, for analyses with a small number of samples, a common PC can suffice.
-For COI, a minimum of 20 GB of RAM for the taxonomy assignment step is required. 
-
-PEMA runs either as a [**Docker**](https://www.docker.com/) or as a [**Singularity**](https://sylabs.io/singularity/) image. On the following chapters, you can find how to install PEMA both in Docker and Singlularity including examples.
+PEMA is now being rewritten in [Nextflow](https://www.nextflow.io/). Every step runs in its own container, so the only requirements are Nextflow and a container engine (Docker, Podman, Singularity or Apptainer).
 
 
 
-<!---  ################   NEXT CHAPTER     ########################          -->
+## What the Nextflow pipeline does
+
+| Step | Tool | Container |
+|------|------|-----------|
+| Quality control and merging of paired-end reads | [fastp](https://github.com/OpenGene/fastp) | `quay.io/biocontainers/fastp` |
+| Dereplication per sample | [VSEARCH](https://github.com/torognes/vsearch) | `quay.io/biocontainers/vsearch` |
+| Hashing of the unique sequences and contingency table across samples | PEMA scripts | `hariszaf/pema-nf` |
+| ASV inference | [Swarm v3](https://github.com/torognes/swarm) | `quay.io/biocontainers/swarm` |
+| Removal of oligotons (ASVs with low total abundance) | PEMA scripts | `hariszaf/pema-nf` |
+| Taxonomy assignment | [crest4](https://github.com/xapple/crest4) | `hariszaf/crest4` |
+| Mapping to NCBI Taxonomy (optional) | [NCBI Datasets CLI](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/) | `staphb/ncbi-datasets`, `hariszaf/pema-nf` |
+
+Currently supported: `clustering_algo: swarm` and `classifier: crest`.
+OTU clustering with VSEARCH and taxonomy assignment with RDPClassifier are not yet ported to the Nextflow version;
+the pipeline stops with an error if they are selected.
 
 
-## Get-set-go PEMA! 
+
+## How to run PEMA
+
+### Requirements
+
+* [Nextflow](https://www.nextflow.io/docs/latest/install.html) **25.04 or later** (tested with 26.04)
+* One of: Docker (default), Podman, Singularity or Apptainer
+
+All container images are pulled automatically on the first run.
 
 
-### Local install
+### Input data
 
+A folder with paired-end, gzipped fastq files. Two naming patterns are recognised:
 
 ```
-./setup_env.sh --env local
+<sample>_1.fastq.gz        <sample>_2.fastq.gz
+<sample>_R1_<any>.fastq.gz <sample>_R2_<any>.fastq.gz
 ```
 
+Everything before `_1`/`_R1` is used as the sample name.
 
 
-### Get
+### Run
 
-To get PEMA running you first need to make sure you either have **[Singularity]( https://www.sylabs.io/guides/3.0/user-guide/quick_start.html#quick-installation-steps )** , 
-or Docker on your computing environment. 
-
-In case you are working on Singularity, you may run the following command to get the PEMA Singularity image:
-
-```
- singularity pull pema_v.2.1.5.sif https://gitlab.com/microbactions/pema-singularity-images-v.2.1.5/-/raw/main/pema_v.2.1.5.sif 
-```
-
-This will take some time but once it's downloaded you have PEMA ready to go!
-
-
-Similarly, in case you are working on Docker you need to run: 
-```bash=
-docker pull hariszaf/pema:v.2.1.5
-```
-instead.
-
-A version of Docker is avalable for all Windows, Mac and Linux. 
-If you have Windows 10 Pro or your Mac's hardware in after 2010, then you can insall Docker straightforward. 
-Otherwise, you need to install the [Docker toolbox](https://docs.docker.com/toolbox/) instead. 
-You can check if your System Requirements are according to the ones mentioned below in order to be sure what you need to do.
-
-
-You are now ready to set up your analysis PEMA run! 
-
-
-
-###  Set 
-
-In the step, you need to create a directory where you will have everything PEMA needs to 
-perform an analysis. We will call this the ***analysis directory***.
-
-In the *analysis directory*, you need to add the following **mandatory** files:
-
-   * the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file 
-   (you can download it from this repository and then **complete it** according to the needs of your analysis) 
-   > **ATTENTION!** You always need to check that you have the corresponding version of the parameters file with the pema version you are about to use! For example, if you are about to use `pema:v.2.1.5` then, your parameters file needs to be the [`v.2.1.5`](https://github.com/hariszaf/pema/blob/ARMS/analysis_directory/parameters.tsv) 
-
-   * a subdirectory called ***mydata*** where your .fastq.gz files will be located <br />
-
-If your need to perform phyloseq, in the analysis directory you also need to add the following **optionally** files:
-
-   * the [***phyloseq_in_PEMA.R***](https://github.com/hariszaf/pema/blob/master/analysis_directory/phyloseq_in_PEMA.R) which you can also download from this repository and set it the way you want (that is an R script which we have implemented and has some main features that need to stay always the same in order to be executed as part of PEMA and some parts where the user can set what exactly needs to get from the phyloseq package)
-
-   * the [***metadata.csv***](https://raw.githubusercontent.com/hariszaf/pema/master/analysis_directory/metadata.csv) file which has to be in a **comma separated** format (you can find an example of this file on PEMA's GitHub repository).
-
-
-> **Attention!**  <br />
-PEMA will **fail** unless you name the aforementioned files and directories **exactly** as described above.
-<br />
-
-Here is an example of how your *analysis directory* should be in case you do want a phyloseq analysis:
+Copy [`config_files/pema.yaml`](config_files/pema.yaml), set `raw_reads` and `outdir`, adjust the parameters (see [below](#the-parameters-file)), and run from the root folder of this repository:
 
 ```bash
-user@home-PC:~/Desktop/analysis_directory$ ls
-mydata  parameters.tsv  phyloseq_in_PEMA.R  metadata.csv
+nextflow run pema.nf --params-file config_files/pema.yaml
 ```
 
-and in case you do not:
+To use another container engine, add a profile:
 
 ```bash
-user@home-PC:~/Desktop/analysis_directory$ ls
-mydata  parameters.tsv 
+nextflow run pema.nf --params-file config_files/pema.yaml -profile singularity
 ```
 
-[**Here**](https://github.com/hariszaf/pema/tree/master/analysis_directory) you can find an example of an *analysis directory*.
+Available profiles: `docker` (default), `podman`, `singularity`, `apptainer`.
+Adding the `reports` profile (e.g. `-profile docker,reports`) writes a Nextflow timeline, report and trace in `pipeline_info/`.
+This needs `ps` in every container, which the `hariszaf/crest4` image does not provide yet.
 
-**An extended list with PEMA's ouput can be found [**here**](https://github.com/hariszaf/pema/blob/master/help_files/PEMA's%20output%20files.md).**
-
-
-Now you are ready to run!
-
-
+> **Note:** the parameters are given with `--params-file` (two dashes), which PEMA reads itself.
+> Nextflow's own `-params-file` (single dash) is a different option.
 
 
-###  Go
+### Resume a run
 
-Either you are working on Docker or in Singularity, running PEMA has two discrete steps: 
-
-   1. A container needs to be initiated having your analysis directory mounted under a certain directory
-   2. Run pema
-
-
-
-#### Docker 
-To do so using Docker, you will first run:
+Add `-resume` to re-run only the steps whose input or code changed:
 
 ```bash
-docker run -it -v /<path_to_analysis_directory>/:/mnt/analysis hariszaf/pema
+nextflow run pema.nf --params-file config_files/pema.yaml -resume
 ```
 
-The `-v` flag allows to the container you built, have access to everything included under your `<path_to_analysis_directory>`. 
-All PEMA's outuput will be there too
+This is especially useful if the NCBI Taxonomy step is interrupted (for example by "too many requests" errors).
 
 
-From the inside of the PEMA container, the only thing remaining to do now, is to run PEMA:
+
+## The parameters file
+
+All parameters live in one YAML file; [`config_files/pema.yaml`](config_files/pema.yaml) documents each of them.
+Parameters left empty are not passed to the tool, so the tool's own default applies.
+
+| Section / key | Description | Default |
+|---------------|-------------|---------|
+| `raw_reads` | Folder with the input `.fastq.gz` files | **required** |
+| `outdir` | Output folder | `results` |
+| `threads` | Threads for fastp, Swarm and crest4 | `3` |
+| `clustering_algo` | `swarm` | `swarm` |
+| `classifier` | `crest` | `crest` |
+| `min_oligotons` | ASVs with a total abundance below this are removed; `0` keeps all | `5` |
+| `fastp` | Any [fastp option](https://github.com/OpenGene/fastp#all-options), without the leading `--` | **required** |
+| `swarm` | Any [Swarm option](https://github.com/torognes/swarm), e.g. `differences`, `fastidious` | **required** |
+| `crest` | `database`, `mount_crest_dbs`, `search_algo`, `min_score`, `min_smlrty`, `score_drop`, `threads` | see the YAML file |
+| `ncbi_taxonomy` | `get_ncbi_taxonomy`, `ncbi_api_key`, `max_parallel`, `sleep` | off when missing |
+
+PEMA adjusts some values to keep the tools consistent:
+
+* With Swarm, fastp's `n_base_limit` is set to `0` (Swarm does not accept `N`s).
+* Swarm's fastidious options (`fastidious`, `boundary`, `ceiling`, `bloom-bits`) are only used when `differences` is `1`,
+  and the pairwise alignment options (`match-reward`, `mismatch-penalty`, `gap-opening-penalty`, `gap-extension-penalty`) only when it is larger than `1`.
+
+**CREST databases.** `database` is one of crest4's built-in databases (`ssuome`, `silvamod138pr2`, `mitofish`, `midori253darn`)
+or the name of a folder with a custom database. For a custom database, `mount_crest_dbs` must point to the folder that contains it, for example:
+
+```
+~/.crest4/
+├── silvamod138pr2/
+└── unite_19_02_2025/
+    ├── unite_19_02_2025.fasta
+    ├── unite_19_02_2025.map
+    ├── unite_19_02_2025.names
+    ├── unite_19_02_2025.tre
+    └── unite_19_02_2025.tsv
+```
+
+Setting `mount_crest_dbs` is also recommended for the built-in databases, so they are downloaded only once.
+
+**NCBI Taxonomy.** With `get_ncbi_taxonomy: true`, the lowest taxon of each CREST assignment is looked up in NCBI Taxonomy
+and the NCBI lineage and taxids are added to the final table.
+Without an API key, queries run one at a time (NCBI allows about 3 requests per second); with a key, `max_parallel` queries can run at once.
+[Get an API key](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/) and preferably provide it through an environment variable,
+to keep it out of your configuration files:
 
 ```bash
-./pema_latest.bds
+export NCBI_API_KEY=<your key>
 ```
 
-PEMA is now running!
-
-The runtime of PEMA depends on the computational features of your environment, on the size of your data, as well as the parameters you chose.
 
 
-#### Singularity 
+## Output
 
-In case you are working on Singularity, you may implement both these steps with a single command 
-by running:
+See [output_descr.md](output_descr.md) for a description of every output file.
+The main result is `crest_assignment/tax_assigned_table.tsv` (ASV abundances per sample with their taxonomy),
+or `ncbi_taxonomy/tax_assigned_with_ncbi.tsv` when the NCBI Taxonomy step is enabled.
+
+
+
+## Running single modules
+
+Each module in [`modules/`](modules) can also be run on its own, for example to test a step:
 
 ```bash
-singularity run -B /<path_to_analysis_directory>/:/mnt/analysis /<path_to>/pema_v.2.1.5.sif
+nextflow run modules/swarm.nf --params-file config_files/swarm.yaml -c nextflow.config
 ```
 
-The `pema_v.2.1.5.sif` may be called differently according to the pema version you 're using.
+Add `-c nextflow.config`: when a module is run directly, Nextflow does not load the root `nextflow.config`, so containers would be disabled.
+See [nf-nodes.md](nf-nodes.md) for notes on developing the pipeline.
 
-
-
-> For further information, you can always check on [PEMA's website](https://hariszaf.github.io/pema_documentation/2.running_general/).
-
-
-
-<!---  ################   NEXT CHAPTER     ########################          -->
-
-## Parameters' file
-The most crucial component in running PEMA is the parameters file. 
-This file must be located **in** the *analysis directory* and the user needs to fill it **every time** PEMA is about to be called. 
-If you need more than one analyses to run, then you need to make copies of the parameters' file and have one of those in eah of the analysis directrories you create.
-
-So, here is the [***parameters.tsv***](https://github.com/hariszaf/pema/blob/master/analysis_directory/parameters.tsv) file as it looks like, in a study case of our own. 
-
-**Always remember** to have the same version of the parameters file with the pema version you are about to use!
-
-
-
-<!---  ################   NEXT CHAPTER     ########################          -->
-
-
-
-## Downstream ecological analysis
-
-PEMA performs all the basic functions of the "phyloseq" R package. In addition, it performs certain functions of the [***vegan***](https://cran.r-project.org/web/packages/vegan/index.html) R package. 
-
-When the user asks for a downstream analysis using the "phyloseq" R package, then an extra input file called [***"phyloseq_script.R"***](https://github.com/hariszaf/pema/blob/master/analysis_directory/phyloseq_in_PEMA.R) needs to be imported in the "analysis_directory". In PEMA's main repository, you can find a template of this file; this file needs to be as it would run on your own computer, as you would run *phyloseq* in any case. PEMA will create the *"phyloseq object"* automatically and then it will perform the analysis as asked. The output will be placed in an extra subfolder in the main output directory of PEMA called *phyloseq_analysis*. 
-
-In addition, the ***metadata.tsv*** file is also required when the phyloseq option has been selected. An example of this file you can find [here](https://raw.githubusercontent.com/hariszaf/pema/master/analysis_directory/metadata.csv).
 
 
 ## Acknowledgments
 
-PEMA is implemented in [Big Data Script language (BDS)](https://pcingola.github.io/BigDataScript/),
-invokes a series of tools and makes use of several databases.
+PEMA invokes a series of tools and makes use of several databases.
 
-Tools:
+Tools used by the Nextflow pipeline:
+
+* fastp - https://github.com/OpenGene/fastp
+* VSEARCH - https://github.com/torognes/vsearch
+* SWARM - https://github.com/torognes/swarm
+* crest4 - https://github.com/xapple/crest4
+* NCBI Datasets - https://www.ncbi.nlm.nih.gov/datasets/
+* Nextflow - https://www.nextflow.io/
+
+Tools used by PEMA v2.x:
 
 * FASTQC - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
 * Trimmomatic - http://www.usadellab.org/cms/?page=trimmomatic
-* fastp - https://github.com/OpenGene/fastp
 * Cutadapt - https://cutadapt.readthedocs.io/en/stable/
 * BayesHammer - included in SPAdes - http://cab.spbu.ru/software/spades/
 * PANDAseq - https://github.com/neufeld/pandaseq
 * OBITools4 - https://obitools4.metabarcoding.org/
 * BLAST Command Line Applications - https://www.ncbi.nlm.nih.gov/books/NBK52640/
-* VSEARCH-2.9.1 - https://github.com/torognes/vsearch/releases/tag/v2.9.1
-* SWARM - https://github.com/torognes/swarm
 * CROP - https://github.com/tingchenlab/CROP
-* crest4 - https://github.com/xapple/crest4
 * RDPClassifier - https://github.com/rdpstaff/classifier
 (RPDtools are required in order to execute RDPClassifier)
 * "phat" algorithm, from the "gappa" package - https://github.com/lczech/gappa/wiki/Subcommand:-phat
@@ -297,8 +227,9 @@ Tools:
 * PaPaRa - https://cme.h-its.org/exelixis/web/software/papara/index.html
 * EPA-ng - https://github.com/Pbdas/epa-ng
 * phyloseq R package - http://joey711.github.io/phyloseq/index.html
-* vegan R package - https://cran.r-project.org/web/packages/vegan/index.html 
+* vegan R package - https://cran.r-project.org/web/packages/vegan/index.html
 * ncbi-taxonomist - https://ncbi-taxonomist.readthedocs.io/en/latest/
+* Big Data Script (BDS) - https://pcingola.github.io/BigDataScript/
 
 Databases
 
