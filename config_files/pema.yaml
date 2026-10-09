@@ -220,6 +220,19 @@ crest:
 
   threads: 
 
+  # Build a custom crest4 database (optional). When `taxonomy` and `sequences` are set and `database` is not yet
+  # built in `mount_crest_dbs`, PEMA builds it there first and then uses it; the next runs reuse it.
+  # `database` is then the name of the new database (not one of the built-in ones).
+  train:
+
+    # Taxonomy file: tab-separated, no header, one line per sequence: <accession> TAB <lineage> [TAB <name>].
+    # The lineage is separated by '/' (crest4, e.g. exported from ARB) or by ';' (.nds files of older CREST), e.g.
+    #   SSEQ_1   Bacteria;Firmicutes;Bacilli;Bacillales;Bacillaceae;Bacillus;Bacillus_vallismortis   SSEQ_1
+    taxonomy:
+
+    # Sequence file: fasta, the first word of each header is the accession. An alignment works too (gaps are removed).
+    sequences:
+
 
 rdp:
 

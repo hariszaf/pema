@@ -153,7 +153,7 @@ Parameters left empty are not passed to the tool, so the tool's own default appl
 | `fastp` | Any [fastp option](https://github.com/OpenGene/fastp#all-options), without the leading `--` | **required** |
 | `swarm` | Any [Swarm option](https://github.com/torognes/swarm), e.g. `differences`, `fastidious` | required for Swarm |
 | `vsearch` | `threshold`: identity threshold for the OTU clustering | `0.97` |
-| `crest` | `database`, `mount_crest_dbs`, `search_algo`, `min_score`, `min_smlrty`, `score_drop`, `threads` | see the YAML file |
+| `crest` | `database`, `mount_crest_dbs`, `search_algo`, `min_score`, `min_smlrty`, `score_drop`, `threads`, and `train` for a custom database | see the YAML file |
 | `rdp` | `database`, `databases_dir`, `confidence`, `memory`, and `train` for a custom database | see the YAML file |
 | `ncbi_taxonomy` | `get_ncbi_taxonomy`, `ncbi_api_key`, `max_parallel`, `sleep` | off when missing |
 
@@ -183,6 +183,24 @@ or the name of a folder with a custom database. For a custom database, `mount_cr
 ```
 
 Setting `mount_crest_dbs` is also recommended for the built-in databases, so they are downloaded only once.
+
+**Building a custom CREST database.** Set `crest.train.taxonomy` and `crest.train.sequences`, `mount_crest_dbs`, and `database` to the name of the new database.
+If that database is not yet in `mount_crest_dbs`, PEMA builds it there (`PREPARE_CREST_TRAINING`, `TRAIN_CREST_DB`) and then uses it; later runs reuse it.
+The database is built for crest4 with `scripts/make_new_crest_db.py` (the `.map`, `.names` and `.tre` files) and its search index is built too.
+The two files are:
+
+* a **taxonomy** file: tab-separated, no header, one line per sequence: accession, lineage, and optionally a name.
+  The lineage is separated by `/` (crest4; e.g. exported from ARB, starting with `Main genome/`) or by `;` (the `.nds` files of the
+  [previous CREST versions](https://hariszaf.github.io/pema_documentation/training_crest_classifier/)):
+  ```
+  SSEQ_1   Bacteria;Firmicutes;Bacilli;Bacillales;Bacillaceae;Bacillus;Bacillus_vallismortis   SSEQ_1
+  ```
+* a **sequence** file: fasta, the first word of each header being the accession. Unlike older CREST versions, crest4 does not need an alignment
+  (gaps are removed if there are any).
+
+Each rank gets a minimum similarity for an assignment to it: 0.99 for the deepest rank (e.g. species), then 0.02 less per rank up
+(0.97 genus, 0.95 family, ...), and none for the first two ranks below the root (in ARB lineages, `Main genome` and the domain).
+`sanity_check/custom_crest/custom_ref_db/` contains a small example.
 
 **RDPClassifier databases.** RDPClassifier needs an RDP-trained database: a folder with an `rRNAClassifier.properties` file
 and the files it lists, for example:

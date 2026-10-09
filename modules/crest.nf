@@ -12,30 +12,68 @@ include { loadYamlParams; valueOr } from './utils.nf'
 params.outdir          = params.outdir ?: (params.paramsFile ? loadYamlParams(params.paramsFile, 'outdir') : null) ?: "results"
 params.clustering_algo = params.clustering_algo ?: (params.paramsFile ? loadYamlParams(params.paramsFile, 'clustering_algo') : null) ?: 'swarm'
 
-process TRAIN_CREST_DB {
+// Building a custom crest4 database: the user provides a taxonomy file (tsv: accession, lineage
+// separated by '/' or ';', optionally a name) and a sequence file (fasta, named by accession).
 
-    tag "Training CREST database."
+process PREPARE_CREST_TRAINING {
 
-    publishDir { "${params.outdir}/crest_database_training" }, mode: 'copy'
+    tag "Prepare the CREST training files for ${crest_params.database_name}."
 
-    container "hariszaf/crest4:4.4.2"
+    container "hariszaf/pema-nf:0.2.2"
 
     input:
-
-        path database_fasta
-        path database_taxonomy
+        path taxonomy
+        path sequences
+        val crest_params
 
     output:
-
-        path "trained_database", emit: trained_db
+        path "${crest_params.database_name}", emit: database
 
     script:
-
         """
-        crest4 --train_db \
-            --db_fasta ${database_fasta} \
-            --db_taxonomy ${database_taxonomy} \
-            --output_dir trained_database
+        python3 /opt/pema/scripts/crest_training_files.py \\
+            --taxonomy ${taxonomy} \\
+            --sequences ${sequences} \\
+            --name ${crest_params.database_name}
+        """
+}
+
+
+process TRAIN_CREST_DB {
+
+    tag "Build the crest4 database ${crest_params.database_name}."
+
+    // Saved in mount_crest_dbs; pema.nf finds it there in the next runs and does not build it again
+    publishDir { crest_params.mount_crest_dbs }, mode: 'copy'
+
+    container "hariszaf/crest4:4.3.8"
+
+    input:
+        path prepared, stageAs: 'prepared_db'
+        path make_new_crest_db
+        val crest_params
+
+    output:
+        path "${crest_params.database_name}", emit: database
+
+    script:
+        def db = crest_params.database_name
+        """
+        # Work on a copy, so the prepared folder (a link to the previous task) is not modified
+        cp -rL ${prepared} ${db}
+
+        # The .tre, .map and .names files, from the .tsv
+        python3 ${make_new_crest_db} ${db}/${db}.tsv
+
+        # Build the search index now, so the classification does not have to
+        python3 - <<'EOF'
+        from crest4.databases import CrestDatabase
+        db = CrestDatabase(custom_path="${db}")
+        db.${crest_params.search_algo == 'vsearch' ? 'vsearch_db' : 'blast_db'}
+        EOF
+
+        # The container runs as root; let the database be read (and published) by the user
+        chmod -R a+rX ${db}
         """
 }
 
@@ -56,6 +94,8 @@ process CREST_TAXONOMY_ASSIGNMENT {
 
         path fasta
         val crest_params
+        // A database built in this run (TRAIN_CREST_DB); [] to use crest_params.database
+        path built_db
 
     output:
 
@@ -64,8 +104,9 @@ process CREST_TAXONOMY_ASSIGNMENT {
 
     script:
 
+        def search_db = built_db ? built_db.toString() : crest_params.database
         """
-        if [[ -e "${crest_params.database}" ]]; then
+        if [[ -e "${search_db}" ]]; then
             # Treat as input directory
             echo "Using a custom database"
         else
@@ -80,7 +121,7 @@ process CREST_TAXONOMY_ASSIGNMENT {
             fasta       = "${fasta}",
             search_algo = "${crest_params.search_algo}",
             num_threads = ${task.cpus},
-            search_db   = "${crest_params.database}",
+            search_db   = "${search_db}",
             output_dir  = "crest_assignment",
             min_score   = ${crest_params.min_score as double},
             score_drop  = ${crest_params.score_drop as double},
@@ -188,7 +229,8 @@ workflow {
     // Run the CREST taxonomy assignment.
     def crest_taxonomy_assignment = CREST_TAXONOMY_ASSIGNMENT(
         fasta,
-        crest_params
+        crest_params,
+        []
     )
 
     // Build the taxonomy table by combining the ASV contingency table and the CREST taxonomy assignments.

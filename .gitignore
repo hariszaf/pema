@@ -37,6 +37,7 @@ sanity_check/*/TEST_*
 sanity_check/*/work/
 sanity_check/*/.nextflow*
 sanity_check/custom_rdp/trained_dbs/
+sanity_check/custom_crest/trained_dbs/
 
 # Ignore custom db input fules
 sanity_check/custom_crest/greek_bac/

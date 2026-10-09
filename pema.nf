@@ -36,7 +36,9 @@ params.sleep        = valueOr(params.ncbi_taxonomy.sleep, 0.4)
 
 include { FASTP } from './modules/fastp.nf'
 include { SWARM } from './modules/swarm.nf'
-include { CREST_TAXONOMY_ASSIGNMENT; BUILD_TAXONOMY_TABLE } from './modules/crest.nf'
+include {
+    PREPARE_CREST_TRAINING; TRAIN_CREST_DB; CREST_TAXONOMY_ASSIGNMENT; BUILD_TAXONOMY_TABLE
+} from './modules/crest.nf'
 include {
     DOWNLOAD_RDP_DB; PREPARE_RDP_TRAINING; TRAIN_RDP_DB; RDP_CLASSIFY; BUILD_RDP_TAXONOMY_TABLE
 } from './modules/rdpclassifier.nf'
@@ -127,7 +129,34 @@ def resolveCrestParams() {
         """
     )
 
+    // Build a custom database first, if training files are given and it is not built yet
+    crest_params.needs_training = false
+    if (crest_params.train?.taxonomy || crest_params.train?.sequences) {
+        if (crestSupportedDBs.contains(db) || db.toString().contains('/') || !crest_params.mount_crest_dbs) {
+            error "To build a CREST database, set `mount_crest_dbs` (where it is saved) and `database` to the name of the new database."
+        }
+        if (file("${crest_params.mount_crest_dbs}/${db}/${db}.names").exists()) {
+            log.info "CREST database '${crest_params.mount_crest_dbs}/${db}' is already built; using it. Remove it to build it again."
+        } else {
+            ['taxonomy', 'sequences'].each { key ->
+                def f = crest_params.train[key] ? file(crest_params.train[key].toString()) : null
+                if (!f?.exists()) {
+                    error "crest.train.${key}: file '${crest_params.train[key]}' not found."
+                }
+            }
+            crest_params.needs_training = true
+            crest_params.database_name  = db.toString()
+            file(crest_params.mount_crest_dbs.toString()).mkdirs()
+            log.info "CREST database '${db}' will be built and saved in '${crest_params.mount_crest_dbs}'."
+        }
+    }
+
     if (!crestSupportedDBs.contains(db)) {
+        if (crest_params.mount_crest_dbs && !crest_params.needs_training
+                && !file("${crest_params.mount_crest_dbs}/${db}/${db}.names").exists()) {
+            error """CREST database '${crest_params.mount_crest_dbs}/${db}' not found (no ${db}.names in it).
+                Check `database` and `mount_crest_dbs` in the 'crest' section, or build it (crest.train)."""
+        }
         crest_params.database = "/crest4/.crest4/${db}"
         crest_params.mount_crest_dbs = crest_params.mount_crest_dbs ?: error(
         """
@@ -297,9 +326,25 @@ workflow {
 
     if (params.classifier == 'crest') {
 
+        // Build a custom database first, if asked; it is used directly from the training task
+        def built_crest_db = []
+        if (crest_params.needs_training) {
+            prepared = PREPARE_CREST_TRAINING(
+                file(crest_params.train.taxonomy.toString()),
+                file(crest_params.train.sequences.toString()),
+                crest_params
+            )
+            built_crest_db = TRAIN_CREST_DB(
+                prepared.database,
+                file("${projectDir}/scripts/make_new_crest_db.py"),
+                crest_params
+            ).database
+        }
+
         crest_taxonomy_assignment = CREST_TAXONOMY_ASSIGNMENT(
             representatives,
-            crest_params
+            crest_params,
+            built_crest_db
         )
         tax_assigned_table = BUILD_TAXONOMY_TABLE(
             clusters_hash,

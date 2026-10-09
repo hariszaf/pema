@@ -144,10 +144,10 @@ class AccessionTSV:
         self.by_nums = {}
         # Initialize hashmap of the numbers (of the nodes) by names #
         self.by_names = {}
-        # Initialize the node number to zero #
-        current_num = 0
-        # Set the root name to "meta" #
-        root_name = "meta"
+        # Initialize the node number to one, as in the crest4 databases #
+        current_num = 1
+        # Set the root name to "root" (as in the crest4 databases) #
+        root_name = "root"
         # Make the root of the tree #
         self.root_node = TreeNode(name=current_num)
         self.root_node.add_feature('taxa', root_name)
@@ -192,7 +192,9 @@ class AccessionTSV:
                 # Set the parent for the next iteration #
                 parent = node
             # When we are on the last step of the path, add the accession #
-            node.add_feature('acc', acc)
+            # (several sequences can share the same path, so keep them all) #
+            if not hasattr(node, 'accs'): node.add_feature('accs', [])
+            node.accs.append(acc)
         # Return #
         return self.root_node
 
@@ -233,11 +235,15 @@ class MapFile(OutputFile):
     extension = '.map'
 
     def lines(self):
+        # Every leaf must have an accession #
         for leaf in self.acc_tsv.tree.iter_leaves():
-            # Check if the leaf has an accession #
-            if not hasattr(leaf, 'acc'): self.show_bad_leaf(leaf)
-            # Return the line #
-            yield str(leaf.name) + ',' + leaf.acc + '\n'
+            if not hasattr(leaf, 'accs'): self.show_bad_leaf(leaf)
+        # One line per accession, also for accessions on internal nodes
+        # (sequences whose path stops above the deepest rank), as crest4
+        # needs every accession of the database in the map #
+        for node in self.acc_tsv.tree.traverse():
+            for acc in getattr(node, 'accs', []):
+                yield str(node.name) + ',' + acc + '\n'
 
     def show_bad_leaf(self, leaf):
         # List the parents #
@@ -291,7 +297,8 @@ class TreeFile(OutputFile):
     extension = '.tre'
 
     def __call__(self):
-        self.acc_tsv.tree.write(format=8, outfile=self.output_path)
+        # The root needs its name in the file too, as crest4 looks up every ancestor #
+        self.acc_tsv.tree.write(format=8, format_root_node=True, outfile=self.output_path)
         return self.output_path
 
 ###############################################################################

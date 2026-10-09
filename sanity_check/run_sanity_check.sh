@@ -12,7 +12,8 @@
 #
 #   test                16S 18S 12S COI ITS (Swarm, crest4), 16S-vsearch 18S-vsearch (VSEARCH, crest4),
 #                       12S-rdp COI-rdp (Swarm, RDPClassifier),
-#                       COI-rdp-custom (Swarm, RDPClassifier trained on custom_rdp/custom_ref_db)
+#                       COI-rdp-custom (Swarm, RDPClassifier trained on custom_rdp/custom_ref_db),
+#                       COI-crest-custom (Swarm, crest4 database built from custom_crest/custom_ref_db)
 #                       (default: all of them)
 #   --ncbi              also map the taxonomies to NCBI Taxonomy (set NCBI_API_KEY to go faster)
 #   --profile <name>    Nextflow profile(s), e.g. singularity (default: docker)
@@ -48,22 +49,29 @@ declare -A READS=( [16S]=mydata16s [18S]=mydata18s [12S]=mydata12s [COI]=mydataC
 
 # test -> marker, clustering algorithm, classifier and database
 declare -A MARKER=( [16S]=16S [18S]=18S [12S]=12S [COI]=COI [ITS]=ITS
-                    [16S-vsearch]=16S [18S-vsearch]=18S [12S-rdp]=12S [COI-rdp]=COI [COI-rdp-custom]=COI )
+                    [16S-vsearch]=16S [18S-vsearch]=18S [12S-rdp]=12S [COI-rdp]=COI [COI-rdp-custom]=COI
+                    [COI-crest-custom]=COI )
 declare -A CLUSTERING=( [16S]=swarm [18S]=swarm [12S]=swarm [COI]=swarm [ITS]=swarm
                         [16S-vsearch]=vsearch [18S-vsearch]=vsearch [12S-rdp]=swarm [COI-rdp]=swarm
-                        [COI-rdp-custom]=swarm )
+                        [COI-rdp-custom]=swarm [COI-crest-custom]=swarm )
 declare -A CLASSIFIER=( [16S]=crest [18S]=crest [12S]=crest [COI]=crest [ITS]=crest
                         [16S-vsearch]=crest [18S-vsearch]=crest [12S-rdp]=rdp [COI-rdp]=rdp
-                        [COI-rdp-custom]=rdp )
+                        [COI-rdp-custom]=rdp [COI-crest-custom]=crest )
 declare -A DATABASE=( [16S]=silvamod138pr2 [18S]=silvamod138pr2 [12S]=mitofish [COI]=midori253darn
                       [ITS]="${ITS_CREST_DB}" [16S-vsearch]=silvamod138pr2 [18S-vsearch]=silvamod138pr2
-                      [12S-rdp]="${RDP_12S_DB}" [COI-rdp]="${RDP_COI_DB}" [COI-rdp-custom]=amvrakikos_coi )
-ALL_TESTS=(16S 18S 12S COI ITS 16S-vsearch 18S-vsearch 12S-rdp COI-rdp COI-rdp-custom)
+                      [12S-rdp]="${RDP_12S_DB}" [COI-rdp]="${RDP_COI_DB}" [COI-rdp-custom]=amvrakikos_coi
+                      [COI-crest-custom]=amvrakikos_crest )
+ALL_TESTS=(16S 18S 12S COI ITS 16S-vsearch 18S-vsearch 12S-rdp COI-rdp COI-rdp-custom COI-crest-custom)
 
 # The custom RDP database of COI-rdp-custom: trained from these files, into this folder
 CUSTOM_RDP_DIR="${SANITY_DIR}/custom_rdp"
 CUSTOM_RDP_TAXONOMY="${CUSTOM_RDP_DIR}/custom_ref_db/amvrakikos_species_2019_taxonomy_file.tsv"
 CUSTOM_RDP_SEQUENCES="${CUSTOM_RDP_DIR}/custom_ref_db/amvrakikos_species_2019_sequences_file.fasta"
+
+# The custom crest4 database of COI-crest-custom: built from these files, into this folder
+CUSTOM_CREST_DIR="${SANITY_DIR}/custom_crest"
+CUSTOM_CREST_TAXONOMY="${CUSTOM_CREST_DIR}/custom_ref_db/amvrakikos_species_2019_taxonomy.nds"
+CUSTOM_CREST_SEQUENCES="${CUSTOM_CREST_DIR}/custom_ref_db/amvrakikos_species_2019_sequences.fasta"
 
 
 # ------------                 OPTIONS               -------------------
@@ -78,8 +86,8 @@ while [[ $# -gt 0 ]]; do
         --ncbi)    NCBI=true ;;
         --profile) PROFILE="$2"; shift ;;
         --resume)  RESUME="-resume" ;;
-        -h|--help) sed -n '3,31p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-        16S|18S|12S|COI|ITS|16S-vsearch|18S-vsearch|12S-rdp|COI-rdp|COI-rdp-custom) TESTS+=("$1") ;;
+        -h|--help) sed -n '3,32p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        16S|18S|12S|COI|ITS|16S-vsearch|18S-vsearch|12S-rdp|COI-rdp|COI-rdp-custom|COI-crest-custom) TESTS+=("$1") ;;
         *) echo "Unknown option or test: $1 (see --help)"; exit 1 ;;
     esac
     shift
@@ -123,16 +131,18 @@ mkdir -p "${CREST_DBS}"
 make_params() {
     local test=$1 outdir=$2 params=$3
     local marker=${MARKER[$test]}
-    local rdp_dbs="${RDP_DBS}" taxonomy="" sequences=""
+    local rdp_dbs="${RDP_DBS}" crest_dbs="${CREST_DBS}" taxonomy="" sequences=""
     if [[ "${test}" == COI-rdp-custom ]]; then
         rdp_dbs="${CUSTOM_RDP_DIR}/trained_dbs" taxonomy="${CUSTOM_RDP_TAXONOMY}" sequences="${CUSTOM_RDP_SEQUENCES}"
+    elif [[ "${test}" == COI-crest-custom ]]; then
+        crest_dbs="${CUSTOM_CREST_DIR}/trained_dbs" taxonomy="${CUSTOM_CREST_TAXONOMY}" sequences="${CUSTOM_CREST_SEQUENCES}"
     fi
     sed -e "s#^raw_reads:.*#raw_reads: ${SANITY_DIR}/${marker}/${READS[$marker]}#" \
         -e "s#^outdir:.*#outdir: ${outdir}#" \
         -e "s#^clustering_algo:.*#clustering_algo: ${CLUSTERING[$test]}#" \
         -e "s#^classifier:.*#classifier: ${CLASSIFIER[$test]}#" \
         -e "s#^  database:.*#  database: ${DATABASE[$test]}#" \
-        -e "s#^  mount_crest_dbs:.*#  mount_crest_dbs: ${CREST_DBS}#" \
+        -e "s#^  mount_crest_dbs:.*#  mount_crest_dbs: ${crest_dbs}#" \
         -e "s#^  databases_dir:.*#  databases_dir: ${rdp_dbs}#" \
         -e "s#^    taxonomy:.*#    taxonomy: ${taxonomy}#" \
         -e "s#^    sequences:.*#    sequences: ${sequences}#" \
@@ -171,8 +181,8 @@ skip_reason() {
     local test=$1
     if [[ "${test}" == ITS && -z "${DATABASE[$test]}" ]]; then
         echo "crest4 has no built-in ITS database; set ITS_CREST_DB to a UNITE folder in ${CREST_DBS}"
-    elif [[ "${test}" == COI-rdp-custom ]]; then
-        :   # trains its own database
+    elif [[ "${test}" == COI-rdp-custom || "${test}" == COI-crest-custom ]]; then
+        :   # builds its own database
     elif [[ "${CLASSIFIER[$test]}" == rdp && -z "${RDP_DBS}" ]]; then
         echo "set RDP_DBS to the folder with the RDP-trained databases"
     elif [[ "${CLASSIFIER[$test]}" == rdp && -z "${DATABASE[$test]}" ]]; then
@@ -187,7 +197,7 @@ for test in "${TESTS[@]}"; do
     marker=${MARKER[$test]}
     classifier=${CLASSIFIER[$test]}
     name="TEST_${marker}_FASTP_${CLUSTERING[$test]^^}_${classifier^^}"
-    [[ "${test}" == COI-rdp-custom ]] && name="${name}_CUSTOM"
+    [[ "${test}" == *-custom ]] && name="${name}_CUSTOM"
     outdir="${SANITY_DIR}/${marker}/${name}"
     params="${SANITY_DIR}/${marker}/${name}.yaml"
     log="${SANITY_DIR}/${marker}/${name}.log"
