@@ -20,9 +20,20 @@ def loadYamlParams(String yamlFilePath, String section) {
         error "YAML file '${yamlFilePath}' not found."
     }
     def content = new groovy.yaml.YamlSlurper().parse(yamlFile) ?: [:]
-    def value = content[section]
-    // YamlSlurper returns lazy maps that break when passed to a process; copy to a plain map
-    return value instanceof Map ? new LinkedHashMap(value) : value
+    return plainCopy(content[section])
+}
+
+// YamlSlurper returns lazy maps and lists that break when passed to a process; copy them, recursively
+def plainCopy(value) {
+    if (value instanceof Map) {
+        def copy = new LinkedHashMap()
+        value.each { k, v -> copy[k] = plainCopy(v) }
+        return copy
+    }
+    if (value instanceof List) {
+        return value.collect { v -> plainCopy(v) }
+    }
+    return value
 }
 
 // Like `value ?: fallback`, but only falls back when value is null (keeps 0 and false).

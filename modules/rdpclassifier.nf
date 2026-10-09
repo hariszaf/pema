@@ -13,6 +13,79 @@
        └── wordConditionalProbIndexArr.txt
 */
 
+// Training a custom database (https://hariszaf.github.io/pema_documentation/training_rdpclassifier/):
+// the user provides a taxonomy file (tsv: id, then one column per rank, with a header line)
+// and a sequence file (fasta, ids as in the taxonomy file).
+
+process PREPARE_RDP_TRAINING {
+
+    tag "Prepare the RDP training files for ${rdp_params.database}."
+
+    container "hariszaf/pema-nf:0.2.2"
+
+    input:
+        path taxonomy
+        path sequences
+        val rdp_params
+
+    output:
+        path "ready4train_taxonomy.txt", emit: taxonomy
+        path "ready4train_seqs.fasta", emit: sequences
+
+    script:
+        """
+        python3 /opt/pema/scripts/rdp_training_files.py \\
+            --taxonomy ${taxonomy} \\
+            --sequences ${sequences} \\
+            ${rdp_params.train.rename_duplicates ? '--rename-duplicates' : ''}
+        """
+}
+
+
+process TRAIN_RDP_DB {
+
+    tag "Train the RDPClassifier database ${rdp_params.database}."
+
+    // Saved in databases_dir; pema.nf finds it there in the next runs and does not train it again
+    publishDir { rdp_params.databases_dir }, mode: 'copy'
+
+    container "quay.io/biocontainers/rdp_classifier:2.13--hdfd78af_1"
+
+    memory { rdp_params.train.memory }
+
+    input:
+        path taxonomy
+        path sequences
+        val rdp_params
+
+    output:
+        path "${rdp_params.database}", emit: database
+
+    script:
+        def heap_mb = Math.max((task.memory.toMega() * 0.9) as long, 512)
+        """
+        rdp_classifier -Xmx${heap_mb}m train \\
+            -o ${rdp_params.database} \\
+            -s ${sequences} \\
+            -t ${taxonomy}
+
+        # The classifier finds the trained files through this file
+        cat > ${rdp_params.database}/rRNAClassifier.properties <<'EOF'
+        # Sample ResourceBundle properties file
+        bergeyTree=bergeyTrainingTree.xml
+
+        probabilityList=genus_wordConditionalProbList.txt
+
+        probabilityIndex=wordConditionalProbIndexArr.txt
+
+        wordPrior=logWordPrior.txt
+
+        classifierVersion=RDP Naive Bayesian rRNA Classifier Version 2.13
+        EOF
+        """
+}
+
+
 process RDP_CLASSIFY {
 
     tag "Taxonomy assignment using RDPClassifier."

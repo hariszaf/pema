@@ -238,6 +238,28 @@ rdp:
   # Memory for RDPClassifier. Large databases (e.g. MIDORI for COI) need more.
   memory: 8 GB
 
+  # Train a custom database (optional). When `taxonomy` and `sequences` are set and `database` is not yet
+  # trained in `databases_dir`, PEMA trains it there first and then uses it; the next runs reuse it.
+  # See https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ for how to prepare the files.
+  train:
+
+    # Taxonomy file: tab-separated, with a header line; an id column, then one column per rank, e.g.
+    #   Seq_ID      Kingdom     Phylum      Class       ...  Species
+    #   SEQ1179093  Eukaryota   Annelida    Polychaeta  ...  Eunice_vittata
+    # Every line needs an entry for every rank.
+    taxonomy:
+
+    # Sequence file: fasta, the first word of each header is the id used in the taxonomy file.
+    sequences:
+
+    # The RDPClassifier does not allow the same taxon name at the same rank under different parent lineages
+    # (e.g. the genus Thalia, both an animal and a plant). PEMA stops and lists them; set this to true to
+    # rename them to <name>_1, <name>_2, ... instead.
+    rename_duplicates: false
+
+    # Memory for the training. Large databases need a lot (MIDORI needed more than 50 GB).
+    memory: 16 GB
+
 
 ncbi_taxonomy:
 

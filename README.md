@@ -154,7 +154,7 @@ Parameters left empty are not passed to the tool, so the tool's own default appl
 | `swarm` | Any [Swarm option](https://github.com/torognes/swarm), e.g. `differences`, `fastidious` | required for Swarm |
 | `vsearch` | `threshold`: identity threshold for the OTU clustering | `0.97` |
 | `crest` | `database`, `mount_crest_dbs`, `search_algo`, `min_score`, `min_smlrty`, `score_drop`, `threads` | see the YAML file |
-| `rdp` | `database`, `databases_dir`, `confidence`, `memory` | see the YAML file |
+| `rdp` | `database`, `databases_dir`, `confidence`, `memory`, and `train` for a custom database | see the YAML file |
 | `ncbi_taxonomy` | `get_ncbi_taxonomy`, `ncbi_api_key`, `max_parallel`, `sleep` | off when missing |
 
 PEMA adjusts some values to keep the tools consistent:
@@ -201,6 +201,23 @@ Set `database` to the folder name and `databases_dir` to the folder that contain
 The PEMA-trained databases (e.g. 12S, and MIDORI for COI) are available on [Zenodo](https://zenodo.org/records/16876159) (`rdp_dbs_v220.tar.gz`).
 Ranks are kept from the top down while RDPClassifier's confidence is at least `confidence` (default 0.8; for short amplicons a lower value such as 0.5 is common).
 Rank prefixes such as `g__` and placeholder ranks such as `k__undef_Eukaryota` are removed from the taxonomy.
+
+**Training RDPClassifier on a custom database.** Set `rdp.train.taxonomy` and `rdp.train.sequences`, `databases_dir`, and `database` to the name of the new database.
+If that database is not yet in `databases_dir`, PEMA trains it there (`PREPARE_RDP_TRAINING`, `TRAIN_RDP_DB`) and then uses it; later runs reuse it.
+The two files are prepared as described in the [PEMA documentation](https://hariszaf.github.io/pema_documentation/training_rdpclassifier/):
+
+* a **taxonomy** file: tab-separated, with a header line; an id column, then one column per rank, with an entry for every rank on every line
+  ```
+  Seq_ID      Kingdom    Phylum     Class       Order     Family     Genus    Species
+  SEQ1179093  Eukaryota  Annelida   Polychaeta  Eunicida  Eunicidae  Eunice   Eunice_vittata
+  ```
+* a **sequence** file: fasta, the first word of each header being the id used in the taxonomy file.
+
+PEMA checks both files before training and lists any problem: missing ranks, sequences without a taxonomy, and taxon names that appear
+at the same rank under different parent lineages (e.g. the genus *Thalia*, both an animal and a plant), which RDPClassifier does not allow.
+Set `rename_duplicates: true` to rename those to `<name>_1`, `<name>_2`, ... instead.
+Training large databases needs a lot of memory (`train.memory`; MIDORI needed more than 50 GB).
+`sanity_check/custom_rdp/custom_ref_db/` contains a small example.
 
 **NCBI Taxonomy.** With `get_ncbi_taxonomy: true`, the lowest taxon of each assignment is looked up in NCBI Taxonomy
 and the NCBI lineage and taxids are added to the final table.

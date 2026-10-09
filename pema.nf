@@ -37,7 +37,7 @@ params.sleep        = valueOr(params.ncbi_taxonomy.sleep, 0.4)
 include { FASTP } from './modules/fastp.nf'
 include { SWARM } from './modules/swarm.nf'
 include { CREST_TAXONOMY_ASSIGNMENT; BUILD_TAXONOMY_TABLE } from './modules/crest.nf'
-include { RDP_CLASSIFY; BUILD_RDP_TAXONOMY_TABLE } from './modules/rdpclassifier.nf'
+include { PREPARE_RDP_TRAINING; TRAIN_RDP_DB; RDP_CLASSIFY; BUILD_RDP_TAXONOMY_TABLE } from './modules/rdpclassifier.nf'
 include { VSEARCH_DEREP } from './modules/vsearch_derep.nf'
 include { LINEARIZE; HASH_DEREP_FASTA; HASH_MAP; CONCATENATE_FASTA } from './modules/hash.nf'
 include { CONTINGENCY_TABLE; ASVS_CONTINGENCY_TABLE } from './modules/contingency.nf'
@@ -163,19 +163,43 @@ def resolveRdpParams() {
         A database folder contains an rRNAClassifier.properties file and the files it lists.
         """
     )
+    rdp_params.confidence = valueOr(rdp_params.confidence, 0.8)
+    rdp_params.memory     = valueOr(rdp_params.memory, '8 GB')
+
     // A database name is looked up in databases_dir; anything with a '/' is taken as a path
     def db_path = (rdp_params.databases_dir && !db.toString().contains('/'))
         ? file("${rdp_params.databases_dir}/${db}")
         : file(db.toString())
-    if (!db_path.isDirectory()) {
+    def trained = file("${db_path}/rRNAClassifier.properties").exists()
+
+    // Train the database first, if training files are given and it is not trained yet
+    rdp_params.needs_training = false
+    if (rdp_params.train?.taxonomy || rdp_params.train?.sequences) {
+        if (!rdp_params.databases_dir || db.toString().contains('/')) {
+            error "To train an RDP database, set `databases_dir` (where it is saved) and `database` to the name of the new database."
+        }
+        if (trained) {
+            log.info "RDP database '${db_path}' is already trained; using it. Remove it to train it again."
+        } else {
+            ['taxonomy', 'sequences'].each { key ->
+                def f = rdp_params.train[key] ? file(rdp_params.train[key].toString()) : null
+                if (!f?.exists()) {
+                    error "rdp.train.${key}: file '${rdp_params.train[key]}' not found."
+                }
+            }
+            rdp_params.train.rename_duplicates = valueOr(rdp_params.train.rename_duplicates, false)
+            rdp_params.train.memory            = valueOr(rdp_params.train.memory, '16 GB')
+            rdp_params.needs_training          = true
+            file(rdp_params.databases_dir.toString()).mkdirs()
+            log.info "RDP database '${db}' will be trained and saved in '${rdp_params.databases_dir}'."
+        }
+    } else if (!db_path.isDirectory()) {
         error "RDP database folder '${db_path}' not found. Check `database` and `databases_dir` in the 'rdp' section."
-    }
-    if (!file("${db_path}/rRNAClassifier.properties").exists()) {
+    } else if (!trained) {
         error "No rRNAClassifier.properties in the RDP database folder '${db_path}'."
     }
+
     rdp_params.database_path = db_path
-    rdp_params.confidence    = valueOr(rdp_params.confidence, 0.8)
-    rdp_params.memory        = valueOr(rdp_params.memory, '8 GB')
     return rdp_params
 }
 
@@ -269,9 +293,21 @@ workflow {
 
     } else {
 
+        def rdp_database = rdp_params.database_path
+
+        // Train a custom database first, if asked
+        if (rdp_params.needs_training) {
+            training_files = PREPARE_RDP_TRAINING(
+                file(rdp_params.train.taxonomy.toString()),
+                file(rdp_params.train.sequences.toString()),
+                rdp_params
+            )
+            rdp_database = TRAIN_RDP_DB(training_files.taxonomy, training_files.sequences, rdp_params).database
+        }
+
         rdp_assignment = RDP_CLASSIFY(
             representatives,
-            rdp_params.database_path,
+            rdp_database,
             rdp_params
         )
         tax_assigned_table = BUILD_RDP_TAXONOMY_TABLE(
