@@ -18,7 +18,8 @@ Each of the next paragraphs stands for a file or subdirectory of that folder.
 ├── asvs_contingency_table.tsv
 ├── asvs_contingency_hash.tsv
 ├── asvs_representatives.fa
-├── crest_assignment/               assignments.txt, search.hits, tax_assigned_table.tsv
+├── crest_assignment/               assignments.txt, search.hits, tax_assigned_table.tsv  (classifier: crest)
+├── rdp_assignment/                 rdp_assignments.txt, tax_assigned_table.tsv              (classifier: rdp)
 └── ncbi_taxonomy/                  taxonomies.json, not_found.tsv, ambiguous_candidates.tsv,
                                     tax_assigned_with_ncbi.tsv
 ```
@@ -108,9 +109,20 @@ These are the sequences that are classified.
 
 
 
+### RDPClassifier
+
+***"rdp_assignment/rdp_assignments.txt"*** is the output of RDPClassifier: for each representative sequence, its hash, the strand,
+and then the name, rank and confidence of each rank of its lineage, from the root of the database down.
+
+***"rdp_assignment/tax_assigned_table.tsv"*** is the final ASV table: the ASV identifier, its abundance in each sample, and its taxonomy.
+The taxonomy keeps the ranks whose confidence is at least `confidence`, without the root, rank prefixes (e.g. `g__`) or placeholder ranks (e.g. `k__undef_Eukaryota`);
+it is `Unassigned` when no rank reaches the threshold.
+
+
+
 ### NCBI Taxonomy
 
-Only when `get_ncbi_taxonomy` is `true`. The lowest taxon of each CREST lineage is looked up in NCBI Taxonomy.
+Only when `get_ncbi_taxonomy` is `true`. The lowest taxon of each lineage in the final ASV table is looked up in NCBI Taxonomy.
 
 ***"ncbi_taxonomy/taxonomies.json"*** contains the NCBI Taxonomy report of each taxon that was found, by taxon name.
 
@@ -122,4 +134,4 @@ one line per candidate taxid: the taxon name, a tab, and the NCBI report of the 
 
 ***"ncbi_taxonomy/tax_assigned_with_ncbi.tsv"*** is the final ASV table with three extra columns:
 `last_taxon` (the taxon that was looked up), `ncbi_taxonomy` (the NCBI lineage, from kingdom to species) and `ncbi_taxonomy_ids` (the NCBI taxids of that lineage).
-For ambiguous names, the candidate whose lineage is the most similar to the CREST lineage is used.
+For ambiguous names, the candidate whose lineage is the most similar to the classifier's lineage is used.

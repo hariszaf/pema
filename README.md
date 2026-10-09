@@ -58,12 +58,11 @@ PEMA is now being rewritten in [Nextflow](https://www.nextflow.io/). Every step 
 | Hashing of the unique sequences and contingency table across samples | PEMA scripts | `hariszaf/pema-nf` |
 | ASV inference | [Swarm v3](https://github.com/torognes/swarm) | `quay.io/biocontainers/swarm` |
 | Removal of oligotons (ASVs with low total abundance) | PEMA scripts | `hariszaf/pema-nf` |
-| Taxonomy assignment | [crest4](https://github.com/xapple/crest4) | `hariszaf/crest4` |
+| Taxonomy assignment | [crest4](https://github.com/xapple/crest4) or [RDPClassifier](https://github.com/rdpstaff/classifier) | `hariszaf/crest4`, `quay.io/biocontainers/rdp_classifier` |
 | Mapping to NCBI Taxonomy (optional) | [NCBI Datasets CLI](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/) | `staphb/ncbi-datasets`, `hariszaf/pema-nf` |
 
-Currently supported: `clustering_algo: swarm` and `classifier: crest`.
-OTU clustering with VSEARCH and taxonomy assignment with RDPClassifier are not yet ported to the Nextflow version;
-the pipeline stops with an error if they are selected.
+Currently supported: `clustering_algo: swarm`, and `classifier: crest` or `classifier: rdp`.
+OTU clustering with VSEARCH is not yet ported to the Nextflow version; the pipeline stops with an error if it is selected.
 
 
 
@@ -149,11 +148,12 @@ Parameters left empty are not passed to the tool, so the tool's own default appl
 | `outdir` | Output folder | `results` |
 | `threads` | Threads for fastp, Swarm and crest4 | `3` |
 | `clustering_algo` | `swarm` | `swarm` |
-| `classifier` | `crest` | `crest` |
+| `classifier` | `crest` or `rdp` | `crest` |
 | `min_oligotons` | ASVs with a total abundance below this are removed; `0` keeps all | `5` |
 | `fastp` | Any [fastp option](https://github.com/OpenGene/fastp#all-options), without the leading `--` | **required** |
 | `swarm` | Any [Swarm option](https://github.com/torognes/swarm), e.g. `differences`, `fastidious` | **required** |
 | `crest` | `database`, `mount_crest_dbs`, `search_algo`, `min_score`, `min_smlrty`, `score_drop`, `threads` | see the YAML file |
+| `rdp` | `database`, `databases_dir`, `confidence`, `memory` | see the YAML file |
 | `ncbi_taxonomy` | `get_ncbi_taxonomy`, `ncbi_api_key`, `max_parallel`, `sleep` | off when missing |
 
 PEMA adjusts some values to keep the tools consistent:
@@ -178,7 +178,25 @@ or the name of a folder with a custom database. For a custom database, `mount_cr
 
 Setting `mount_crest_dbs` is also recommended for the built-in databases, so they are downloaded only once.
 
-**NCBI Taxonomy.** With `get_ncbi_taxonomy: true`, the lowest taxon of each CREST assignment is looked up in NCBI Taxonomy
+**RDPClassifier databases.** RDPClassifier needs an RDP-trained database: a folder with an `rRNAClassifier.properties` file
+and the files it lists, for example:
+
+```
+rdp_databases/
+└── 12S_v2.0.0/
+    ├── bergeyTrainingTree.xml
+    ├── genus_wordConditionalProbList.txt
+    ├── logWordPrior.txt
+    ├── rRNAClassifier.properties
+    └── wordConditionalProbIndexArr.txt
+```
+
+Set `database` to the folder name and `databases_dir` to the folder that contains it (here `rdp_databases`), or `database` to the full path.
+The PEMA-trained databases (e.g. 12S, and MIDORI for COI) are available on [Zenodo](https://zenodo.org/records/16876159) (`rdp_dbs_v220.tar.gz`).
+Ranks are kept from the top down while RDPClassifier's confidence is at least `confidence` (default 0.8; for short amplicons a lower value such as 0.5 is common).
+Rank prefixes such as `g__` and placeholder ranks such as `k__undef_Eukaryota` are removed from the taxonomy.
+
+**NCBI Taxonomy.** With `get_ncbi_taxonomy: true`, the lowest taxon of each assignment is looked up in NCBI Taxonomy
 and the NCBI lineage and taxids are added to the final table.
 Without an API key, queries run one at a time (NCBI allows about 3 requests per second); with a key, `max_parallel` queries can run at once.
 [Get an API key](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/) and preferably provide it through an environment variable,
@@ -193,7 +211,7 @@ export NCBI_API_KEY=<your key>
 ## Output
 
 See [output_descr.md](output_descr.md) for a description of every output file.
-The main result is `crest_assignment/tax_assigned_table.tsv` (ASV abundances per sample with their taxonomy),
+The main result is `crest_assignment/tax_assigned_table.tsv` or `rdp_assignment/tax_assigned_table.tsv` (ASV abundances per sample with their taxonomy),
 or `ncbi_taxonomy/tax_assigned_with_ncbi.tsv` when the NCBI Taxonomy step is enabled.
 
 

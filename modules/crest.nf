@@ -97,7 +97,7 @@ process BUILD_TAXONOMY_TABLE {
 
     publishDir { "${params.outdir}/crest_assignment" }, mode: 'copy'
 
-    container "hariszaf/pema-nf:0.2.1"
+    container "hariszaf/pema-nf:0.2.2"
 
     input:
 

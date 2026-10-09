@@ -5,8 +5,9 @@ directive of each process in [`modules/`](../modules) and are pulled automatical
 
 | Image | Used by | Built from |
 |-------|---------|------------|
-| `hariszaf/pema-nf:0.2.1` | hashing, contingency tables, oligoton removal, taxonomy tables, NCBI merging | [`Dockerfile.pema_nf`](Dockerfile.pema_nf) |
+| `hariszaf/pema-nf:0.2.2` | hashing, contingency tables, oligoton removal, taxonomy tables, NCBI merging | [`Dockerfile.pema_nf`](Dockerfile.pema_nf) |
 | `hariszaf/crest4:4.3.8` | `CREST_TAXONOMY_ASSIGNMENT` | published image |
+| `quay.io/biocontainers/rdp_classifier:2.13--hdfd78af_1` | `RDP_CLASSIFY` | BioContainers |
 | `quay.io/biocontainers/fastp:1.0.1--heae3180_0` | `FASTP` | BioContainers |
 | `quay.io/biocontainers/vsearch:2.30.4--hd6d6fdc_0` | `VSEARCH_DEREP` | BioContainers |
 | `quay.io/biocontainers/swarm:3.1.6--h9948957_0` | `SWARM` | BioContainers |
@@ -35,8 +36,9 @@ docker push hariszaf/pema-nf:<tag>
 
 * [`Dockerfile.crest4`](Dockerfile.crest4) builds crest4 4.4.5. The pipeline currently uses the published `hariszaf/crest4:4.3.8`;
   `TRAIN_CREST_DB` (not yet part of the pipeline) refers to `hariszaf/crest4:4.4.2`.
-* [`Dockerfile.cutadapt`](Dockerfile.cutadapt) and [`Dockerfile.rdpclassifier`](Dockerfile.rdpclassifier) are for the
-  Cutadapt (ITS) and RDPClassifier steps, which are not yet ported to the Nextflow pipeline.
+* [`Dockerfile.cutadapt`](Dockerfile.cutadapt) is for the Cutadapt (ITS) step, which is not yet ported to the Nextflow pipeline.
+* [`Dockerfile.rdpclassifier`](Dockerfile.rdpclassifier) builds RDPClassifier 2.13 with the PEMA-trained databases inside.
+  The pipeline uses the BioContainers image instead, with the databases given in the parameters file.
 
 The Docker and Singularity images of PEMA v2.x (BigDataScript) are described on the
 [`master`](https://github.com/hariszaf/pema/tree/master) branch.

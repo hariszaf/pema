@@ -5,7 +5,7 @@
 Usage:
 
     nextflow run modules/ncbi.nf --params-file config_files/ncbi.yaml
-    nextflow run modules/ncbi.nf --strings_file buildingPemaNf2/crest_assignment/assignments30.txt --ncbi_api_key <YOUR_KEY> --outdir buildingPemaNf2/ncbi_taxonomy/ --tax_table buildingPemaNf2/ncbi_taxonomy/tax_assigned_table.tsv 
+    nextflow run modules/ncbi.nf -c nextflow.config --tax_table results/crest_assignment/tax_assigned_table.tsv --outdir results
 */
 
 
@@ -16,8 +16,8 @@ params.sleep        = params.sleep ?: 0.4
 
 workflow {
 
-    strings_ch = channel.fromPath(params.strings_file)
-    unique_ch  = UNIQUE_TAXA(strings_ch)
+    tax_table_ch = channel.fromPath(params.tax_table)
+    unique_ch    = UNIQUE_TAXA(tax_table_ch)
 
     // -------------------------------
     // Load strings from file
@@ -44,7 +44,6 @@ workflow {
     // -------------------------------
     // Integrate NCBI Taxonomy to taxonomy abundance table
     // -------------------------------
-    tax_table_ch = channel.fromPath(params.tax_table)
     MERGE_NCBI_TAXONOMY_TABLE(
         tax_table_ch,
         ncbi_taxonomies.ncbi_taxonomy,
@@ -59,23 +58,25 @@ process UNIQUE_TAXA {
 
     tag "Get unique records from the last part of the taxonomies retrieved"
 
-    container "hariszaf/pema-nf:0.2.1" 
+    container "hariszaf/pema-nf:0.2.2" 
 
     input:
-        path assignments 
+        path tax_table
 
     output:
         path "unique_taxa.tsv", emit: unique_taxa_file
 
     script:
         """
-        # assignments.txt: <sequence id> TAB <lineage separated by ';'>. Keep the lowest rank only.
-        awk -F'\t' '{
-            n = split(\$2, ranks, ";")
-            taxon = ranks[n]
-            gsub(/^[ \t]+|[ \t]+\$/, "", taxon)
-            if (taxon != "" && taxon != "No hits") print taxon
-        }' ${assignments} | sort -u > unique_taxa.tsv
+        # tax_assigned_table.tsv: lineages separated by ';' in the Taxonomy column. Keep the lowest rank only.
+        awk -F'\t' '
+            NR == 1 { for (i = 1; i <= NF; i++) if (\$i == "Taxonomy") col = i; next }
+            {
+                n = split(\$col, ranks, ";")
+                taxon = ranks[n]
+                gsub(/^[ \t]+|[ \t]+\$/, "", taxon)
+                if (taxon != "" && taxon != "No hits" && taxon != "Unassigned") print taxon
+            }' ${tax_table} | sort -u > unique_taxa.tsv
         """
 }
 
@@ -140,7 +141,7 @@ process MERGE_NCBI_TAXONOMIES {
 
     tag "Merge NCBI Taxonomies"
 
-    container "hariszaf/pema-nf:0.2.1"
+    container "hariszaf/pema-nf:0.2.2"
 
     publishDir {"${params.outdir}/ncbi_taxonomy"}, mode: 'copy'
 
@@ -190,7 +191,7 @@ process MERGE_NCBI_TAXONOMY_TABLE {
 
     tag "Build taxonomy table with NCBI taxonomy"
 
-    container "hariszaf/pema-nf:0.2.1"
+    container "hariszaf/pema-nf:0.2.2"
 
     publishDir { "${params.outdir}/ncbi_taxonomy" }, mode: 'copy'
 

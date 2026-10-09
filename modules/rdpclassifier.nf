@@ -1,47 +1,74 @@
 #!/usr/bin/env nextflow
 
-/* Nextflow script to run rdpclassifier.jar ()
+/* Nextflow processes to run the RDP Classifier (https://github.com/rdpstaff/classifier)
+   with an RDP-trained database, and build the taxonomy table.
 
-Usage: 
+   A database is a folder with an rRNAClassifier.properties file and the files it lists, e.g.
 
-nextflow run modules/rdpclassifier.nf -params-file modules/faprotax/faprotax.yaml 
-
+       12S_v2.0.0/
+       ├── bergeyTrainingTree.xml
+       ├── genus_wordConditionalProbList.txt
+       ├── logWordPrior.txt
+       ├── rRNAClassifier.properties
+       └── wordConditionalProbIndexArr.txt
 */
 
-process RDPCLASSIFY {
+process RDP_CLASSIFY {
 
-    tag "Sequencing quality control and merging per paired read sample."
+    tag "Taxonomy assignment using RDPClassifier."
 
-    publishDir "${params.outdir}/fastp", mode: 'copy'
-    container "quay.io/biocontainers/1.0.1--heae3180_0"
+    publishDir { "${params.outdir}/rdp_assignment" }, mode: 'copy'
+
+    container "quay.io/biocontainers/rdp_classifier:2.13--hdfd78af_1"
+
+    memory { rdp_params.memory }
 
     input:
-    tuple val(sampleName), path(readF), path(readR)
+        path fasta
+        path database
+        val rdp_params
 
     output:
-    // QC files into qc subfolder
-    path("qc/${sampleName}.html"), emit: qc_html
-    path("qc/${sampleName}.json"), emit: qc_json
-
-    // Merged reads into merged subfolder
-    path("merged/${sampleName}.fastq.gz"), emit: merged_reads
+        path "rdp_assignments.txt", emit: assignments
 
     script:
-    """
-    java -Xmx64g \
-        -jar /opt/rdp_classifier_2.14/dist/classifier.jar classify \
-        -t $globalVars{'tools'}/rdp_classifier_2.14/TRAIN/$params{'referenceDb'}/rRNAClassifier.properties \
-        -o tax_assign_temp.txt all_sequences_grouped.fa
-    """
+        // Leave some of the task memory to the JVM itself
+        def heap_mb = Math.max((task.memory.toMega() * 0.9) as long, 512)
+        """
+        if [[ ! -f "${database}/rRNAClassifier.properties" ]]; then
+            echo "No rRNAClassifier.properties in the RDP database folder '${database}'." >&2
+            exit 1
+        fi
+
+        rdp_classifier -Xmx${heap_mb}m classify \\
+            -t ${database}/rRNAClassifier.properties \\
+            -o rdp_assignments.txt \\
+            ${fasta}
+        """
 }
 
 
-workflow{
+process BUILD_RDP_TAXONOMY_TABLE {
 
-    // Pattern 1: _1/_2
-    def paired1 = Channel.fromFilePairs("${params.raw_reads}/*_{1,2}.fastq.gz", flat: true)
+    tag "Building taxonomy table from RDPClassifier assignments."
 
-    // Run process 
-    RDPCLASSIFY(paired_raw_reads)
+    publishDir { "${params.outdir}/rdp_assignment" }, mode: 'copy'
+
+    container "hariszaf/pema-nf:0.2.2"
+
+    input:
+        path asvs_contingency_hash_table
+        path rdp_assignments
+        val rdp_params
+
+    output:
+        path "tax_assigned_table.tsv", emit: tax_assigned_table
+
+    script:
+        """
+        python3 /opt/pema/scripts/rdp_tax_table.py \\
+            --asvs-hash ${asvs_contingency_hash_table} \\
+            --rdp-assignments ${rdp_assignments} \\
+            --confidence ${rdp_params.confidence}
+        """
 }
-

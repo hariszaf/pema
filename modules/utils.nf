@@ -128,7 +128,7 @@ process GUNZIP {
 
     tag "Unzip .gz files to original format."
 
-    container "hariszaf/pema-nf:0.2.1"
+    container "hariszaf/pema-nf:0.2.2"
 
     input:
         path gzip_file

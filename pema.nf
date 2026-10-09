@@ -37,6 +37,7 @@ params.sleep        = valueOr(params.ncbi_taxonomy.sleep, 0.4)
 include { FASTP } from './modules/fastp.nf'
 include { SWARM } from './modules/swarm.nf'
 include { CREST_TAXONOMY_ASSIGNMENT; BUILD_TAXONOMY_TABLE } from './modules/crest.nf'
+include { RDP_CLASSIFY; BUILD_RDP_TAXONOMY_TABLE } from './modules/rdpclassifier.nf'
 include { VSEARCH_DEREP } from './modules/vsearch_derep.nf'
 include { LINEARIZE; HASH_DEREP_FASTA; HASH_MAP; CONCATENATE_FASTA } from './modules/hash.nf'
 include { CONTINGENCY_TABLE; ASVS_CONTINGENCY_TABLE } from './modules/contingency.nf'
@@ -51,8 +52,8 @@ def checkSupported() {
     if (!(params.clustering_algo in ['swarm'])) {
         error "clustering_algo '${params.clustering_algo}' is not supported yet. Please select 'swarm'."
     }
-    if (!(params.classifier in ['crest'])) {
-        error "classifier '${params.classifier}' is not supported yet. Please select 'crest'."
+    if (!(params.classifier in ['crest', 'rdp'])) {
+        error "classifier '${params.classifier}' is not supported. Please select 'crest' or 'rdp'."
     }
 }
 
@@ -140,6 +141,33 @@ def resolveCrestParams() {
     return crest_params
 }
 
+def resolveRdpParams() {
+    def rdp_params = loadYamlParams(params.yaml, 'rdp') ?: error(
+        "classifier is set to 'rdp' but no 'rdp' section was found in the YAML config."
+    )
+    def db = rdp_params.database ?: error(
+        """
+        Please set `database` in the 'rdp' section: the name of an RDP-trained database folder
+        inside `databases_dir`, or the full path to such a folder.
+        A database folder contains an rRNAClassifier.properties file and the files it lists.
+        """
+    )
+    // A database name is looked up in databases_dir; anything with a '/' is taken as a path
+    def db_path = (rdp_params.databases_dir && !db.toString().contains('/'))
+        ? file("${rdp_params.databases_dir}/${db}")
+        : file(db.toString())
+    if (!db_path.isDirectory()) {
+        error "RDP database folder '${db_path}' not found. Check `database` and `databases_dir` in the 'rdp' section."
+    }
+    if (!file("${db_path}/rRNAClassifier.properties").exists()) {
+        error "No rRNAClassifier.properties in the RDP database folder '${db_path}'."
+    }
+    rdp_params.database_path = db_path
+    rdp_params.confidence    = valueOr(rdp_params.confidence, 0.8)
+    rdp_params.memory        = valueOr(rdp_params.memory, '8 GB')
+    return rdp_params
+}
+
 
 // -------------------- WORKFLOW --------------------
 
@@ -148,7 +176,8 @@ workflow {
     checkSupported()
     def fastpParams  = resolveFastpParams()
     def swarmParams  = resolveSwarmParams()
-    def crest_params = resolveCrestParams()
+    def crest_params = params.classifier == 'crest' ? resolveCrestParams() : null
+    def rdp_params   = params.classifier == 'rdp' ? resolveRdpParams() : null
 
     // -------------------- CHANNELS --------------------
     def paired_raw_reads = channel.fromList(findReadPairs(params.raw_reads.toString()))
@@ -192,21 +221,38 @@ workflow {
     asvs_cont_table = ASVS_CONTINGENCY_TABLE(stats_ch, swarms_ch, fasta_ch, contingency_table)
 
     // -------------------- TAXONOMY ASSIGNMENT --------------------
-    crest_taxonomy_assignment = CREST_TAXONOMY_ASSIGNMENT(
-        asvs_cont_table.asvs_to_tax_assign,
-        crest_params
-    )
+    // Both classifiers end with a tax_assigned_table.tsv: ASV, abundance per sample, Taxonomy
+    def tax_assigned_table
 
-    // Build the taxonomy table by combining the ASV contingency table and the CREST taxonomy assignments.
-    tax_table = BUILD_TAXONOMY_TABLE(
-        asvs_cont_table.asvs_contingency_hash,
-        crest_taxonomy_assignment.assignments
-    )
+    if (params.classifier == 'crest') {
+
+        crest_taxonomy_assignment = CREST_TAXONOMY_ASSIGNMENT(
+            asvs_cont_table.asvs_to_tax_assign,
+            crest_params
+        )
+        tax_assigned_table = BUILD_TAXONOMY_TABLE(
+            asvs_cont_table.asvs_contingency_hash,
+            crest_taxonomy_assignment.assignments
+        ).tax_assigned_table
+
+    } else {
+
+        rdp_assignment = RDP_CLASSIFY(
+            asvs_cont_table.asvs_to_tax_assign,
+            rdp_params.database_path,
+            rdp_params
+        )
+        tax_assigned_table = BUILD_RDP_TAXONOMY_TABLE(
+            asvs_cont_table.asvs_contingency_hash,
+            rdp_assignment.assignments,
+            rdp_params
+        ).tax_assigned_table
+    }
 
     // -------------------- NCBI TAXONOMY MAP --------------------
     if (params.ncbi_taxonomy.get_ncbi_taxonomy == true) {
 
-        unique_ch = UNIQUE_TAXA(crest_taxonomy_assignment.assignments)
+        unique_ch = UNIQUE_TAXA(tax_assigned_table)
 
         // One taxon name per line → one query per taxon
         taxa_ch = unique_ch
@@ -223,7 +269,7 @@ workflow {
         )
 
         MERGE_NCBI_TAXONOMY_TABLE(
-            tax_table.tax_assigned_table,
+            tax_assigned_table,
             ncbi_taxonomies.ncbi_taxonomy,
             ncbi_taxonomies.ambiguous_candidates
         )

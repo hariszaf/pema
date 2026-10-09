@@ -210,6 +210,24 @@ crest:
   threads: 
 
 
+rdp:
+
+  # The RDP-trained database: the name of a folder inside `databases_dir`, or the full path to a folder.
+  # A database folder contains an rRNAClassifier.properties file and the files it lists, e.g.
+  # 12S_v2.0.0 for 12S, or a MIDORI-trained database for COI.
+  database: 12S_v2.0.0
+
+  # Folder that contains the RDP-trained databases (optional when `database` is a full path).
+  databases_dir:
+
+  # Ranks are kept from the top down while RDPClassifier's confidence is at least this value.
+  # 0.8 is the usual threshold for reads of 250 bp or more; for shorter reads 0.5 is often used. 0 keeps all ranks.
+  confidence: 0.8
+
+  # Memory for RDPClassifier. Large databases (e.g. MIDORI for COI) need more.
+  memory: 8 GB
+
+
 ncbi_taxonomy:
 
   get_ncbi_taxonomy: true
