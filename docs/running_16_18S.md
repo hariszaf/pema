@@ -3,56 +3,35 @@ layout: page
 title: 16/18S analysis
 ---
 
-PEMA supports multiple options for running 16S or/and 18S rRNA data.
+Set `marker_gene: 16S` or `marker_gene: 18S` in the parameters file.
 
 
-## Clustering OTUs / ASVs inference
+## ASVs or OTUs
 
-You may choose between OTUs clustering or ASVs inference ;PEMA supports both. 
+PEMA supports both ASV inference and OTU clustering; set `clustering_algo` in the parameters file:
 
-On the `parameters.tsv` file, you will find the `clusteringAlgoFor16S_18SrRNA` parameter. By setting this as `algo_vsearch` PEMA will use the [vsearch](https://github.com/torognes/vsearch) algorithm to get OTUs. 
+* `swarm`: [Swarm](https://github.com/torognes/swarm) infers **ASVs**. Its options are in the `swarm` section; the usual setting is
+  `differences: 1` with `fastidious: true`. Higher values of `differences` merge more sequences into each ASV.
+* `vsearch`: [VSEARCH](https://github.com/torognes/vsearch) clusters **OTUs**, at the identity `threshold` of the `vsearch` section
+  (e.g. `0.97`), after removing chimeras de novo, as in the [VSEARCH pipeline](https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline).
 
-Otherwise, by setting this as `algo_swarm` PEMA implements the [swarm](https://github.com/torognes/swarm) algorithm to infer ASVs.
-
-
-
-## Silva version 128 and 132
-
-Silva includes two different Silva versions you may choose. 
-
-Silva versions besides the increased number of available sequences, they may include different taxonomic frameworks. 
-
-You may furhter check on that on the corresponding literature, for example [here](https://academic.oup.com/nar/article/42/D1/D643/1061236) or visit the [Silva database website](https://www.arb-silva.de/).
+`min_oligotons` removes ASVs with a low total abundance after Swarm. With VSEARCH, it removes unique sequences with a low total
+abundance *before* clustering (as in PEMA v2.x), which removes many more reads: use a low value, e.g. `2`.
 
 
+## Taxonomy assignment
 
-## Alignment or phylogeny based taxonomy assignment
+With `classifier: crest`, PEMA assigns the taxonomy with [crest4](https://github.com/xapple/crest4), an LCA-based classifier,
+against one of its databases (`database` in the `crest` section):
 
-For the taxonomy assignment step, PEMA supports two ways when it comes to 16S/18S rRNA data. 
+* `silvamod138pr2`: SILVA 138 with PR2, for 16S and 18S;
+* `ssuome`: the crest4 SSU database, for 16S and 18S.
 
-By setting `taxonomyAssignmentMethod` as `alignment`, PEMA will use the [CREST](https://github.com/lanzen/CREST) algorithm and the Silva version you selected and will return you an **alignment based** taxonomy assignment. 
+crest4 downloads the database the first time it is used; set `mount_crest_dbs` to a folder of yours (e.g. `~/.crest4`) to keep it there,
+so it is downloaded only once. The search uses BLAST or VSEARCH (`search_algo`); `min_score`, `score_drop` and `min_smlrty` set how strict the
+assignment is (see the `crest` section of the parameters file).
 
-On the contrary, by setting this parameter as `phylogeny` PEMA will use a reference tree of 1.000 consensus taxa we have built by using Silva 128, the RAxML-ng and the EPA algorithms to return you a **phylogeny based** taxonomy assignment which you will be able to view via tools such as iTOL.
+You can also use your own reference database; see [Training the CREST classifier]({{ '/training_crest_classifier/' | relative_url }}).
 
-Here is the workflow we used to build PEMA's reference tree. 
-
-![Alt text](public/ref_tree.jpeg)
-
-
-## `phyloseq` analysis
-
-You may ask for PEMA to move on after the taxonomy step and run a `phyloseq` analysis. [Phyloseq](https://joey711.github.io/phyloseq/index.html) is a R package for further exploring microbiome profiles. 
-
-To do so, you need to set the `phyloseq` parameter in the `parameters.tsv` file as `Yes` and add the `phyloseq_in_PEMA.R` script in the `analysis_directory` with all the rest of your input~ 
-
-You may get a version of this script [here](https://github.com/hariszaf/pema/blob/master/analysis_directory/phyloseq_in_PEMA.R). As mentioned on the script, the first sections need to be **exactly like this**. 
-
-However, you may add or remove `phyloseq` modules according to your needs. 
-
-You always need to remember the `metadata.csv` file, you may find an example [here](https://github.com/hariszaf/pema/blob/master/analysis_directory/metadata.csv).
-
-You need to add your own metadata there keeping the format of the file as it is!
-
-> **You always have to keep the names of these scripts exactly as they are, otherwise PEMA will return you an error!**
-
-Plots and all the phyloseq-related output will be saved in a seperate subdirectory called `phyloseq_output`. 
+The phylogeny-based taxonomy assignment (EPA-ng) and the `phyloseq` analysis of PEMA v2.x are not part of the Nextflow-based PEMA;
+the final ASV/OTU table (`tax_assigned_table.tsv`) can be loaded in phyloseq, or any other R or Python package, directly.

@@ -2,6 +2,27 @@
 layout: default
 ---
 
+{% comment %}
+  A note on top of every page, linking to the same page in the other version, if there is one.
+{% endcomment %}
+{% if page.url contains '/v2/' %}
+  {% assign other_url = page.url | remove_first: '/v2' %}
+  {% assign other = site.pages | where: "url", other_url | first %}
+  <p class="message">
+    This page is about <b>PEMA v2.x</b> (BigDataScript, Docker / Singularity images), the previous version of PEMA.
+    {% if other %}See <a href="{{ other.url | relative_url }}">{{ other.title }}</a> for the current, Nextflow-based PEMA.
+    {% else %}See the <a href="{{ '/' | relative_url }}">documentation of the current, Nextflow-based PEMA</a>.{% endif %}
+  </p>
+{% else %}
+  {% assign other_url = '/v2' | append: page.url %}
+  {% assign other = site.pages | where: "url", other_url | first %}
+  {% if other %}
+  <p class="message">
+    Looking for PEMA v2.x? See <a href="{{ other.url | relative_url }}">{{ other.title }} (v2.x)</a>.
+  </p>
+  {% endif %}
+{% endif %}
+
 <div class="page">
   <h1 class="page-title">{{ page.title }}</h1>
   {{ content }}

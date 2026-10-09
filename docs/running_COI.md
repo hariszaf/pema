@@ -3,35 +3,44 @@ layout: page
 title: COI analysis
 ---
 
+Set `marker_gene: COI` in the parameters file.
 
-## OTUs or ASVs
 
-PEMA includes the [CROP algorithm](https://code.google.com/archive/p/crop-tingchenlab/) for OTU clustering for the case of COI data and the [Swarm algorithm](https://github.com/torognes/swarm) for ASVs inference. 
+## ASVs or OTUs
 
-The user may select between the two by setting the `clusteringAlgoForCOI_ITS` parameter of the `parameters.tsv` file either as `algo_CROP` or `algo_SWARM` correspondingly. 
-
-> We are strongly suggest to use the Swarm option, especially in large datasets, as the computational time CROP might need can be 
-
+Set `clustering_algo` to `swarm` (ASVs) or `vsearch` (OTUs); see [16/18S analysis]({{ '/running_16_18S/' | relative_url }}) for both.
 
 > **Hint** <br />
-The Swarm algorithm asks you to set the value of the essential parameter *d*. It [has been shown](https://www.biorxiv.org/content/10.1101/717355v3.full.pdf) that for COI data the *d* parameter can take rather high values, i.e 10 < *d* < 25. 
+The `differences` (*d*) parameter of Swarm can take rather high values for COI data: [it has been shown](https://www.biorxiv.org/content/10.1101/717355v3.full.pdf)
+that 10 < *d* < 25 can work well. Fastidious mode only applies to *d* = 1, so PEMA turns it off otherwise.
 
 
-## Midori versions
+## Taxonomy assignment
 
-Since `v.2.0.1` PEMA supports both [MIDORI versions](http://www.reference-midori.info/). MIDORI reference 2 includes not only metazoans but also eukaryota sequences.  
+### RDPClassifier with MIDORI
 
-By setting the `midori_version` parameter of the `parameters.tsv` file as `v_1` or `v_2` the user may choose which of the two versions preferes to use.
+With `classifier: rdp`, PEMA assigns the taxonomy with [RDPClassifier](https://github.com/rdpstaff/classifier), trained on
+[MIDORI](http://www.reference-midori.info/):
 
-MIDORI 2 may include about 100.000 unique species more, however the computational time needed to run an analysis using that increases **significantly**! 
+* `midori_1`: MIDORI 1, metazoans;
+* `midori_2`: MIDORI 2, all eukaryotes; about 100,000 more species, but considerably slower and needing more memory.
 
-To run an analysis using MIDORI 2 you need to have access on a HPC or cloud environment as a personal computer is quite sure that will not be able to support that. 
+Set `database` to one of them and `databases_dir` to a folder of yours (in the `rdp` section): PEMA downloads the database from
+[Zenodo](https://zenodo.org/records/16876159) the first time it is used, and reuses it afterwards.
+Set `memory` to at least `20 GB`; with MIDORI 2 you will most likely need an HPC system or a server
+(see [Running on HPC]({{ '/3.running_on_HPC/' | relative_url }})).
 
-## Using a custom reference db
-
-Since `v.2.0.1` PEMA supports that option for the COI data too. 
-To do so, the user needs to support PEMA with two specific files so PEMA can train the RDPClassifier according to your database. 
-
-You may have a look on how the format of these input files need to be like [here](https://github.com/hariszaf/pema/tree/local_ref_db/analysis_directory/custom_ref_db/rdpclassifier_example) and for further information on how to train the RDPClassifier, you can also check the documentation tab [Training the RDPClassifier](https://hariszaf.github.io/pema_documentation/training_rdpclassifier/).
+RDPClassifier gives a confidence to every rank; PEMA keeps the ranks from the top down while their confidence is at least `confidence`
+(default `0.8`; for short amplicons a lower value, such as `0.5`, is common).
 
 
+### crest4 with MIDORI
+
+Alternatively, with `classifier: crest` and `database: midori253darn`, the crest4 MIDORI database is used
+(see [16/18S analysis]({{ '/running_16_18S/' | relative_url }}) for crest4).
+
+
+## Your own reference database
+
+Both classifiers can be trained on your own reference sequences; see [Training the RDPClassifier]({{ '/training_rdpclassifier/' | relative_url }})
+and [Training the CREST classifier]({{ '/training_crest_classifier/' | relative_url }}).

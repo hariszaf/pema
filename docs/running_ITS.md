@@ -3,28 +3,40 @@ layout: page
 title: ITS analysis
 ---
 
+ITS needs an extra step: removing the primers with [cutadapt](https://cutadapt.readthedocs.io/en/stable/).
 
 
-ITS has a rather peculiar behavior in terms of removing the primers from the corresponding sequencing data.
+## Primer removal
 
-To this end, PEMA implements an **extra step** in this case, by making use of the [`cutadapt`](https://cutadapt.readthedocs.io/en/stable/) tool. 
+ITS amplicons vary a lot in length; when an amplicon is shorter than the reads, the reads run into the opposite primer.
+So, with `marker_gene: ITS`, PEMA runs cutadapt on the raw read pairs, **before** fastp trims and merges them:
+
+* from read 1, the forward primer and the reverse complement of the reverse primer;
+* from read 2, the reverse primer and the reverse complement of the forward primer;
+
+as in the [DADA2 ITS workflow](https://benjjneb.github.io/dada2/ITS_workflow.html).
+
+Set the primers you used in the `cutadapt` section of the parameters file (5'→3'; IUPAC ambiguity codes are allowed), e.g.
+
+```
+marker_gene: ITS
+
+cutadapt:
+  forward_primer: GATGAAGAACGYAGYRAA
+  reverse_primer: CTBTTVCCKCTTCACTCG
+```
+
+Any other cutadapt option can be added to the section, without the leading `--`, e.g. `minimum-length: 50`.
+The cutadapt report of each sample, with the number of reads in which each primer was found, is in `cutadapt/` in the output folder.
 
 
-When you are about to run PEMA for ITS data these are the parameters you need to make sure you have ther right: 
+## ASVs or OTUs
 
-* `gene`	   `gene_ITS`
-
-> The next parameters are needed for the `cutadat` tool. \n You need to set the primers you used there to allow `cutadapt` to perform
-
-* `forwardITSPrimer`	   `GATGAAGAACGYAGYRAA` 
+Set `clustering_algo` to `swarm` (ASVs) or `vsearch` (OTUs); see [16/18S analysis]({{ '/running_16_18S/' | relative_url }}).
 
 
-  `reverseITSPrimer`	   `CTBTTVCCKCTTCACTCG`
- 
+## Taxonomy assignment
 
-Regarding the algorithm for ASVs inference or OTU clustering, 
-you are able to select between the `Swarm` and the `CROP` algorithms.
-
-We strongly suggest to use the `Swarm` option as it scales better and takes less time. 
-
-
+crest4 has no built-in ITS database, so use crest4 with a [UNITE](https://unite.ut.ee/) database built for it: put it in `mount_crest_dbs`,
+and set `database` to its name (in the `crest` section). You can also build one from the UNITE sequences yourself; see
+[Training the CREST classifier]({{ '/training_crest_classifier/' | relative_url }}).

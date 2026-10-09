@@ -9,23 +9,37 @@
   </div>
 
   <nav class="sidebar-nav">
-    <a class="sidebar-nav-item{% if page.title == 'Home' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a>
+    <a class="sidebar-nav-item{% if page.url == '/' %} active{% endif %}" href="{{ '/' | absolute_url }}">Home</a>
 
     {% comment %}
       The code below dynamically generates a sidebar nav of pages with
-      `layout: page` in the front-matter. See readme for usage.
+      `layout: page` in the front-matter, for the version being read:
+      the Nextflow-based PEMA (pages at the root) or PEMA v2.x (pages under /v2/).
     {% endcomment %}
+
+    {% assign in_v2 = false %}
+    {% if page.url contains '/v2/' %}{% assign in_v2 = true %}{% endif %}
+
+    {% if in_v2 %}
+      <a class="sidebar-nav-item{% if page.url == '/v2/' %} active{% endif %}" href="{{ '/v2/' | relative_url }}">PEMA v2.x home</a>
+    {% endif %}
 
     {% assign pages_list = site.pages | sort:"url" %}
     {% for node in pages_list %}
-      {% if node.title != null %}
-        {% if node.layout == "page" %}
+      {% if node.title != null and node.layout == "page" %}
+        {% assign node_in_v2 = false %}
+        {% if node.url contains '/v2/' %}{% assign node_in_v2 = true %}{% endif %}
+        {% if node_in_v2 == in_v2 %}
           <a class="sidebar-nav-item{% if page.url == node.url %} active{% endif %}" href="{{ node.url | absolute_url }}">{{ node.title }}</a>
         {% endif %}
       {% endif %}
     {% endfor %}
 
-
+    {% if in_v2 %}
+      <a class="sidebar-nav-item" href="{{ '/' | relative_url }}">&rarr; Current version (Nextflow)</a>
+    {% else %}
+      <a class="sidebar-nav-item" href="{{ '/v2/' | relative_url }}">&rarr; Previous version (v2.x)</a>
+    {% endif %}
 
     <a class="sidebar-nav-item" href="https://github.com/hariszaf/pema">GitHub repo</a>
     
