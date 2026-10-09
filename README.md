@@ -8,13 +8,45 @@
 #### PEMA website along with *how to* documentation can be found [**here**](https://hariszaf.github.io/pema_documentation/).
 Its sources are in [`docs/`](docs) (a Jekyll site); changes merged into `master` are published there automatically
 by the [docs workflow](.github/workflows/docs.yml), through [hariszaf/pema_documentation](https://github.com/hariszaf/pema_documentation).
-To preview them locally (with Docker), from the root folder of this repository run
+To build and preview them on your computer, use Jekyll with Ruby (option 1), or Docker (option 2).
+
+**Option 1: Jekyll.** The site uses the same Jekyll version and plugins as GitHub Pages (the `github-pages` gem, listed in
+[`docs/Gemfile`](docs/Gemfile)), which need **Ruby 3.3**, as GitHub Pages uses (Ruby 4 does not work with them).
+
+1. Install Ruby 3.3 with its development files and a C compiler, which some gems need to build. If your system's Ruby is another
+   version (e.g. Fedora 44 ships Ruby 4), install 3.3 with a version manager such as [rbenv](https://github.com/rbenv/rbenv):
+   ```bash
+   # the compiler and libraries to build Ruby, e.g. on Fedora:
+   sudo dnf install gcc make openssl-devel libyaml-devel readline-devel zlib-devel libffi-devel
+   # or on Debian/Ubuntu:
+   sudo apt install build-essential libssl-dev libyaml-dev libreadline-dev zlib1g-dev libffi-dev
+
+   rbenv install 3.3.6
+   cd docs && rbenv local 3.3.6      # use Ruby 3.3 in docs/ only
+   ```
+   On macOS, `brew install rbenv ruby-build` gives you rbenv.
+2. Install the gems, in `docs/vendor/` (git-ignored):
+   ```bash
+   cd docs
+   gem install bundler
+   bundle config set --local path vendor/bundle
+   bundle install
+   ```
+3. Build and serve the site:
+   ```bash
+   bundle exec jekyll serve
+   ```
+   and open http://localhost:4000/pema_documentation/; the pages are rebuilt as you edit them (Ctrl+C to stop).
+   `bundle exec jekyll build` only builds it, in `docs/_site/`.
+
+**Option 2: Docker.** Without installing Ruby, from the root folder of this repository:
 
 ```bash
 docker run --rm -it -p 4000:4000 -u $(id -u):$(id -g) -v "$PWD/docs":/srv/jekyll jekyll/jekyll:pages jekyll serve --host 0.0.0.0
 ```
 
-and open http://localhost:4000/pema_documentation/; the pages are rebuilt as you edit them (Ctrl+C to stop).
+and open http://localhost:4000/pema_documentation/.
+
 The documentation of the Nextflow-based PEMA is in `docs/`, and that of PEMA v2.x in `docs/v2/`.
 
 #### For any troubles you may have when running PEMA or for any potential improvevments you would like to suggest, please share on the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community).
