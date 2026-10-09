@@ -38,11 +38,10 @@ include { FASTP } from './modules/fastp.nf'
 include { SWARM } from './modules/swarm.nf'
 include { CREST_TAXONOMY_ASSIGNMENT; BUILD_TAXONOMY_TABLE } from './modules/crest.nf'
 include { PREPARE_RDP_TRAINING; TRAIN_RDP_DB; RDP_CLASSIFY; BUILD_RDP_TAXONOMY_TABLE } from './modules/rdpclassifier.nf'
-include { VSEARCH_DEREP } from './modules/vsearch_derep.nf'
 include { LINEARIZE; HASH_DEREP_FASTA; HASH_MAP; CONCATENATE_FASTA } from './modules/hash.nf'
 include { CONTINGENCY_TABLE; ASVS_CONTINGENCY_TABLE } from './modules/contingency.nf'
 include { REMOVE_OLIGOS_SWARM } from './modules/oligos.nf'
-include { VSEARCH_OTUS } from './modules/vsearch.nf'
+include { VSEARCH_DEREP; VSEARCH_OTUS } from './modules/vsearch.nf'
 include {
     NCBI_TAXONOMY_QUERY; UNIQUE_TAXA; MERGE_NCBI_TAXONOMIES; MERGE_NCBI_TAXONOMY_TABLE
 } from './modules/ncbi.nf'

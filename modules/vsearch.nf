@@ -1,6 +1,10 @@
 #!/usr/bin/env nextflow
 
-/* Nextflow processes for OTU clustering with VSEARCH, following the VSEARCH pipeline of T. Rognes
+/* Nextflow processes using VSEARCH:
+
+   VSEARCH_DEREP dereplicates the merged reads of each sample (for both Swarm and VSEARCH clustering).
+
+   The rest is the OTU clustering, following the VSEARCH pipeline of T. Rognes
    (https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline):
 
    1. dereplicate the amplicons of all samples, dropping those with a total abundance below min_oligotons
@@ -18,6 +22,32 @@ include {
     VSEARCH_MAP_BACK as VSEARCH_MAP_BACK_DEREP;
     VSEARCH_MAP_BACK as VSEARCH_MAP_BACK_ALL
 } from './utils.nf'
+
+// Dereplicate the merged reads of one sample; the abundance of each sequence goes to its header (;size=)
+process VSEARCH_DEREP {
+
+    tag "${underep_fastq.simpleName}"
+
+    publishDir { "${params.outdir}/derep_samples" }, mode: 'copy'
+
+    container "quay.io/biocontainers/vsearch:2.30.4--hd6d6fdc_0"
+
+    input:
+    path underep_fastq
+
+    output:
+    path "*.fasta", emit: derep_fasta
+
+    script:
+    """
+    SAMPLE_NAME=\$(basename $underep_fastq .fastq.gz)
+
+    vsearch --fastx_uniques ${underep_fastq} \
+            --fastaout \$SAMPLE_NAME.fasta \
+            --sizeout
+    """
+}
+
 
 process VSEARCH_DEREP_ALL {
 
