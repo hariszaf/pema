@@ -138,6 +138,7 @@ make_params() {
         crest_dbs="${CUSTOM_CREST_DIR}/trained_dbs" taxonomy="${CUSTOM_CREST_TAXONOMY}" sequences="${CUSTOM_CREST_SEQUENCES}"
     fi
     sed -e "s#^raw_reads:.*#raw_reads: ${SANITY_DIR}/${marker}/${READS[$marker]}#" \
+        -e "s#^marker_gene:.*#marker_gene: ${marker}#" \
         -e "s#^outdir:.*#outdir: ${outdir}#" \
         -e "s#^clustering_algo:.*#clustering_algo: ${CLUSTERING[$test]}#" \
         -e "s#^classifier:.*#classifier: ${CLASSIFIER[$test]}#" \

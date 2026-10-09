@@ -53,6 +53,7 @@ PEMA is now being rewritten in [Nextflow](https://www.nextflow.io/). Every step 
 
 | Step | Tool | Container |
 |------|------|-----------|
+| Primer removal (ITS only) | [cutadapt](https://cutadapt.readthedocs.io) | `quay.io/biocontainers/cutadapt` |
 | Quality control and merging of paired-end reads | [fastp](https://github.com/OpenGene/fastp) | `quay.io/biocontainers/fastp` |
 | Dereplication per sample | [VSEARCH](https://github.com/torognes/vsearch) | `quay.io/biocontainers/vsearch` |
 | Hashing of the unique sequences and contingency table across samples | PEMA scripts | `hariszaf/pema-nf` |
@@ -145,17 +146,24 @@ Parameters left empty are not passed to the tool, so the tool's own default appl
 | Section / key | Description | Default |
 |---------------|-------------|---------|
 | `raw_reads` | Folder with the paired-end fastq files (see [Input data](#input-data)) | **required** |
+| `marker_gene` | `16S`, `18S`, `12S`, `COI` or `ITS` | **required** |
 | `outdir` | Output folder | `results` |
 | `threads` | Threads for fastp, Swarm and crest4 | `3` |
 | `clustering_algo` | `swarm` or `vsearch` | `swarm` |
 | `classifier` | `crest` or `rdp` | `crest` |
 | `min_oligotons` | Abundance below which ASVs (Swarm) or amplicons (VSEARCH) are removed; `0` keeps all | `5` |
+| `cutadapt` | `forward_primer`, `reverse_primer` and any other [cutadapt option](https://cutadapt.readthedocs.io/en/stable/reference.html) | required for ITS |
 | `fastp` | Any [fastp option](https://github.com/OpenGene/fastp#all-options), without the leading `--` | **required** |
 | `swarm` | Any [Swarm option](https://github.com/torognes/swarm), e.g. `differences`, `fastidious` | required for Swarm |
 | `vsearch` | `threshold`: identity threshold for the OTU clustering | `0.97` |
 | `crest` | `database`, `mount_crest_dbs`, `search_algo`, `min_score`, `min_smlrty`, `score_drop`, `threads`, and `train` for a custom database | see the YAML file |
 | `rdp` | `database`, `databases_dir`, `confidence`, `memory`, and `train` for a custom database | see the YAML file |
 | `ncbi_taxonomy` | `get_ncbi_taxonomy`, `ncbi_api_key`, `max_parallel`, `sleep` | off when missing |
+
+**ITS.** With `marker_gene: ITS`, the primers are removed with cutadapt from the raw read pairs, before fastp. ITS amplicons vary in length,
+so reads often run into the opposite primer: read 1 is trimmed of the forward primer and of the reverse complement of the reverse primer, and
+read 2 of the reverse primer and of the reverse complement of the forward primer (as in the DADA2 ITS workflow). This has to happen while the
+reads are still pairs, before fastp trims and merges them. IUPAC ambiguity codes are allowed in the primers.
 
 PEMA adjusts some values to keep the tools consistent:
 

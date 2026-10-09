@@ -1,51 +1,61 @@
 #!/usr/bin/env nextflow
 
-/* Nextflow script to run fastp (https://github.com/OpenGene/fastp)
+/* Nextflow process to remove the primers of ITS amplicons with cutadapt (https://cutadapt.readthedocs.io)
 
-Usage: 
-
-nextflow run modules/fastp.nf -params-file modules/faprotax/faprotax.yaml 
-
+   ITS amplicons vary in length; when one is shorter than the reads, the reads run into the opposite primer.
+   So, on the raw read pairs (before fastp), as in the DADA2 ITS workflow:
+     read 1: the forward primer (5', -g) and the reverse complement of the reverse primer (3', -a)
+     read 2: the reverse primer (5', -G) and the reverse complement of the forward primer (3', -A)
 */
+
+include { paramsToCliArgs } from './utils.nf'
+
+// Reverse complement of a primer, with IUPAC ambiguity codes
+def reverseComplement(String seq) {
+    def complement = [
+        A: 'T', T: 'A', U: 'A', G: 'C', C: 'G',
+        R: 'Y', Y: 'R', S: 'S', W: 'W', K: 'M', M: 'K',
+        B: 'V', V: 'B', D: 'H', H: 'D', N: 'N', I: 'I'
+    ]
+    return seq.toUpperCase().reverse().collect { base ->
+        complement[base] ?: error("Primer '${seq}': '${base}' is not a nucleotide (IUPAC) code.")
+    }.join('')
+}
+
 
 process CUTADAPT {
 
-    tag "Sequencing quality control and merging per paired read sample."
+    tag "${sampleName}"
 
-    publishDir "${params.outdir}/fastp", mode: 'copy'
-    container "quay.io/biocontainers/1.0.1--heae3180_0"
+    publishDir { "${params.outdir}/cutadapt" }, mode: 'copy', pattern: "*.cutadapt.json"
+
+    container "quay.io/biocontainers/cutadapt:5.2--py312hfabe715_2"
+
+    cpus params.threads
 
     input:
-    tuple val(sampleName), path(readF), path(readR)
+        tuple val(sampleName), path(readF), path(readR)
+        val cutadapt_params
 
     output:
-    // QC files into qc subfolder
-    path("qc/${sampleName}.html"), emit: qc_html
-    path("qc/${sampleName}.json"), emit: qc_json
-
-    // Merged reads into merged subfolder
-    path("merged/${sampleName}.fastq.gz"), emit: merged_reads
+        tuple val(sampleName), path("${sampleName}_1.trimmed.fastq.gz"), path("${sampleName}_2.trimmed.fastq.gz"), emit: trimmed_reads
+        path "${sampleName}.cutadapt.json", emit: report
 
     script:
-    """
-    Rscript cutadaptITS.R $readF $readR $forwardITSPrimer $reverseITSPrimer $params{'dataPath'}
-    """
+        def fwd   = cutadapt_params.forward_primer.toString().trim().toUpperCase()
+        def rev   = cutadapt_params.reverse_primer.toString().trim().toUpperCase()
+        // Any other option of the cutadapt section is passed as it is, e.g. minimum-length: 50
+        def extra = paramsToCliArgs(cutadapt_params.findAll { k, _v -> !(k in ['forward_primer', 'reverse_primer']) })
+        """
+        cutadapt \\
+            -g ${fwd} -a ${reverseComplement(rev)} \\
+            -G ${rev} -A ${reverseComplement(fwd)} \\
+            -n 2 \\
+            --cores ${task.cpus} \\
+            ${extra} \\
+            --json ${sampleName}.cutadapt.json \\
+            -o ${sampleName}_1.trimmed.fastq.gz \\
+            -p ${sampleName}_2.trimmed.fastq.gz \\
+            ${readF} ${readR}
+        """
 }
-
-workflow{
-
-    // Pattern 1: _1/_2
-    def paired1 = Channel.fromFilePairs("${params.raw_reads}/*_{1,2}.fastq.gz", flat: true)
-
-    // Pattern 2: _R1_/_R2_
-    def paired2 = Channel.fromFilePairs("${params.raw_reads}/*_R{1,2}_*.fastq.gz", flat: true)
-
-    // Merge channels; only if not empty
-    def paired_raw_reads = Channel.empty()
-        .mix(paired1)
-        .mix(paired2)
-
-    // Run process 
-    CUTADAPT(paired_raw_reads)
-}
-

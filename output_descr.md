@@ -5,6 +5,7 @@ Each of the next paragraphs stands for a file or subdirectory of that folder.
 
 ```
 <outdir>/
+├── cutadapt/                       <sample>.cutadapt.json  (marker_gene: ITS)
 ├── fastp/
 │   ├── qc/                         <sample>.html, <sample>.json
 │   └── merged/                     <sample>.fastq.gz
@@ -27,6 +28,13 @@ Each of the next paragraphs stands for a file or subdirectory of that folder.
 └── ncbi_taxonomy/                  taxonomies.json, not_found.tsv, ambiguous_candidates.tsv,
                                     tax_assigned_with_ncbi.tsv
 ```
+
+
+
+### cutadapt
+
+Only for `marker_gene: ITS`. ***"cutadapt/<sample>.cutadapt.json"*** is the cutadapt report of each sample: how many read pairs
+had each primer (and its reverse complement) removed. The trimmed reads go to fastp and are not kept.
 
 
 

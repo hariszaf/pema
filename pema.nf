@@ -23,6 +23,9 @@ params.outdir          = valueOr(loadYamlParams(params.yaml, 'outdir'), "results
 params.clustering_algo = valueOr(loadYamlParams(params.yaml, 'clustering_algo'), "swarm")
 params.min_oligotons   = valueOr(loadYamlParams(params.yaml, 'min_oligotons'), 5)
 params.classifier      = valueOr(loadYamlParams(params.yaml, 'classifier'), "crest")
+params.marker_gene     = loadYamlParams(params.yaml, 'marker_gene') ?: error(
+    "Please set marker_gene in the YAML config file: 16S, 18S, 12S, COI or ITS."
+)
 params.ncbi_taxonomy   = valueOr(loadYamlParams(params.yaml, 'ncbi_taxonomy'), [:])
 
 // Flat params read by modules/ncbi.nf. Without an API key NCBI allows ~3 requests/sec,
@@ -34,6 +37,7 @@ params.sleep        = valueOr(params.ncbi_taxonomy.sleep, 0.4)
 
 // -------------------- MODULES --------------------
 
+include { CUTADAPT } from './modules/cutadapt.nf'
 include { FASTP } from './modules/fastp.nf'
 include { SWARM } from './modules/swarm.nf'
 include {
@@ -53,12 +57,29 @@ include {
 // -------------------- ADJUST PARAMS  --------------------
 
 def checkSupported() {
+    if (!(params.marker_gene.toString() in ['16S', '18S', '12S', 'COI', 'ITS'])) {
+        error "marker_gene '${params.marker_gene}' is not supported. Please select 16S, 18S, 12S, COI or ITS."
+    }
     if (!(params.clustering_algo in ['swarm', 'vsearch'])) {
         error "clustering_algo '${params.clustering_algo}' is not supported. Please select 'swarm' or 'vsearch'."
     }
     if (!(params.classifier in ['crest', 'rdp'])) {
         error "classifier '${params.classifier}' is not supported. Please select 'crest' or 'rdp'."
     }
+}
+
+// ITS: the primers are removed with cutadapt, before fastp
+def resolveCutadaptParams() {
+    def cutadaptParams = loadYamlParams(params.yaml, 'cutadapt') ?: [:]
+    ['forward_primer', 'reverse_primer'].each { key ->
+        if (!cutadaptParams[key]) {
+            error "marker_gene is ITS: please set cutadapt.${key} in the YAML config file (the primers are removed with cutadapt)."
+        }
+        if (!(cutadaptParams[key].toString().trim() ==~ /(?i)[ACGTURYSWKMBDHVNI]+/)) {
+            error "cutadapt.${key} '${cutadaptParams[key]}' is not a primer sequence (nucleotide / IUPAC codes only)."
+        }
+    }
+    return cutadaptParams
 }
 
 def resolveFastpParams() {
@@ -261,6 +282,13 @@ workflow {
 
     // -------------------- CHANNELS --------------------
     def paired_raw_reads = channel.fromList(findReadPairs(params.raw_reads.toString()))
+
+    // -------------------- PRIMER REMOVAL (ITS) --------------------
+    // On the raw read pairs: ITS reads can run into the opposite primer, which has to be
+    // removed from both reads before fastp trims and merges them
+    if (params.marker_gene == 'ITS') {
+        paired_raw_reads = CUTADAPT(paired_raw_reads, resolveCutadaptParams()).trimmed_reads
+    }
 
     // -------------------- QUALITY CONTROL --------------------
     qc = FASTP(paired_raw_reads, fastpParams)

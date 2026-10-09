@@ -6,10 +6,14 @@
 #   - vsearch.yaml
 #   - rdpclassifier.yaml
 
-# The pattern *_{1,2}.fastq.gz means:
-# The * is the sample name (everything before _1 or _2)
-# {1,2} matches R1 and R2
+# Folder with the paired-end fastq files (.fastq, .fastq.gz, .fq, .fq.gz). The two files of a sample are
+# recognised by a _1/_2 or _R1/_R2 in their names (e.g. S1_1.fastq.gz, S1_S1_L001_R1_001.fastq.gz);
+# the part before it is the sample name.
 raw_reads: sanity_check/16S/mydata16s
+
+# values from: ["16S", "18S", "12S", "COI", "ITS"]
+# For ITS, the primers are removed with cutadapt (see the cutadapt section) before fastp.
+marker_gene: 16S
 
 threads: 3
 
@@ -22,6 +26,20 @@ clustering_algo: swarm
 classifier: crest
 
 min_oligotons: 10
+
+
+# Only for marker_gene: ITS. The primers are removed from the raw read pairs, before fastp:
+# from read 1 the forward primer and the reverse complement of the reverse primer, and from read 2
+# the reverse primer and the reverse complement of the forward primer (ITS reads can run into the opposite primer).
+cutadapt:
+
+  # Primer sequences (5'->3'); IUPAC ambiguity codes are allowed, e.g. ITS1F and ITS2:
+  forward_primer: CTTGGTCATTTAGAGGAAGTAA
+  reverse_primer: GCTGCGTTCTTCATCGATGC
+
+  # Any other cutadapt option can be added, without the leading --, e.g.
+  # minimum-length: 50
+  # discard-untrimmed: true
 
 
 fastp:
