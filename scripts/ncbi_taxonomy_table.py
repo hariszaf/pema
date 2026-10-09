@@ -65,7 +65,7 @@ print("NCBI candidates:", ncbi_candidates_file)
 print("Output file:", output_file)
 
 
-ranks  = ["kingdom", "phylum", "class", "order", "family", "genus", "species"]
+ranks  = ["domain", "kingdom", "phylum", "class", "order", "family", "genus", "species"]
 ignore = {"root", "main genome"}
 
 # Load data
@@ -92,6 +92,8 @@ def get_ncbi_tax(row):
 
     row["ncbi_taxonomy"] = ";".join([names[r] for r in ranks if r in names])
     row["ncbi_taxonomy_ids"] = ";".join([str(ids[r]) for r in ranks if r in ids])
+    # NCBI Taxonomy id of the taxon itself (the lowest rank that was looked up)
+    row["ncbi_taxid"] = tax_data.get("taxonomy", {}).get("tax_id")
 
     return row
 
@@ -122,7 +124,9 @@ with open(ncbi_candidates_file) as f:
         ncbi_taxonomy     = ";".join([names[r] for r in ranks if r in names])
         ncbi_taxonomy_ids = ";".join([str(ids[r]) for r in ranks if r in ids])
 
-        taxon_ncbi_taxonomies.setdefault(taxon, []).append([ncbi_taxonomy, ncbi_taxonomy_ids])
+        taxon_ncbi_taxonomies.setdefault(taxon, []).append(
+            [ncbi_taxonomy, ncbi_taxonomy_ids, entry.get("taxonomy", {}).get("tax_id")]
+        )
 
 # ---------------------------
 # Pick best candidate based on overlap
@@ -167,12 +171,12 @@ def pick_best_taxonomy(existing_tax, candidates):
 
     existing_tax_clean = clean_tax(existing_tax)
 
-    for tax_string, tax_ids in candidates:
+    for tax_string, tax_ids, taxid in candidates:
 
         score = taxonomy_similarity(existing_tax_clean, tax_string, args.min_prefix_len)
         if score > best_score:
             best_score = score
-            best = (tax_string, tax_ids)
+            best = (tax_string, tax_ids, taxid)
 
     return best
 
@@ -189,6 +193,7 @@ def get_ncbi_filtered_tax(row):
     if best:
         row["ncbi_taxonomy"] = best[0]
         row["ncbi_taxonomy_ids"] = best[1]
+        row["ncbi_taxid"] = best[2]
 
     return row
 
@@ -198,4 +203,8 @@ tax_table = tax_table.apply(get_ncbi_filtered_tax, axis=1)
 # ---------------------------
 # Save enhanced table
 # ---------------------------
+# Taxa not found in NCBI have no taxid; keep the column as integers
+if "ncbi_taxid" in tax_table:
+    tax_table["ncbi_taxid"] = pd.to_numeric(tax_table["ncbi_taxid"], errors="coerce").astype("Int64")
+
 tax_table.to_csv(output_file, sep="\t", index=False)
