@@ -6,6 +6,8 @@
 # PEMA:
 ### a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S rRNA, ITS and COI marker genes
 #### PEMA website along with *how to* documentation can be found [**here**](https://hariszaf.github.io/pema_documentation/).
+Its sources are in [`docs/`](docs) (a Jekyll site); changes merged into `master` are published there automatically
+by the [docs workflow](.github/workflows/docs.yml), through [hariszaf/pema_documentation](https://github.com/hariszaf/pema_documentation).
 
 #### For any troubles you may have when running PEMA or for any potential improvevments you would like to suggest, please share on the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community).
 
