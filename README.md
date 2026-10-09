@@ -4,79 +4,29 @@
 
 
 # PEMA:
-### a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S rRNA, ITS and COI marker genes
-#### PEMA website along with *how to* documentation can be found [**here**](https://hariszaf.github.io/pema_documentation/).
-Its sources are in [`docs/`](docs) (a Jekyll site); changes merged into `master` are published there automatically
-by the [docs workflow](.github/workflows/docs.yml), through [hariszaf/pema_documentation](https://github.com/hariszaf/pema_documentation).
-To build and preview them on your computer, use Jekyll with Ruby (option 1), or Docker (option 2).
-
-**Option 1: Jekyll.** The site uses the same Jekyll version and plugins as GitHub Pages (the `github-pages` gem, listed in
-[`docs/Gemfile`](docs/Gemfile)), which need **Ruby 3.3**, as GitHub Pages uses (Ruby 4 does not work with them).
-
-1. Install Ruby 3.3 with its development files and a C compiler, which some gems need to build. If your system's Ruby is another
-   version (e.g. Fedora 44 ships Ruby 4), install 3.3 with a version manager such as [rbenv](https://github.com/rbenv/rbenv):
-   ```bash
-   # the compiler and libraries to build Ruby, e.g. on Fedora:
-   sudo dnf install gcc make openssl-devel libyaml-devel readline-devel zlib-devel libffi-devel
-   # or on Debian/Ubuntu:
-   sudo apt install build-essential libssl-dev libyaml-dev libreadline-dev zlib1g-dev libffi-dev
-
-   rbenv install 3.3.6
-   cd docs && rbenv local 3.3.6      # use Ruby 3.3 in docs/ only
-   ```
-   On macOS, `brew install rbenv ruby-build` gives you rbenv.
-2. Install the gems, in `docs/vendor/` (git-ignored):
-   ```bash
-   cd docs
-   gem install bundler
-   bundle config set --local path vendor/bundle
-   bundle install
-   ```
-3. Build and serve the site:
-   ```bash
-   bundle exec jekyll serve
-   ```
-   and open http://localhost:4000/pema_documentation/; the pages are rebuilt as you edit them (Ctrl+C to stop).
-   `bundle exec jekyll build` only builds it, in `docs/_site/`.
-
-**Option 2: Docker.** Without installing Ruby, from the root folder of this repository:
-
-```bash
-docker run --rm -it -p 4000:4000 -u $(id -u):$(id -g) -v "$PWD/docs":/srv/jekyll jekyll/jekyll:pages jekyll serve --host 0.0.0.0
-```
-
-and open http://localhost:4000/pema_documentation/.
-
-The documentation of the Nextflow-based PEMA is in `docs/`, and that of PEMA v2.x in `docs/v2/`.
-
-#### For any troubles you may have when running PEMA or for any potential improvevments you would like to suggest, please share on the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community).
-
-[![Gitter](https://badges.gitter.im/pema-helpdesk/community.svg)](https://gitter.im/pema-helpdesk/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+*a flexible Pipeline for Environmental DNA Metabarcoding Analysis of the 16S/18S rRNA, ITS and COI marker genes*
 
 
-> **This is the Nextflow version of PEMA, under development.**
-> The BigDataScript-based PEMA (v2.x), with its Docker and Singularity images and its `parameters.tsv` file,
-> is available on the [`master`](https://github.com/hariszaf/pema/tree/master) branch.
+<!-- TOC -->
 
+- [PEMA:](#pema)
+   - [PEMA: biodiversity in all its different levels](#pema-biodiversity-in-all-its-different-levels)
+   - [What the Nextflow pipeline does](#what-the-nextflow-pipeline-does)
+   - [How to run PEMA](#how-to-run-pema)
+      - [Requirements](#requirements)
+      - [Input data](#input-data)
+      - [Run](#run)
+      - [Resume a run](#resume-a-run)
+   - [The parameters file](#the-parameters-file)
+   - [Output](#output)
+   - [Running single modules](#running-single-modules)
+   - [Running the tests](#running-the-tests)
+   - [PEMA website along with how to documentation can be found here.](#pema-website-along-with-how-to-documentation-can-be-found-here)
+   - [Contact](#contact)
+   - [License](#license)
+   - [Citation](#citation)
 
-Table of Contents
-=================
-
-   * [PEMA: biodiversity in all its different levels](#pema-biodiversity-in-all-its-different-levels)
-   * [What the Nextflow pipeline does](#what-the-nextflow-pipeline-does)
-   * [How to run PEMA](#how-to-run-pema)
-      * [Requirements](#requirements)
-      * [Input data](#input-data)
-      * [Run](#run)
-      * [Resume a run](#resume-a-run)
-   * [The parameters file](#the-parameters-file)
-   * [Output](#output)
-   * [Running single modules](#running-single-modules)
-   * [Acknowledgments](#acknowledgments)
-   * [License](#license)
-   * [Citation](#citation)
-
+<!-- /TOC -->
 
 
 ## PEMA: biodiversity in all its different levels
@@ -322,53 +272,98 @@ See [modules/README.md](modules/README.md) for notes on developing the pipeline.
 
 
 
-## Acknowledgments
+## Running the tests
 
-PEMA invokes a series of tools and makes use of several databases.
+On every push and pull request, GitHub Actions ([`.github/workflows/tests.yml`](.github/workflows/tests.yml)) lints the pipeline
+and runs two tests of the sanity check, `COI-rdp-custom` and `COI-crest-custom`, which need no external database.
+Other tests can be run from the Actions tab ("Run workflow"), with the list of tests to run.
 
-Tools used by the Nextflow pipeline:
+To run the same tests on your computer (with Nextflow and Docker), from the root folder of this repository:
 
-* fastp - https://github.com/OpenGene/fastp
-* VSEARCH - https://github.com/torognes/vsearch
-* SWARM - https://github.com/torognes/swarm
-* crest4 - https://github.com/xapple/crest4
-* NCBI Datasets - https://www.ncbi.nlm.nih.gov/datasets/
-* Nextflow - https://www.nextflow.io/
+1. Lint the pipeline:
+   ```bash
+   nextflow lint pema.nf modules/ nextflow.config
+   ```
+2. Build the `pema-nf` image from your copy of the repository, with the tag the modules use, so the tests run your version of `scripts/`
+   (otherwise the image is pulled from Docker Hub):
+   ```bash
+   for tag in $(grep -rhoE 'hariszaf/pema-nf:[0-9.]+' modules/ | sort -u); do
+       docker build -f containers/Dockerfile.pema_nf -t "$tag" .
+   done
+   ```
+3. Run the sanity check tests:
+   ```bash
+   sanity_check/run_sanity_check.sh COI-rdp-custom COI-crest-custom
+   ```
+   The first time, this downloads the sanity dataset (~280 MB) into `sanity_check/`.
+   Each test prints whether it passed, and its log is `sanity_check/<marker>/TEST_<...>.log`;
+   the script exits with an error if a test failed.
 
-Tools used by PEMA v2.x:
+`sanity_check/run_sanity_check.sh` without tests runs all of them (16S, 18S, 12S, COI and ITS, with Swarm or VSEARCH, crest4 or RDPClassifier);
+some need databases that are downloaded on first use (the crest4 SILVA database is ~4 GB) or that you provide.
+`sanity_check/run_sanity_check.sh --help` lists the tests and their options, e.g. `--ncbi` to also test the NCBI Taxonomy step,
+or `--profile singularity` to use Singularity instead of Docker.
 
-* FASTQC - https://www.bioinformatics.babraham.ac.uk/projects/fastqc/
-* Trimmomatic - http://www.usadellab.org/cms/?page=trimmomatic
-* Cutadapt - https://cutadapt.readthedocs.io/en/stable/
-* BayesHammer - included in SPAdes - http://cab.spbu.ru/software/spades/
-* PANDAseq - https://github.com/neufeld/pandaseq
-* OBITools4 - https://obitools4.metabarcoding.org/
-* BLAST Command Line Applications - https://www.ncbi.nlm.nih.gov/books/NBK52640/
-* CROP - https://github.com/tingchenlab/CROP
-* RDPClassifier - https://github.com/rdpstaff/classifier
-(RPDtools are required in order to execute RDPClassifier)
-* "phat" algorithm, from the "gappa" package - https://github.com/lczech/gappa/wiki/Subcommand:-phat
-* MAFFT - https://mafft.cbrc.jp/alignment/software/
-* RAxML -ng - https://github.com/amkozlov/raxml-ng
-* PaPaRa - https://cme.h-its.org/exelixis/web/software/papara/index.html
-* EPA-ng - https://github.com/Pbdas/epa-ng
-* phyloseq R package - http://joey711.github.io/phyloseq/index.html
-* vegan R package - https://cran.r-project.org/web/packages/vegan/index.html
-* ncbi-taxonomist - https://ncbi-taxonomist.readthedocs.io/en/latest/
-* Big Data Script (BDS) - https://pcingola.github.io/BigDataScript/
 
-Databases
 
-* SILVA db - https://www.arb-silva.de/no_cache/download/archive/current/Exports/
-* MIDORI db - http://reference-midori.info/index.html
-* PR2 db - https://pr2-database.org/
-* Unite db -- https://unite.ut.ee/
+## PEMA website along with *how to* documentation can be found [**here**](https://hariszaf.github.io/pema_documentation/).
 
-And of course the container-based technologies:
+Its sources are in [`docs/`](docs) (a Jekyll site); changes merged into `master` are published there automatically
+by the [docs workflow](.github/workflows/docs.yml), through [hariszaf/pema_documentation](https://github.com/hariszaf/pema_documentation).
 
-* Docker - https://www.docker.com/
-* Singularity - https://sylabs.io/singularity/
+To build and preview them on your computer, use Jekyll with Ruby (option 1), or Docker (option 2).
 
+**Option 1: Jekyll.** The site uses the same Jekyll version and plugins as GitHub Pages (the `github-pages` gem, listed in
+[`docs/Gemfile`](docs/Gemfile)), which need **Ruby 3.3**, as GitHub Pages uses (Ruby 4 does not work with them).
+
+1. Install Ruby 3.3 with its development files and a C compiler, which some gems need to build.
+ If your system's Ruby is another version (e.g. Fedora 44 ships Ruby 4), install 3.3 with a version manager such as [rbenv](https://github.com/rbenv/rbenv):
+   ```bash
+   # the compiler and libraries to build Ruby, e.g. on Fedora:
+   sudo dnf install gcc make openssl-devel libyaml-devel readline-devel zlib-devel libffi-devel
+   # or on Debian/Ubuntu:
+   sudo apt install build-essential libssl-dev libyaml-dev libreadline-dev zlib1g-dev libffi-dev
+
+   rbenv install 3.3.6
+   cd docs && rbenv local 3.3.6      # use Ruby 3.3 in docs/ only
+   ```
+   On macOS, `brew install rbenv ruby-build` gives you rbenv.
+
+2. Install the gems, in `docs/vendor/` (git-ignored):
+   ```bash
+   cd docs
+   gem install bundler
+   bundle config set --local path vendor/bundle
+   bundle install
+   ```
+3. Build and serve the site:
+   ```bash
+   bundle exec jekyll serve
+   ```
+   and open http://localhost:4000/pema_documentation/; the pages are rebuilt as you edit them (Ctrl+C to stop).
+   `bundle exec jekyll build` only builds it, in `docs/_site/`.
+
+**Option 2: Docker.** Without installing Ruby, from the root folder of this repository:
+
+```bash
+docker run --rm -it -p 4000:4000 -u $(id -u):$(id -g) -v "$PWD/docs":/srv/jekyll jekyll/jekyll:pages jekyll serve --host 0.0.0.0
+```
+
+and open http://localhost:4000/pema_documentation/.
+
+The documentation of the Nextflow-based PEMA is in `docs/`, and that of PEMA v2.x in `docs/v2/`.
+
+## Contact
+
+For any troubles you may have when running PEMA or for any potential improvevments you would like to suggest, please share on the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community).
+
+[![Gitter](https://badges.gitter.im/pema-helpdesk/community.svg)](https://gitter.im/pema-helpdesk/community?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+
+
+> **This is the Nextflow version of PEMA, under development.**
+> The BigDataScript-based PEMA (v1.x and v2.x), with its Docker and Singularity images and its `parameters.tsv` file,
+> is available on the [`master`](https://github.com/hariszaf/pema/tree/master) branch.
 
 ## License
 PEMA is under the GNU GPLv3 license (for 3rd party components separate licenses apply).
