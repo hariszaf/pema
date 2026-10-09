@@ -7,7 +7,7 @@ process REMOVE_OLIGOS_SWARM {
 
     publishDir { "${params.outdir}/oligos" }, mode: 'copy'
 
-    container "hariszaf/pema-nf:0.0.1"
+    container "hariszaf/pema-nf:0.2.1"
 
     input:
 
@@ -41,7 +41,7 @@ process REMOVE_OLIGOS_VSEARCH {
 
     publishDir { "${params.outdir}/oligos" }, mode: 'copy'
 
-    container "hariszaf/pema-nf:0.0.1"
+    container "hariszaf/pema-nf:0.2.1"
 
     input:
 

@@ -6,7 +6,7 @@ process LINEARIZE {
 
     publishDir "${params.outdir}/linearized", mode: 'copy'
 
-    container "hariszaf/pema-nf:0.0.1"
+    container "hariszaf/pema-nf:0.2.1"
 
     input:
         path multiline_fasta
@@ -34,7 +34,7 @@ process CONCATENATE_FASTA {
 
     publishDir "${params.outdir}", mode: 'copy'
 
-    container "hariszaf/pema-nf:0.0.1"
+    container "hariszaf/pema-nf:0.2.1"
 
     input:
         path derep_files
@@ -60,7 +60,7 @@ process HASH_DEREP_FASTA {
 
     publishDir "${params.outdir}/hashing", mode: 'copy'
 
-    container "hariszaf/pema-nf:0.0.1"
+    container "hariszaf/pema-nf:0.2.1"
 
     input:
         path linearized_fasta
@@ -76,7 +76,7 @@ process HASH_DEREP_FASTA {
 
 process HASH_MAP {
     
-    container "hariszaf/pema-nf:0.0.1"
+    container "hariszaf/pema-nf:0.2.1"
 
     publishDir "${params.outdir}/hashing", mode: 'copy'
 

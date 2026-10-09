@@ -1,7 +1,5 @@
 import pandas as pd
 import json
-import re
-import subprocess
 
 # ---------------------------
 # File paths
@@ -28,9 +26,10 @@ parser.add_argument(
 )
 
 parser.add_argument(
-    "--ncbi-errors", "-e",
-    default="not_found.tsv",
-    help="Path to the NCBI errors TSV file containing ambiguous taxids"
+    "--ncbi-candidates", "-c",
+    default="ambiguous_candidates.tsv",
+    help="""TSV with one '<taxon> TAB <NCBI JSON report>' line per candidate taxid,
+    for taxon names that match more than one NCBI taxid"""
 )
 
 parser.add_argument(
@@ -42,6 +41,7 @@ parser.add_argument(
 parser.add_argument(
     "--min-prefix-len",
     default=5,
+    type=int,
     help="""Number of characters that need to be at least the same in the begining of a taxon name
     to be considered as a matching prefix"""
 )
@@ -53,7 +53,7 @@ args = parser.parse_args()
 # ---------------------------
 taxonomy_table_file  = args.taxonomy_table
 ncbi_taxonomies_file = args.ncbi_taxonomies
-ncbi_error_file      = args.ncbi_errors
+ncbi_candidates_file = args.ncbi_candidates
 output_file          = args.output
 
 # ---------------------------
@@ -61,7 +61,7 @@ output_file          = args.output
 # ---------------------------
 print("Taxonomy table:", taxonomy_table_file)
 print("NCBI taxonomies:", ncbi_taxonomies_file)
-print("NCBI errors:", ncbi_error_file)
+print("NCBI candidates:", ncbi_candidates_file)
 print("Output file:", output_file)
 
 
@@ -95,68 +95,34 @@ def get_ncbi_tax(row):
 
     return row
 
-# Handle errors with multiple taxids
-def parse_blocks(filepath):
-    with open(filepath, 'r') as f:
-        content = f.read()
-    blocks = [block.strip() for block in content.split("\n\n") if block.strip()]
-    return blocks
-
-# Get matches with taxon name and NCBI tax id
-def extract_taxa(error):
-    return re.findall(r"^(.*?)\s*\(.*?taxid:\s*(\d+)\)", error, re.MULTILINE)
-
-
 tax_table = pd.read_csv(taxonomy_table_file, sep="\t")
 
 tax_table["last_taxon"] = tax_table["Taxonomy"].apply(last_taxon)
 
 tax_table = tax_table.apply(get_ncbi_tax, axis=1)
 
-errors = parse_blocks(ncbi_error_file)
-regex  = re.compile(r"exact match.*more than one taxid", re.IGNORECASE)
-
-filtered_errors = [
-    error for error in errors
-    if any(regex.search(line) for line in error.splitlines())
-]
-
+# Candidate classifications for taxon names that match more than one NCBI taxid
 taxon_ncbi_taxonomies = {}
 
-for error in filtered_errors:
-
-    cases = extract_taxa(error)
-
-    for taxon, tax_id in cases:
-        # fetch NCBI data
-        result = subprocess.run(
-            ["datasets", "summary", "taxonomy", "taxon", str(tax_id), "--as-json-lines"],
-            capture_output=True, text=True
-        )
-
+with open(ncbi_candidates_file) as f:
+    for line in f:
+        taxon, sep, report = line.rstrip("\n").partition("\t")
+        if not sep:
+            continue
         try:
-            data = [
-                json.loads(line)
-                for line in result.stdout.splitlines()
-            ]
+            entry = json.loads(report)
         except json.JSONDecodeError:
             continue
 
-        if taxon not in taxon_ncbi_taxonomies:
+        classification = entry.get("taxonomy", {}).get("classification", {})
 
-            taxon_ncbi_taxonomies[taxon] = []
+        names = {r: classification.get(r, {}).get("name") for r in ranks if classification.get(r)}
+        ids   = {r: classification.get(r, {}).get("id") for r in ranks if classification.get(r)}
 
-        for entry in data:
+        ncbi_taxonomy     = ";".join([names[r] for r in ranks if r in names])
+        ncbi_taxonomy_ids = ";".join([str(ids[r]) for r in ranks if r in ids])
 
-            classification = entry.get("taxonomy", {}).get("classification", {})
-
-            names = {r: classification.get(r, {}).get("name") for r in ranks if classification.get(r)}
-            ids   = {r: classification.get(r, {}).get("id") for r in ranks if classification.get(r)}
-
-            ncbi_taxonomy     = ";".join([names[r] for r in ranks if r in names])
-            ncbi_taxonomy_ids = ";".join([str(ids[r]) for r in ranks if r in ids])
-
-            taxon_ncbi_taxonomies[taxon].append([ncbi_taxonomy, ncbi_taxonomy_ids])
+        taxon_ncbi_taxonomies.setdefault(taxon, []).append([ncbi_taxonomy, ncbi_taxonomy_ids])
 
 # ---------------------------
 # Pick best candidate based on overlap

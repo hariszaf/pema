@@ -221,13 +221,14 @@ workflow {
 
         ncbi_taxonomies = MERGE_NCBI_TAXONOMIES(
             ncbi_taxonomies_ch.taxon_file.collect(),
-            ncbi_taxonomies_ch.error_file.collect()
+            ncbi_taxonomies_ch.error_file.collect(),
+            ncbi_taxonomies_ch.candidates_file.collect()
         )
 
         MERGE_NCBI_TAXONOMY_TABLE(
             tax_table.tax_assigned_table,
             ncbi_taxonomies.ncbi_taxonomy,
-            ncbi_taxonomies.missed_taxonomies
+            ncbi_taxonomies.ambiguous_candidates
         )
     }
 }

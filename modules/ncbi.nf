@@ -37,7 +37,8 @@ workflow {
     // -------------------------------
     ncbi_taxonomies = MERGE_NCBI_TAXONOMIES(
         ncbi_taxonomies_ch.taxon_file.collect(), 
-        ncbi_taxonomies_ch.error_file.collect()
+        ncbi_taxonomies_ch.error_file.collect(),
+        ncbi_taxonomies_ch.candidates_file.collect()
     )
 
     // -------------------------------
@@ -47,7 +48,7 @@ workflow {
     MERGE_NCBI_TAXONOMY_TABLE(
         tax_table_ch,
         ncbi_taxonomies.ncbi_taxonomy,
-        ncbi_taxonomies.missed_taxonomies
+        ncbi_taxonomies.ambiguous_candidates
     )
 
 }
@@ -58,7 +59,7 @@ process UNIQUE_TAXA {
 
     tag "Get unique records from the last part of the taxonomies retrieved"
 
-    container "hariszaf/pema-nf:0.0.1" 
+    container "hariszaf/pema-nf:0.2.1" 
 
     input:
         path assignments 
@@ -94,6 +95,7 @@ process NCBI_TAXONOMY_QUERY {
     output:
         path "ncbi_ids/*.tsv", emit: taxon_file
         path "ncbi_ids/*.err", emit: error_file
+        path "ncbi_ids/*.candidates.jsonl", emit: candidates_file
 
     script:
         // Single-quote the taxon for the shell, so names with quotes, $ or backticks are safe
@@ -117,6 +119,18 @@ process NCBI_TAXONOMY_QUERY {
         # Drop the client update notice, so the .err file only holds real errors
         sed -i '/^New version of client/d' "ncbi_ids/\$output_filename.err"
 
+        # A name matching more than one taxid: fetch every candidate, one
+        # "<taxon> TAB <json report>" line each (empty file otherwise)
+        touch "ncbi_ids/\$output_filename.candidates.jsonl"
+        if grep -q "more than one taxid" "ncbi_ids/\$output_filename.err"; then
+            taxids=\$(grep -oE 'taxid: [0-9]+' "ncbi_ids/\$output_filename.err" | awk '{print \$2}' | sort -u)
+            sleep ${sleep_time}
+            datasets summary taxonomy taxon \$taxids --as-json-lines 2>/dev/null \
+                | while IFS= read -r report; do
+                    printf '%s\t%s\n' ${taxon_q} "\$report"
+                done > "ncbi_ids/\$output_filename.candidates.jsonl" || true
+        fi
+
         sleep ${sleep_time}
         """
 }
@@ -126,17 +140,19 @@ process MERGE_NCBI_TAXONOMIES {
 
     tag "Merge NCBI Taxonomies"
 
-    container "hariszaf/pema-nf:0.0.1"
+    container "hariszaf/pema-nf:0.2.1"
 
     publishDir {"${params.outdir}/ncbi_taxonomy"}, mode: 'copy'
 
     input:
         path tax_files
         path error_files
+        path candidate_files
 
     output:
         path "taxonomies.json", emit: ncbi_taxonomy
         path "not_found.tsv", emit: missed_taxonomies
+        path "ambiguous_candidates.tsv", emit: ambiguous_candidates
 
     script:
         """
@@ -165,6 +181,7 @@ process MERGE_NCBI_TAXONOMIES {
     EOF
 
         cat ${error_files.join(' ')} > not_found.tsv
+        cat ${candidate_files.join(' ')} > ambiguous_candidates.tsv
         """
 }
 
@@ -173,7 +190,7 @@ process MERGE_NCBI_TAXONOMY_TABLE {
 
     tag "Build taxonomy table with NCBI taxonomy"
 
-    container "hariszaf/datasets:latest"
+    container "hariszaf/pema-nf:0.2.1"
 
     publishDir { "${params.outdir}/ncbi_taxonomy" }, mode: 'copy'
 
@@ -181,7 +198,7 @@ process MERGE_NCBI_TAXONOMY_TABLE {
 
         path taxonomy_table
         path ncbi_taxonomies_json
-        path ncbi_errors
+        path ambiguous_candidates
 
     output:
 
@@ -190,10 +207,10 @@ process MERGE_NCBI_TAXONOMY_TABLE {
     script:
 
         """
-        python /opt/ncbi_taxonomy_table.py \
+        python3 /opt/pema/scripts/ncbi_taxonomy_table.py \
             --taxonomy-table ${taxonomy_table} \
             --ncbi-taxonomies ${ncbi_taxonomies_json} \
-            --ncbi-errors ${ncbi_errors} \
+            --ncbi-candidates ${ambiguous_candidates} \
             --output tax_assigned_with_ncbi.tsv
         """
 
