@@ -44,3 +44,6 @@ rdp_dbs_v220.tar.gz
 
 # Ignore any .sif file
 *.sif
+
+# Ignore vscode settngs etc.
+.vscode/
