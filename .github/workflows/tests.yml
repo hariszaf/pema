@@ -1,41 +1,134 @@
 # PEMA : a Pipeline for Environmental DNA Metabarcoding Analysis
 # Author: Haris Zafeiropoulos
 # Licensed under GNU LGPL.3, see LICENCE file
+#
+# Lint the pipeline and run the sanity check (sanity_check/run_sanity_check.sh).
+#
+# On every push and pull request, the tests that need no external database run:
+#   COI-rdp-custom   - fastp, Swarm, RDPClassifier trained on sanity_check/custom_rdp/custom_ref_db
+#   COI-crest-custom - fastp, Swarm, crest4 database built from sanity_check/custom_crest/custom_ref_db
+# Any other test (e.g. 16S 18S-vsearch, which download the crest4 SILVA database, ~4 GB) can be run
+# from the Actions tab: "Run workflow", with the tests to run.
 
 name: pema-nf
 
-on: [push, pull_request]
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      tests:
+        description: 'Sanity check tests to run, separated by spaces (see sanity_check/run_sanity_check.sh --help)'
+        required: true
+        default: 'COI-rdp-custom COI-crest-custom'
+
+env:
+  NXF_VER: 26.04.7
+  NXF_ANSI_LOG: false
 
 jobs:
-  nextflow-tests:
+
+  lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
-      - name: Set up Java 17
-        uses: actions/setup-java@v3
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: "17"
+          java-version: '17'
 
-      - name: Install Nextflow 24.10.0
+      - name: Install Nextflow
         run: |
-          wget -q https://github.com/nextflow-io/nextflow/releases/download/v24.10.0/nextflow
-          chmod +x nextflow
+          curl -s https://get.nextflow.io | bash
           sudo mv nextflow /usr/local/bin/
           nextflow -version
 
-      # ✅ Create a persistent isolated Nextflow home
-      - name: Setup isolated Nextflow home
-        id: nxfhome
-        run: echo "NXF_HOME=$(mktemp -d)" >> $GITHUB_ENV
+      - name: Lint
+        run: nextflow lint pema.nf modules/ nextflow.config
 
-      # ✅ Warm up dependencies in the same NXF_HOME
-      - name: Warm up Nextflow
-        run: nextflow info
 
-      # ✅ Run the tests
-      - name: Run fastp workflow
+  tests:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.tests.outputs.matrix }}
+    steps:
+      - name: Tests to run
+        id: tests
         run: |
-          nextflow run modules/fastp.nf --params-file config_files/fastp.yaml
+          tests="${{ github.event.inputs.tests || 'COI-rdp-custom COI-crest-custom' }}"
+          echo "matrix=$(printf '%s\n' $tests | jq -R . | jq -cs .)" >> "$GITHUB_OUTPUT"
+
+
+  sanity:
+    needs: [lint, tests]
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        test: ${{ fromJSON(needs.tests.outputs.matrix) }}
+    name: sanity (${{ matrix.test }})
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Install Nextflow
+        run: |
+          curl -s https://get.nextflow.io | bash
+          sudo mv nextflow /usr/local/bin/
+          nextflow -version
+
+      # The pema-nf image holds the scripts/ of the repository: build it from this commit,
+      # with the tag the modules use, so the tests run the scripts being tested
+      - name: Build the pema-nf image
+        run: |
+          for tag in $(grep -rhoE 'hariszaf/pema-nf:[0-9.]+' modules/ | sort -u); do
+            docker build -q -f containers/Dockerfile.pema_nf -t "$tag" .
+          done
+
+      - name: Cache the sanity dataset
+        uses: actions/cache@v4
+        with:
+          path: sanity_check/sanity_data.tar.gz
+          key: sanity-data-1NoZfw3IOWksc1AnSr46HkOMoFautaiTO
+
+      # crest4 downloads its built-in databases on first use; keep them between runs
+      - name: Cache the crest4 databases
+        uses: actions/cache@v4
+        with:
+          path: ~/.crest4
+          key: crest4-dbs-${{ matrix.test }}
+
+      - name: Run the sanity check
+        run: sanity_check/run_sanity_check.sh ${{ matrix.test }}
+
+      # crest4 runs as root in its container; let the cache step read what it downloaded
+      - name: Make the crest4 databases readable
+        if: always()
+        run: sudo chown -R "$(id -u):$(id -g)" ~/.crest4 2>/dev/null || true
+
+      - name: Summary
+        if: always()
+        run: |
+          {
+            echo "### Sanity check: ${{ matrix.test }}"
+            echo '```'
+            tail -n 40 sanity_check/*/TEST_*.log 2>/dev/null | grep -E "SUCCESS|FAILED|ERROR|Caused by|Command error" -A2 || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload the logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ matrix.test }}
+          path: |
+            sanity_check/*/TEST_*.log
+            sanity_check/*/TEST_*.yaml
+            sanity_check/*/.nextflow.log
+          if-no-files-found: ignore
