@@ -5,7 +5,7 @@
 // -------------------- PARAMETERS --------------------
 
 // Only top-level params live here; params are available to all modules included below.
-// The tool-specific sections (fastp, swarm, crest) are resolved inside the workflow.
+// The tool-specific sections (fastp, swarm, vsearch, crest, rdp) are resolved inside the workflow.
 
 include { loadYamlParams; valueOr; findReadPairs } from './modules/utils.nf'
 
@@ -42,6 +42,7 @@ include { VSEARCH_DEREP } from './modules/vsearch_derep.nf'
 include { LINEARIZE; HASH_DEREP_FASTA; HASH_MAP; CONCATENATE_FASTA } from './modules/hash.nf'
 include { CONTINGENCY_TABLE; ASVS_CONTINGENCY_TABLE } from './modules/contingency.nf'
 include { REMOVE_OLIGOS_SWARM } from './modules/oligos.nf'
+include { VSEARCH_OTUS } from './modules/vsearch.nf'
 include {
     NCBI_TAXONOMY_QUERY; UNIQUE_TAXA; MERGE_NCBI_TAXONOMIES; MERGE_NCBI_TAXONOMY_TABLE
 } from './modules/ncbi.nf'
@@ -49,8 +50,8 @@ include {
 // -------------------- ADJUST PARAMS  --------------------
 
 def checkSupported() {
-    if (!(params.clustering_algo in ['swarm'])) {
-        error "clustering_algo '${params.clustering_algo}' is not supported yet. Please select 'swarm'."
+    if (!(params.clustering_algo in ['swarm', 'vsearch'])) {
+        error "clustering_algo '${params.clustering_algo}' is not supported. Please select 'swarm' or 'vsearch'."
     }
     if (!(params.classifier in ['crest', 'rdp'])) {
         error "classifier '${params.classifier}' is not supported. Please select 'crest' or 'rdp'."
@@ -94,6 +95,16 @@ def resolveSwarmParams() {
         swarmParams["gap-extension-penalty"] = null
     }
     return swarmParams
+}
+
+def resolveVsearchParams() {
+    def vsearchParams = loadYamlParams(params.yaml, 'vsearch') ?: [:]
+    vsearchParams.threshold = valueOr(vsearchParams.threshold, 0.97)
+    def t = vsearchParams.threshold as double
+    if (t <= 0 || t > 1) {
+        error "vsearch threshold must be between 0 and 1 (e.g. 0.97), not ${vsearchParams.threshold}."
+    }
+    return vsearchParams
 }
 
 def resolveCrestParams() {
@@ -174,10 +185,11 @@ def resolveRdpParams() {
 workflow {
 
     checkSupported()
-    def fastpParams  = resolveFastpParams()
-    def swarmParams  = resolveSwarmParams()
-    def crest_params = params.classifier == 'crest' ? resolveCrestParams() : null
-    def rdp_params   = params.classifier == 'rdp' ? resolveRdpParams() : null
+    def fastpParams   = resolveFastpParams()
+    def swarmParams   = params.clustering_algo == 'swarm' ? resolveSwarmParams() : null
+    def vsearchParams = params.clustering_algo == 'vsearch' ? resolveVsearchParams() : null
+    def crest_params  = params.classifier == 'crest' ? resolveCrestParams() : null
+    def rdp_params    = params.classifier == 'rdp' ? resolveRdpParams() : null
 
     // -------------------- CHANNELS --------------------
     def paired_raw_reads = channel.fromList(findReadPairs(params.raw_reads.toString()))
@@ -204,46 +216,66 @@ workflow {
     contingency_table = CONTINGENCY_TABLE(hashed.hash_fasta.collect(sort: { a, b -> a.name <=> b.name }))
 
     //  -------------------- CLUSTERING --------------------
-    swarm_ch = SWARM(all_samples_fasta.all_samples, swarmParams)
+    // Both clustering algorithms end with a contingency table linked to the representative
+    // sequences by their hash (Seed), and the representative sequences to classify
+    def clusters_hash
+    def representatives
 
-    def stats_ch  = swarm_ch.swarm_stats
-    def swarms_ch = swarm_ch.swarm_swarms
-    def fasta_ch  = swarm_ch.hash_fasta
+    if (params.clustering_algo == 'swarm') {
 
-    if (params.min_oligotons > 0) {
-        oligos_ch = REMOVE_OLIGOS_SWARM(stats_ch, swarms_ch, fasta_ch, params.min_oligotons)
-        stats_ch  = oligos_ch.swarm_stats_filtered
-        swarms_ch = oligos_ch.swarm_swarms_filtered
-        fasta_ch  = oligos_ch.hash_fasta_filtered
+        swarm_ch = SWARM(all_samples_fasta.all_samples, swarmParams)
+
+        def stats_ch  = swarm_ch.swarm_stats
+        def swarms_ch = swarm_ch.swarm_swarms
+        def fasta_ch  = swarm_ch.hash_fasta
+
+        if (params.min_oligotons > 0) {
+            oligos_ch = REMOVE_OLIGOS_SWARM(stats_ch, swarms_ch, fasta_ch, params.min_oligotons)
+            stats_ch  = oligos_ch.swarm_stats_filtered
+            swarms_ch = oligos_ch.swarm_swarms_filtered
+            fasta_ch  = oligos_ch.hash_fasta_filtered
+        }
+
+        asvs_cont_table = ASVS_CONTINGENCY_TABLE(stats_ch, swarms_ch, fasta_ch, contingency_table)
+        clusters_hash   = asvs_cont_table.asvs_contingency_hash
+        representatives = asvs_cont_table.asvs_to_tax_assign
+
+    } else {
+
+        otus = VSEARCH_OTUS(
+            all_samples_fasta.all_samples,
+            contingency_table,
+            vsearchParams.threshold,
+            params.min_oligotons
+        )
+        clusters_hash   = otus.contingency_hash
+        representatives = otus.representatives
     }
 
-    // ------------ BUILD ASVS CONTINGENCY TABLE ----------
-    asvs_cont_table = ASVS_CONTINGENCY_TABLE(stats_ch, swarms_ch, fasta_ch, contingency_table)
-
     // -------------------- TAXONOMY ASSIGNMENT --------------------
-    // Both classifiers end with a tax_assigned_table.tsv: ASV, abundance per sample, Taxonomy
+    // Both classifiers end with a tax_assigned_table.tsv: ASV/OTU, abundance per sample, Taxonomy
     def tax_assigned_table
 
     if (params.classifier == 'crest') {
 
         crest_taxonomy_assignment = CREST_TAXONOMY_ASSIGNMENT(
-            asvs_cont_table.asvs_to_tax_assign,
+            representatives,
             crest_params
         )
         tax_assigned_table = BUILD_TAXONOMY_TABLE(
-            asvs_cont_table.asvs_contingency_hash,
+            clusters_hash,
             crest_taxonomy_assignment.assignments
         ).tax_assigned_table
 
     } else {
 
         rdp_assignment = RDP_CLASSIFY(
-            asvs_cont_table.asvs_to_tax_assign,
+            representatives,
             rdp_params.database_path,
             rdp_params
         )
         tax_assigned_table = BUILD_RDP_TAXONOMY_TABLE(
-            asvs_cont_table.asvs_contingency_hash,
+            clusters_hash,
             rdp_assignment.assignments,
             rdp_params
         ).tax_assigned_table

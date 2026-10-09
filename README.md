@@ -56,13 +56,13 @@ PEMA is now being rewritten in [Nextflow](https://www.nextflow.io/). Every step 
 | Quality control and merging of paired-end reads | [fastp](https://github.com/OpenGene/fastp) | `quay.io/biocontainers/fastp` |
 | Dereplication per sample | [VSEARCH](https://github.com/torognes/vsearch) | `quay.io/biocontainers/vsearch` |
 | Hashing of the unique sequences and contingency table across samples | PEMA scripts | `hariszaf/pema-nf` |
-| ASV inference | [Swarm v3](https://github.com/torognes/swarm) | `quay.io/biocontainers/swarm` |
-| Removal of oligotons (ASVs with low total abundance) | PEMA scripts | `hariszaf/pema-nf` |
+| ASV inference, or | [Swarm v3](https://github.com/torognes/swarm) | `quay.io/biocontainers/swarm` |
+| OTU clustering, with de novo chimera removal | [VSEARCH](https://github.com/torognes/vsearch) | `quay.io/biocontainers/vsearch` |
+| Removal of oligotons (low-abundance ASVs or amplicons) and ASV/OTU tables | PEMA scripts | `hariszaf/pema-nf` |
 | Taxonomy assignment | [crest4](https://github.com/xapple/crest4) or [RDPClassifier](https://github.com/rdpstaff/classifier) | `hariszaf/crest4`, `quay.io/biocontainers/rdp_classifier` |
 | Mapping to NCBI Taxonomy (optional) | [NCBI Datasets CLI](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/) | `staphb/ncbi-datasets`, `hariszaf/pema-nf` |
 
-Currently supported: `clustering_algo: swarm`, and `classifier: crest` or `classifier: rdp`.
-OTU clustering with VSEARCH is not yet ported to the Nextflow version; the pipeline stops with an error if it is selected.
+Supported: `clustering_algo: swarm` (ASVs) or `clustering_algo: vsearch` (OTUs), and `classifier: crest` or `classifier: rdp`, in any combination.
 
 
 
@@ -147,11 +147,12 @@ Parameters left empty are not passed to the tool, so the tool's own default appl
 | `raw_reads` | Folder with the paired-end fastq files (see [Input data](#input-data)) | **required** |
 | `outdir` | Output folder | `results` |
 | `threads` | Threads for fastp, Swarm and crest4 | `3` |
-| `clustering_algo` | `swarm` | `swarm` |
+| `clustering_algo` | `swarm` or `vsearch` | `swarm` |
 | `classifier` | `crest` or `rdp` | `crest` |
-| `min_oligotons` | ASVs with a total abundance below this are removed; `0` keeps all | `5` |
+| `min_oligotons` | Abundance below which ASVs (Swarm) or amplicons (VSEARCH) are removed; `0` keeps all | `5` |
 | `fastp` | Any [fastp option](https://github.com/OpenGene/fastp#all-options), without the leading `--` | **required** |
-| `swarm` | Any [Swarm option](https://github.com/torognes/swarm), e.g. `differences`, `fastidious` | **required** |
+| `swarm` | Any [Swarm option](https://github.com/torognes/swarm), e.g. `differences`, `fastidious` | required for Swarm |
+| `vsearch` | `threshold`: identity threshold for the OTU clustering | `0.97` |
 | `crest` | `database`, `mount_crest_dbs`, `search_algo`, `min_score`, `min_smlrty`, `score_drop`, `threads` | see the YAML file |
 | `rdp` | `database`, `databases_dir`, `confidence`, `memory` | see the YAML file |
 | `ncbi_taxonomy` | `get_ncbi_taxonomy`, `ncbi_api_key`, `max_parallel`, `sleep` | off when missing |
@@ -161,6 +162,11 @@ PEMA adjusts some values to keep the tools consistent:
 * With Swarm, fastp's `n_base_limit` is set to `0` (Swarm does not accept `N`s).
 * Swarm's fastidious options (`fastidious`, `boundary`, `ceiling`, `bloom-bits`) are only used when `differences` is `1`,
   and the pairwise alignment options (`match-reward`, `mismatch-penalty`, `gap-opening-penalty`, `gap-extension-penalty`) only when it is larger than `1`.
+
+**Oligotons.** With Swarm, `min_oligotons` applies to whole ASVs, after clustering.
+With VSEARCH it applies to individual amplicons (unique sequences) before clustering, as in PEMA v2.x and the
+[VSEARCH pipeline](https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline), so it removes many more reads:
+with VSEARCH, a low value (e.g. `2`) is usually preferable.
 
 **CREST databases.** `database` is one of crest4's built-in databases (`ssuome`, `silvamod138pr2`, `mitofish`, `midori253darn`)
 or the name of a folder with a custom database. For a custom database, `mount_crest_dbs` must point to the folder that contains it, for example:
@@ -225,7 +231,7 @@ nextflow run modules/swarm.nf --params-file config_files/swarm.yaml -c nextflow.
 ```
 
 Add `-c nextflow.config`: when a module is run directly, Nextflow does not load the root `nextflow.config`, so containers would be disabled.
-See [nf-nodes.md](nf-nodes.md) for notes on developing the pipeline.
+See [modules/README.md](modules/README.md) for notes on developing the pipeline.
 
 
 

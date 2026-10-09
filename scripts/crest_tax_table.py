@@ -22,17 +22,18 @@ def parse_args():
     return parser.parse_args()
 
 def find_id_column(df):
-    return next((col for col in ["ASV", "amplicon", "#OTU ID"] if col in df.columns), None)
+    return next((col for col in ["ASV", "OTU", "amplicon", "#OTU ID"] if col in df.columns), None)
 
 def load_and_merge(input_file, crest_file, clustering_algo):
     df     = pd.read_csv(input_file, sep="\t")
     id_col = find_id_column(df)
     if id_col is None:
-        raise ValueError("Neither 'ASV', 'amplicon', nor '#OTU ID' found in input columns.")
+        raise ValueError("Neither 'ASV', 'OTU', 'amplicon', nor '#OTU ID' found in input columns.")
 
     tax = pd.read_csv(crest_file, header=None, sep="\t")
 
-    if clustering_algo == "swarm":
+    # ASV and OTU tables from pema-nf link each row to its representative sequence by its hash (Seed)
+    if "Seed" in df.columns:
         tax.columns = ["Seed", "Taxonomy"]
         df = df.merge(tax[["Seed", "Taxonomy"]], on="Seed", how="left")
         df = df.drop(columns=["Seed"])

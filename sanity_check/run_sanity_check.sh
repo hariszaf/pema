@@ -5,13 +5,13 @@
 #       a new feature causes any issues or not.
 #       Should be always run before a new version is to be released.
 #
-#       Each test runs pema.nf (fastp, Swarm, then crest4 or RDPClassifier) on the sanity dataset
-#       of one marker gene, with a parameters file generated from config_files/pema.yaml.
+#       Each test runs pema.nf (fastp, Swarm or VSEARCH, then crest4 or RDPClassifier) on the
+#       sanity dataset of one marker gene, with a parameters file generated from config_files/pema.yaml.
 #
 # Usage: ./run_sanity_check.sh [options] [test ...]
 #
-#   test                16S 18S 12S COI ITS (crest4), 12S-rdp COI-rdp (RDPClassifier)
-#                       (default: all of them)
+#   test                16S 18S 12S COI ITS (Swarm, crest4), 16S-vsearch 18S-vsearch (VSEARCH, crest4),
+#                       12S-rdp COI-rdp (Swarm, RDPClassifier) (default: all of them)
 #   --ncbi              also map the taxonomies to NCBI Taxonomy (set NCBI_API_KEY to go faster)
 #   --profile <name>    Nextflow profile(s), e.g. singularity (default: docker)
 #   --resume            resume the previous runs
@@ -44,12 +44,17 @@ RDP_COI_DB="${RDP_COI_DB:-}"
 # marker -> folder with the reads (inside sanity_check/<marker>/)
 declare -A READS=( [16S]=mydata16s [18S]=mydata18s [12S]=mydata12s [COI]=mydataCOI [ITS]=mydataITS )
 
-# test -> marker, classifier and database
-declare -A MARKER=( [16S]=16S [18S]=18S [12S]=12S [COI]=COI [ITS]=ITS [12S-rdp]=12S [COI-rdp]=COI )
-declare -A CLASSIFIER=( [16S]=crest [18S]=crest [12S]=crest [COI]=crest [ITS]=crest [12S-rdp]=rdp [COI-rdp]=rdp )
+# test -> marker, clustering algorithm, classifier and database
+declare -A MARKER=( [16S]=16S [18S]=18S [12S]=12S [COI]=COI [ITS]=ITS
+                    [16S-vsearch]=16S [18S-vsearch]=18S [12S-rdp]=12S [COI-rdp]=COI )
+declare -A CLUSTERING=( [16S]=swarm [18S]=swarm [12S]=swarm [COI]=swarm [ITS]=swarm
+                        [16S-vsearch]=vsearch [18S-vsearch]=vsearch [12S-rdp]=swarm [COI-rdp]=swarm )
+declare -A CLASSIFIER=( [16S]=crest [18S]=crest [12S]=crest [COI]=crest [ITS]=crest
+                        [16S-vsearch]=crest [18S-vsearch]=crest [12S-rdp]=rdp [COI-rdp]=rdp )
 declare -A DATABASE=( [16S]=silvamod138pr2 [18S]=silvamod138pr2 [12S]=mitofish [COI]=midori253darn
-                      [ITS]="${ITS_CREST_DB}" [12S-rdp]="${RDP_12S_DB}" [COI-rdp]="${RDP_COI_DB}" )
-ALL_TESTS=(16S 18S 12S COI ITS 12S-rdp COI-rdp)
+                      [ITS]="${ITS_CREST_DB}" [16S-vsearch]=silvamod138pr2 [18S-vsearch]=silvamod138pr2
+                      [12S-rdp]="${RDP_12S_DB}" [COI-rdp]="${RDP_COI_DB}" )
+ALL_TESTS=(16S 18S 12S COI ITS 16S-vsearch 18S-vsearch 12S-rdp COI-rdp)
 
 
 # ------------                 OPTIONS               -------------------
@@ -65,7 +70,7 @@ while [[ $# -gt 0 ]]; do
         --profile) PROFILE="$2"; shift ;;
         --resume)  RESUME="-resume" ;;
         -h|--help) sed -n '3,29p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-        16S|18S|12S|COI|ITS|12S-rdp|COI-rdp) TESTS+=("$1") ;;
+        16S|18S|12S|COI|ITS|16S-vsearch|18S-vsearch|12S-rdp|COI-rdp) TESTS+=("$1") ;;
         *) echo "Unknown option or test: $1 (see --help)"; exit 1 ;;
     esac
     shift
@@ -111,6 +116,7 @@ make_params() {
     local marker=${MARKER[$test]}
     sed -e "s#^raw_reads:.*#raw_reads: ${SANITY_DIR}/${marker}/${READS[$marker]}#" \
         -e "s#^outdir:.*#outdir: ${outdir}#" \
+        -e "s#^clustering_algo:.*#clustering_algo: ${CLUSTERING[$test]}#" \
         -e "s#^classifier:.*#classifier: ${CLASSIFIER[$test]}#" \
         -e "s#^  database:.*#  database: ${DATABASE[$test]}#" \
         -e "s#^  mount_crest_dbs:.*#  mount_crest_dbs: ${CREST_DBS}#" \
@@ -120,7 +126,7 @@ make_params() {
         "${PEMA_DIR}/config_files/pema.yaml" > "${params}"
 }
 
-# Check that a test produced a final table with at least one ASV
+# Check that a test produced a final table with at least one ASV/OTU
 check_outputs() {
     local outdir=$1 classifier=$2
     local table="${outdir}/${classifier}_assignment/tax_assigned_table.tsv"
@@ -130,16 +136,16 @@ check_outputs() {
         echo "missing ${table#"${SANITY_DIR}/"}"
         return 1
     fi
-    local asvs=$(( $(wc -l < "${table}") - 1 ))
-    if [[ ${asvs} -lt 1 ]]; then
-        echo "no ASVs in ${table#"${SANITY_DIR}/"}"
+    local clusters=$(( $(wc -l < "${table}") - 1 ))
+    if [[ ${clusters} -lt 1 ]]; then
+        echo "no ASVs/OTUs in ${table#"${SANITY_DIR}/"}"
         return 1
     fi
     local assigned
     assigned=$(awk -F'\t' '
         NR == 1 { for (i = 1; i <= NF; i++) if ($i == "Taxonomy") col = i; next }
         $col != "" && $col != "No hits" && $col != "Unassigned"' "${table}" | wc -l)
-    echo "${asvs} ASVs, ${assigned} with a taxonomy"
+    echo "${clusters} ASVs/OTUs, ${assigned} with a taxonomy"
 }
 
 declare -A STATUS DETAILS MINUTES
@@ -163,7 +169,7 @@ for test in "${TESTS[@]}"; do
 
     marker=${MARKER[$test]}
     classifier=${CLASSIFIER[$test]}
-    name="TEST_${marker}_FASTP_SWARM_${classifier^^}"
+    name="TEST_${marker}_FASTP_${CLUSTERING[$test]^^}_${classifier^^}"
     outdir="${SANITY_DIR}/${marker}/${name}"
     params="${SANITY_DIR}/${marker}/${name}.yaml"
     log="${SANITY_DIR}/${marker}/${name}.log"
@@ -177,7 +183,7 @@ for test in "${TESTS[@]}"; do
     fi
 
     echo
-    echo "PEMA for ${marker} using fastp, Swarm and ${classifier} (${DATABASE[$test]}) is about to start"
+    echo "PEMA for ${marker} using fastp, ${CLUSTERING[$test]} and ${classifier} (${DATABASE[$test]}) is about to start"
     [[ "${NCBI}" == true ]] && echo "NCBI Taxonomy IDs will be assigned in the end, on the taxonomies returned."
 
     [[ -z "${RESUME}" ]] && rm -rf "${outdir}"
@@ -219,7 +225,7 @@ echo
 echo "Sanity check summary"
 echo "--------------------"
 for test in "${TESTS[@]}"; do
-    printf "%-8s %-8s %6s  %s\n" "${test}" "${STATUS[$test]}" \
+    printf "%-12s %-8s %6s  %s\n" "${test}" "${STATUS[$test]}" \
         "${MINUTES[$test]:+${MINUTES[$test]} min}" "${DETAILS[$test]}"
 done
 

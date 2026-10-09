@@ -146,3 +146,31 @@ process GUNZIP {
         """
 }
 
+
+// Keep the sequences of `original` that are, or are clustered (in `uc`) with, a sequence of `accepted`
+process VSEARCH_MAP_BACK {
+
+    tag "${outfile_name}"
+
+    publishDir { "${params.outdir}/vsearch" }, mode: 'copy'
+
+    container "hariszaf/pema-nf:0.2.2"
+
+    input:
+        path original
+        path uc
+        path accepted
+        val outfile_name
+
+    output:
+        path "${outfile_name}", emit: fasta
+
+    script:
+        """
+        python3 /opt/pema/scripts/map_vsearch.py \\
+            --original ${original} \\
+            --uc ${uc} \\
+            --map ${accepted} \\
+            > ${outfile_name}
+        """
+}

@@ -15,9 +15,13 @@ Each of the next paragraphs stands for a file or subdirectory of that folder.
 ├── amplicon_contingency_table.tsv
 ├── swarm/                          asvs.stats, asvs.swarms, asvs_representatives_hash.fa
 ├── oligos/                         filtered_asvs.stats, filtered_asvs.swarms, filtered_asvs_representatives_hash.fa
-├── asvs_contingency_table.tsv
+├── asvs_contingency_table.tsv      (clustering_algo: swarm)
 ├── asvs_contingency_hash.tsv
 ├── asvs_representatives.fa
+├── vsearch/                        all_samples.fasta, derep.*, preclustered.*, nonchimeras*.fasta, otus.*
+├── otus_contingency_table.tsv      (clustering_algo: vsearch)
+├── otus_contingency_hash.tsv
+├── otus_representatives.fa
 ├── crest_assignment/               assignments.txt, search.hits, tax_assigned_table.tsv  (classifier: crest)
 ├── rdp_assignment/                 rdp_assignments.txt, tax_assigned_table.tsv              (classifier: rdp)
 └── ncbi_taxonomy/                  taxonomies.json, not_found.tsv, ambiguous_candidates.tsv,
@@ -54,7 +58,7 @@ sorted by decreasing abundance. This is the input of the clustering step.
 
 
 
-### Swarm
+### Swarm (`clustering_algo: swarm`)
 
 Swarm writes two files, ***"asvs.stats"*** and ***"asvs.swarms"***, and ***"asvs_representatives_hash.fa"*** with the seed (representative) sequence of each ASV.
 
@@ -86,7 +90,30 @@ If `min_oligotons` is larger than 0, ASVs with a total abundance below it are re
 
 
 
-### ASV tables
+### VSEARCH (`clustering_algo: vsearch`)
+
+OTUs are built as in the [VSEARCH pipeline](https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline). All files are in ***"vsearch/"***;
+the `.uc` files record which sequence was assigned to which cluster (see their format [here](https://www.drive5.com/usearch/manual/opt_uc.html)).
+
+***"all_samples.fasta"*** is `hash_all_samples.fa` with the abundances written as `;size=`, as VSEARCH expects.
+
+***"derep.fasta"*** / ***"derep.uc"***: the amplicons with a total abundance of at least `min_oligotons`.
+
+***"preclustered.fasta"*** / ***"preclustered.uc"***: these amplicons preclustered at the `threshold` identity (denoising).
+
+***"nonchimeras_preclustered.fasta"***: the preclusters that are not chimeras (VSEARCH `--uchime_denovo`).
+
+***"nonchimeras_derep.fasta"*** and ***"nonchimeras.fasta"***: the amplicons of the non-chimeric preclusters, mapped back to the dereplicated and to all amplicons.
+
+***"otus.fasta"*** / ***"otus.uc"***: the OTUs, clustered at the `threshold` identity; the centroid of each OTU is its representative sequence.
+
+
+
+### ASV / OTU tables
+
+The ASV (Swarm) and OTU (VSEARCH) tables have the same format; the files start with `asvs_` or `otus_`, and the first column is `ASV` or `OTU`.
+OTUs are named `OTU_1`, `OTU_2`, ... by decreasing total abundance; the abundance of an OTU in a sample is the sum of its amplicons.
+
 
 ***"asvs_contingency_table.tsv"*** contains the abundance of each ASV in each sample.
 
@@ -132,6 +159,7 @@ names unknown to NCBI, and names that match more than one NCBI taxid.
 ***"ncbi_taxonomy/ambiguous_candidates.tsv"*** contains, for names that match more than one taxid,
 one line per candidate taxid: the taxon name, a tab, and the NCBI report of the candidate.
 
-***"ncbi_taxonomy/tax_assigned_with_ncbi.tsv"*** is the final ASV table with three extra columns:
-`last_taxon` (the taxon that was looked up), `ncbi_taxonomy` (the NCBI lineage, from kingdom to species) and `ncbi_taxonomy_ids` (the NCBI taxids of that lineage).
+***"ncbi_taxonomy/tax_assigned_with_ncbi.tsv"*** is the final ASV/OTU table with four extra columns:
+`last_taxon` (the taxon that was looked up), `ncbi_taxonomy` (the NCBI lineage, from domain to species), `ncbi_taxonomy_ids` (the NCBI taxids of that lineage)
+and `ncbi_taxid` (the NCBI Taxonomy id of the taxon itself; empty when it was not found).
 For ambiguous names, the candidate whose lineage is the most similar to the classifier's lineage is used.

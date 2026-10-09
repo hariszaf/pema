@@ -15,7 +15,7 @@ threads: 3
 
 outdir: buildingPemaNf2
 
-# values_from: ["swarm", "vsearch"]
+# values from: ["swarm", "vsearch"]
 clustering_algo: swarm  
 
 # values from: ["crest", "rdp"]
@@ -177,6 +177,17 @@ swarm:
 
   # gap extension penalty
   gap-extension-penalty:
+
+
+vsearch:
+
+  # values from (0-1]
+  # Identity threshold for the OTU clustering (and the preclustering before chimera removal):
+  # an amplicon joins a cluster if its pairwise identity with the cluster's centroid is at least this value.
+  # The pairwise identity is the number of matching columns / (alignment length - terminal gaps).
+  # The OTUs are built as in https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline;
+  # amplicons with a total abundance below min_oligotons are removed before clustering.
+  threshold: 0.98
 
 
 crest:

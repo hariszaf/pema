@@ -5,11 +5,11 @@ directive of each process in [`modules/`](../modules) and are pulled automatical
 
 | Image | Used by | Built from |
 |-------|---------|------------|
-| `hariszaf/pema-nf:0.2.2` | hashing, contingency tables, oligoton removal, taxonomy tables, NCBI merging | [`Dockerfile.pema_nf`](Dockerfile.pema_nf) |
+| `hariszaf/pema-nf:0.2.2` | hashing, contingency tables, oligoton removal, VSEARCH map-back, taxonomy tables, NCBI merging | [`Dockerfile.pema_nf`](Dockerfile.pema_nf) |
 | `hariszaf/crest4:4.3.8` | `CREST_TAXONOMY_ASSIGNMENT` | published image |
 | `quay.io/biocontainers/rdp_classifier:2.13--hdfd78af_1` | `RDP_CLASSIFY` | BioContainers |
 | `quay.io/biocontainers/fastp:1.0.1--heae3180_0` | `FASTP` | BioContainers |
-| `quay.io/biocontainers/vsearch:2.30.4--hd6d6fdc_0` | `VSEARCH_DEREP` | BioContainers |
+| `quay.io/biocontainers/vsearch:2.30.4--hd6d6fdc_0` | `VSEARCH_DEREP`, and the VSEARCH OTU clustering steps | BioContainers |
 | `quay.io/biocontainers/swarm:3.1.6--h9948957_0` | `SWARM` | BioContainers |
 | `staphb/ncbi-datasets:18.36.0` | `NCBI_TAXONOMY_QUERY` | StaPH-B |
 
