@@ -1,9 +1,6 @@
 #!/usr/bin/env nextflow
 
 
-include { paramsToCliArgs; loadYamlParams } from './utils.nf'
-
-
 process REMOVE_OLIGOS_SWARM {
 
     tag "Removing oligotons from ASVs data files."
@@ -54,8 +51,8 @@ process REMOVE_OLIGOS_VSEARCH {
         
     output:
 
-        path(""), emit: otu_table_filtered
-        path(""), emit: otu_fasta_filtered
+        path("filtered_${otu_table.name}"), emit: otu_table_filtered
+        path("filtered_${otu_fasta.name}"), emit: otu_fasta_filtered
 
 
     script:
@@ -69,11 +66,4 @@ process REMOVE_OLIGOS_VSEARCH {
         """
 }
 
-
-workflow {
-
-
-
-
-}
 

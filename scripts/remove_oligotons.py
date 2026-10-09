@@ -153,7 +153,7 @@ def main():
     elif args.clustering_algo == "vsearch":
         run_vsearch(
             otu_table_file = args.otu_table,
-            fasta_file     = args.ptu_fasta,
+            fasta_file     = args.otu_fasta,
             threshold      = args.threshold,
             suffix         = args.suffix
         )

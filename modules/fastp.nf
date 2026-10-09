@@ -70,10 +70,10 @@ workflow {
     params.outdir     = loadYamlParams(params.yaml, 'outdir') ?: "results"
 
     // -------------------- CHANNELS --------------------
-    def paired1 = Channel.fromFilePairs("${params.raw_reads}/*_{1,2}.fastq.gz", flat: true)
-    def paired2 = Channel.fromFilePairs("${params.raw_reads}/*_R{1,2}_*.fastq.gz", flat: true)
+    def paired1 = channel.fromFilePairs("${params.raw_reads}/*_{1,2}.fastq.gz", flat: true)
+    def paired2 = channel.fromFilePairs("${params.raw_reads}/*_R{1,2}_*.fastq.gz", flat: true)
 
-    def paired_raw_reads = Channel.empty().mix(paired1).mix(paired2)
+    def paired_raw_reads = channel.empty().mix(paired1).mix(paired2)
 
     // -------------------- RUN FASTP --------------------
     FASTP(paired_raw_reads, fastpParams)

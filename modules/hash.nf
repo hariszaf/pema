@@ -91,15 +91,14 @@ process HASH_DEREP_FASTA {
 
 process HASH_MAP {
     
-    tag "Generate mapping file from dereplication."
-
     container "hariszaf/pema-nf:0.0.1"
 
     publishDir "${params.outdir}/hashing", mode: 'copy'
 
+    tag "${sample}"
+
     input:
-        path derep_fasta
-        path nonderep_fasta
+        tuple val(sample), path(derep_fasta), path(nonderep_fasta)
 
     output:
         path "*.tsv", emit: hash_map
@@ -133,52 +132,4 @@ process HASH_MAP {
             }
         ' "$derep_fasta" "$nonderep_fasta" > "\${MAPPING_FILE}"
         """
-}
-
-// -----------------------   TESTING MODULES ------------------
-
-workflow {
-
-    def underep_ch = Channel.fromPath("${params.input_dir}/*")
-    def to_dererp  = GUNZIP(underep_ch) \
-
-    // DEREPLICATE_IN_ONE_STEP(to_dererp)
-
-    def linearized   = LINEARIZE(to_dererp)
-    def dereplicated = DEREPLICATE(linearized)
-    def derep_maps   = HASH_MAP(dereplicated, to_dererp)
-
-    def contingency_table = CONTINGENCY_TABLE(dereplicated.collect())
-    def all_samples       = CONCATENATE_FASTA(dereplicated.collect())
-
-
-    // ----------   NOW WE CLUSTER AND THEN MOVE ON TO THE NEXT   ----- 
-
-    // If remove_oligotons, then this is now
-    def asvs_stats    = Channel.fromPath("${params.asvs_stats}")
-    def asvs_swarms   = Channel.fromPath("${params.asvs_swarms}")
-    def asvs_repr_has = Channel.fromPath("${params.asvs_repr_hash}")
-
-    def threshold    = params.threshold
-    def oligo_script = Channel.fromPath("${params.oligo_script}")
-
-    def amplicon_contingency_table = Channel.fromPath("${params.contingency_table}")
-    def asv_cont_script            = Channel.fromPath("${params.asv_cont_script}")
-
-    def tas = OLIGOTONS_FROM_SWARM(
-        asvs_stats, 
-        asvs_swarms, 
-        asvs_repr_has, 
-        threshold, 
-        oligo_script
-    )
-
-    // Build ASVS contingency table (after removing oligotons if asked)
-    def asvs_contingency_table = ASVS_CONTINGENCY_TABLE(
-        tas.swarm_stats, 
-        tas.swarm_seeds, 
-        tas.asvs_hash, 
-        amplicon_contingency_table, 
-        asv_cont_script
-    )
 }

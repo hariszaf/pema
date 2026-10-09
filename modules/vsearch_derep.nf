@@ -49,7 +49,7 @@ workflow {
     params.outdir     = loadYamlParams(params.yaml, 'outdir') ?: "results"
 
     // -------------------- CHANNELS --------------------
-    def underep = Channel.fromPath("${params.input_files}/*.fastq.gz")
+    def underep = channel.fromPath("${params.input_files}/*.fastq.gz")
 
     // -------------------- DEREPLICATION --------------------
     VSEARCH_DEREP(underep)

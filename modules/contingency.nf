@@ -20,33 +20,6 @@ process CONTINGENCY_TABLE {
 }
 
 
-process OLIGOTONS_FROM_SWARM {
-
-    tag "Remove oligotons from Swarm findings."
-
-    publishDir "${params.outdir}"
-
-    container "hariszaf/pema-nf:0.0.1"
-
-    input:
-    path swarm_stats
-    path swarm_swarms
-    path asvs_repr_hash
-    val threshold
-    path pyscript
-
-    output:
-    path "asvs.stats", emit: swarm_stats
-    path "asvs.swarms", emit: swarm_seeds
-    path "asvs_representatives_hash.fa", emit: asvs_hash
-
-    script:
-    """
-    python $pyscript $swarm_stats $swarm_swarms $asvs_repr_hash $threshold
-    """
-}
-
-
 process ASVS_CONTINGENCY_TABLE {
 
     tag "Build contingency table using the ASVs returned"

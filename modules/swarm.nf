@@ -58,7 +58,7 @@ workflow {
         with the parameter values for how to run swarm."""
     )
 
-    def input_seq = Channel.fromPath(params.input_fasta)
+    def input_seq = channel.fromPath(params.input_fasta)
 
     println(swarm_params)
 

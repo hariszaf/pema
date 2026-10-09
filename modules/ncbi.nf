@@ -5,29 +5,27 @@
 Usage:
 
     nextflow run modules/ncbi.nf --params-file config_files/ncbi.yaml
-    nextflow run modules/ncbi.nf --strings_file buildingPemaNf2/crest_assignment/assignments30.txt --ncbi_api_key 4fab68323a62356af3bbb7471d9120153c08 --outdir buildingPemaNf2/ncbi_taxonomy/ --tax_table buildingPemaNf2/ncbi_taxonomy/tax_assigned_table.tsv 
+    nextflow run modules/ncbi.nf --strings_file buildingPemaNf2/crest_assignment/assignments30.txt --ncbi_api_key <YOUR_KEY> --outdir buildingPemaNf2/ncbi_taxonomy/ --tax_table buildingPemaNf2/ncbi_taxonomy/tax_assigned_table.tsv 
 */
 
-include { paramsToCliArgs; loadYamlParams } from './utils.nf'
 
 
 params.max_parallel = params.max_parallel ?: 1
-params.ncbi_api_key = params.ncbi_api_key ?: null
+params.ncbi_api_key = params.ncbi_api_key ?: System.getenv('NCBI_API_KEY')
 params.sleep        = params.sleep ?: 0.4
 
 workflow {
 
-    strings_ch = Channel.fromPath(params.strings_file)
+    strings_ch = channel.fromPath(params.strings_file)
     unique_ch  = UNIQUE_TAXA(strings_ch)
 
     // -------------------------------
     // Load strings from file
     // -------------------------------
     taxa_ch = unique_ch
-        .map { file -> file.text }
         .splitText()
-        .map { it.trim() }
-        .filter { it }
+        .map { line -> line.trim() }
+        .filter { line -> line }
 
     // -------------------------------
     // Run API query for each taxon
@@ -45,7 +43,7 @@ workflow {
     // -------------------------------
     // Integrate NCBI Taxonomy to taxonomy abundance table
     // -------------------------------
-    tax_table_ch = Channel.fromPath(params.tax_table)
+    tax_table_ch = channel.fromPath(params.tax_table)
     MERGE_NCBI_TAXONOMY_TABLE(
         tax_table_ch,
         ncbi_taxonomies.ncbi_taxonomy,
@@ -77,7 +75,7 @@ process UNIQUE_TAXA {
 
 process NCBI_TAXONOMY_QUERY {
 
-    tag {"Get NCBI Taxonomy metadata for" }
+    tag "${taxon}"
 
     container "hariszaf/datasets"  // based on: biocontainers/ncbi-datasets-cli:16.22.1_cv1
 
@@ -92,46 +90,26 @@ process NCBI_TAXONOMY_QUERY {
         path "ncbi_ids/*.err", emit: error_file
 
     script:
-    """
-    mkdir -p ncbi_ids
+        // Single-quote the taxon for the shell, so names with quotes, $ or backticks are safe
+        def taxon_q = "'" + taxon.replace("'", "'\\''") + "'"
+        def api_key = params.ncbi_api_key ?: ''
+        // NCBI allows ~10 requests/sec with an API key and ~3 without one
+        def sleep_time = Math.max((params.sleep ?: 0) as double, api_key ? 0.1 : 0.4)
+        """
+        mkdir -p ncbi_ids
 
-    taxon_clean=\$(echo "${taxon}" | tr -d '()' | tr '/:' '_')
+        taxon_clean=\$(printf '%s' ${taxon_q} | tr -d '()' | tr '/:' '__')
+        output_filename="\${taxon_clean// /_}"
 
-    # Export API key to be visible to datasets CLI if provided
-    if [ -n "${params.ncbi_api_key}" ]; then
-        export NCBI_API_KEY="${params.ncbi_api_key}"
-    fi
+        ${api_key ? "export NCBI_API_KEY='${api_key}'" : ''}
 
-    output_filename="\${taxon_clean// /_}"
+        # A taxon unknown to NCBI must not fail the run; its error is kept in the .err file
+        datasets summary taxonomy taxon "\$taxon_clean" \
+            > "ncbi_ids/\$output_filename.tsv" \
+            2> "ncbi_ids/\$output_filename.err" || true
 
-    # Run the NCBI API CLI  
-    datasets summary taxonomy taxon "\$taxon_clean" > "ncbi_ids/\$output_filename.tsv" 2> "ncbi_ids/\$output_filename.err"
-
-    # Sleep 
-    sleep_time=0.4  # default
-
-    if [ -n "${params.ncbi_api_key}" ]; then
-        if [ -n "${params.sleep}" ]; then
-            # if params.sleep > 0.1
-            if awk "BEGIN{exit !(${params.sleep} > 0.1)}"; then
-                sleep_time=${params.sleep}
-            else
-                sleep_time=0.1
-            fi
-        fi
-    else
-        if [ -n "${params.sleep}" ]; then
-            # if params.sleep < 0.4
-            if awk "BEGIN{exit !(${params.sleep} < 0.4)}"; then
-                sleep_time=0.4
-            else
-                sleep_time=${params.sleep}
-            fi
-        fi
-    fi
-
-    sleep \$sleep_time
-    """
+        sleep ${sleep_time}
+        """
 }
 
 
@@ -203,7 +181,11 @@ process MERGE_NCBI_TAXONOMY_TABLE {
     script:
 
         """
-        python /opt/ncbi_taxonomy_table.py --ncbi-taxonomies taxonomies.json
+        python /opt/ncbi_taxonomy_table.py \
+            --taxonomy-table ${taxonomy_table} \
+            --ncbi-taxonomies ${ncbi_taxonomies_json} \
+            --ncbi-errors ${ncbi_errors} \
+            --output tax_assigned_with_ncbi.tsv
         """
 
 }

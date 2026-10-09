@@ -6,7 +6,11 @@ Usage:
 
     nextflow run modules/crest.nf --params-file config_files/crest.yaml
 */
-include { paramsToCliArgs; loadYamlParams } from './utils.nf'
+include { loadYamlParams; valueOr } from './utils.nf'
+
+// Defaults for standalone use; when included from pema.nf these are already set.
+params.outdir          = params.outdir ?: (params.paramsFile ? loadYamlParams(params.paramsFile, 'outdir') : null) ?: "results"
+params.clustering_algo = params.clustering_algo ?: (params.paramsFile ? loadYamlParams(params.paramsFile, 'clustering_algo') : null) ?: 'swarm'
 
 process TRAIN_CREST_DB {
 
@@ -43,7 +47,8 @@ process CREST_TAXONOMY_ASSIGNMENT {
     publishDir { "${params.outdir}" }, mode: 'copy'
 
     container "hariszaf/crest4:4.4.5"
-    containerOptions "-v ${crest_params.mount_crest_dbs}:/crest4/.crest4:rw"
+    // Mount the local CREST databases folder only when one is given
+    containerOptions { crest_params.mount_crest_dbs ? "-v ${crest_params.mount_crest_dbs}:/crest4/.crest4:rw" : '' }
 
     input:
 
@@ -67,13 +72,13 @@ process CREST_TAXONOMY_ASSIGNMENT {
         fi
 
         crest4 --fasta ${fasta} \
-            --search_algo ${crest_params.search_algo ?: 'vsearch'} \
+            --search_algo ${crest_params.search_algo} \
             --num_threads ${crest_params.threads} \
             --min_score ${crest_params.min_score} \
             --score_drop ${crest_params.score_drop} \
             --min_smlrty ${crest_params.min_smlrty} \
             --search_db ${crest_params.database} \
-            --output_dir crest_assignment || true
+            --output_dir crest_assignment
         """
 }
 
@@ -114,26 +119,24 @@ workflow {
     )
 
     // Crest params
-    def crest_params = loadYamlParams(params.yaml, 'crest')
+    def crest_params = loadYamlParams(params.yaml, 'crest') ?: [:]
     def crest_supported_DBs = ['ssuome', 'silvamod138pr2', 'mitofish', 'midori253darn']
 
     // Load the input fasta file containing the sequences to be classified.
     def fasta_file  = crest_params.fasta ?: error(
         "Please provide a fasta file to be classified (--fasta)."
     ) // asvs_representatives.fa
-    def fasta   = Channel.fromPath(fasta_file)
+    def fasta   = channel.fromPath(fasta_file)
 
     // Load the ASV contingency table from the provided path. This table is needed to build the taxonomy table after the CREST assignments.
     def cont_file = loadYamlParams(params.yaml, 'asvs_contingency_table') ?: error(
         "Please provide the path to the ASV contingency table (--asvs_contingency_table)."
     )
-    def cont_table = Channel.fromPath(cont_file)
+    def cont_table = channel.fromPath(cont_file)
 
     // Load the database parameter, which can be either a predefined database name 
     // or a custom path to a directory containing the database files. 
     // If it's a custom path, make sure to prepend the mount point for the CREST databases.
-
-    crest_params.mount_crest_dbs = crest_params.mount_crest_dbs
 
     def db = crest_params.database ?: error(
         """
@@ -167,16 +170,12 @@ workflow {
         crest_params.database = db
     }
 
-    crest_params.threads     = loadYamlParams(params.yaml, 'threads') ?: 4
+    crest_params.threads     = valueOr(crest_params.threads, valueOr(loadYamlParams(params.yaml, 'threads'), 4))
 
     crest_params.search_algo = crest_params.search_algo ?: 'blast'                                       // 'blast' or 'vsearch'
-    crest_params.min_score   = crest_params.min_score ?: (params.search_algo == 'blast' ? 155.0 : 0.75)
-    crest_params.min_smlrty  = crest_params.min_smlrty ?: true
-    crest_params.score_drop  = crest_params.score_drop ?: 2.0
-
-    // General parameters
-    params.outdir          = loadYamlParams(params.yaml, 'outdir') ?: "results"    
-    params.clustering_algo = loadYamlParams(params.yaml, 'clustering_algo') ?: 'swarm' // 'vsearch' or 'swarm'
+    crest_params.min_score   = valueOr(crest_params.min_score, crest_params.search_algo == 'blast' ? 155.0 : 0.75)
+    crest_params.min_smlrty  = valueOr(crest_params.min_smlrty, true)
+    crest_params.score_drop  = valueOr(crest_params.score_drop, 2.0)
 
     // Run the CREST taxonomy assignment.
     def crest_taxonomy_assignment = CREST_TAXONOMY_ASSIGNMENT(
@@ -185,6 +184,6 @@ workflow {
     )
 
     // Build the taxonomy table by combining the ASV contingency table and the CREST taxonomy assignments.
-    def tax_table = BUILD_TAXONOMY_TABLE(cont_table, crest_taxonomy_assignment.assignments)
+    BUILD_TAXONOMY_TABLE(cont_table, crest_taxonomy_assignment.assignments)
 
 }

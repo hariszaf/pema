@@ -1,30 +1,33 @@
 #!/usr/bin/env nextflow
 
-// @Grab('org.yaml:snakeyaml:1.33')
-// import org.yaml.snakeyaml.Yaml
-
-import groovy.yaml.YamlSlurper
-
 
 def paramsToCliArgs(Map p) {
     if (!p) return ""
     return p.collectMany { k, v ->
         if (v == null) return []       // skip nulls
         if (v instanceof Boolean) return v ? ["--$k"] : []
-        if (v instanceof Collection) return v.collect { "--$k $it" }
+        if (v instanceof Collection) return v.collect { item -> "--$k $item" }
         return ["--$k $v"]             // scalar
     }.join(' ')
 }
 
 
+// Returns the value of `section` in the YAML file, or null if the key is missing.
+// Callers must use `valueOr` (not `?:`) for defaults, so that 0 / false values are kept.
 def loadYamlParams(String yamlFilePath, String section) {
     def yamlFile = new File(yamlFilePath)
     if (!yamlFile.exists()) {
-        println "Warning: YAML file '${yamlFilePath}' not found."
-        return [:]
+        error "YAML file '${yamlFilePath}' not found."
     }
-    def params = new YamlSlurper().parse(yamlFile)
-    return params[section] ?: [:]
+    def content = new groovy.yaml.YamlSlurper().parse(yamlFile) ?: [:]
+    def value = content[section]
+    // YamlSlurper returns lazy maps that break when passed to a process; copy to a plain map
+    return value instanceof Map ? new LinkedHashMap(value) : value
+}
+
+// Like `value ?: fallback`, but only falls back when value is null (keeps 0 and false).
+def valueOr(value, fallback) {
+    return value != null ? value : fallback
 }
 
 def stripAllExtensions(filePath) {

@@ -215,7 +215,8 @@ ncbi_taxonomy:
   get_ncbi_taxonomy: true
 
   # When To get one:  https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/
-  ncbi_api_key: 4fab68323a62356af3bbb7471d9120153c08
+  # Leave empty and export NCBI_API_KEY instead, to keep the key out of version control.
+  ncbi_api_key:
 
   max_parallel: 1
 
