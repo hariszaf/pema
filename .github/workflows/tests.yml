@@ -33,16 +33,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
+      # Installed in the job's folder (no root needed), and added to the PATH of the next steps
       - name: Install Nextflow
         run: |
+          mkdir -p "$RUNNER_TEMP/bin" && cd "$RUNNER_TEMP/bin"
           curl -s https://get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
-          nextflow -version
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          ./nextflow -version
 
       - name: Lint
         run: nextflow lint pema.nf modules/ nextflow.config
@@ -72,16 +74,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '17'
 
+      # Installed in the job's folder (no root needed), and added to the PATH of the next steps
       - name: Install Nextflow
         run: |
+          mkdir -p "$RUNNER_TEMP/bin" && cd "$RUNNER_TEMP/bin"
           curl -s https://get.nextflow.io | bash
-          sudo mv nextflow /usr/local/bin/
-          nextflow -version
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
+          ./nextflow -version
 
       # The pema-nf image holds the scripts/ of the repository: build it from this commit,
       # with the tag the modules use, so the tests run the scripts being tested
@@ -97,20 +101,26 @@ jobs:
           path: sanity_check/sanity_data.tar.gz
           key: sanity-data-1NoZfw3IOWksc1AnSr46HkOMoFautaiTO
 
-      # crest4 downloads its built-in databases on first use; keep them between runs
+      # crest4 downloads its built-in databases on first use; keep them between runs.
+      # In the job's temporary folder, not in ~/.crest4, so a local run (e.g. with act) does not touch yours
       - name: Cache the crest4 databases
         uses: actions/cache@v4
         with:
-          path: ~/.crest4
+          path: ${{ runner.temp }}/crest4
           key: crest4-dbs-${{ matrix.test }}
 
       - name: Run the sanity check
+        env:
+          CREST_DBS: ${{ runner.temp }}/crest4
         run: sanity_check/run_sanity_check.sh ${{ matrix.test }}
 
-      # crest4 runs as root in its container; let the cache step read what it downloaded
-      - name: Make the crest4 databases readable
+      # The containers run as root: give the files they wrote back to the runner user, so the cache
+      # can be saved and the job folder cleaned up (with Docker, so no sudo is needed)
+      - name: Give the files written by the containers back to the runner user
         if: always()
-        run: sudo chown -R "$(id -u):$(id -g)" ~/.crest4 2>/dev/null || true
+        run: |
+          docker run --rm -v "$GITHUB_WORKSPACE":/workspace -v "$RUNNER_TEMP":/runner_temp alpine:3 \
+              chown -R "$(id -u):$(id -g)" /workspace /runner_temp
 
       - name: Summary
         if: always()

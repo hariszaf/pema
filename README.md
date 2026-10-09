@@ -299,7 +299,23 @@ To run the same tests on your computer (with Nextflow and Docker), from the root
    Each test prints whether it passed, and its log is `sanity_check/<marker>/TEST_<...>.log`;
    the script exits with an error if a test failed.
 
-`sanity_check/run_sanity_check.sh` without tests runs all of them (16S, 18S, 12S, COI and ITS, with Swarm or VSEARCH, crest4 or RDPClassifier);
+To run the **CI workflow itself** (to check a change to `.github/workflows/tests.yml`, for example), use
+[act](https://github.com/nektos/act), which runs GitHub Actions workflows on your computer. Download it from its
+[releases](https://github.com/nektos/act/releases) (e.g. `act_Linux_x86_64.tar.gz`; no installation or `sudo` needed), and run,
+from the root folder of this repository:
+
+```bash
+./act push -W .github/workflows/tests.yml -P ubuntu-latest=-self-hosted
+```
+
+This runs the jobs of a push (lint, then the two sanity tests) as GitHub would, and ends with `Job succeeded` for each job.
+`-P ubuntu-latest=-self-hosted` runs the steps directly on your computer instead of in a container: the tests start Docker containers
+themselves, which does not work from inside act's own containers. To run other tests, as from the Actions tab, add
+`workflow_dispatch --input tests="16S 18S-vsearch"` in place of `push`.
+act keeps the GitHub actions and the caches in `~/.cache/act` and `~/.cache/actcache`, and a folder for each job it ran in
+`~/.cache/act/<id>/` (a copy of the repository with the test outputs, a few GB); delete those when you are done.
+
+ (16S, 18S, 12S, COI and ITS, with Swarm or VSEARCH, crest4 or RDPClassifier);
 some need databases that are downloaded on first use (the crest4 SILVA database is ~4 GB) or that you provide.
 `sanity_check/run_sanity_check.sh --help` lists the tests and their options, e.g. `--ncbi` to also test the NCBI Taxonomy step,
 or `--profile singularity` to use Singularity instead of Docker.
