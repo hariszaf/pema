@@ -21,6 +21,8 @@
    - [Output](#output)
    - [Running single modules](#running-single-modules)
    - [Running the tests](#running-the-tests)
+      - [Running the sanity check locally](#running-the-sanity-check-locally)
+      - [Running the CI workflow locally](#running-the-ci-workflow-locally)
    - [PEMA website along with how to documentation can be found here.](#pema-website-along-with-how-to-documentation-can-be-found-here)
    - [Contact](#contact)
    - [License](#license)
@@ -278,7 +280,12 @@ On every push and pull request, GitHub Actions ([`.github/workflows/tests.yml`](
 and runs two tests of the sanity check, `COI-rdp-custom` and `COI-crest-custom`, which need no external database.
 Other tests can be run from the Actions tab ("Run workflow"), with the list of tests to run.
 
-To run the same tests on your computer (with Nextflow and Docker), from the root folder of this repository:
+Both can also be run on your computer: the sanity check itself, or the whole CI workflow.
+
+
+### Running the sanity check locally
+
+With Nextflow and Docker, from the root folder of this repository:
 
 1. Lint the pipeline:
    ```bash
@@ -299,26 +306,46 @@ To run the same tests on your computer (with Nextflow and Docker), from the root
    Each test prints whether it passed, and its log is `sanity_check/<marker>/TEST_<...>.log`;
    the script exits with an error if a test failed.
 
-To run the **CI workflow itself** (to check a change to `.github/workflows/tests.yml`, for example), use
-[act](https://github.com/nektos/act), which runs GitHub Actions workflows on your computer. Download it from its
-[releases](https://github.com/nektos/act/releases) (e.g. `act_Linux_x86_64.tar.gz`; no installation or `sudo` needed), and run,
-from the root folder of this repository:
-
-```bash
-./act push -W .github/workflows/tests.yml -P ubuntu-latest=-self-hosted
-```
-
-This runs the jobs of a push (lint, then the two sanity tests) as GitHub would, and ends with `Job succeeded` for each job.
-`-P ubuntu-latest=-self-hosted` runs the steps directly on your computer instead of in a container: the tests start Docker containers
-themselves, which does not work from inside act's own containers. To run other tests, as from the Actions tab, add
-`workflow_dispatch --input tests="16S 18S-vsearch"` in place of `push`.
-act keeps the GitHub actions and the caches in `~/.cache/act` and `~/.cache/actcache`, and a folder for each job it ran in
-`~/.cache/act/<id>/` (a copy of the repository with the test outputs, a few GB); delete those when you are done.
-
- (16S, 18S, 12S, COI and ITS, with Swarm or VSEARCH, crest4 or RDPClassifier);
+`sanity_check/run_sanity_check.sh` without tests runs all of them (16S, 18S, 12S, COI and ITS, with Swarm or VSEARCH, crest4 or RDPClassifier);
 some need databases that are downloaded on first use (the crest4 SILVA database is ~4 GB) or that you provide.
 `sanity_check/run_sanity_check.sh --help` lists the tests and their options, e.g. `--ncbi` to also test the NCBI Taxonomy step,
 or `--profile singularity` to use Singularity instead of Docker.
+
+
+### Running the CI workflow locally
+
+To check the CI workflow itself (e.g. after changing `.github/workflows/tests.yml`), run it with [act](https://github.com/nektos/act),
+which runs GitHub Actions workflows on your computer. You need Docker (usable without `sudo`), Java 17 or later, and act.
+
+1. Get act, once. It is a single file, no installation or `sudo` needed; e.g. in `~/bin`:
+   ```bash
+   mkdir -p ~/bin && curl -sL https://github.com/nektos/act/releases/latest/download/act_Linux_x86_64.tar.gz | tar xz -C ~/bin act
+   ~/bin/act --version
+   ```
+   (for macOS or Windows, see the [act releases](https://github.com/nektos/act/releases)).
+2. Run the workflow, **from the root folder of this repository** (act takes the folder it is run from as the repository):
+   ```bash
+   ~/bin/act push -W .github/workflows/tests.yml -P ubuntu-latest=-self-hosted
+   ```
+   This runs what GitHub runs on a push: the lint job, then the two sanity tests (about 10 minutes). It worked if every job ends with
+   `🏁  Job succeeded`, and act exits without an error. The first time, act may ask which default image to use; any answer works.
+3. To run other tests, as with "Run workflow" on the Actions tab:
+   ```bash
+   ~/bin/act workflow_dispatch --input tests="16S 18S-vsearch" -W .github/workflows/tests.yml -P ubuntu-latest=-self-hosted
+   ```
+   These download the crest4 databases they need on first use (SILVA is ~4 GB).
+4. Clean up: act keeps a folder for each job it ran in `~/.cache/act/<id>/` (a copy of the repository with the test outputs,
+   a few GB each); delete those when you are done. Keep `~/.cache/act/actions-*`, `~/.cache/act/tool_cache` and `~/.cache/actcache`
+   (the GitHub actions, Java and the caches), which act reuses.
+
+Notes:
+
+* `-P ubuntu-latest=-self-hosted` runs the steps directly on your computer instead of in a container: the tests start Docker containers
+  themselves, which does not work from inside act's own containers. The steps need no `sudo`.
+* act runs your working copy, including changes you have not committed.
+* Do not use `-n` (dry run) with `-self-hosted`: in this mode the steps run anyway.
+* The `actions/setup-java` step writes Maven settings in `~/.m2/` (`settings.xml`, `toolchains.xml`).
+* The `punycode` deprecation messages come from the Node.js that act uses to run the GitHub actions, and can be ignored.
 
 
 
