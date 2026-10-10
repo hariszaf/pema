@@ -112,7 +112,22 @@ jobs:
       - name: Run the sanity check
         env:
           CREST_DBS: ${{ runner.temp }}/crest4
-        run: sanity_check/run_sanity_check.sh ${{ matrix.test }}
+        run: sanity_check/run_sanity_check.sh ${{ matrix.test }} | tee sanity_summary.txt
+
+      # Show why a test failed, in the job output: the errors and the end of its Nextflow log
+      - name: Show the errors
+        if: failure()
+        run: |
+          for log in sanity_check/*/TEST_*.log; do
+            [ -f "$log" ] || continue
+            echo "::group::${log}"
+            echo "--- errors:"
+            grep -E "ERROR|Error|Caused by|Command error|exceeds|exit status" -A4 "$log" | head -n 80 || true
+            echo "--- last lines:"
+            tail -n 40 "$log"
+            echo "::endgroup::"
+            grep -m1 -A3 "Caused by" "$log" | tail -n 3 | sed "s|^|::error title=${{ matrix.test }}::|" || true
+          done
 
       # The containers run as root: give the files they wrote back to the runner user, so the cache
       # can be saved and the job folder cleaned up (with Docker, so no sudo is needed)
@@ -128,7 +143,8 @@ jobs:
           {
             echo "### Sanity check: ${{ matrix.test }}"
             echo '```'
-            tail -n 40 sanity_check/*/TEST_*.log 2>/dev/null | grep -E "SUCCESS|FAILED|ERROR|Caused by|Command error" -A2 || true
+            sed -n '/Sanity check summary/,$p' sanity_summary.txt 2>/dev/null || true
+            grep -h -m1 -A3 "Caused by" sanity_check/*/TEST_*.log 2>/dev/null || true
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 

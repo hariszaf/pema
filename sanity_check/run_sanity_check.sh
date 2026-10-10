@@ -132,8 +132,11 @@ make_params() {
     local test=$1 outdir=$2 params=$3
     local marker=${MARKER[$test]}
     local rdp_dbs="${RDP_DBS}" crest_dbs="${CREST_DBS}" taxonomy="" sequences=""
+    local rdp_memory="" train_memory=""
     if [[ "${test}" == COI-rdp-custom ]]; then
         rdp_dbs="${CUSTOM_RDP_DIR}/trained_dbs" taxonomy="${CUSTOM_RDP_TAXONOMY}" sequences="${CUSTOM_RDP_SEQUENCES}"
+        # A small database: the default memory (16 GB to train) is more than e.g. GitHub's runners have
+        rdp_memory="4 GB" train_memory="4 GB"
     elif [[ "${test}" == COI-crest-custom ]]; then
         crest_dbs="${CUSTOM_CREST_DIR}/trained_dbs" taxonomy="${CUSTOM_CREST_TAXONOMY}" sequences="${CUSTOM_CREST_SEQUENCES}"
     fi
@@ -147,6 +150,8 @@ make_params() {
         -e "s#^  databases_dir:.*#  databases_dir: ${rdp_dbs}#" \
         -e "s#^    taxonomy:.*#    taxonomy: ${taxonomy}#" \
         -e "s#^    sequences:.*#    sequences: ${sequences}#" \
+        -e "${rdp_memory:+s#^  memory:.*#  memory: ${rdp_memory}#}" \
+        -e "${train_memory:+s#^    memory:.*#    memory: ${train_memory}#}" \
         -e "s#^  get_ncbi_taxonomy:.*#  get_ncbi_taxonomy: ${NCBI}#" \
         -e "s#^  ncbi_api_key:.*#  ncbi_api_key:#" \
         "${PEMA_DIR}/config_files/pema.yaml" > "${params}"
