@@ -12,6 +12,62 @@ include { loadYamlParams; valueOr } from './utils.nf'
 params.outdir          = params.outdir ?: (params.paramsFile ? loadYamlParams(params.paramsFile, 'outdir') : null) ?: "results"
 params.clustering_algo = params.clustering_algo ?: (params.paramsFile ? loadYamlParams(params.paramsFile, 'clustering_algo') : null) ?: 'swarm'
 
+// Download one of PEMA's crest4 databases: <download_url>/<archive>.tar.gz, with the database folder in it.
+// crest4 needs the files of a database to be named after its folder (<db>/<db>.fasta, .map, .names, .tre),
+// so they are renamed; a tree whose root (node 0) is not named, as written by older versions of
+// make_new_crest_db.py, gets its root named, otherwise crest4 fails on it.
+process DOWNLOAD_CREST_DB {
+
+    tag "Download the crest4 database ${crest_params.database_name}."
+
+    // Saved in mount_crest_dbs; pema.nf finds it there in the next runs and does not download it again
+    publishDir { crest_params.mount_crest_dbs }, mode: 'copy'
+
+    container "hariszaf/pema-nf:0.2.2"
+
+    input:
+        val crest_params
+
+    output:
+        path "${crest_params.database_name}", emit: database
+
+    script:
+        def db      = crest_params.database_name
+        def archive = crest_params.download_archive
+        def url     = crest_params.download_url.toString().replaceAll('/+$', '')
+        """
+        wget --quiet --tries 10 --waitretry 10 --continue --output-document ${archive}.tar.gz "${url}/${archive}.tar.gz"
+        mkdir -p extracted && tar -xzf ${archive}.tar.gz -C extracted
+
+        # The database folder is the one with the .names file, wherever it is in the archive
+        names=\$(find extracted -name "*.names" | head -n 1)
+        if [[ -z "\$names" ]]; then
+            echo "${url}/${archive}.tar.gz has no .names file: not a crest4 database." >&2
+            exit 1
+        fi
+        mv "\$(dirname "\$names")" ${db}
+        rm -rf extracted ${archive}.tar.gz
+
+        # Name the files after the folder
+        cd ${db}
+        for ext in fasta map names tre tsv; do
+            found=\$(ls *.\$ext 2>/dev/null | head -n 1)
+            if [[ -n "\$found" && "\$found" != "${db}.\$ext" ]]; then
+                mv "\$found" "${db}.\$ext"
+            fi
+        done
+        for ext in fasta map names tre; do
+            [[ -f "${db}.\$ext" ]] || { echo "The crest4 database ${db} has no .\$ext file." >&2; exit 1; }
+        done
+
+        # A root numbered 0 must be named in the tree too
+        if head -n 1 ${db}.names | grep -q '^0,' && grep -q ')\\s*;\\s*\$' ${db}.tre; then
+            sed -i 's/)\\s*;\\s*\$/)0;/' ${db}.tre
+        fi
+        """
+}
+
+
 // Building a custom crest4 database: the user provides a taxonomy file (tsv: accession, lineage
 // separated by '/' or ';', optionally a name) and a sequence file (fasta, named by accession).
 
@@ -190,7 +246,8 @@ workflow {
     def db = crest_params.database ?: error(
         """
         The database used for the sequence similarity search.
-        Either `ssuome`, `silvamod138pr2`, `mitofish`, or `midori253darn`. By default, `ssuome`.
+        Either `ssuome`, `silvamod138pr2`, `mitofish`, or `midori253darn`. 
+        By default, `ssuome`.
         In case of a custom database, please specify the full path to a directory containing 
         all required files, making sure that is under the `mount_crest_dbs`.
         """

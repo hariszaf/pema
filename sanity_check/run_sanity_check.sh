@@ -22,11 +22,11 @@
 # Environment variables:
 #   CREST_DBS           folder for the CREST databases, so they are downloaded only once
 #                       (default: ~/.crest4)
-#   ITS_CREST_DB        name of a custom UNITE database folder under CREST_DBS, needed for ITS
-#                       (crest4 has no built-in ITS database); ITS is skipped if not set
-#   RDP_DBS             folder with the RDP-trained databases; the RDP tests are skipped without it
-#   RDP_12S_DB          RDP database for 12S-rdp (default: 12S_v2.0.0)
-#   RDP_COI_DB          RDP database for COI-rdp; COI-rdp is skipped if not set
+#   ITS_CREST_DB        crest4 database for ITS, in CREST_DBS (default: unite2025, downloaded on first use)
+#   RDP_DBS             folder for the RDP-trained databases (default: sanity_check/rdp_dbs); the PEMA-trained
+#                       ones are downloaded there on first use
+#   RDP_12S_DB          RDP database for 12S-rdp (default: 12S_v200)
+#   RDP_COI_DB          RDP database for COI-rdp, e.g. midori_1 (needs >= 20 GB of memory); COI-rdp is skipped if not set
 #
 # Author: Haris Zafeiropoulos
 
@@ -39,9 +39,9 @@ DATA_URL="https://drive.usercontent.google.com/download?id=1NoZfw3IOWksc1AnSr46H
 DATA_TARBALL="${SANITY_DIR}/sanity_data.tar.gz"
 
 CREST_DBS="${CREST_DBS:-${HOME}/.crest4}"
-ITS_CREST_DB="${ITS_CREST_DB:-}"
-RDP_DBS="${RDP_DBS:-}"
-RDP_12S_DB="${RDP_12S_DB:-12S_v2.0.0}"
+ITS_CREST_DB="${ITS_CREST_DB:-unite2025}"
+RDP_DBS="${RDP_DBS:-${SANITY_DIR}/rdp_dbs}"
+RDP_12S_DB="${RDP_12S_DB:-12S_v200}"
 RDP_COI_DB="${RDP_COI_DB:-}"
 
 # marker -> folder with the reads (inside sanity_check/<marker>/)
@@ -186,15 +186,11 @@ failed=0
 skip_reason() {
     local test=$1
     if [[ "${test}" == ITS && -z "${DATABASE[$test]}" ]]; then
-        echo "crest4 has no built-in ITS database; set ITS_CREST_DB to a UNITE folder in ${CREST_DBS}"
+        echo "set ITS_CREST_DB to a crest4 UNITE database in ${CREST_DBS}"
     elif [[ "${test}" == COI-rdp-custom || "${test}" == COI-crest-custom ]]; then
         :   # builds its own database
-    elif [[ "${CLASSIFIER[$test]}" == rdp && -z "${RDP_DBS}" ]]; then
-        echo "set RDP_DBS to the folder with the RDP-trained databases"
     elif [[ "${CLASSIFIER[$test]}" == rdp && -z "${DATABASE[$test]}" ]]; then
-        echo "set RDP_COI_DB to the name of an RDP-trained COI database in ${RDP_DBS}"
-    elif [[ "${CLASSIFIER[$test]}" == rdp && ! -d "${RDP_DBS}/${DATABASE[$test]}" ]]; then
-        echo "RDP database ${RDP_DBS}/${DATABASE[$test]} not found"
+        echo "set RDP_COI_DB to an RDP-trained COI database (e.g. midori_1, downloaded into ${RDP_DBS}; needs >= 20 GB of memory)"
     fi
 }
 

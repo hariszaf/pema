@@ -13,8 +13,7 @@
        └── wordConditionalProbIndexArr.txt
 */
 
-// Download a PEMA-trained database from Zenodo: <download_url>/<database>.tar.gz, or, if that file
-// is not there, the database's folder from <download_url>/rdp_dbs_v220.tar.gz (all databases, ~1.2 GB).
+// Download a PEMA-trained database: <download_url>/<archive>.tar.gz, with the database folder in it
 process DOWNLOAD_RDP_DB {
 
     tag "Download the RDPClassifier database ${rdp_params.database}."
@@ -31,32 +30,21 @@ process DOWNLOAD_RDP_DB {
         path "${rdp_params.database}", emit: database
 
     script:
-        def db  = rdp_params.database
-        def url = rdp_params.download_url.toString().replaceAll('/+$', '')
+        def db      = rdp_params.database
+        def archive = rdp_params.download_archive
+        def url     = rdp_params.download_url.toString().replaceAll('/+$', '')
         """
-        download() {
-            wget --quiet --tries 10 --waitretry 10 --continue --output-document "\$2" "\$1"
-        }
+        wget --quiet --tries 10 --waitretry 10 --continue --output-document ${archive}.tar.gz "${url}/${archive}.tar.gz"
+        mkdir -p extracted && tar -xzf ${archive}.tar.gz -C extracted
 
-        if download "${url}/${db}.tar.gz" ${db}.tar.gz; then
-            tar -xzf ${db}.tar.gz
-        else
-            rm -f ${db}.tar.gz
-            echo "${url}/${db}.tar.gz not available; extracting ${db} from ${url}/rdp_dbs_v220.tar.gz" >&2
-            download "${url}/rdp_dbs_v220.tar.gz" rdp_dbs_v220.tar.gz
-            tar -xzf rdp_dbs_v220.tar.gz --wildcards "*${db}/*"
-        fi
-
-        # Move the database folder (wherever it is in the archive) to ./${db}
-        properties=\$(find . -path "*${db}/rRNAClassifier.properties" -not -path "./${db}/*" | head -n 1)
-        if [[ -n "\$properties" ]]; then
-            mv "\$(dirname "\$properties")" ${db}_tmp && rm -rf ${db} && mv ${db}_tmp ${db}
-        fi
-        if [[ ! -f ${db}/rRNAClassifier.properties ]]; then
-            echo "The downloaded archive has no ${db}/rRNAClassifier.properties." >&2
+        # The database folder is the one with the rRNAClassifier.properties file, wherever it is in the archive
+        properties=\$(find extracted -name rRNAClassifier.properties | head -n 1)
+        if [[ -z "\$properties" ]]; then
+            echo "${url}/${archive}.tar.gz has no rRNAClassifier.properties: not an RDPClassifier database." >&2
             exit 1
         fi
-        rm -f ${db}.tar.gz rdp_dbs_v220.tar.gz
+        mv "\$(dirname "\$properties")" ${db}
+        rm -rf extracted ${archive}.tar.gz
         """
 }
 

@@ -41,7 +41,7 @@ include { CUTADAPT } from './modules/cutadapt.nf'
 include { FASTP } from './modules/fastp.nf'
 include { SWARM } from './modules/swarm.nf'
 include {
-    PREPARE_CREST_TRAINING; TRAIN_CREST_DB; CREST_TAXONOMY_ASSIGNMENT; BUILD_TAXONOMY_TABLE
+    DOWNLOAD_CREST_DB; PREPARE_CREST_TRAINING; TRAIN_CREST_DB; CREST_TAXONOMY_ASSIGNMENT; BUILD_TAXONOMY_TABLE
 } from './modules/crest.nf'
 include {
     DOWNLOAD_RDP_DB; PREPARE_RDP_TRAINING; TRAIN_RDP_DB; RDP_CLASSIFY; BUILD_RDP_TAXONOMY_TABLE
@@ -172,11 +172,29 @@ def resolveCrestParams() {
         }
     }
 
+    // PEMA's crest4 databases, downloaded when they are not in mount_crest_dbs yet:
+    // database name -> archive (<download_url>/<archive>.tar.gz)
+    def pemaCrestDBs = ['unite2025': 'unite2025']
+    crest_params.needs_download = false
+    if (!crest_params.needs_training && pemaCrestDBs.containsKey(db.toString())
+            && !(crest_params.mount_crest_dbs && file("${crest_params.mount_crest_dbs}/${db}/${db}.names").exists())) {
+        if (!crest_params.mount_crest_dbs) {
+            error "To download the CREST database '${db}', set `mount_crest_dbs` in the 'crest' section (where it is saved)."
+        }
+        crest_params.download_url     = valueOr(crest_params.download_url, 'https://zenodo.org/records/23266088/files')
+        crest_params.download_archive = pemaCrestDBs[db.toString()]
+        crest_params.database_name    = db.toString()
+        crest_params.needs_download   = true
+        file(crest_params.mount_crest_dbs.toString()).mkdirs()
+        log.info "CREST database '${db}' will be downloaded and saved in '${crest_params.mount_crest_dbs}'."
+    }
+
     if (!crestSupportedDBs.contains(db)) {
-        if (crest_params.mount_crest_dbs && !crest_params.needs_training
+        if (crest_params.mount_crest_dbs && !crest_params.needs_training && !crest_params.needs_download
                 && !file("${crest_params.mount_crest_dbs}/${db}/${db}.names").exists()) {
             error """CREST database '${crest_params.mount_crest_dbs}/${db}' not found (no ${db}.names in it).
-                Check `database` and `mount_crest_dbs` in the 'crest' section, or build it (crest.train)."""
+                Check `database` and `mount_crest_dbs` in the 'crest' section, or build it (crest.train).
+                PEMA can download these databases: ${pemaCrestDBs.keySet().join(', ')}."""
         }
         crest_params.database = "/crest4/.crest4/${db}"
         crest_params.mount_crest_dbs = crest_params.mount_crest_dbs ?: error(
@@ -224,7 +242,8 @@ def resolveRdpParams() {
     def trained = file("${db_path}/rRNAClassifier.properties").exists()
 
     // PEMA-trained databases that can be downloaded from Zenodo
-    def pemaTrainedRdpDBs = ['12S_v2.0.0', 'midori_1', 'midori_2']
+    // database name -> archive (<download_url>/<archive>.tar.gz); 12S_v2.0.0 is the name it had in PEMA v2.x
+    def pemaTrainedRdpDBs = ['12S_v200': '12S_v200', '12S_v2.0.0': '12S_v200', 'midori_1': 'midori_1', 'midori_2': 'midori_2']
 
     // Train the database first, if training files are given and it is not trained yet
     rdp_params.needs_training = false
@@ -248,18 +267,19 @@ def resolveRdpParams() {
             file(rdp_params.databases_dir.toString()).mkdirs()
             log.info "RDP database '${db}' will be trained and saved in '${rdp_params.databases_dir}'."
         }
-    } else if (!trained && db.toString() in pemaTrainedRdpDBs) {
+    } else if (!trained && pemaTrainedRdpDBs.containsKey(db.toString())) {
         // A PEMA-trained database not downloaded yet
         if (!rdp_params.databases_dir) {
             error "To download the RDP database '${db}', set `databases_dir` in the 'rdp' section (where it is saved)."
         }
-        rdp_params.download_url    = valueOr(rdp_params.download_url, 'https://zenodo.org/records/16876159/files')
+        rdp_params.download_url     = valueOr(rdp_params.download_url, 'https://zenodo.org/records/23266088/files')
+        rdp_params.download_archive = pemaTrainedRdpDBs[db.toString()]
         rdp_params.needs_download  = true
         file(rdp_params.databases_dir.toString()).mkdirs()
         log.info "RDP database '${db}' will be downloaded and saved in '${rdp_params.databases_dir}'."
     } else if (!db_path.isDirectory()) {
         error """RDP database folder '${db_path}' not found. Check `database` and `databases_dir` in the 'rdp' section.
-            PEMA can download these databases: ${pemaTrainedRdpDBs.join(', ')}; or train one (rdp.train)."""
+            PEMA can download these databases: ${pemaTrainedRdpDBs.keySet().join(', ')}; or train one (rdp.train)."""
     } else if (!trained) {
         error "No rRNAClassifier.properties in the RDP database folder '${db_path}'."
     }
@@ -367,6 +387,11 @@ workflow {
                 file("${projectDir}/scripts/make_new_crest_db.py"),
                 crest_params
             ).database
+        }
+
+        // Download one of PEMA's crest4 databases, if it is not in mount_crest_dbs yet
+        if (crest_params.needs_download) {
+            built_crest_db = DOWNLOAD_CREST_DB(crest_params).database
         }
 
         crest_taxonomy_assignment = CREST_TAXONOMY_ASSIGNMENT(

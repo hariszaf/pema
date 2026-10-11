@@ -37,6 +37,8 @@ Set `clustering_algo` to `swarm` (ASVs) or `vsearch` (OTUs); see [16/18S analysi
 
 ## Taxonomy assignment
 
-crest4 has no built-in ITS database, so use crest4 with a [UNITE](https://unite.ut.ee/) database built for it: put it in `mount_crest_dbs`,
-and set `database` to its name (in the `crest` section). You can also build one from the UNITE sequences yourself; see
+crest4 has no built-in ITS database; PEMA provides one built from [UNITE](https://unite.ut.ee/) (2025): set `database: unite2025` and
+`mount_crest_dbs` to a folder of yours (in the `crest` section), and PEMA downloads it from [Zenodo](https://zenodo.org/records/23266088)
+the first time it is used. You can also use another crest4 database (put it in `mount_crest_dbs` and set `database` to its name),
+or build one from the UNITE sequences yourself; see
 [Training the CREST classifier]({{ '/training_crest_classifier/' | relative_url }}).

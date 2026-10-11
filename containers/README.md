@@ -35,6 +35,8 @@ docker push hariszaf/pema-nf:<tag>
 
 ## Other Dockerfiles
 
+* [`Dockerfile.dada2`](Dockerfile.dada2) builds [DADA2](https://benjjneb.github.io/dada2/) (1.40.0) from Bioconductor 3.23 / R 4.6.1,
+  on the official Bioconductor image; not used by the pipeline yet.
 * [`Dockerfile.crest4`](Dockerfile.crest4) builds crest4 4.4.5. The pipeline currently uses the published `hariszaf/crest4:4.3.8`;
   `TRAIN_CREST_DB` (not yet part of the pipeline) refers to `hariszaf/crest4:4.4.2`.
 * [`Dockerfile.cutadapt`](Dockerfile.cutadapt) built R and cutadapt for `scripts/cutadaptITS.R` (PEMA v2.x); the pipeline now runs cutadapt

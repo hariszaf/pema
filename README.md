@@ -186,6 +186,10 @@ or the name of a folder with a custom database. For a custom database, `mount_cr
 
 Setting `mount_crest_dbs` is also recommended for the built-in databases, so they are downloaded only once.
 
+PEMA's own crest4 databases, currently `unite2025` (UNITE, for ITS), are downloaded from [Zenodo](https://zenodo.org/records/23266088)
+into `mount_crest_dbs` the first time they are used (`DOWNLOAD_CREST_DB`, from `<download_url>/<database>.tar.gz`), and reused afterwards.
+Their files are renamed after the database folder, as crest4 requires.
+
 **Building a custom CREST database.** Set `crest.train.taxonomy` and `crest.train.sequences`, `mount_crest_dbs`, and `database` to the name of the new database.
 If that database is not yet in `mount_crest_dbs`, PEMA builds it there (`PREPARE_CREST_TRAINING`, `TRAIN_CREST_DB`) and then uses it; later runs reuse it.
 The database is built for crest4 with `scripts/make_new_crest_db.py` (the `.map`, `.names` and `.tre` files) and its search index is built too.
@@ -209,7 +213,7 @@ and the files it lists, for example:
 
 ```
 rdp_databases/
-└── 12S_v2.0.0/
+└── 12S_v200/
     ├── bergeyTrainingTree.xml
     ├── genus_wordConditionalProbList.txt
     ├── logWordPrior.txt
@@ -218,9 +222,9 @@ rdp_databases/
 ```
 
 Set `database` to the folder name and `databases_dir` to the folder that contains it (here `rdp_databases`), or `database` to the full path.
-The PEMA-trained databases `12S_v2.0.0` (12S), `midori_1` and `midori_2` (COI) are downloaded from [Zenodo](https://zenodo.org/records/16876159)
+The PEMA-trained databases `12S_v200` (12S; `12S_v2.0.0` also works), `midori_1` and `midori_2` (COI) are downloaded from [Zenodo](https://zenodo.org/records/23266088)
 into `databases_dir` the first time they are used (`DOWNLOAD_RDP_DB`), and reused afterwards.
-They are fetched as `<download_url>/<database>.tar.gz`, or, if that file is not there, from the archive with all of them (`rdp_dbs_v220.tar.gz`, ~1.2 GB).
+They are fetched as `<download_url>/<database>.tar.gz` (`download_url` in the `rdp` section).
 Ranks are kept from the top down while RDPClassifier's confidence is at least `confidence` (default 0.8; for short amplicons a lower value such as 0.5 is common).
 Rank prefixes such as `g__` and placeholder ranks such as `k__undef_Eukaryota` are removed from the taxonomy.
 

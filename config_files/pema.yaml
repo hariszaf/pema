@@ -213,11 +213,16 @@ crest:
   # The database used for the sequence similarity search.
   # Either `ssuome`, `silvamod138pr2`, `mitofish`, or `midori253darn`.
   # In case of a custom database, e.g. unite_19_02_2025, please make sure you provide the `mount_crest_dbs` too.
+  # PEMA's crest4 databases, e.g. unite2025 (UNITE, for ITS), are downloaded from Zenodo into `mount_crest_dbs`
+  # the first time they are used.
   database: silvamod138pr2
 
   # Directory containing all the custom CREST databases, if any (optional, e.g. /home/luna.kuleuven.be/u0156635/.crest4/).
   # It is good practice to provide a path even when using one of the crest databases, so you do not download it every time.  !!!!
   mount_crest_dbs: /home/luna.kuleuven.be/u0156635/.crest4/
+
+  # Where PEMA's crest4 databases are downloaded from: <download_url>/<database>.tar.gz
+  download_url: https://zenodo.org/records/23266088/files
 
   # The algorithm used for the sequence similarity search
   # that will be run to match the sequences against the database chosen. Either `blast` or `vsearch`. By default, `blast`.
@@ -256,17 +261,16 @@ rdp:
 
   # The RDP-trained database: the name of a folder inside `databases_dir`, or the full path to a folder.
   # A database folder contains an rRNAClassifier.properties file and the files it lists, e.g.
-  # The PEMA-trained databases 12S_v2.0.0 (12S), midori_1 and midori_2 (COI) are downloaded from Zenodo
+  # The PEMA-trained databases 12S_v200 (12S; also accepted as 12S_v2.0.0), midori_1 and midori_2 (COI) are downloaded from Zenodo
   # into `databases_dir` the first time they are used.
-  database: 12S_v2.0.0
+  database: 12S_v200
 
   # Folder that contains the RDP-trained databases; downloaded and trained databases are saved here.
   # (Optional when `database` is a full path.)
   databases_dir:
 
   # Where the PEMA-trained databases are downloaded from: <download_url>/<database>.tar.gz
-  # (or, if missing, the database's folder in <download_url>/rdp_dbs_v220.tar.gz).
-  download_url: https://zenodo.org/records/16876159/files
+  download_url: https://zenodo.org/records/23266088/files
 
   # Ranks are kept from the top down while RDPClassifier's confidence is at least this value.
   # 0.8 is the usual threshold for reads of 250 bp or more; for shorter reads 0.5 is often used. 0 keeps all ranks.
