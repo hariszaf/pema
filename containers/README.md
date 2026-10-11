@@ -6,7 +6,7 @@ directive of each process in [`modules/`](../modules) and are pulled automatical
 | Image | Used by | Built from |
 |-------|---------|------------|
 | `hariszaf/pema-nf:0.2.2` | hashing, contingency tables, oligoton removal, VSEARCH map-back, taxonomy tables, NCBI merging | [`Dockerfile.pema_nf`](Dockerfile.pema_nf) |
-| `hariszaf/crest4:4.3.8` | `CREST_TAXONOMY_ASSIGNMENT` | published image |
+| `hariszaf/crest4:4.4.5` | `CREST_TAXONOMY_ASSIGNMENT`, `TRAIN_CREST_DB` | [`Dockerfile.crest4`](Dockerfile.crest4) |
 | `quay.io/biocontainers/rdp_classifier:2.13--hdfd78af_1` | `RDP_CLASSIFY` | BioContainers |
 | `quay.io/biocontainers/cutadapt:5.2--py312hfabe715_2` | `CUTADAPT` (ITS) | BioContainers |
 | `quay.io/biocontainers/fastp:1.0.1--heae3180_0` | `FASTP` | BioContainers |
@@ -38,8 +38,6 @@ docker push hariszaf/pema-nf:<tag>
 
 * [`Dockerfile.dada2`](Dockerfile.dada2) builds [DADA2](https://benjjneb.github.io/dada2/) (1.40.0) from Bioconductor 3.23 / R 4.6.1,
   on the official Bioconductor image (7.6 GB); the pipeline uses the smaller BioContainers image instead.
-* [`Dockerfile.crest4`](Dockerfile.crest4) builds crest4 4.4.5. The pipeline currently uses the published `hariszaf/crest4:4.3.8`;
-  `TRAIN_CREST_DB` (not yet part of the pipeline) refers to `hariszaf/crest4:4.4.2`.
 * [`Dockerfile.rdpclassifier`](Dockerfile.rdpclassifier) builds RDPClassifier 2.13 with the PEMA-trained databases inside.
   The pipeline uses the BioContainers image instead, with the databases given in the parameters file.
 

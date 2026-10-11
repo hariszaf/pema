@@ -36,6 +36,7 @@ sanity_check/*/mydata*/
 sanity_check/*/TEST_*
 sanity_check/*/work/
 sanity_check/*/.nextflow*
+sanity_check/*/pipeline_info/
 sanity_check/custom_rdp/trained_dbs/
 sanity_check/custom_crest/trained_dbs/
 sanity_check/rdp_dbs/

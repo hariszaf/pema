@@ -102,7 +102,7 @@ process TRAIN_CREST_DB {
     // Saved in mount_crest_dbs; pema.nf finds it there in the next runs and does not build it again
     publishDir { crest_params.mount_crest_dbs }, mode: 'copy'
 
-    container "hariszaf/crest4:4.3.8"
+    container "hariszaf/crest4:4.4.5"
 
     input:
         path prepared, stageAs: 'prepared_db'
@@ -140,7 +140,7 @@ process CREST_TAXONOMY_ASSIGNMENT {
 
     publishDir { "${params.outdir}" }, mode: 'copy'
 
-    container "hariszaf/crest4:4.3.8"
+    container "hariszaf/crest4:4.4.5"
 
     cpus { crest_params.threads }
     // Mount the local CREST databases folder only when one is given

@@ -114,8 +114,8 @@ nextflow run pema.nf --params-file pema.yaml -profile singularity
 ```
 
 Available profiles: `docker` (default), `podman`, `singularity`, `apptainer`.
-Adding the `reports` profile (e.g. `-profile docker,reports`) writes a Nextflow timeline, report and trace in `pipeline_info/`.
-This needs `ps` in every container, which the `hariszaf/crest4` image does not provide yet.
+Adding the `reports` profile (e.g. `-profile docker,reports`) writes a Nextflow timeline, report and trace in `pipeline_info/`,
+with the time, CPU and memory of every step.
 
 > **Note:** the parameters are given with `--params-file` (two dashes), which PEMA reads itself.
 > Nextflow's own `-params-file` (single dash) is a different option.
