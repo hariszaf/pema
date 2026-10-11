@@ -123,13 +123,31 @@ with the time, CPU and memory of every step.
 
 ### Resume a run
 
-Add `-resume` to re-run only the steps whose input or code changed:
+You do not have to run the whole analysis again to change part of it. Nextflow keeps the result of every step in the `work/`
+folder; add `-resume` and only the steps whose input, parameters or code changed are run again, the others are reused
+(they show as `cached`):
 
 ```bash
 nextflow run pema.nf --params-file pema.yaml -resume
 ```
 
-This is especially useful if the NCBI Taxonomy step is interrupted (for example by "too many requests" errors).
+For example, after a run with crest4:
+
+- **another classifier or database:** change `classifier` (or the database) in the parameters file and resume; quality control,
+  denoising/clustering and the ASV/OTU table are reused, and only the taxonomy assignment runs again;
+- **adding NCBI Taxonomy:** set `get_ncbi_taxonomy: true` and resume; only the NCBI steps run;
+- **another clustering setting** (e.g. Swarm's `differences`): clustering and everything after it run again, quality control is reused;
+- **an interrupted run** (Ctrl+C, a crash, or "too many requests" errors of the NCBI step): resume, and PEMA continues from where it stopped.
+
+Each step only reads its own section of the parameters file, so changing one section does not re-run the other steps.
+What `-resume` needs:
+
+- run it **from the same folder** as before, so Nextflow finds the same `work/` folder and run history (`.nextflow/`);
+  do not delete `work/` (or run `nextflow clean`) while you may still want to resume;
+- the results of the new run are written to `outdir`, over the previous ones; to keep both, set a different `outdir`
+  (e.g. `results_rdp`): this does not affect what is reused.
+
+`nextflow log` lists the previous runs of a folder.
 
 
 
@@ -371,7 +389,12 @@ sanity_check/run_sanity_check.sh --profile singularity 16S
 
 # resume the previous runs of these tests, e.g. after a failure (only what changed is run again)
 sanity_check/run_sanity_check.sh --resume 16S-dada2
+
+# add the NCBI Taxonomy step to a previous run, without running the rest again
+sanity_check/run_sanity_check.sh --resume --ncbi 16S-dada2
 ```
+
+> **Note:** without `--resume`, a test starts from scratch: its output folder is deleted and every step runs again.
 
 Environment variables choose where the databases are and which ones some tests use:
 
