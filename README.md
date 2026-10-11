@@ -338,7 +338,7 @@ The tests:
 | `ITS` | ITS | cutadapt, Swarm | crest4, `unite2025` | PEMA's UNITE database (12 MB, downloaded on first use) |
 | `16S-vsearch` | 16S | VSEARCH | crest4, `silvamod138pr2` | as `16S` |
 | `18S-vsearch` | 18S | VSEARCH | crest4, `silvamod138pr2` | as `16S` |
-| `16S-dada2` | 16S | DADA2 | crest4, `silvamod138pr2` | as `16S`; the slowest test (~12 min) |
+| `16S-dada2` | 16S | DADA2 | crest4, `silvamod138pr2` | as `16S`; the slowest test (~15-20 min) |
 | `12S-rdp` | 12S | Swarm | RDPClassifier, `12S_v200` | PEMA's 12S database (30 MB, downloaded on first use) |
 | `COI-rdp` | COI | Swarm | RDPClassifier, MIDORI | `RDP_COI_DB=midori_1` or `midori_2` (downloaded on first use; >= 20 GB of memory); skipped otherwise |
 | `COI-rdp-custom` | COI | Swarm | RDPClassifier, trained on `sanity_check/custom_rdp/custom_ref_db/` | nothing: trains its own database (also run by CI) |
