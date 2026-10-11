@@ -276,13 +276,19 @@ or `ncbi_taxonomy/tax_assigned_with_ncbi.tsv` when the NCBI Taxonomy step is ena
 
 ## Running single modules
 
-Each module in [`modules/`](modules) can also be run on its own, for example to test a step:
+Some modules in [`modules/`](modules) can also be run on their own, to test a step on small data:
+fastp, Swarm and crest4 (CREST taxonomy assignment). Their parameters files are in [`tests/configs/`](tests/configs) and their
+input data in [`tests/data/`](tests/data) (see [tests/README.md](tests/README.md)). From the root folder of this repository:
 
 ```bash
-nextflow run modules/swarm.nf --params-file config_files/swarm.yaml -c nextflow.config
+nextflow run modules/fastp.nf --params-file tests/configs/fastp.yaml -c nextflow.config
+nextflow run modules/swarm.nf --params-file tests/configs/swarm.yaml -c nextflow.config
+nextflow run modules/crest.nf --params-file tests/configs/crest.yaml -c nextflow.config
 ```
 
-Add `-c nextflow.config`: when a module is run directly, Nextflow does not load the root `nextflow.config`, so containers would be disabled.
+The outputs are written in `tests/results/` (git-ignored). Add `-c nextflow.config`: when a module is run directly, Nextflow does not
+load the root `nextflow.config`, so containers would be disabled. The crest4 test classifies ITS sequences with the `unite2025`
+database: set `mount_crest_dbs` in `tests/configs/crest.yaml` to the folder that has it.
 See [modules/README.md](modules/README.md) for notes on developing the pipeline.
 
 

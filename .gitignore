@@ -54,3 +54,6 @@ rdp_dbs_v220.tar.gz
 
 # Ignore vscode settngs etc.
 .vscode/
+
+# Outputs of the module tests (tests/)
+tests/results/

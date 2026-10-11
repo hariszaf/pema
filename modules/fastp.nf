@@ -4,7 +4,7 @@
 
 Usage: 
 
-    nextflow run modules/fastp.nf --params-file modules/fastp.yaml
+    nextflow run modules/fastp.nf --params-file tests/configs/fastp.yaml -c nextflow.config
 
 */
 
@@ -64,7 +64,7 @@ process FASTP {
 workflow {
 
     // -------------------- PARAMETERS --------------------
-    params.yaml = params['params-file'] ?: error(
+    params.yaml = params.paramsFile ?: error(
         "Please provide YAML file with fastp parameters (--params-file)."
     )
     //  Loading parameters from YAML file. 

@@ -4,7 +4,7 @@
 
 Usage: 
 
-    nextflow run modules/swarm.nf --params-file config_files/swarm.yaml
+    nextflow run modules/swarm.nf --params-file tests/configs/swarm.yaml -c nextflow.config
 
 */
 

@@ -1,6 +1,6 @@
-input_fasta: test_data/swarm/all_samples.fa
+input_fasta: tests/data/swarm/all_samples.fa
 
-outdir: buildingPemaNf
+outdir: tests/results/swarm
 
 threads: 4
 

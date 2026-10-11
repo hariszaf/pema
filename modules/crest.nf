@@ -4,7 +4,7 @@
 
 Usage:
 
-    nextflow run modules/crest.nf --params-file config_files/crest.yaml
+    nextflow run modules/crest.nf --params-file tests/configs/crest.yaml -c nextflow.config
 */
 include { loadYamlParams; valueOr } from './utils.nf'
 
