@@ -101,16 +101,16 @@ Samples sequenced on several lanes (`_L001`, `_L002`, ...) are treated as separa
 
 ### Run
 
-Copy [`config_files/pema.yaml`](config_files/pema.yaml), set `raw_reads` and `outdir`, adjust the parameters (see [below](#the-parameters-file)), and run from the root folder of this repository:
+Copy [`pema.yaml`](pema.yaml), set `raw_reads` and `outdir`, adjust the parameters (see [below](#the-parameters-file)), and run from the root folder of this repository:
 
 ```bash
-nextflow run pema.nf --params-file config_files/pema.yaml
+nextflow run pema.nf --params-file pema.yaml
 ```
 
 To use another container engine, add a profile:
 
 ```bash
-nextflow run pema.nf --params-file config_files/pema.yaml -profile singularity
+nextflow run pema.nf --params-file pema.yaml -profile singularity
 ```
 
 Available profiles: `docker` (default), `podman`, `singularity`, `apptainer`.
@@ -126,7 +126,7 @@ This needs `ps` in every container, which the `hariszaf/crest4` image does not p
 Add `-resume` to re-run only the steps whose input or code changed:
 
 ```bash
-nextflow run pema.nf --params-file config_files/pema.yaml -resume
+nextflow run pema.nf --params-file pema.yaml -resume
 ```
 
 This is especially useful if the NCBI Taxonomy step is interrupted (for example by "too many requests" errors).
@@ -135,7 +135,7 @@ This is especially useful if the NCBI Taxonomy step is interrupted (for example 
 
 ## The parameters file
 
-All parameters live in one YAML file; [`config_files/pema.yaml`](config_files/pema.yaml) documents each of them.
+All parameters live in one YAML file; [`pema.yaml`](pema.yaml) documents each of them.
 Parameters left empty are not passed to the tool, so the tool's own default applies.
 
 | Section / key | Description | Default |
@@ -311,7 +311,7 @@ breaks nothing. You need Nextflow and Docker (or another container engine, see `
 For each test, the script:
 
 1. downloads and extracts the sanity dataset into `sanity_check/` (~280 MB), if it is not there yet;
-2. writes a parameters file from [`config_files/pema.yaml`](config_files/pema.yaml), with the reads, marker gene, clustering
+2. writes a parameters file from [`pema.yaml`](pema.yaml), with the reads, marker gene, clustering
    algorithm, classifier and database of the test (so the tests always use the current parameters file);
 3. runs `pema.nf` in `sanity_check/<marker>/`;
 4. checks that the final table (`tax_assigned_table.tsv`) exists and has ASVs/OTUs, and counts how many have a taxonomy.

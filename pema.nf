@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 
-// Usage:  nextflow run pema.nf --params-file config_files/pema.yaml
+// Usage:  nextflow run pema.nf --params-file pema.yaml
 
 // -------------------- PARAMETERS --------------------
 

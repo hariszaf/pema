@@ -41,7 +41,7 @@ Clone the repository,
 
 Now you may try to run the current version of PEMA locally, following the [README](README.md):
 
-    nextflow run pema.nf --params-file config_files/pema.yaml
+    nextflow run pema.nf --params-file pema.yaml
 
 
 

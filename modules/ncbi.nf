@@ -4,7 +4,6 @@
 
 Usage:
 
-    nextflow run modules/ncbi.nf --params-file config_files/ncbi.yaml
     nextflow run modules/ncbi.nf -c nextflow.config --tax_table results/crest_assignment/tax_assigned_table.tsv --outdir results
 */
 

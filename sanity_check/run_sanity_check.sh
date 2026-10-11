@@ -6,7 +6,7 @@
 #       Should be always run before a new version is to be released.
 #
 #       Each test runs pema.nf (fastp, Swarm, VSEARCH or DADA2, then crest4 or RDPClassifier) on the
-#       sanity dataset of one marker gene, with a parameters file generated from config_files/pema.yaml.
+#       sanity dataset of one marker gene, with a parameters file generated from pema.yaml.
 #
 # Usage: ./run_sanity_check.sh [options] [test ...]
 #
@@ -127,7 +127,7 @@ mkdir -p "${CREST_DBS}"
 
 # ------------                 TESTS                 -------------------
 
-# Write the parameters file of a test: config_files/pema.yaml with the test's
+# Write the parameters file of a test: pema.yaml with the test's
 # reads, output folder, classifier and database
 make_params() {
     local test=$1 outdir=$2 params=$3
@@ -159,7 +159,7 @@ make_params() {
         -e "${dada2_nbases:+s#^  nbases:.*#  nbases: ${dada2_nbases}#}" \
         -e "s#^  get_ncbi_taxonomy:.*#  get_ncbi_taxonomy: ${NCBI}#" \
         -e "s#^  ncbi_api_key:.*#  ncbi_api_key:#" \
-        "${PEMA_DIR}/config_files/pema.yaml" > "${params}"
+        "${PEMA_DIR}/pema.yaml" > "${params}"
 }
 
 # Check that a test produced a final table with at least one ASV/OTU

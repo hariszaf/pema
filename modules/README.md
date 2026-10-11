@@ -61,7 +61,7 @@ Scripts from `scripts/` run in the `hariszaf/pema-nf` image, so a change in a sc
 Add `-resume` to re-run only the steps whose input or code changed:
 
 ```
-nextflow run pema.nf --params-file config_files/pema.yaml -resume
+nextflow run pema.nf --params-file pema.yaml -resume
 ```
 
 This can be rather useful if you get errors on getting NCBI Taxonomy Ids,
