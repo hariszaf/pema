@@ -144,7 +144,10 @@ make_params() {
     elif [[ "${test}" == COI-crest-custom ]]; then
         crest_dbs="${CUSTOM_CREST_DIR}/trained_dbs" taxonomy="${CUSTOM_CREST_TAXONOMY}" sequences="${CUSTOM_CREST_SEQUENCES}"
     fi
-    sed -e "s#^raw_reads:.*#raw_reads: ${SANITY_DIR}/${marker}/${READS[$marker]}#" \
+    sed -e "1i # Written by run_sanity_check.sh from pema.yaml, again before every run: edits here are lost.\\
+# Change pema.yaml or use the script's options (e.g. --ncbi) instead.\\
+" \
+        -e "s#^raw_reads:.*#raw_reads: ${SANITY_DIR}/${marker}/${READS[$marker]}#" \
         -e "s#^marker_gene:.*#marker_gene: ${marker}#" \
         -e "s#^outdir:.*#outdir: ${outdir}#" \
         -e "s#^clustering_algo:.*#clustering_algo: ${CLUSTERING[$test]}#" \
