@@ -150,8 +150,8 @@ Parameters left empty are not passed to the tool, so the tool's own default appl
 | `cutadapt` | `forward_primer`, `reverse_primer` and any other [cutadapt option](https://cutadapt.readthedocs.io/en/stable/reference.html) | required for ITS |
 | `fastp` | Any [fastp option](https://github.com/OpenGene/fastp#all-options), without the leading `--` | **required** |
 | `swarm` | Any [Swarm option](https://github.com/torognes/swarm), e.g. `differences`, `fastidious` | required for Swarm |
-| `vsearch` | `threshold`: identity threshold for the OTU clustering | `0.97` |
-| `dada2` | `pool`, `min_overlap`, `max_mismatch`, `chimera_method`, `nbases` | see the YAML file |
+| `vsearch` | `threshold`: identity threshold for the OTU clustering; `min_oligotons` for VSEARCH only | `0.97`; the global `min_oligotons` |
+| `dada2` | `trunc_len_forward`, `trunc_len_reverse`, `pool`, `min_overlap`, `max_mismatch`, `chimera_method`, `nbases` | see the YAML file |
 | `crest` | `database`, `mount_crest_dbs`, `search_algo`, `min_score`, `min_smlrty`, `score_drop`, `threads`, and `train` for a custom database | see the YAML file |
 | `rdp` | `database`, `databases_dir`, `confidence`, `memory`, and `train` for a custom database | see the YAML file |
 | `ncbi_taxonomy` | `get_ncbi_taxonomy`, `ncbi_api_key`, `max_parallel`, `sleep` | off when missing |
@@ -172,12 +172,12 @@ PEMA adjusts some values to keep the tools consistent:
 error rates and denoises the forward and the reverse reads separately (on all samples together), merges the denoised pairs
 (`mergePairs`) and removes the chimeras. Merging before denoising would change the quality scores DADA2's error model relies on.
 `min_oligotons` then removes the ASVs with a lower total abundance. The options are in the `dada2` section (`pool`, `min_overlap`,
-`max_mismatch`, `chimera_method`, `nbases`); to truncate the reads to a fixed length, as DADA2 recommends, use fastp's `max_len1` and `max_len2`.
+`max_mismatch`, `chimera_method`, `nbases`); to truncate the reads to fixed lengths, as DADA2 recommends, set `trunc_len_forward` and `trunc_len_reverse` (applied by fastp, only for DADA2).
 
 **Oligotons.** With Swarm, `min_oligotons` applies to whole ASVs, after clustering.
 With VSEARCH it applies to individual amplicons (unique sequences) before clustering, as in PEMA v2.x and the
 [VSEARCH pipeline](https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline), so it removes many more reads:
-with VSEARCH, a low value (e.g. `2`) is usually preferable.
+with VSEARCH, a low value (e.g. `2`) is usually preferable; set it in the `vsearch` section, so it applies to VSEARCH only.
 
 **CREST databases.** `database` is one of crest4's built-in databases (`ssuome`, `silvamod138pr2`, `mitofish`, `midori253darn`)
 or the name of a folder with a custom database. For a custom database, `mount_crest_dbs` must point to the folder that contains it, for example:

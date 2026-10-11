@@ -125,6 +125,8 @@ def resolveSwarmParams() {
 def resolveVsearchParams() {
     def vsearchParams = loadYamlParams(params.yaml, 'vsearch') ?: [:]
     vsearchParams.threshold = valueOr(vsearchParams.threshold, 0.97)
+    // VSEARCH removes oligotons before clustering, so it has its own threshold (by default, the global one)
+    vsearchParams.min_oligotons = valueOr(vsearchParams.min_oligotons, params.min_oligotons)
     def t = vsearchParams.threshold as double
     if (t <= 0 || t > 1) {
         error "vsearch threshold must be between 0 and 1 (e.g. 0.97), not ${vsearchParams.threshold}."
@@ -139,6 +141,7 @@ def resolveDada2Params() {
     dada2Params.max_mismatch   = valueOr(dada2Params.max_mismatch, 0)
     dada2Params.chimera_method = valueOr(dada2Params.chimera_method, 'consensus')
     dada2Params.nbases         = valueOr(dada2Params.nbases, 1e8)
+    // Lengths to truncate the forward and the reverse reads to (DADA2's truncLen), applied by fastp
     if (!(dada2Params.pool.toLowerCase() in ['false', 'true', 'pseudo'])) {
         error "dada2.pool must be false, true or pseudo, not ${dada2Params.pool}."
     }
@@ -315,6 +318,21 @@ workflow {
     def swarmParams   = params.clustering_algo == 'swarm' ? resolveSwarmParams() : null
     def vsearchParams = params.clustering_algo == 'vsearch' ? resolveVsearchParams() : null
     def dada2Params   = params.clustering_algo == 'dada2' ? resolveDada2Params() : null
+
+    // DADA2: fastp truncates the reads to fixed lengths (DADA2's truncLen) and drops the shorter ones,
+    // only for DADA2, as truncation before merging would shorten the overlap of the pairs
+    if (dada2Params?.trunc_len_forward) {
+        fastpParams.max_len1 = dada2Params.trunc_len_forward
+    }
+    if (dada2Params?.trunc_len_reverse) {
+        fastpParams.max_len2 = dada2Params.trunc_len_reverse
+    }
+    if (dada2Params && fastpParams.length_required == null) {
+        def lengths = [dada2Params.trunc_len_forward, dada2Params.trunc_len_reverse].findAll { len -> len }
+        if (lengths) {
+            fastpParams.length_required = lengths.min()
+        }
+    }
     def crest_params  = params.classifier == 'crest' ? resolveCrestParams() : null
     def rdp_params    = params.classifier == 'rdp' ? resolveRdpParams() : null
 
@@ -399,7 +417,7 @@ workflow {
                 all_samples_fasta.all_samples,
                 contingency_table,
                 vsearchParams.threshold,
-                params.min_oligotons
+                vsearchParams.min_oligotons
             )
             clusters_hash   = otus.contingency_hash
             representatives = otus.representatives

@@ -5,14 +5,14 @@ outdir: buildingPemaNf
 threads: 4
 
 swarm:
-  differences: 3
+  differences: 1
 
   # ---
   # Fastidious options (only when d = 1):
   # ---
 
   # Fastidious options (only when d = 1):
-  fastidious: false
+  fastidious: true
 
   #  min mass of large clusters
   boundary:

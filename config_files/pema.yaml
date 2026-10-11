@@ -162,7 +162,7 @@ fastp:
 
 
 swarm:
-  differences: 10
+  differences: 1
 
   # ---
   # Fastidious options (only when d = 1). If you set any of the following with a d > 1, pema will fail
@@ -208,13 +208,24 @@ vsearch:
   # amplicons with a total abundance below min_oligotons are removed before clustering.
   threshold: 0.98
 
+  # VSEARCH removes oligotons *before* clustering: unique sequences with a total abundance below this are removed,
+  # which removes many more reads than removing small clusters afterwards (Swarm, DADA2). Hence a lower value than
+  # the global min_oligotons, which is used if this is left empty.
+  min_oligotons: 2
+
 
 dada2:
 
   # Only for clustering_algo: dada2. DADA2 learns the error rates and denoises the forward and the reverse reads separately,
   # then merges the denoised pairs and removes the chimeras (https://benjjneb.github.io/dada2/tutorial.html).
-  # fastp filters the read pairs (without merging them); to truncate the reads to a fixed length, as DADA2 recommends,
-  # use fastp's max_len1 / max_len2 in the fastp section.
+  # fastp filters the read pairs (without merging them).
+
+  # Lengths to truncate the forward and the reverse reads to, as DADA2 recommends (its truncLen): where their quality drops
+  # (see the fastp reports in fastp/qc/). fastp truncates the reads and drops those shorter than these lengths.
+  # The truncated reads must still overlap (by min_overlap) to be merged: forward + reverse > amplicon length + min_overlap.
+  # e.g. 240 and 200 for 2x250 reads; leave empty not to truncate.
+  trunc_len_forward: 240
+  trunc_len_reverse: 200
 
   # Denoise each sample on its own (false), all samples together (true; more sensitive to rare variants, slower),
   # or each sample with priors from the others (pseudo).

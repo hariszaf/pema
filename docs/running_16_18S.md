@@ -14,13 +14,13 @@ PEMA supports both ASV inference and OTU clustering; set `clustering_algo` in th
   `differences: 1` with `fastidious: true`. Higher values of `differences` merge more sequences into each ASV.
 * `dada2`: [DADA2](https://benjjneb.github.io/dada2/) infers **ASVs** from the read pairs, as in its [tutorial](https://benjjneb.github.io/dada2/tutorial.html):
   fastp filters the pairs without merging them; DADA2 learns the error rates and denoises the forward and the reverse reads separately,
-  merges the denoised pairs and removes the chimeras. Its options are in the `dada2` section (e.g. `pool`, `min_overlap`); to truncate the reads to a
-  fixed length, as DADA2 recommends, use fastp's `max_len1` and `max_len2`. The read counts after each step are in `dada2/dada2_read_tracking.tsv`.
+  merges the denoised pairs and removes the chimeras. Its options are in the `dada2` section (e.g. `pool`, `min_overlap`); to truncate the reads to
+  fixed lengths, as DADA2 recommends, set `trunc_len_forward` and `trunc_len_reverse` there (applied by fastp, only for DADA2). The read counts after each step are in `dada2/dada2_read_tracking.tsv`.
 * `vsearch`: [VSEARCH](https://github.com/torognes/vsearch) clusters **OTUs**, at the identity `threshold` of the `vsearch` section
   (e.g. `0.97`), after removing chimeras de novo, as in the [VSEARCH pipeline](https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline).
 
 `min_oligotons` removes ASVs with a low total abundance after Swarm or DADA2. With VSEARCH, it removes unique sequences with a low total
-abundance *before* clustering (as in PEMA v2.x), which removes many more reads: use a low value, e.g. `2`.
+abundance *before* clustering (as in PEMA v2.x), which removes many more reads: use a low value, e.g. `2`, with `min_oligotons` in the `vsearch` section (VSEARCH only).
 
 
 ## Taxonomy assignment
