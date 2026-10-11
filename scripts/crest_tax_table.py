@@ -15,7 +15,7 @@ def parse_args():
         "--crest-assignments",
         type=Path, required=True, help="Taxonomy assignments from CREST (assignments.txt)")
     parser.add_argument(
-        "--clustering-algo", type=str, choices=["swarm", "vsearch"],
+        "--clustering-algo", type=str, choices=["swarm", "vsearch", "dada2"],
         required=True, help="Clustering algorithm used: 'swarm' or 'vsearch'"
     )
     parser.add_argument("-v", "--verbose", action="store_true", help="Enable verbose output")

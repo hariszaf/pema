@@ -8,7 +8,8 @@ Each of the next paragraphs stands for a file or subdirectory of that folder.
 ├── cutadapt/                       <sample>.cutadapt.json  (marker_gene: ITS)
 ├── fastp/
 │   ├── qc/                         <sample>.html, <sample>.json
-│   └── merged/                     <sample>.fastq.gz
+│   ├── merged/                     <sample>.fastq.gz                    (not with DADA2)
+│   └── filtered/                   <sample>_1.fastq.gz, <sample>_2.fastq.gz  (clustering_algo: dada2)
 ├── derep_samples/                  <sample>.fasta
 ├── linearized/                     <sample>.fa
 ├── hashing/                        <sample>.hash, <sample>.tsv
@@ -19,6 +20,7 @@ Each of the next paragraphs stands for a file or subdirectory of that folder.
 ├── asvs_contingency_table.tsv      (clustering_algo: swarm)
 ├── asvs_contingency_hash.tsv
 ├── asvs_representatives.fa
+├── dada2/                          dada2_seqtab.tsv, dada2_read_tracking.tsv, dada2_errors.pdf  (clustering_algo: dada2)
 ├── vsearch/                        all_samples.fasta, derep.*, preclustered.*, nonchimeras*.fasta, otus.*
 ├── otus_contingency_table.tsv      (clustering_algo: vsearch)
 ├── otus_contingency_hash.tsv
@@ -45,6 +47,10 @@ had each primer (and its reverse complement) removed. The trimmed reads go to fa
 ***"merged/"*** contains, for each sample, the reads that passed quality control and were merged into one read per pair.
 Read pairs that could not be merged are not kept.
 
+***"filtered/"***, only with `clustering_algo: dada2`, contains instead the read pairs that passed quality control, not merged:
+DADA2 denoises the forward and the reverse reads separately, and merges them afterwards.
+With DADA2, the dereplication and hashing steps below are not run.
+
 
 
 ### Dereplication and hashing
@@ -63,6 +69,21 @@ The abundance of each sequence is in its header (e.g. `>read_id;size=12`).
 sorted by decreasing abundance. This is the input of the clustering step.
 
 ***"amplicon_contingency_table.tsv"*** contains the abundance of each unique sequence (amplicon) in each sample, and the total.
+
+
+
+### DADA2 (`clustering_algo: dada2`)
+
+DADA2 learns the error rates and denoises the forward and the reverse reads separately, merges the denoised pairs and removes the chimeras.
+Its ASV tables (see below) are written directly; the files of ***"dada2/"*** are:
+
+***"dada2_seqtab.tsv"***: the ASVs after chimera and oligoton removal: their sequence, and their abundance in each sample.
+
+***"dada2_read_tracking.tsv"***: the number of reads of each sample after each step: input (after fastp), denoised forward and reverse reads,
+merged pairs, and non-chimeric reads. A large loss at the merging step usually means that the reads overlap too little (see `min_overlap`).
+
+***"dada2_errors.pdf"***: the error rates learned for the forward and the reverse reads, as a function of the quality score
+(the points should follow the black line of the fitted model).
 
 
 
@@ -119,7 +140,7 @@ the `.uc` files record which sequence was assigned to which cluster (see their f
 
 ### ASV / OTU tables
 
-The ASV (Swarm) and OTU (VSEARCH) tables have the same format; the files start with `asvs_` or `otus_`, and the first column is `ASV` or `OTU`.
+The ASV (Swarm, DADA2) and OTU (VSEARCH) tables have the same format; the files start with `asvs_` or `otus_`, and the first column is `ASV` or `OTU`.
 OTUs are named `OTU_1`, `OTU_2`, ... by decreasing total abundance; the abundance of an OTU in a sample is the sum of its amplicons.
 
 

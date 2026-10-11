@@ -10,11 +10,14 @@ Usage:
 
 include { paramsToCliArgs; loadYamlParams; findReadPairs } from './utils.nf'
 
+// Quality control of each read pair, and merging of the pairs; with merge = false (for DADA2,
+// which denoises the forward and reverse reads separately and merges them afterwards) the
+// filtered read pairs are returned instead of merged reads
 process FASTP {
 
     tag "${sampleName}"
 
-    publishDir { "${params.outdir}/fastp" }, mode: 'copy'
+    publishDir { "${params.outdir}/fastp" }, mode: 'copy', pattern: "{qc,merged,filtered}/*"
 
     container "quay.io/biocontainers/fastp:1.0.1--heae3180_0"
 
@@ -24,31 +27,34 @@ process FASTP {
 
         tuple val(sampleName), path(readF), path(readR)
         val fastpArgs
+        val merge
 
     output:
 
         path("qc/${sampleName}.html"), emit: qc_html
         path("qc/${sampleName}.json"), emit: qc_json
-        path("merged/${sampleName}.fastq.gz"), emit: merged_reads
+        path("merged/${sampleName}.fastq.gz"), emit: merged_reads, optional: true
+        tuple val(sampleName), path("filtered/${sampleName}_1.fastq.gz"), path("filtered/${sampleName}_2.fastq.gz"),
+            emit: filtered_reads, optional: true
 
     script:
 
         // -------------------- BUILD FASTP ARGS --------------------
         def fastpParamsStr = paramsToCliArgs(fastpArgs)
+        def outputs = merge
+            ? "--out1 ${sampleName}_proc_R1.fastq.gz --out2 ${sampleName}_proc_R2.fastq.gz --merge --merged_out merged/${sampleName}.fastq.gz"
+            : "--out1 filtered/${sampleName}_1.fastq.gz --out2 filtered/${sampleName}_2.fastq.gz"
 
         """
-        mkdir -p qc merged
+        mkdir -p qc merged filtered
 
-        fastp \
-            --in1 $readF \
-            --in2 $readR \
-            --out1 ${sampleName}_proc_R1.fastq.gz \
-            --out2 ${sampleName}_proc_R2.fastq.gz \
-            --merge \
-            --merged_out merged/${sampleName}.fastq.gz \
-            --thread ${task.cpus} \
-            --html qc/${sampleName}.html \
-            --json qc/${sampleName}.json \
+        fastp \\
+            --in1 $readF \\
+            --in2 $readR \\
+            ${outputs} \\
+            --thread ${task.cpus} \\
+            --html qc/${sampleName}.html \\
+            --json qc/${sampleName}.json \\
             $fastpParamsStr
         """
 }
@@ -75,5 +81,5 @@ workflow {
     def paired_raw_reads = channel.fromList(findReadPairs(params.raw_reads.toString()))
 
     // -------------------- RUN FASTP --------------------
-    FASTP(paired_raw_reads, fastpParams)
+    FASTP(paired_raw_reads, fastpParams, true)
 }

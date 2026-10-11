@@ -12,6 +12,7 @@ directive of each process in [`modules/`](../modules) and are pulled automatical
 | `quay.io/biocontainers/fastp:1.0.1--heae3180_0` | `FASTP` | BioContainers |
 | `quay.io/biocontainers/vsearch:2.30.4--hd6d6fdc_0` | `VSEARCH_DEREP`, and the VSEARCH OTU clustering steps | BioContainers |
 | `quay.io/biocontainers/swarm:3.1.6--h9948957_0` | `SWARM` | BioContainers |
+| `quay.io/biocontainers/bioconductor-dada2:1.38.0--r45ha27e39d_0` | `DADA2` | BioContainers |
 | `staphb/ncbi-datasets:18.36.0` | `NCBI_TAXONOMY_QUERY` | StaPH-B |
 
 
@@ -36,7 +37,7 @@ docker push hariszaf/pema-nf:<tag>
 ## Other Dockerfiles
 
 * [`Dockerfile.dada2`](Dockerfile.dada2) builds [DADA2](https://benjjneb.github.io/dada2/) (1.40.0) from Bioconductor 3.23 / R 4.6.1,
-  on the official Bioconductor image; not used by the pipeline yet.
+  on the official Bioconductor image (7.6 GB); the pipeline uses the smaller BioContainers image instead.
 * [`Dockerfile.crest4`](Dockerfile.crest4) builds crest4 4.4.5. The pipeline currently uses the published `hariszaf/crest4:4.3.8`;
   `TRAIN_CREST_DB` (not yet part of the pipeline) refers to `hariszaf/crest4:4.4.2`.
 * [`Dockerfile.cutadapt`](Dockerfile.cutadapt) built R and cutadapt for `scripts/cutadaptITS.R` (PEMA v2.x); the pipeline now runs cutadapt
@@ -46,3 +47,7 @@ docker push hariszaf/pema-nf:<tag>
 
 The Docker and Singularity images of PEMA v2.x (BigDataScript) are described on the
 [`master`](https://github.com/hariszaf/pema/tree/master) branch.
+
+
+
+Besides DockerHub, another repo for images is the [Quay](https://quay.io/)

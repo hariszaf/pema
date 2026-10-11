@@ -211,7 +211,7 @@ process BUILD_TAXONOMY_TABLE {
         /opt/pema/scripts/crest_tax_table.py \
             --asvs-hash ${asvs_contingency_hash_table} \
             --crest-assignments ${crest_assignments} \
-            --clustering-algo ${params.clustering_algo}
+            --clustering-algo ${params.clustering_algo == 'vsearch' ? 'vsearch' : 'swarm'}
         """
 }
 

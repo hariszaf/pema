@@ -19,7 +19,8 @@ threads: 3
 
 outdir: buildingPemaNf2
 
-# values from: ["swarm", "vsearch"]
+# values from: ["swarm", "vsearch", "dada2"]
+# swarm: ASVs with Swarm; vsearch: OTUs with VSEARCH; dada2: ASVs with DADA2 (fastp then filters the read pairs without merging them)
 clustering_algo: swarm  
 
 # values from: ["crest", "rdp"]
@@ -206,6 +207,28 @@ vsearch:
   # The OTUs are built as in https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline;
   # amplicons with a total abundance below min_oligotons are removed before clustering.
   threshold: 0.98
+
+
+dada2:
+
+  # Only for clustering_algo: dada2. DADA2 learns the error rates and denoises the forward and the reverse reads separately,
+  # then merges the denoised pairs and removes the chimeras (https://benjjneb.github.io/dada2/tutorial.html).
+  # fastp filters the read pairs (without merging them); to truncate the reads to a fixed length, as DADA2 recommends,
+  # use fastp's max_len1 / max_len2 in the fastp section.
+
+  # Denoise each sample on its own (false), all samples together (true; more sensitive to rare variants, slower),
+  # or each sample with priors from the others (pseudo).
+  pool: false
+
+  # Minimum overlap (in bases) and maximum number of mismatches in the overlap, to merge a denoised pair.
+  min_overlap: 12
+  max_mismatch: 0
+
+  # Chimera removal: consensus (each sample on its own, then a consensus), pooled, or per-sample.
+  chimera_method: consensus
+
+  # Number of bases used to learn the error rates (DADA2's default: 1e8).
+  nbases: 1e8
 
 
 crest:

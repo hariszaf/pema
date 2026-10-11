@@ -11,6 +11,7 @@
 # Usage: ./run_sanity_check.sh [options] [test ...]
 #
 #   test                16S 18S 12S COI ITS (Swarm, crest4), 16S-vsearch 18S-vsearch (VSEARCH, crest4),
+#                       16S-dada2 (DADA2, crest4),
 #                       12S-rdp COI-rdp (Swarm, RDPClassifier),
 #                       COI-rdp-custom (Swarm, RDPClassifier trained on custom_rdp/custom_ref_db),
 #                       COI-crest-custom (Swarm, crest4 database built from custom_crest/custom_ref_db)
@@ -50,18 +51,18 @@ declare -A READS=( [16S]=mydata16s [18S]=mydata18s [12S]=mydata12s [COI]=mydataC
 # test -> marker, clustering algorithm, classifier and database
 declare -A MARKER=( [16S]=16S [18S]=18S [12S]=12S [COI]=COI [ITS]=ITS
                     [16S-vsearch]=16S [18S-vsearch]=18S [12S-rdp]=12S [COI-rdp]=COI [COI-rdp-custom]=COI
-                    [COI-crest-custom]=COI )
+                    [COI-crest-custom]=COI [16S-dada2]=16S )
 declare -A CLUSTERING=( [16S]=swarm [18S]=swarm [12S]=swarm [COI]=swarm [ITS]=swarm
                         [16S-vsearch]=vsearch [18S-vsearch]=vsearch [12S-rdp]=swarm [COI-rdp]=swarm
-                        [COI-rdp-custom]=swarm [COI-crest-custom]=swarm )
+                        [COI-rdp-custom]=swarm [COI-crest-custom]=swarm [16S-dada2]=dada2 )
 declare -A CLASSIFIER=( [16S]=crest [18S]=crest [12S]=crest [COI]=crest [ITS]=crest
                         [16S-vsearch]=crest [18S-vsearch]=crest [12S-rdp]=rdp [COI-rdp]=rdp
-                        [COI-rdp-custom]=rdp [COI-crest-custom]=crest )
+                        [COI-rdp-custom]=rdp [COI-crest-custom]=crest [16S-dada2]=crest )
 declare -A DATABASE=( [16S]=silvamod138pr2 [18S]=silvamod138pr2 [12S]=mitofish [COI]=midori253darn
                       [ITS]="${ITS_CREST_DB}" [16S-vsearch]=silvamod138pr2 [18S-vsearch]=silvamod138pr2
                       [12S-rdp]="${RDP_12S_DB}" [COI-rdp]="${RDP_COI_DB}" [COI-rdp-custom]=amvrakikos_coi
-                      [COI-crest-custom]=amvrakikos_crest )
-ALL_TESTS=(16S 18S 12S COI ITS 16S-vsearch 18S-vsearch 12S-rdp COI-rdp COI-rdp-custom COI-crest-custom)
+                      [COI-crest-custom]=amvrakikos_crest [16S-dada2]=silvamod138pr2 )
+ALL_TESTS=(16S 18S 12S COI ITS 16S-vsearch 18S-vsearch 16S-dada2 12S-rdp COI-rdp COI-rdp-custom COI-crest-custom)
 
 # The custom RDP database of COI-rdp-custom: trained from these files, into this folder
 CUSTOM_RDP_DIR="${SANITY_DIR}/custom_rdp"
@@ -87,7 +88,7 @@ while [[ $# -gt 0 ]]; do
         --profile) PROFILE="$2"; shift ;;
         --resume)  RESUME="-resume" ;;
         -h|--help) sed -n '3,32p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
-        16S|18S|12S|COI|ITS|16S-vsearch|18S-vsearch|12S-rdp|COI-rdp|COI-rdp-custom|COI-crest-custom) TESTS+=("$1") ;;
+        16S|18S|12S|COI|ITS|16S-vsearch|18S-vsearch|16S-dada2|12S-rdp|COI-rdp|COI-rdp-custom|COI-crest-custom) TESTS+=("$1") ;;
         *) echo "Unknown option or test: $1 (see --help)"; exit 1 ;;
     esac
     shift
@@ -132,11 +133,14 @@ make_params() {
     local test=$1 outdir=$2 params=$3
     local marker=${MARKER[$test]}
     local rdp_dbs="${RDP_DBS}" crest_dbs="${CREST_DBS}" taxonomy="" sequences=""
-    local rdp_memory="" train_memory=""
+    local rdp_memory="" train_memory="" dada2_nbases=""
     if [[ "${test}" == COI-rdp-custom ]]; then
         rdp_dbs="${CUSTOM_RDP_DIR}/trained_dbs" taxonomy="${CUSTOM_RDP_TAXONOMY}" sequences="${CUSTOM_RDP_SEQUENCES}"
         # A small database: the default memory (16 GB to train) is more than e.g. GitHub's runners have
         rdp_memory="4 GB" train_memory="4 GB"
+    elif [[ "${test}" == 16S-dada2 ]]; then
+        # Fewer bases to learn the error rates (DADA2's default is 1e8): much faster, and enough for a test
+        dada2_nbases="1e7"
     elif [[ "${test}" == COI-crest-custom ]]; then
         crest_dbs="${CUSTOM_CREST_DIR}/trained_dbs" taxonomy="${CUSTOM_CREST_TAXONOMY}" sequences="${CUSTOM_CREST_SEQUENCES}"
     fi
@@ -152,6 +156,7 @@ make_params() {
         -e "s#^    sequences:.*#    sequences: ${sequences}#" \
         -e "${rdp_memory:+s#^  memory:.*#  memory: ${rdp_memory}#}" \
         -e "${train_memory:+s#^    memory:.*#    memory: ${train_memory}#}" \
+        -e "${dada2_nbases:+s#^  nbases:.*#  nbases: ${dada2_nbases}#}" \
         -e "s#^  get_ncbi_taxonomy:.*#  get_ncbi_taxonomy: ${NCBI}#" \
         -e "s#^  ncbi_api_key:.*#  ncbi_api_key:#" \
         "${PEMA_DIR}/config_files/pema.yaml" > "${params}"

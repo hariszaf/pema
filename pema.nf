@@ -50,6 +50,7 @@ include { LINEARIZE; HASH_DEREP_FASTA; HASH_MAP; CONCATENATE_FASTA } from './mod
 include { CONTINGENCY_TABLE; ASVS_CONTINGENCY_TABLE } from './modules/contingency.nf'
 include { REMOVE_OLIGOS_SWARM } from './modules/oligos.nf'
 include { VSEARCH_DEREP; VSEARCH_OTUS } from './modules/vsearch.nf'
+include { DADA2 } from './modules/dada2.nf'
 include {
     NCBI_TAXONOMY_QUERY; UNIQUE_TAXA; MERGE_NCBI_TAXONOMIES; MERGE_NCBI_TAXONOMY_TABLE
 } from './modules/ncbi.nf'
@@ -60,8 +61,8 @@ def checkSupported() {
     if (!(params.marker_gene.toString() in ['16S', '18S', '12S', 'COI', 'ITS'])) {
         error "marker_gene '${params.marker_gene}' is not supported. Please select 16S, 18S, 12S, COI or ITS."
     }
-    if (!(params.clustering_algo in ['swarm', 'vsearch'])) {
-        error "clustering_algo '${params.clustering_algo}' is not supported. Please select 'swarm' or 'vsearch'."
+    if (!(params.clustering_algo in ['swarm', 'vsearch', 'dada2'])) {
+        error "clustering_algo '${params.clustering_algo}' is not supported. Please select 'swarm', 'vsearch' or 'dada2'."
     }
     if (!(params.classifier in ['crest', 'rdp'])) {
         error "classifier '${params.classifier}' is not supported. Please select 'crest' or 'rdp'."
@@ -86,9 +87,9 @@ def resolveFastpParams() {
     def fastpParams = loadYamlParams(params.yaml, 'fastp') ?: error(
         "You need to provide 'fastp' on your YAML file along with its corresponding parameters."
     )
-    if (params.clustering_algo == "swarm") {
+    if (params.clustering_algo in ['swarm', 'dada2']) {
         fastpParams.n_base_limit = 0
-        log.warn "clustering_algo=swarm → forcing fastp --n_base_limit 0 (Swarm does not accept Ns)"
+        log.warn "clustering_algo=${params.clustering_algo} → forcing fastp --n_base_limit 0 (${params.clustering_algo == 'swarm' ? 'Swarm' : 'DADA2'} does not accept Ns)"
     }
     return fastpParams
 }
@@ -129,6 +130,22 @@ def resolveVsearchParams() {
         error "vsearch threshold must be between 0 and 1 (e.g. 0.97), not ${vsearchParams.threshold}."
     }
     return vsearchParams
+}
+
+def resolveDada2Params() {
+    def dada2Params = loadYamlParams(params.yaml, 'dada2') ?: [:]
+    dada2Params.pool           = valueOr(dada2Params.pool, false).toString()
+    dada2Params.min_overlap    = valueOr(dada2Params.min_overlap, 12)
+    dada2Params.max_mismatch   = valueOr(dada2Params.max_mismatch, 0)
+    dada2Params.chimera_method = valueOr(dada2Params.chimera_method, 'consensus')
+    dada2Params.nbases         = valueOr(dada2Params.nbases, 1e8)
+    if (!(dada2Params.pool.toLowerCase() in ['false', 'true', 'pseudo'])) {
+        error "dada2.pool must be false, true or pseudo, not ${dada2Params.pool}."
+    }
+    if (!(dada2Params.chimera_method in ['consensus', 'pooled', 'per-sample'])) {
+        error "dada2.chimera_method must be consensus, pooled or per-sample, not ${dada2Params.chimera_method}."
+    }
+    return dada2Params
 }
 
 def resolveCrestParams() {
@@ -297,6 +314,7 @@ workflow {
     def fastpParams   = resolveFastpParams()
     def swarmParams   = params.clustering_algo == 'swarm' ? resolveSwarmParams() : null
     def vsearchParams = params.clustering_algo == 'vsearch' ? resolveVsearchParams() : null
+    def dada2Params   = params.clustering_algo == 'dada2' ? resolveDada2Params() : null
     def crest_params  = params.classifier == 'crest' ? resolveCrestParams() : null
     def rdp_params    = params.classifier == 'rdp' ? resolveRdpParams() : null
 
@@ -311,61 +329,81 @@ workflow {
     }
 
     // -------------------- QUALITY CONTROL --------------------
-    qc = FASTP(paired_raw_reads, fastpParams)
+    // DADA2 denoises the forward and the reverse reads separately and merges them afterwards:
+    // with it, fastp filters the read pairs without merging them
+    qc = FASTP(paired_raw_reads, fastpParams, params.clustering_algo != 'dada2')
 
-    // -------------------- DEREPLICATION --------------------
-    derep_samples = VSEARCH_DEREP(qc.merged_reads)
-    linearized    = LINEARIZE(derep_samples.derep_fasta)
-
-    //  -------------------- HASHING --------------------
-    hashed = HASH_DEREP_FASTA(linearized.linearized_fasta)
-
-    // Pair each hash file with the linearized fasta of the same sample (channel order is not guaranteed)
-    def hash_by_sample       = hashed.hash_fasta.map { f -> [f.baseName, f] }
-    def linearized_by_sample = linearized.linearized_fasta.map { f -> [f.baseName, f] }
-    HASH_MAP(hash_by_sample.join(linearized_by_sample))
-
-    // -------------------- CONCATENATE --------------------
-    all_samples_fasta = CONCATENATE_FASTA(hashed.hash_fasta.collect(sort: { a, b -> a.name <=> b.name }))
-
-    //  -------------------- CONTINGENCY TABLE --------------------
-    contingency_table = CONTINGENCY_TABLE(hashed.hash_fasta.collect(sort: { a, b -> a.name <=> b.name }))
-
-    //  -------------------- CLUSTERING --------------------
-    // Both clustering algorithms end with a contingency table linked to the representative
+    // Every ASV inference / OTU clustering ends with a contingency table linked to the representative
     // sequences by their hash (Seed), and the representative sequences to classify
     def clusters_hash
     def representatives
 
-    if (params.clustering_algo == 'swarm') {
+    if (params.clustering_algo == 'dada2') {
 
-        swarm_ch = SWARM(all_samples_fasta.all_samples, swarmParams)
-
-        def stats_ch  = swarm_ch.swarm_stats
-        def swarms_ch = swarm_ch.swarm_swarms
-        def fasta_ch  = swarm_ch.hash_fasta
-
-        if (params.min_oligotons > 0) {
-            oligos_ch = REMOVE_OLIGOS_SWARM(stats_ch, swarms_ch, fasta_ch, params.min_oligotons)
-            stats_ch  = oligos_ch.swarm_stats_filtered
-            swarms_ch = oligos_ch.swarm_swarms_filtered
-            fasta_ch  = oligos_ch.hash_fasta_filtered
-        }
-
-        asvs_cont_table = ASVS_CONTINGENCY_TABLE(stats_ch, swarms_ch, fasta_ch, contingency_table)
-        clusters_hash   = asvs_cont_table.asvs_contingency_hash
-        representatives = asvs_cont_table.asvs_to_tax_assign
+        // -------------------- ASV INFERENCE WITH DADA2 --------------------
+        // All samples together: the error rates are learned from all of them
+        def filtered = qc.filtered_reads.toSortedList { a, b -> a[0] <=> b[0] }
+        asvs = DADA2(
+            filtered.map { pairs -> pairs.collect { pair -> pair[1] } },
+            filtered.map { pairs -> pairs.collect { pair -> pair[2] } },
+            file("${projectDir}/scripts/dada2_denoise.R"),
+            dada2Params,
+            params.min_oligotons
+        )
+        clusters_hash   = asvs.asvs_contingency_hash
+        representatives = asvs.asvs_to_tax_assign
 
     } else {
 
-        otus = VSEARCH_OTUS(
-            all_samples_fasta.all_samples,
-            contingency_table,
-            vsearchParams.threshold,
-            params.min_oligotons
-        )
-        clusters_hash   = otus.contingency_hash
-        representatives = otus.representatives
+        // -------------------- DEREPLICATION --------------------
+        derep_samples = VSEARCH_DEREP(qc.merged_reads)
+        linearized    = LINEARIZE(derep_samples.derep_fasta)
+
+        //  -------------------- HASHING --------------------
+        hashed = HASH_DEREP_FASTA(linearized.linearized_fasta)
+
+        // Pair each hash file with the linearized fasta of the same sample (channel order is not guaranteed)
+        def hash_by_sample       = hashed.hash_fasta.map { f -> [f.baseName, f] }
+        def linearized_by_sample = linearized.linearized_fasta.map { f -> [f.baseName, f] }
+        HASH_MAP(hash_by_sample.join(linearized_by_sample))
+
+        // -------------------- CONCATENATE --------------------
+        all_samples_fasta = CONCATENATE_FASTA(hashed.hash_fasta.collect(sort: { a, b -> a.name <=> b.name }))
+
+        //  -------------------- CONTINGENCY TABLE --------------------
+        contingency_table = CONTINGENCY_TABLE(hashed.hash_fasta.collect(sort: { a, b -> a.name <=> b.name }))
+
+        //  -------------------- CLUSTERING --------------------
+        if (params.clustering_algo == 'swarm') {
+
+            swarm_ch = SWARM(all_samples_fasta.all_samples, swarmParams)
+
+            def stats_ch  = swarm_ch.swarm_stats
+            def swarms_ch = swarm_ch.swarm_swarms
+            def fasta_ch  = swarm_ch.hash_fasta
+
+            if (params.min_oligotons > 0) {
+                oligos_ch = REMOVE_OLIGOS_SWARM(stats_ch, swarms_ch, fasta_ch, params.min_oligotons)
+                stats_ch  = oligos_ch.swarm_stats_filtered
+                swarms_ch = oligos_ch.swarm_swarms_filtered
+                fasta_ch  = oligos_ch.hash_fasta_filtered
+            }
+
+            asvs_cont_table = ASVS_CONTINGENCY_TABLE(stats_ch, swarms_ch, fasta_ch, contingency_table)
+            clusters_hash   = asvs_cont_table.asvs_contingency_hash
+            representatives = asvs_cont_table.asvs_to_tax_assign
+
+        } else {
+
+            otus = VSEARCH_OTUS(
+                all_samples_fasta.all_samples,
+                contingency_table,
+                vsearchParams.threshold,
+                params.min_oligotons
+            )
+            clusters_hash   = otus.contingency_hash
+            representatives = otus.representatives
+        }
     }
 
     // -------------------- TAXONOMY ASSIGNMENT --------------------

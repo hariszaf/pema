@@ -52,12 +52,13 @@ PEMA is now being rewritten in [Nextflow](https://www.nextflow.io/). Every step 
 | Dereplication per sample | [VSEARCH](https://github.com/torognes/vsearch) | `quay.io/biocontainers/vsearch` |
 | Hashing of the unique sequences and contingency table across samples | PEMA scripts | `hariszaf/pema-nf` |
 | ASV inference, or | [Swarm v3](https://github.com/torognes/swarm) | `quay.io/biocontainers/swarm` |
+| ASV inference (on the read pairs, merged after denoising), or | [DADA2](https://benjjneb.github.io/dada2/) | `quay.io/biocontainers/bioconductor-dada2` |
 | OTU clustering, with de novo chimera removal | [VSEARCH](https://github.com/torognes/vsearch) | `quay.io/biocontainers/vsearch` |
 | Removal of oligotons (low-abundance ASVs or amplicons) and ASV/OTU tables | PEMA scripts | `hariszaf/pema-nf` |
 | Taxonomy assignment | [crest4](https://github.com/xapple/crest4) or [RDPClassifier](https://github.com/rdpstaff/classifier) | `hariszaf/crest4`, `quay.io/biocontainers/rdp_classifier` |
 | Mapping to NCBI Taxonomy (optional) | [NCBI Datasets CLI](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/command-line-tools/download-and-install/) | `staphb/ncbi-datasets`, `hariszaf/pema-nf` |
 
-Supported: `clustering_algo: swarm` (ASVs) or `clustering_algo: vsearch` (OTUs), and `classifier: crest` or `classifier: rdp`, in any combination.
+Supported: `clustering_algo: swarm` (ASVs), `clustering_algo: dada2` (ASVs) or `clustering_algo: vsearch` (OTUs), and `classifier: crest` or `classifier: rdp`, in any combination.
 
 
 
@@ -143,13 +144,14 @@ Parameters left empty are not passed to the tool, so the tool's own default appl
 | `marker_gene` | `16S`, `18S`, `12S`, `COI` or `ITS` | **required** |
 | `outdir` | Output folder | `results` |
 | `threads` | Threads for fastp, Swarm and crest4 | `3` |
-| `clustering_algo` | `swarm` or `vsearch` | `swarm` |
+| `clustering_algo` | `swarm`, `dada2` or `vsearch` | `swarm` |
 | `classifier` | `crest` or `rdp` | `crest` |
 | `min_oligotons` | Abundance below which ASVs (Swarm) or amplicons (VSEARCH) are removed; `0` keeps all | `5` |
 | `cutadapt` | `forward_primer`, `reverse_primer` and any other [cutadapt option](https://cutadapt.readthedocs.io/en/stable/reference.html) | required for ITS |
 | `fastp` | Any [fastp option](https://github.com/OpenGene/fastp#all-options), without the leading `--` | **required** |
 | `swarm` | Any [Swarm option](https://github.com/torognes/swarm), e.g. `differences`, `fastidious` | required for Swarm |
 | `vsearch` | `threshold`: identity threshold for the OTU clustering | `0.97` |
+| `dada2` | `pool`, `min_overlap`, `max_mismatch`, `chimera_method`, `nbases` | see the YAML file |
 | `crest` | `database`, `mount_crest_dbs`, `search_algo`, `min_score`, `min_smlrty`, `score_drop`, `threads`, and `train` for a custom database | see the YAML file |
 | `rdp` | `database`, `databases_dir`, `confidence`, `memory`, and `train` for a custom database | see the YAML file |
 | `ncbi_taxonomy` | `get_ncbi_taxonomy`, `ncbi_api_key`, `max_parallel`, `sleep` | off when missing |
@@ -164,6 +166,13 @@ PEMA adjusts some values to keep the tools consistent:
 * With Swarm, fastp's `n_base_limit` is set to `0` (Swarm does not accept `N`s).
 * Swarm's fastidious options (`fastidious`, `boundary`, `ceiling`, `bloom-bits`) are only used when `differences` is `1`,
   and the pairwise alignment options (`match-reward`, `mismatch-penalty`, `gap-opening-penalty`, `gap-extension-penalty`) only when it is larger than `1`.
+
+**DADA2.** With `clustering_algo: dada2`, the ASVs are inferred with [DADA2](https://benjjneb.github.io/dada2/), as in its
+[tutorial](https://benjjneb.github.io/dada2/tutorial.html): fastp filters the read pairs **without merging them**, DADA2 learns the
+error rates and denoises the forward and the reverse reads separately (on all samples together), merges the denoised pairs
+(`mergePairs`) and removes the chimeras. Merging before denoising would change the quality scores DADA2's error model relies on.
+`min_oligotons` then removes the ASVs with a lower total abundance. The options are in the `dada2` section (`pool`, `min_overlap`,
+`max_mismatch`, `chimera_method`, `nbases`); to truncate the reads to a fixed length, as DADA2 recommends, use fastp's `max_len1` and `max_len2`.
 
 **Oligotons.** With Swarm, `min_oligotons` applies to whole ASVs, after clustering.
 With VSEARCH it applies to individual amplicons (unique sequences) before clustering, as in PEMA v2.x and the

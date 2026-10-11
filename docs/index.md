@@ -31,7 +31,7 @@ Here is what PEMA does:
 | Primer removal (ITS only) | [cutadapt](https://cutadapt.readthedocs.io) |
 | Quality control and merging of the read pairs | [fastp](https://github.com/OpenGene/fastp) |
 | Dereplication | [VSEARCH](https://github.com/torognes/vsearch) |
-| ASV inference, or OTU clustering with chimera removal | [Swarm](https://github.com/torognes/swarm), or [VSEARCH](https://github.com/torognes/vsearch) |
+| ASV inference, or OTU clustering with chimera removal | [Swarm](https://github.com/torognes/swarm) or [DADA2](https://benjjneb.github.io/dada2/), or [VSEARCH](https://github.com/torognes/vsearch) |
 | Taxonomy assignment | [crest4](https://github.com/xapple/crest4) or [RDPClassifier](https://github.com/rdpstaff/classifier), with built-in, PEMA-trained or your own databases |
 | Mapping to NCBI Taxonomy (optional) | [NCBI Datasets](https://www.ncbi.nlm.nih.gov/datasets/) |
 
