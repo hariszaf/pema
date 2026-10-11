@@ -1,0 +1,30 @@
+# crest4 (https://github.com/xapple/crest4), with BLAST and VSEARCH for its sequence similarity search.
+#
+# Used by the CREST processes of PEMA (modules/crest.nf). It includes `ps` (procps), which Nextflow needs to
+# collect the metrics of a task (e.g. with -profile docker,reports).
+#
+# To build the image, from the root folder of the repository:
+#   docker build -f containers/Dockerfile.crest4 -t hariszaf/crest4:4.4.5 .
+# To check it:
+#   docker run --rm hariszaf/crest4:4.4.5 crest4 --version
+
+FROM python:3.10-slim
+
+LABEL maintainer="Haris Zafeiropoulos <haris.zafeiropoulos@atomicmail.io>"
+
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends \
+        build-essential \
+        python3-dev \
+        ncbi-blast+ \
+        vsearch \
+        procps \
+ && rm -rf /var/lib/apt/lists/*
+
+# ete3 is needed by scripts/make_new_crest_db.py, which PEMA runs in this image to build custom databases
+RUN pip install --no-cache-dir crest4==4.4.5 ete3 six
+
+# crest4 keeps its databases in CREST4_DIR; PEMA mounts the user's databases folder there (mount_crest_dbs)
+WORKDIR /crest4
+RUN mkdir .crest4
+ENV CREST4_DIR=/crest4/.crest4

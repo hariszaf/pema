@@ -1,0 +1,30 @@
+# DADA2 (https://benjjneb.github.io/dada2/), installed from Bioconductor as described in
+# https://benjjneb.github.io/dada2/dada-installation.html
+#
+# The base image is the official Bioconductor image: R and the matching Bioconductor release, set up so that
+# BiocManager installs prebuilt binaries (no compilation). The Bioconductor release fixes the dada2 version
+# (Bioconductor 3.23 / R 4.6.1).
+#
+# To build the image, from the root folder of the repository:
+#   docker build -f containers/Dockerfile.dada2 -t hariszaf/dada2:<dada2 version> .
+# To check it:
+#   docker run --rm hariszaf/dada2:<dada2 version> Rscript -e 'library(dada2); packageVersion("dada2")'
+
+FROM bioconductor/bioconductor_docker:RELEASE_3_23-r-4.6.1
+
+LABEL maintainer="Haris Zafeiropoulos <haris.zafeiropoulos@atomicmail.io>"
+
+# dada2 and its dependencies (ShortRead, Biostrings, ...), as on the installation page;
+# stop the build if dada2 cannot be loaded
+RUN Rscript -e 'if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")' \
+ && Rscript -e 'BiocManager::install("dada2", update = FALSE, ask = FALSE)' \
+ && Rscript -e 'library(dada2); cat("dada2", as.character(packageVersion("dada2")), "\n")'
+
+# ps (procps) is needed by Nextflow to collect the metrics of a task
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends procps \
+ && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /data
+
+CMD ["R"]

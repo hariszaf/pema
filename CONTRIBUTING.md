@@ -23,23 +23,24 @@ Feel free to contribute to this document as in the rest of the repo! :wink:
 
 * `git` (see [Getting Started with Git](https://help.github.com/en/github/using-git/getting-started-with-git-and-github))
 * configured GitHub account
-* you also need to have [Docker](https://www.docker.com/get-started) on your machine as PEMA is a containerized-oriented software
+* [Nextflow](https://www.nextflow.io/docs/latest/install.html) 25.04 or later
+* [Docker](https://www.docker.com/get-started) (or Podman, Singularity or Apptainer), as every step of PEMA runs in a container
 
-In terms of contributing to the PEMA image you need to set you code feasible to run on its PEMA's acutal container, meaning a container.
-So, before you start coding, you need to make sure that you can build your own images using the `docker build` command, and run your code
-over there as part of the PEMA environment. 
+Each step of the Nextflow pipeline runs in its own container (see [containers/README.md](containers/README.md)),
+so your code needs to run in the container of the process it belongs to.
+PEMA's own scripts (in `scripts/`) run in the `hariszaf/pema-nf` image, built from `containers/Dockerfile.pema_nf`.
 
-To have a look on what you need to end up with, you can just download the current version of PEMA and run a small test. 
+To have a look on what you need to end up with, you can just get the current version of PEMA and run a small test.
 
-Clone the repository, 
+Clone the repository,
 
     git clone git@github.com:hariszaf/pema.git pema
     cd pema
     git branch -vv
 
-the last command should tell you that you are in `develop` branch.
+Now you may try to run the current version of PEMA locally, following the [README](README.md):
 
-Now you may try to run current version of PEMA locally by making use of the [```analysis_directory```](https://github.com/hariszaf/pema/tree/master/analysis_directory) following the instructions presented on the [PEMA tutorial](https://docs.google.com/presentation/d/1lVH23DPa2NDNBhVvOTRoip8mraw8zfw8VQwbK4vkB1U/edit?fbclid=IwAR14PpWfPtxB8lLBBnoxs7UbG3IJfkArrJBS5f2kRA__kvGDUb8wiJ2Cy_s#slide=id.g464fa2cc59_0_57)
+    nextflow run pema.nf --params-file pema.yaml
 
 
 
@@ -88,7 +89,7 @@ You should be able to see exactly the same commits as in `pema` repository now.
 PEMA is using the [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) workflow. 
 Each repository using this model should contain two main branches:
 
-* master - release-ready version of the library
+* main - release-ready version of the library
 * develop - development version of the library
  
 and could contain various supporting branches for new features and hotfixes. 
@@ -141,12 +142,16 @@ You can see your newly created remote branch also on GitHub on your fork repo, n
 Before contributiong to a library by adding a new feature, or a bugfix, 
 you need **always** to contact the PEMA developers team (pema@hcmr.gr) or by opening an issue.
 
-You also need to run your version locally to make sure that your contribution leads to a robust new Docker and Singularity image.
+You also need to run your version locally to make sure that your contribution works in the pipeline:
 
-To do so, you need to re-build ```pema``` or ```pemabase``` Docker images and for the primer, the correponding Singularity file as
-you can see [here](https://github.com/hariszaf/pema/tree/master/singularity).
+* check the code with `nextflow lint pema.nf modules/ nextflow.config`;
+* run the pipeline on a small dataset, e.g. `nextflow run pema.nf --params-file <your yaml>`;
+* run the sanity check, `sanity_check/run_sanity_check.sh`, which downloads the test dataset if needed and runs
+  the pipeline on the 16S, 18S, 12S and COI samples (`--help` for the options);
+* if you changed anything under `scripts/`, re-build the `pema-nf` image (see [containers/README.md](containers/README.md))
+  and use it in the modules, since the scripts are copied into the image.
 
-It is your images that will be tested by the PEMA group to review your contribution. 
+It is your images that will be tested by the PEMA group to review your contribution.
 
 
 Now you can push your changes to the remote branch

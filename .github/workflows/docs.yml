@@ -1,0 +1,44 @@
+# PEMA : a Pipeline for Environmental DNA Metabarcoding Analysis
+# Author: Haris Zafeiropoulos
+# Licensed under GNU LGPL.3, see LICENCE file
+#
+# Publish the documentation in docs/ (on the main branch) to https://hariszaf.github.io/pema_documentation
+#
+# The sources live in this repository, but the site is still served by the GitHub Pages of
+# hariszaf/pema_documentation, so that its URL does not change: docs/ is copied to the gh-pages
+# branch of that repository, and GitHub Pages builds it (Jekyll) as before.
+#
+# Setup (once):
+#   1. ssh-keygen -t ed25519 -N "" -C "pema docs" -f pema_docs_key
+#   2. hariszaf/pema_documentation > Settings > Deploy keys: add pema_docs_key.pub, with write access
+#   3. hariszaf/pema > Settings > Secrets and variables > Actions: add pema_docs_key as DOCS_DEPLOY_KEY
+
+name: docs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Publish docs/ to hariszaf/pema_documentation (gh-pages)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.DOCS_DEPLOY_KEY }}
+          external_repository: hariszaf/pema_documentation
+          publish_branch: gh-pages
+          publish_dir: ./docs
+          # GitHub Pages builds the Jekyll site in hariszaf/pema_documentation, as before
+          enable_jekyll: true
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
+          full_commit_message: 'Update from hariszaf/pema@${{ github.sha }}'

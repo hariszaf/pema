@@ -1,0 +1,38 @@
+threads: 4
+
+# The ASV table of the sequences to classify (an ITS dataset)
+asvs_contingency_table: tests/data/crest/asvs_contingency_hash.tsv
+
+clustering_algo: swarm
+
+outdir: tests/results/crest
+
+crest:
+  # Fasta file containing the sequences to be classified.
+  fasta: tests/data/crest/all_sequences_grouped.fa
+
+  # Directory containing all the custom CREST databases, if any (optional): set it to the folder with unite2025
+  # (e.g. /home/<you>/.crest4; pema.nf downloads unite2025 there the first time it is used for ITS).
+  mount_crest_dbs:
+
+  # The database used for the sequence similarity search.
+  # Either `ssuome`, `silvamod138pr2`, `mitofish`, or `midori253darn`.
+  # In case of a custom database, please make sure you provide the `mount_crest_dbs` too.
+  database: unite2025
+
+  # The algorithm used for the sequence similarity search
+  # that will be run to match the sequences against the database chosen. Either `blast` or `vsearch`. By default, `blast`.
+  search_algo: vsearch
+
+  # The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm.
+  # All hits below this score are ignored. When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered.
+  # The default is `155` for BLAST and `0.75` for VSEARCH.
+  min_score: 0.75
+
+  # Boolean: Determines if the minimum similarity filter is turned on or off.
+  # The minimum similarity filter prevents classification to higher ranks when a minimum rank-identity is not met.
+  min_smlrty: true
+
+  # Determines the range of hits to retain and the range to discard based on a drop in percentage from the score of the best hit.
+  # Any hit below the following value: "(100 - score_drop)/100 * best_hit_score" is ignored.
+  score_drop: 2.0

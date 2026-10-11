@@ -4,6 +4,9 @@ tools/
 # Ignore the backups directory
 backups/
 
+# Ignore Python bytecode cache files
+__pycache__/
+
 # Ignore old version of scripts
 scripts_OLD_VERSION/
 
@@ -16,12 +19,42 @@ scripts_OLD_VERSION/
 # Ignore all fastq.gz files
 *.fastq.gz
 
+# Ignore nextflow
+.nextflow/
+work/
+
 # Ignore all sanity checks outputs
-pema_docker_image/sanity_check/16S/
-pema_docker_image/sanity_check/18S/
-pema_docker_image/sanity_check/COI/
-pema_docker_image/sanity_check/ITS/
-pema_docker_image/sanity_check/12S/
+sanity_check/16S/TEST*/
+sanity_check/18S/TEST*/
+sanity_check/COI/TEST*/
+sanity_check/ITS/TEST*/
+sanity_check/12S/TEST*/
+sanity_check/custom_crest/TEST*/
+sanity_check/non_ena_data/TEST.*/
+sanity_check/sanity_data/
+sanity_check/*/mydata*/
+sanity_check/*/TEST_*
+sanity_check/*/work/
+sanity_check/*/.nextflow*
+sanity_check/*/pipeline_info/
+sanity_check/custom_rdp/trained_dbs/
+sanity_check/custom_crest/trained_dbs/
+sanity_check/rdp_dbs/
+
+# Ignore custom db input fules
+sanity_check/custom_crest/greek_bac/
+sanity_check/custom_crest/unite10_raw/
+
+# Ignore training files for RDPClassifier
+crest_dbs.tar.gz
+sanity_data.tar.gz
+rdp_dbs_v220.tar.gz
 
 # Ignore any .sif file
 *.sif
+
+# Ignore vscode settngs etc.
+.vscode/
+
+# Outputs of the module tests (tests/)
+tests/results/

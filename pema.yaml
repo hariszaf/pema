@@ -1,0 +1,351 @@
+# The parameters file of PEMA (https://github.com/hariszaf/pema).
+# Copy it, fill it in, and run:   nextflow run pema.nf --params-file my_analysis.yaml
+# A parameter left empty is not passed to its tool, so the tool's own default applies.
+
+# Folder with the paired-end fastq files (.fastq, .fastq.gz, .fq, .fq.gz). The two files of a sample are
+# recognised by a _1/_2 or _R1/_R2 in their names (e.g. S1_1.fastq.gz, S1_S1_L001_R1_001.fastq.gz);
+# the part before it is the sample name.
+# e.g. sanity_check/16S/mydata16s, the 16S samples of the sanity check (sanity_check/run_sanity_check.sh 16S downloads them).
+raw_reads: path/to/your/reads
+
+# values from: ["16S", "18S", "12S", "COI", "ITS"]
+# For ITS, the primers are removed with cutadapt (see the cutadapt section) before fastp.
+marker_gene: 16S
+
+threads: 3
+
+# Output folder
+outdir: results
+
+# values from: ["swarm", "vsearch", "dada2"]
+# swarm: ASVs with Swarm; vsearch: OTUs with VSEARCH; dada2: ASVs with DADA2 (fastp then filters the read pairs without merging them)
+clustering_algo: swarm  
+
+# values from: ["crest", "rdp"]
+classifier: crest
+
+min_oligotons: 10
+
+
+# Only for marker_gene: ITS. The primers are removed from the raw read pairs, before fastp:
+# from read 1 the forward primer and the reverse complement of the reverse primer, and from read 2
+# the reverse primer and the reverse complement of the forward primer (ITS reads can run into the opposite primer).
+cutadapt:
+
+  # Primer sequences (5'->3'); IUPAC ambiguity codes are allowed, e.g. ITS1F and ITS2:
+  forward_primer: CTTGGTCATTTAGAGGAAGTAA
+  reverse_primer: GCTGCGTTCTTCATCGATGC
+
+  # Any other cutadapt option can be added, without the leading --, e.g.
+  # minimum-length: 50
+  # discard-untrimmed: true
+
+
+fastp:
+  # description: Adapter sequence auto-detection.
+  # type: boolean
+  detect_adapter_for_pe: 
+
+  # description: the adapter for read1.This is used if R1/R2 are found not overlapped.
+  # type: string
+  adapter_sequence: 
+
+  # description: The adapter for read2. This is used if R1/R2 are found not overlapped. If not specified, it will be the same as <adapter_sequence>.
+  # type: string
+  adapter_sequence_r2: 
+
+  # description: Enable base correction in overlapped regions, default is disabled.
+  # type: boolean
+  correction: 
+
+  # description:
+  # type: int
+  # default: 30
+  overlap_len_require: 
+
+  # description:
+  # type:
+  overlap_diff_limit:
+
+  # description: Enable overrepresented sequence analysis; for a description of the analysis see https://doi.org/10.1093/bioinformatics/bty560  
+  # type: boolean
+  overrepresentation_analysis: 
+
+  # description: One in (--overrepresentation_sampling) reads will be computed for overrepresentation analysis (1~10000), smaller is slower, default is 20.
+  # type: integer
+  overrepresentation_sampling:
+
+  # description: The maximum percentage of mismatched bases to detect overlapped region of PE reads. This will affect overlap analysis based PE merge, adapter trimming and correction. Default 20 means 20%.
+  # type: integer
+  overlap_diff_percent_limit: 
+
+  # description: Enable low complexity filter. The complexity is defined as the percentage of base that is different from its next base (base[i] != base[i+1]).
+  # type: boolean
+  low_complexity_filter: 
+
+  # description: The threshold for low complexity filter (0~100). Default is 30, which means 30% complexity is required. 
+  # type: integer
+  complexity_threshold: 
+
+  # description: 
+  # type: boolean
+  disable_length_filtering: 
+
+  # description: reads longer than length_limit will be discarded, default 0 means no limitation. (int [=0])
+  # type: integer
+  length_limit: 
+
+  # description: Reads shorter than length_required will be discarded, default is 15.
+  # type: integer
+  length_required: 
+
+  # description: If one read's number of N base is >n_base_limit, then this read/pair is discarded. Default is 5.
+  # type: int
+  n_base_limit: 
+
+  # description: Move a sliding window from front (5') to tail, drop the bases in the window if its mean quality < threshold, stop otherwise.
+  # type: boolean
+  cut_front: 
+
+  # description: The mean quality requirement option for cut_front. Range: 1~36 default: 20 (Q20).
+  # type: integer
+  cut_front_mean_quality: 
+
+  # description: The window size option of cut_front. Range: 1~1000, default: 4.
+  # type: integer
+  cut_front_window_size: 
+
+  # description: Move a sliding window from tail (3') to front, drop the bases in the window if its mean quality < threshold, stop otherwise.
+  # type: boolean
+  cut_tail: 
+
+  # description: The window size option of cut_tail. Range: 1~1000, default: 4.
+  # type: integer
+  cut_tail_window_size: 
+
+  # description: The mean quality requirement option for cut_tail. Range: 1~36 default: 20 (Q20)
+  # type: integer
+  cut_tail_mean_quality: 
+
+  # description: Move a sliding window from front to tail, if meet one window with mean quality < threshold, drop the bases in the window and the right part, and then stop.
+  # type: boolean
+  cut_right: 
+
+  # description: The window size option of cut_right. Range: 1~1000, default: 4.
+  # type: integer
+  cut_right_window_size: 
+
+  # description: The mean quality requirement option for cut_right. Range: 1~36 default: 20 (Q20)
+  # type: integer
+  cut_right_mean_quality: 
+
+  # description: 
+  # type: integer
+  # default: true
+  trim_poly_g: 
+
+  # description: 
+  # type: integer
+  # default: 10
+  poly_g_min_len: 
+
+  # description: 
+  # type: integer
+  cut_right_mean_quality: 
+
+  # description: 
+  # type: bolean
+  # default: false
+  disable_trim_poly_g: 
+
+
+swarm:
+  differences: 1
+
+  # ---
+  # Fastidious options (only when d = 1). If you set any of the following with a d > 1, pema will fail
+  # ---
+
+  # Fastidious options (only when d = 1)
+  fastidious: true
+
+  #  min mass of large clusters
+  boundary: 2
+
+  # max memory in MB for Bloom filter (unlim.)
+  ceiling:
+
+  # bits used per Bloom filter entry
+  bloom-bits: 16
+
+  # ---
+  # Pairwise alignment advanced options (only when d > 1, all integers):
+  # if you set any of the following with a d == 1, pema will fail
+  # ---
+
+  # reward for nucleotide match
+  match-reward:
+
+  # penalty for nucleotide mismatch
+  mismatch-penalty:
+
+  # gap open penalty
+  gap-opening-penalty:
+
+  # gap extension penalty
+  gap-extension-penalty:
+
+
+vsearch:
+
+  # values from (0-1]
+  # Identity threshold for the OTU clustering (and the preclustering before chimera removal):
+  # an amplicon joins a cluster if its pairwise identity with the cluster's centroid is at least this value.
+  # The pairwise identity is the number of matching columns / (alignment length - terminal gaps).
+  # The OTUs are built as in https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline;
+  # amplicons with a total abundance below min_oligotons are removed before clustering.
+  threshold: 0.98
+
+  # VSEARCH removes oligotons *before* clustering: unique sequences with a total abundance below this are removed,
+  # which removes many more reads than removing small clusters afterwards (Swarm, DADA2). Hence a lower value than
+  # the global min_oligotons, which is used if this is left empty.
+  min_oligotons: 2
+
+
+dada2:
+
+  # Only for clustering_algo: dada2. DADA2 learns the error rates and denoises the forward and the reverse reads separately,
+  # then merges the denoised pairs and removes the chimeras (https://benjjneb.github.io/dada2/tutorial.html).
+  # fastp filters the read pairs (without merging them).
+
+  # Lengths to truncate the forward and the reverse reads to, as DADA2 recommends (its truncLen): where their quality drops
+  # (see the fastp reports in fastp/qc/). fastp truncates the reads and drops those shorter than these lengths.
+  # The truncated reads must still overlap (by min_overlap) to be merged: forward + reverse > amplicon length + min_overlap.
+  # e.g. 240 and 200 for 2x250 reads; leave empty not to truncate.
+  trunc_len_forward: 240
+  trunc_len_reverse: 200
+
+  # Denoise each sample on its own (false), all samples together (true; more sensitive to rare variants, slower),
+  # or each sample with priors from the others (pseudo).
+  pool: false
+
+  # Minimum overlap (in bases) and maximum number of mismatches in the overlap, to merge a denoised pair.
+  min_overlap: 12
+  max_mismatch: 0
+
+  # Chimera removal: consensus (each sample on its own, then a consensus), pooled, or per-sample.
+  chimera_method: consensus
+
+  # Number of bases used to learn the error rates (DADA2's default: 1e8).
+  nbases: 1e8
+
+
+crest:
+
+  # The database used for the sequence similarity search.
+  # Either `ssuome`, `silvamod138pr2`, `mitofish`, or `midori253darn`.
+  # In case of a custom database, e.g. unite_19_02_2025, please make sure you provide the `mount_crest_dbs` too.
+  # PEMA's crest4 databases, e.g. unite2025 (UNITE, for ITS), are downloaded from Zenodo into `mount_crest_dbs`
+  # the first time they are used.
+  database: silvamod138pr2
+
+  # Directory containing all the custom CREST databases, if any (optional, e.g. /home/<you>/.crest4).
+  # It is good practice to provide a path even when using one of the crest databases, so you do not download it every time.  !!!!
+  mount_crest_dbs:
+
+  # Where PEMA's crest4 databases are downloaded from: <download_url>/<database>.tar.gz
+  download_url: https://zenodo.org/records/23298141/files
+
+  # The algorithm used for the sequence similarity search
+  # that will be run to match the sequences against the database chosen. Either `blast` or `vsearch`. By default, `blast`.
+  search_algo: vsearch
+
+  # The minimum bit-score for a search hit to be considered when using BLAST as the search algorithm.
+  # All hits below this score are ignored. When using VSEARCH, this value instead indicates the minimum identity between two sequences for the hit to be considered.
+  # The default is `155` for BLAST and `0.75` for VSEARCH.
+  min_score: 0.75
+
+  # Boolean: Determines if the minimum similarity filter is turned on or off.
+  # The minimum similarity filter prevents classification to higher ranks when a minimum rank-identity is not met.
+  min_smlrty: true
+
+  # Determines the range of hits to retain and the range to discard based on a drop in percentage from the score of the best hit.
+  # Any hit below the following value: "(100 - score_drop)/100 * best_hit_score" is ignored.
+  score_drop: 2.0
+
+  threads: 
+
+  # Build a custom crest4 database (optional). When `taxonomy` and `sequences` are set and `database` is not yet
+  # built in `mount_crest_dbs`, PEMA builds it there first and then uses it; the next runs reuse it.
+  # `database` is then the name of the new database (not one of the built-in ones).
+  train:
+
+    # Taxonomy file: tab-separated, no header, one line per sequence: <accession> TAB <lineage> [TAB <name>].
+    # The lineage is separated by '/' (crest4, e.g. exported from ARB) or by ';' (.nds files of older CREST), e.g.
+    #   SSEQ_1   Bacteria;Firmicutes;Bacilli;Bacillales;Bacillaceae;Bacillus;Bacillus_vallismortis   SSEQ_1
+    taxonomy:
+
+    # Sequence file: fasta, the first word of each header is the accession. An alignment works too (gaps are removed).
+    sequences:
+
+
+rdp:
+
+  # The RDP-trained database: the name of a folder inside `databases_dir`, or the full path to a folder.
+  # A database folder contains an rRNAClassifier.properties file and the files it lists, e.g.
+  # The PEMA-trained databases 12S_v200 (12S; also accepted as 12S_v2.0.0), midori_1 and midori_2 (COI) are downloaded from Zenodo
+  # into `databases_dir` the first time they are used.
+  database: 12S_v200
+
+  # Folder that contains the RDP-trained databases; downloaded and trained databases are saved here.
+  # (Optional when `database` is a full path.)
+  databases_dir:
+
+  # Where the PEMA-trained databases are downloaded from: <download_url>/<database>.tar.gz
+  download_url: https://zenodo.org/records/23298141/files
+
+  # Ranks are kept from the top down while RDPClassifier's confidence is at least this value.
+  # 0.8 is the usual threshold for reads of 250 bp or more; for shorter reads 0.5 is often used. 0 keeps all ranks.
+  confidence: 0.8
+
+  # Memory for RDPClassifier. Large databases (e.g. MIDORI for COI) need more.
+  memory: 8 GB
+
+  # Train a custom database (optional). When `taxonomy` and `sequences` are set and `database` is not yet
+  # trained in `databases_dir`, PEMA trains it there first and then uses it; the next runs reuse it.
+  # See https://hariszaf.github.io/pema_documentation/training_rdpclassifier/ for how to prepare the files.
+  train:
+
+    # Taxonomy file: tab-separated, with a header line; an id column, then one column per rank, e.g.
+    #   Seq_ID      Kingdom     Phylum      Class       ...  Species
+    #   SEQ1179093  Eukaryota   Annelida    Polychaeta  ...  Eunice_vittata
+    # Every line needs an entry for every rank.
+    taxonomy:
+
+    # Sequence file: fasta, the first word of each header is the id used in the taxonomy file.
+    sequences:
+
+    # The RDPClassifier does not allow the same taxon name at the same rank under different parent lineages
+    # (e.g. the genus Thalia, both an animal and a plant). PEMA stops and lists them; set this to true to
+    # rename them to <name>_1, <name>_2, ... instead.
+    rename_duplicates: false
+
+    # Memory for the training. Large databases need a lot (MIDORI needed more than 50 GB).
+    memory: 16 GB
+
+
+ncbi_taxonomy:
+
+  # Map the taxonomies to NCBI Taxonomy (see ncbi_taxonomy/ in the output)
+  get_ncbi_taxonomy: false
+
+  # NCBI Datasets allows 5 requests per second without an API key and 10 with one (https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/).
+  # The key is optional: leave it empty and export NCBI_API_KEY instead, to keep it out of version control.
+  ncbi_api_key:
+
+  # Lookups running at the same time: at most 2 without an API key and 4 with one (the default), to stay within the limits.
+  max_parallel:
+
+  # Pause (in seconds) after each lookup: at least 0.4 without an API key and 0.1 with one (default: 0.4).
+  sleep: 
+

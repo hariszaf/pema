@@ -1,0 +1,194 @@
+# PEMA's output files
+
+All files are written under the `outdir` set in the parameters file.
+Each of the next paragraphs stands for a file or subdirectory of that folder.
+
+```
+<outdir>/
+├── cutadapt/                       <sample>.cutadapt.json  (marker_gene: ITS)
+├── fastp/
+│   ├── qc/                         <sample>.html, <sample>.json
+│   ├── merged/                     <sample>.fastq.gz                    (not with DADA2)
+│   └── filtered/                   <sample>_1.fastq.gz, <sample>_2.fastq.gz  (clustering_algo: dada2)
+├── derep_samples/                  <sample>.fasta
+├── linearized/                     <sample>.fa
+├── hashing/                        <sample>.hash, <sample>.tsv
+├── hash_all_samples.fa
+├── amplicon_contingency_table.tsv
+├── swarm/                          asvs.stats, asvs.swarms, asvs_representatives_hash.fa
+├── oligos/                         filtered_asvs.stats, filtered_asvs.swarms, filtered_asvs_representatives_hash.fa
+├── asvs_contingency_table.tsv      (clustering_algo: swarm)
+├── asvs_contingency_hash.tsv
+├── asvs_representatives.fa
+├── dada2/                          dada2_seqtab.tsv, dada2_read_tracking.tsv, dada2_errors.pdf  (clustering_algo: dada2)
+├── vsearch/                        all_samples.fasta, derep.*, preclustered.*, nonchimeras*.fasta, otus.*
+├── otus_contingency_table.tsv      (clustering_algo: vsearch)
+├── otus_contingency_hash.tsv
+├── otus_representatives.fa
+├── crest_assignment/               assignments.txt, search.hits, tax_assigned_table.tsv  (classifier: crest)
+├── rdp_assignment/                 rdp_assignments.txt, tax_assigned_table.tsv              (classifier: rdp)
+└── ncbi_taxonomy/                  taxonomies.json, not_found.tsv, ambiguous_candidates.tsv,
+                                    tax_assigned_with_ncbi.tsv
+```
+
+
+
+### cutadapt
+
+Only for `marker_gene: ITS`. ***"cutadapt/<sample>.cutadapt.json"*** is the cutadapt report of each sample: how many read pairs
+had each primer (and its reverse complement) removed. The trimmed reads go to fastp and are not kept.
+
+
+
+### fastp
+
+***"qc/"*** contains the fastp quality reports, in .json and .html formats, for each sample.
+
+***"merged/"*** contains, for each sample, the reads that passed quality control and were merged into one read per pair.
+Read pairs that could not be merged are not kept.
+
+***"filtered/"***, only with `clustering_algo: dada2`, contains instead the read pairs that passed quality control, not merged:
+DADA2 denoises the forward and the reverse reads separately, and merges them afterwards.
+With DADA2, the dereplication and hashing steps below are not run.
+
+
+
+### Dereplication and hashing
+
+***"derep_samples/"*** contains the unique sequences of each sample, as returned by VSEARCH (`--fastx_uniques`).
+The abundance of each sequence is in its header (e.g. `>read_id;size=12`).
+
+***"linearized/"*** contains the same sequences, with each sequence on a single line.
+
+***"hashing/<sample>.hash"*** contains the unique sequences of each sample, named after the SHA1 hash of the sequence followed by its abundance
+(e.g. `>218a968dfc3034ee2071c2f017aac9b38596ba5f_12`). The same sequence gets the same name in every sample.
+
+***"hashing/<sample>.tsv"*** maps each hash to the read that represented the sequence in the sample, and the sequence itself.
+
+***"hash_all_samples.fa"*** contains all unique sequences of all samples, with their total abundance across samples,
+sorted by decreasing abundance. This is the input of the clustering step.
+
+***"amplicon_contingency_table.tsv"*** contains the abundance of each unique sequence (amplicon) in each sample, and the total.
+
+
+
+### DADA2 (`clustering_algo: dada2`)
+
+DADA2 learns the error rates and denoises the forward and the reverse reads separately, merges the denoised pairs and removes the chimeras.
+Its ASV tables (see below) are written directly; the files of ***"dada2/"*** are:
+
+***"dada2_seqtab.tsv"***: the ASVs after chimera and oligoton removal: their sequence, and their abundance in each sample.
+
+***"dada2_read_tracking.tsv"***: the number of reads of each sample after each step: input (after fastp), denoised forward and reverse reads,
+merged pairs, and non-chimeric reads. A large loss at the merging step usually means that the reads overlap too little (see `min_overlap`).
+
+***"dada2_errors.pdf"***: the error rates learned for the forward and the reverse reads, as a function of the quality score
+(the points should follow the black line of the fitted model).
+
+
+
+### Swarm (`clustering_algo: swarm`)
+
+Swarm writes two files, ***"asvs.stats"*** and ***"asvs.swarms"***, and ***"asvs_representatives_hash.fa"*** with the seed (representative) sequence of each ASV.
+
+- ***asvs.stats*** is a tab-separated table with one ASV per row and 7 columns:
+
+1. number of unique amplicons in the cluster,
+2. total abundance of amplicons in the cluster,
+3. label of the initial seed (header without abundance annotations),
+4. abundance of the initial seed,
+5. number of amplicons with an abundance of 1 in the cluster,
+6. maximum number of iterations before the cluster reached its natural limit,
+7. cumulated number of steps along the path joining the seed and the furthermost
+amplicon in the cluster. Please note that the actual number of differences between
+the seed and the furthermost amplicon is usually much smaller. When using the
+option --fastidious (-f), grafted amplicons are not taken into account.
+
+The sum of column 1 equals the number of sequences in `hash_all_samples.fa`,
+and the sum of column 2 equals the number of merged reads across all samples.
+
+- ***asvs.swarms*** is a list of clusters, one cluster per line.
+A cluster is a list of amplicon headers separated by spaces; the first one is the seed.
+
+
+
+### Oligotons
+
+If `min_oligotons` is larger than 0, ASVs with a total abundance below it are removed.
+***"oligos/"*** contains the Swarm files above without those ASVs (`filtered_` prefix); the following steps use these files.
+
+
+
+### VSEARCH (`clustering_algo: vsearch`)
+
+OTUs are built as in the [VSEARCH pipeline](https://github.com/torognes/vsearch/wiki/VSEARCH-pipeline). All files are in ***"vsearch/"***;
+the `.uc` files record which sequence was assigned to which cluster (see their format [here](https://www.drive5.com/usearch/manual/opt_uc.html)).
+
+***"all_samples.fasta"*** is `hash_all_samples.fa` with the abundances written as `;size=`, as VSEARCH expects.
+
+***"derep.fasta"*** / ***"derep.uc"***: the amplicons with a total abundance of at least `min_oligotons`.
+
+***"preclustered.fasta"*** / ***"preclustered.uc"***: these amplicons preclustered at the `threshold` identity (denoising).
+
+***"nonchimeras_preclustered.fasta"***: the preclusters that are not chimeras (VSEARCH `--uchime_denovo`).
+
+***"nonchimeras_derep.fasta"*** and ***"nonchimeras.fasta"***: the amplicons of the non-chimeric preclusters, mapped back to the dereplicated and to all amplicons.
+
+***"otus.fasta"*** / ***"otus.uc"***: the OTUs, clustered at the `threshold` identity; the centroid of each OTU is its representative sequence.
+
+
+
+### ASV / OTU tables
+
+The ASV (Swarm, DADA2) and OTU (VSEARCH) tables have the same format; the files start with `asvs_` or `otus_`, and the first column is `ASV` or `OTU`.
+OTUs are named `OTU_1`, `OTU_2`, ... by decreasing total abundance; the abundance of an OTU in a sample is the sum of its amplicons.
+
+
+***"asvs_contingency_table.tsv"*** contains the abundance of each ASV in each sample.
+
+***"asvs_contingency_hash.tsv"*** is the same table with an extra `Seed` column: the hash of the representative sequence of each ASV.
+It is used to link the ASVs to their taxonomy.
+
+***"asvs_representatives.fa"*** contains the representative sequence of each ASV, named by its hash.
+These are the sequences that are classified.
+
+
+
+### CREST
+
+***"crest_assignment/assignments.txt"*** contains the crest4 taxonomy of each representative sequence: its hash, a tab, and its lineage separated by `;`
+(or `No hits` when no taxonomy could be assigned).
+
+***"crest_assignment/search.hits"*** contains the hits of the sequence similarity search (BLAST or VSEARCH) against the CREST database.
+
+***"crest_assignment/tax_assigned_table.tsv"*** is the final ASV table: the ASV identifier, its abundance in each sample, and its taxonomy.
+
+
+
+### RDPClassifier
+
+***"rdp_assignment/rdp_assignments.txt"*** is the output of RDPClassifier: for each representative sequence, its hash, the strand,
+and then the name, rank and confidence of each rank of its lineage, from the root of the database down.
+
+***"rdp_assignment/tax_assigned_table.tsv"*** is the final ASV table: the ASV identifier, its abundance in each sample, and its taxonomy.
+The taxonomy keeps the ranks whose confidence is at least `confidence`, without the root, rank prefixes (e.g. `g__`) or placeholder ranks (e.g. `k__undef_Eukaryota`);
+it is `Unassigned` when no rank reaches the threshold.
+
+
+
+### NCBI Taxonomy
+
+Only when `get_ncbi_taxonomy` is `true`. The lowest taxon of each lineage in the final ASV table is looked up in NCBI Taxonomy.
+
+***"ncbi_taxonomy/taxonomies.json"*** contains the NCBI Taxonomy report of each taxon that was found, by taxon name.
+
+***"ncbi_taxonomy/not_found.tsv"*** contains the error messages for taxa that could not be mapped:
+names unknown to NCBI, and names that match more than one NCBI taxid.
+
+***"ncbi_taxonomy/ambiguous_candidates.tsv"*** contains, for names that match more than one taxid,
+one line per candidate taxid: the taxon name, a tab, and the NCBI report of the candidate.
+
+***"ncbi_taxonomy/tax_assigned_with_ncbi.tsv"*** is the final ASV/OTU table with four extra columns:
+`last_taxon` (the taxon that was looked up), `ncbi_taxonomy` (the NCBI lineage, from domain to species), `ncbi_taxonomy_ids` (the NCBI taxids of that lineage)
+and `ncbi_taxid` (the NCBI Taxonomy id of the taxon itself; empty when it was not found).
+For ambiguous names, the candidate whose lineage is the most similar to the classifier's lineage is used.
