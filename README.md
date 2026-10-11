@@ -39,7 +39,7 @@ Since the `v.2.1.4` release, PEMA supports also the analysis of the 12S rRNA mar
 
 PEMA processes the reads from each sample and **returns an OTU- or an ASV-table with the taxonomies** of the taxa found and their abundances in each sample, along with quality reports for the reads of each sample.
 
-PEMA is now being rewritten in [Nextflow](https://www.nextflow.io/). Every step runs in its own container, so the only requirements are Nextflow and a container engine (Docker, Podman, Singularity or Apptainer).
+Since v3.0.0, PEMA is a [Nextflow](https://www.nextflow.io/) pipeline. Every step runs in its own container, so the only requirements are Nextflow and a container engine (Docker, Podman, Singularity or Apptainer).
 
 
 
@@ -527,7 +527,7 @@ For any troubles you may have when running PEMA or for any potential improvevmen
 
 > **This is PEMA v3, written in Nextflow.**
 > The BigDataScript-based PEMA (v1.x and v2.x), with its Docker and Singularity images and its `parameters.tsv` file,
-> is available with the [`v.2.1.5`](https://github.com/hariszaf/pema/tree/v.2.1.5) tag and the [`v2.2.0`](https://github.com/hariszaf/pema/tree/v2.2.0) branch;
+> is available with the [`v.2.1.5`](https://github.com/hariszaf/pema/tree/v.2.1.5) tag and the [`v2.2.0`](https://github.com/hariszaf/pema/tree/v2.2.0) tag;
 > see the [CHANGELOG](CHANGELOG.md) for what changed.
 
 ## License

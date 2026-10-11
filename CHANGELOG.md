@@ -5,7 +5,7 @@
 PEMA is rewritten in [Nextflow](https://www.nextflow.io/). Every step runs in its own container (Docker, Podman, Singularity or
 Apptainer), which Nextflow pulls automatically: there is no PEMA image to install anymore, and the same command runs PEMA on a laptop,
 a server or an HPC cluster (with the `slurm` profile, or any Nextflow executor). The BigDataScript-based PEMA v2.x is available with
-the `v.2.1.5` tag and the `v2.2.0` branch.
+the `v.2.1.5` and `v2.2.0` tags.
 
 ### Running PEMA
 
