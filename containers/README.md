@@ -40,8 +40,6 @@ docker push hariszaf/pema-nf:<tag>
   on the official Bioconductor image (7.6 GB); the pipeline uses the smaller BioContainers image instead.
 * [`Dockerfile.crest4`](Dockerfile.crest4) builds crest4 4.4.5. The pipeline currently uses the published `hariszaf/crest4:4.3.8`;
   `TRAIN_CREST_DB` (not yet part of the pipeline) refers to `hariszaf/crest4:4.4.2`.
-* [`Dockerfile.cutadapt`](Dockerfile.cutadapt) built R and cutadapt for `scripts/cutadaptITS.R` (PEMA v2.x); the pipeline now runs cutadapt
-  directly from the BioContainers image.
 * [`Dockerfile.rdpclassifier`](Dockerfile.rdpclassifier) builds RDPClassifier 2.13 with the PEMA-trained databases inside.
   The pipeline uses the BioContainers image instead, with the databases given in the parameters file.
 
