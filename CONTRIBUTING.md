@@ -36,7 +36,6 @@ Clone the repository,
 
     git clone git@github.com:hariszaf/pema.git pema
     cd pema
-    git checkout nf
     git branch -vv
 
 Now you may try to run the current version of PEMA locally, following the [README](README.md):
@@ -90,7 +89,7 @@ You should be able to see exactly the same commits as in `pema` repository now.
 PEMA is using the [GitFlow](http://nvie.com/posts/a-successful-git-branching-model/) workflow. 
 Each repository using this model should contain two main branches:
 
-* master - release-ready version of the library
+* main - release-ready version of the library
 * develop - development version of the library
  
 and could contain various supporting branches for new features and hotfixes. 

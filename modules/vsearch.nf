@@ -183,7 +183,7 @@ process OTUS_CONTINGENCY_TABLE {
 
     publishDir "${params.outdir}", mode: 'copy'
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
         path otus_uc

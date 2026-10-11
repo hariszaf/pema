@@ -45,11 +45,11 @@ You may ask for PEMA to move on after the taxonomy step and run a `phyloseq` ana
 
 To do so, you need to set the `phyloseq` parameter in the `parameters.tsv` file as `Yes` and add the `phyloseq_in_PEMA.R` script in the `analysis_directory` with all the rest of your input~ 
 
-You may get a version of this script [here](https://github.com/hariszaf/pema/blob/master/analysis_directory/phyloseq_in_PEMA.R). As mentioned on the script, the first sections need to be **exactly like this**. 
+You may get a version of this script [here](https://github.com/hariszaf/pema/blob/v.2.1.5/analysis_directory/phyloseq_in_PEMA.R). As mentioned on the script, the first sections need to be **exactly like this**. 
 
 However, you may add or remove `phyloseq` modules according to your needs. 
 
-You always need to remember the `metadata.csv` file, you may find an example [here](https://github.com/hariszaf/pema/blob/master/analysis_directory/metadata.csv).
+You always need to remember the `metadata.csv` file, you may find an example [here](https://github.com/hariszaf/pema/blob/v.2.1.5/analysis_directory/metadata.csv).
 
 You need to add your own metadata there keeping the format of the file as it is!
 

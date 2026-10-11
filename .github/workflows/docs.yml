@@ -2,7 +2,7 @@
 # Author: Haris Zafeiropoulos
 # Licensed under GNU LGPL.3, see LICENCE file
 #
-# Publish the documentation in docs/ to https://hariszaf.github.io/pema_documentation
+# Publish the documentation in docs/ (on the main branch) to https://hariszaf.github.io/pema_documentation
 #
 # The sources live in this repository, but the site is still served by the GitHub Pages of
 # hariszaf/pema_documentation, so that its URL does not change: docs/ is copied to the gh-pages
@@ -17,7 +17,7 @@ name: docs
 
 on:
   push:
-    branches: [nf-claude]
+    branches: [main]
     paths:
       - 'docs/**'
       - '.github/workflows/docs.yml'

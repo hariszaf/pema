@@ -21,7 +21,7 @@ process DOWNLOAD_RDP_DB {
     // Saved in databases_dir; pema.nf finds it there in the next runs and does not download it again
     publishDir { rdp_params.databases_dir }, mode: 'copy'
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
         val rdp_params
@@ -57,7 +57,7 @@ process PREPARE_RDP_TRAINING {
 
     tag "Prepare the RDP training files for ${rdp_params.database}."
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
         path taxonomy
@@ -163,7 +163,7 @@ process BUILD_RDP_TAXONOMY_TABLE {
 
     publishDir { "${params.outdir}/rdp_assignment" }, mode: 'copy'
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
         path asvs_contingency_hash_table

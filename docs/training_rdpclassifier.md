@@ -35,7 +35,7 @@ As [John Quensen highlights](https://john-quensen.com/tutorials/training-the-rdp
 ATCTTCTCCCTACACTTAGCAGGAGTTTCATCAATTTTAGGCTCCATTAATTTTATTACT...
 ```
 
-The [PEMA repository](https://github.com/hariszaf/pema/tree/master/sanity_check/custom_rdp/custom_ref_db) includes a small example of both files.
+The [PEMA repository](https://github.com/hariszaf/pema/tree/main/sanity_check/custom_rdp/custom_ref_db) includes a small example of both files.
 
 
 ### An example: MIDORI 2

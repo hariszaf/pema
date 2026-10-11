@@ -5,7 +5,7 @@ process CONTINGENCY_TABLE {
 
     publishDir "${params.outdir}", mode: 'copy'
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
     path derep_files
@@ -26,7 +26,7 @@ process ASVS_CONTINGENCY_TABLE {
 
     publishDir "${params.outdir}", mode: 'copy'
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     // Usage:
     // nextflow run modules/utils.nf --asvs_stats testingNfModules/swarm/asvs.stats 

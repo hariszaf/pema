@@ -43,7 +43,7 @@ cut -f 2- taxonomy.nds.temp | nl | sed 's/^ */SSEQ_/' > taxonomy.nds
 
 (the sequences and the lines of the taxonomy file must be in the same order).
 
-The [PEMA repository](https://github.com/hariszaf/pema/tree/master/sanity_check/custom_crest/custom_ref_db) includes a small example of both files.
+The [PEMA repository](https://github.com/hariszaf/pema/tree/main/sanity_check/custom_crest/custom_ref_db) includes a small example of both files.
 
 
 ## Step 2 - what PEMA does
@@ -66,7 +66,7 @@ If `mount_crest_dbs` does not have that database yet, PEMA:
 
 1. checks the two files, and stops with a list of the problems: lines without a lineage, repeated accessions, sequences without a taxonomy;
 2. builds the database for crest4: the `.map`, `.names` and `.tre` files, with
-   [`make_new_crest_db.py`](https://github.com/hariszaf/pema/blob/master/scripts/make_new_crest_db.py) by Lucas Sinclair;
+   [`make_new_crest_db.py`](https://github.com/hariszaf/pema/blob/main/scripts/make_new_crest_db.py) by Lucas Sinclair;
 3. builds the search index (BLAST or VSEARCH, according to `search_algo`);
 4. saves the database in `mount_crest_dbs/<database>`, and assigns the taxonomy of your samples with it.
 

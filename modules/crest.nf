@@ -23,7 +23,7 @@ process DOWNLOAD_CREST_DB {
     // Saved in mount_crest_dbs; pema.nf finds it there in the next runs and does not download it again
     publishDir { crest_params.mount_crest_dbs }, mode: 'copy'
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
         val crest_params
@@ -75,7 +75,7 @@ process PREPARE_CREST_TRAINING {
 
     tag "Prepare the CREST training files for ${crest_params.database_name}."
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
         path taxonomy
@@ -194,7 +194,7 @@ process BUILD_TAXONOMY_TABLE {
 
     publishDir { "${params.outdir}/crest_assignment" }, mode: 'copy'
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
 

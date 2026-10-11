@@ -139,7 +139,7 @@ process GUNZIP {
 
     tag "Unzip .gz files to original format."
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
         path gzip_file
@@ -165,7 +165,7 @@ process VSEARCH_MAP_BACK {
 
     publishDir { "${params.outdir}/vsearch" }, mode: 'copy'
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     input:
         path original

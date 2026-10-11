@@ -57,7 +57,7 @@ process UNIQUE_TAXA {
 
     tag "Get unique records from the last part of the taxonomies retrieved"
 
-    container "hariszaf/pema-nf:0.2.2" 
+    container "hariszaf/pema-nf:0.3.0" 
 
     input:
         path tax_table
@@ -140,7 +140,7 @@ process MERGE_NCBI_TAXONOMIES {
 
     tag "Merge NCBI Taxonomies"
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     publishDir {"${params.outdir}/ncbi_taxonomy"}, mode: 'copy'
 
@@ -190,7 +190,7 @@ process MERGE_NCBI_TAXONOMY_TABLE {
 
     tag "Build taxonomy table with NCBI taxonomy"
 
-    container "hariszaf/pema-nf:0.2.2"
+    container "hariszaf/pema-nf:0.3.0"
 
     publishDir { "${params.outdir}/ncbi_taxonomy" }, mode: 'copy'
 

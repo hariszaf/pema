@@ -37,7 +37,7 @@ Here is what PEMA does:
 
 To start, see [Get PEMA]({{ '/1.get_pema/' | relative_url }}) and [Basics for running PEMA]({{ '/2.running_general/' | relative_url }}).
 
-Here is the [PEMA GitHub repository](https://github.com/hariszaf/pema) if you want to have a look on the source code and why not, to [contribute](https://github.com/hariszaf/pema/blob/master/CONTRIBUTING.md) to!
+Here is the [PEMA GitHub repository](https://github.com/hariszaf/pema) if you want to have a look on the source code and why not, to [contribute](https://github.com/hariszaf/pema/blob/main/CONTRIBUTING.md) to!
 
 
 > For any running issues you may have, or for any further features you would like to see included on PEMA, you can reach us through the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community#), by opening an [issue](https://github.com/hariszaf/pema/issues), or at *pema@hcmr.gr* .

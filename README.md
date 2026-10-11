@@ -449,7 +449,7 @@ Notes:
 
 ## PEMA website along with *how to* documentation can be found [**here**](https://hariszaf.github.io/pema_documentation/).
 
-Its sources are in [`docs/`](docs) (a Jekyll site); changes merged into `master` are published there automatically
+Its sources are in [`docs/`](docs) (a Jekyll site); changes merged into `main` are published there automatically
 by the [docs workflow](.github/workflows/docs.yml), through [hariszaf/pema_documentation](https://github.com/hariszaf/pema_documentation).
 
 To build and preview them on your computer, use Jekyll with Ruby (option 1), or Docker (option 2).
@@ -502,9 +502,10 @@ For any troubles you may have when running PEMA or for any potential improvevmen
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 
-> **This is the Nextflow version of PEMA, under development.**
+> **This is PEMA v3, written in Nextflow.**
 > The BigDataScript-based PEMA (v1.x and v2.x), with its Docker and Singularity images and its `parameters.tsv` file,
-> is available on the [`master`](https://github.com/hariszaf/pema/tree/master) branch.
+> is available with the [`v.2.1.5`](https://github.com/hariszaf/pema/tree/v.2.1.5) tag and the [`v2.2.0`](https://github.com/hariszaf/pema/tree/v2.2.0) branch;
+> see the [CHANGELOG](CHANGELOG.md) for what changed.
 
 ## License
 PEMA is under the GNU GPLv3 license (for 3rd party components separate licenses apply).

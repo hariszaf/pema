@@ -18,7 +18,7 @@ permalink: /v2/
 You may find PEMA as a [Docker](https://hub.docker.com/r/hariszaf/pema) and as a [Singularity](https://singularity-hub.org/collections/2295) container.
 
 
-Here is the [PEMA GitHub repository](https://github.com/hariszaf/pema) if you want to have a look on the source code and why not, to [contribute](https://github.com/hariszaf/pema/blob/master/CONTRIBUTING.md) to!
+Here is the [PEMA GitHub repository](https://github.com/hariszaf/pema) if you want to have a look on the source code and why not, to [contribute](https://github.com/hariszaf/pema/blob/v.2.1.5/CONTRIBUTING.md) to!
 
 
 > For any running issues you may have, or for any further features you would like to see included on PEMA, you can reach us through the [PEMA Gitter community](https://gitter.im/pema-helpdesk/community#) or at *pema@hcmr.gr* .

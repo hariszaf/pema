@@ -1,15 +1,12 @@
-# configs:
-#   - global.yaml
-#   - fastp.yaml
-#   - crest.yaml
-#   - swarm.yaml
-#   - vsearch.yaml
-#   - rdpclassifier.yaml
+# The parameters file of PEMA (https://github.com/hariszaf/pema).
+# Copy it, fill it in, and run:   nextflow run pema.nf --params-file my_analysis.yaml
+# A parameter left empty is not passed to its tool, so the tool's own default applies.
 
 # Folder with the paired-end fastq files (.fastq, .fastq.gz, .fq, .fq.gz). The two files of a sample are
 # recognised by a _1/_2 or _R1/_R2 in their names (e.g. S1_1.fastq.gz, S1_S1_L001_R1_001.fastq.gz);
 # the part before it is the sample name.
-raw_reads: sanity_check/16S/mydata16s
+# e.g. sanity_check/16S/mydata16s, the 16S samples of the sanity check (sanity_check/run_sanity_check.sh 16S downloads them).
+raw_reads: path/to/your/reads
 
 # values from: ["16S", "18S", "12S", "COI", "ITS"]
 # For ITS, the primers are removed with cutadapt (see the cutadapt section) before fastp.
@@ -17,7 +14,8 @@ marker_gene: 16S
 
 threads: 3
 
-outdir: buildingPemaNf2
+# Output folder
+outdir: results
 
 # values from: ["swarm", "vsearch", "dada2"]
 # swarm: ASVs with Swarm; vsearch: OTUs with VSEARCH; dada2: ASVs with DADA2 (fastp then filters the read pairs without merging them)
@@ -251,9 +249,9 @@ crest:
   # the first time they are used.
   database: silvamod138pr2
 
-  # Directory containing all the custom CREST databases, if any (optional, e.g. /home/luna.kuleuven.be/u0156635/.crest4/).
+  # Directory containing all the custom CREST databases, if any (optional, e.g. /home/<you>/.crest4).
   # It is good practice to provide a path even when using one of the crest databases, so you do not download it every time.  !!!!
-  mount_crest_dbs: /home/luna.kuleuven.be/u0156635/.crest4/
+  mount_crest_dbs:
 
   # Where PEMA's crest4 databases are downloaded from: <download_url>/<database>.tar.gz
   download_url: https://zenodo.org/records/23298141/files
@@ -338,7 +336,8 @@ rdp:
 
 ncbi_taxonomy:
 
-  get_ncbi_taxonomy: true
+  # Map the taxonomies to NCBI Taxonomy (see ncbi_taxonomy/ in the output)
+  get_ncbi_taxonomy: false
 
   # NCBI Datasets allows 5 requests per second without an API key and 10 with one (https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/).
   # The key is optional: leave it empty and export NCBI_API_KEY instead, to keep it out of version control.

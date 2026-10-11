@@ -5,7 +5,7 @@ directive of each process in [`modules/`](../modules) and are pulled automatical
 
 | Image | Used by | Built from |
 |-------|---------|------------|
-| `hariszaf/pema-nf:0.2.2` | hashing, contingency tables, oligoton removal, VSEARCH map-back, taxonomy tables, NCBI merging | [`Dockerfile.pema_nf`](Dockerfile.pema_nf) |
+| `hariszaf/pema-nf:0.3.0` | hashing, contingency tables, oligoton removal, VSEARCH map-back, taxonomy tables, NCBI merging | [`Dockerfile.pema_nf`](Dockerfile.pema_nf) |
 | `hariszaf/crest4:4.4.5` | `CREST_TAXONOMY_ASSIGNMENT`, `TRAIN_CREST_DB` | [`Dockerfile.crest4`](Dockerfile.crest4) |
 | `quay.io/biocontainers/rdp_classifier:2.13--hdfd78af_1` | `RDP_CLASSIFY` | BioContainers |
 | `quay.io/biocontainers/cutadapt:5.2--py312hfabe715_2` | `CUTADAPT` (ITS) | BioContainers |
@@ -42,7 +42,7 @@ docker push hariszaf/pema-nf:<tag>
   The pipeline uses the BioContainers image instead, with the databases given in the parameters file.
 
 The Docker and Singularity images of PEMA v2.x (BigDataScript) are described on the
-[`master`](https://github.com/hariszaf/pema/tree/master) branch.
+[`v.2.1.5`](https://github.com/hariszaf/pema/tree/v.2.1.5) tag.
 
 
 

@@ -39,4 +39,4 @@ RUN apt-get update && apt-get install -y \
     procps \
     bc
 # To build the image, run:
-# docker build -f Dockerfile.pema_nf -t hariszaf/pema-nf:0.2.2 .   (from the repo root)
+# docker build -f Dockerfile.pema_nf -t hariszaf/pema-nf:0.3.0 .   (from the repo root)

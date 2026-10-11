@@ -15,7 +15,7 @@ Metabarcoding is an extremely active method!
 That is why PEMA's intention is to become an open source project
 asking for the contribution of anyone who would like to join forces! 
 
-For a thorough description on how you could do that, you may have a look [here](https://github.com/hariszaf/pema/blob/master/CONTRIBUTING.md).
+For a thorough description on how you could do that, you may have a look [here](https://github.com/hariszaf/pema/blob/v.2.1.5/CONTRIBUTING.md).
 
 💯 🖥️ Happy coding! 🖥️ 💯
 
