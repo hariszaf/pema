@@ -195,7 +195,7 @@ or the name of a folder with a custom database. For a custom database, `mount_cr
 
 Setting `mount_crest_dbs` is also recommended for the built-in databases, so they are downloaded only once.
 
-PEMA's own crest4 databases, currently `unite2025` (UNITE, for ITS), are downloaded from [Zenodo](https://zenodo.org/records/23266088)
+PEMA's own crest4 databases, currently `unite2025` (UNITE, for ITS), are downloaded from [Zenodo](https://zenodo.org/records/23298141)
 into `mount_crest_dbs` the first time they are used (`DOWNLOAD_CREST_DB`, from `<download_url>/<database>.tar.gz`), and reused afterwards.
 Their files are renamed after the database folder, as crest4 requires.
 
@@ -231,7 +231,7 @@ rdp_databases/
 ```
 
 Set `database` to the folder name and `databases_dir` to the folder that contains it (here `rdp_databases`), or `database` to the full path.
-The PEMA-trained databases `12S_v200` (12S; `12S_v2.0.0` also works), `midori_1` and `midori_2` (COI) are downloaded from [Zenodo](https://zenodo.org/records/23266088)
+The PEMA-trained databases `12S_v200` (12S; `12S_v2.0.0` also works), `midori_1` and `midori_2` (COI) are downloaded from [Zenodo](https://zenodo.org/records/23298141)
 into `databases_dir` the first time they are used (`DOWNLOAD_RDP_DB`), and reused afterwards.
 They are fetched as `<download_url>/<database>.tar.gz` (`download_url` in the `rdp` section).
 Ranks are kept from the top down while RDPClassifier's confidence is at least `confidence` (default 0.8; for short amplicons a lower value such as 0.5 is common).
@@ -298,31 +298,109 @@ Both can also be run on your computer: the sanity check itself, or the whole CI 
 
 ### Running the sanity check locally
 
-With Nextflow and Docker, from the root folder of this repository:
+[`sanity_check/run_sanity_check.sh`](sanity_check/run_sanity_check.sh) runs PEMA on a small dataset for each marker gene, with
+different clustering algorithms and classifiers, and reports which cases work. Run it before a release, or to check that a change
+breaks nothing. You need Nextflow and Docker (or another container engine, see `--profile`).
 
-1. Lint the pipeline:
-   ```bash
-   nextflow lint pema.nf modules/ nextflow.config
-   ```
-2. Build the `pema-nf` image from your copy of the repository, with the tag the modules use, so the tests run your version of `scripts/`
-   (otherwise the image is pulled from Docker Hub):
-   ```bash
-   for tag in $(grep -rhoE 'hariszaf/pema-nf:[0-9.]+' modules/ | sort -u); do
-       docker build -f containers/Dockerfile.pema_nf -t "$tag" .
-   done
-   ```
-3. Run the sanity check tests:
-   ```bash
-   sanity_check/run_sanity_check.sh COI-rdp-custom COI-crest-custom
-   ```
-   The first time, this downloads the sanity dataset (~280 MB) into `sanity_check/`.
-   Each test prints whether it passed, and its log is `sanity_check/<marker>/TEST_<...>.log`;
-   the script exits with an error if a test failed.
+For each test, the script:
 
-`sanity_check/run_sanity_check.sh` without tests runs all of them (16S, 18S, 12S, COI and ITS, with Swarm or VSEARCH, crest4 or RDPClassifier);
-some need databases that are downloaded on first use (the crest4 SILVA database is ~4 GB) or that you provide.
-`sanity_check/run_sanity_check.sh --help` lists the tests and their options, e.g. `--ncbi` to also test the NCBI Taxonomy step,
-or `--profile singularity` to use Singularity instead of Docker.
+1. downloads and extracts the sanity dataset into `sanity_check/` (~280 MB), if it is not there yet;
+2. writes a parameters file from [`config_files/pema.yaml`](config_files/pema.yaml), with the reads, marker gene, clustering
+   algorithm, classifier and database of the test (so the tests always use the current parameters file);
+3. runs `pema.nf` in `sanity_check/<marker>/`;
+4. checks that the final table (`tax_assigned_table.tsv`) exists and has ASVs/OTUs, and counts how many have a taxonomy.
+
+It ends with a summary, one line per test (`OK`, `FAILED` or `SKIPPED`, the time, and the number of ASVs/OTUs), and exits with an
+error if a test failed. The files of a test are in `sanity_check/<marker>/`:
+
+| File | Content |
+|------|---------|
+| `TEST_<marker>_FASTP_<clustering>_<classifier>/` | the output of PEMA (see [output_descr.md](output_descr.md)) |
+| `TEST_<...>.yaml` | the parameters file of the test |
+| `TEST_<...>.log` | the Nextflow log of the run: look here when a test fails |
+| `work/` | Nextflow's intermediate files (can be deleted) |
+
+The tests:
+
+| Test | Marker | Clustering | Classifier and database | Needs |
+|------|--------|------------|-------------------------|-------|
+| `16S` | 16S | Swarm | crest4, `silvamod138pr2` | the crest4 SILVA database (~4 GB, downloaded on first use) |
+| `18S` | 18S | Swarm | crest4, `silvamod138pr2` | as `16S` |
+| `12S` | 12S | Swarm | crest4, `mitofish` | the crest4 MitoFish database (downloaded on first use) |
+| `COI` | COI | Swarm | crest4, `midori253darn` | the crest4 MIDORI database (~3 GB, downloaded on first use) |
+| `ITS` | ITS | cutadapt, Swarm | crest4, `unite2025` | PEMA's UNITE database (12 MB, downloaded on first use) |
+| `16S-vsearch` | 16S | VSEARCH | crest4, `silvamod138pr2` | as `16S` |
+| `18S-vsearch` | 18S | VSEARCH | crest4, `silvamod138pr2` | as `16S` |
+| `16S-dada2` | 16S | DADA2 | crest4, `silvamod138pr2` | as `16S`; the slowest test (~12 min) |
+| `12S-rdp` | 12S | Swarm | RDPClassifier, `12S_v200` | PEMA's 12S database (30 MB, downloaded on first use) |
+| `COI-rdp` | COI | Swarm | RDPClassifier, MIDORI | `RDP_COI_DB=midori_1` or `midori_2` (downloaded on first use; >= 20 GB of memory); skipped otherwise |
+| `COI-rdp-custom` | COI | Swarm | RDPClassifier, trained on `sanity_check/custom_rdp/custom_ref_db/` | nothing: trains its own database (also run by CI) |
+| `COI-crest-custom` | COI | Swarm | crest4, built from `sanity_check/custom_crest/custom_ref_db/` | nothing: builds its own database (also run by CI) |
+
+**Running specific tests.** From the root folder of this repository, give the tests to run; without tests, all of them run:
+
+```bash
+# one test
+sanity_check/run_sanity_check.sh 16S
+
+# several tests
+sanity_check/run_sanity_check.sh 16S 16S-vsearch 16S-dada2
+
+# the tests that need no external database (as CI)
+sanity_check/run_sanity_check.sh COI-rdp-custom COI-crest-custom
+
+# all the tests
+sanity_check/run_sanity_check.sh
+```
+
+Options, given before the tests:
+
+```bash
+# also test the mapping to NCBI Taxonomy (set NCBI_API_KEY to go faster)
+sanity_check/run_sanity_check.sh --ncbi 18S-vsearch
+
+# with Singularity (or podman, apptainer) instead of Docker
+sanity_check/run_sanity_check.sh --profile singularity 16S
+
+# resume the previous runs of these tests, e.g. after a failure (only what changed is run again)
+sanity_check/run_sanity_check.sh --resume 16S-dada2
+```
+
+Environment variables choose where the databases are and which ones some tests use:
+
+| Variable | Default | |
+|----------|---------|---|
+| `CREST_DBS` | `~/.crest4` | folder of the crest4 databases; they are downloaded there once |
+| `ITS_CREST_DB` | `unite2025` | crest4 database of the `ITS` test, in `CREST_DBS` |
+| `RDP_DBS` | `sanity_check/rdp_dbs` | folder of the RDPClassifier databases; the PEMA-trained ones are downloaded there once |
+| `RDP_12S_DB` | `12S_v200` | RDPClassifier database of the `12S-rdp` test |
+| `RDP_COI_DB` | (none) | RDPClassifier database of the `COI-rdp` test, e.g. `midori_1`; without it, `COI-rdp` is skipped |
+
+for example:
+
+```bash
+# COI with RDPClassifier and MIDORI 1
+RDP_COI_DB=midori_1 sanity_check/run_sanity_check.sh COI-rdp
+
+# ITS with a crest4 database of your own, in /data/crest4/my_unite
+CREST_DBS=/data/crest4 ITS_CREST_DB=my_unite sanity_check/run_sanity_check.sh ITS
+
+# the crest4 databases somewhere else than ~/.crest4
+CREST_DBS=/scratch/crest4 sanity_check/run_sanity_check.sh 16S 18S
+```
+
+`sanity_check/run_sanity_check.sh --help` lists all this too.
+
+**Testing your version of the code, as CI does.** The scripts of `scripts/` run in the `pema-nf` image; to test your changes to them,
+build the image from your copy of the repository, with the tag the modules use (otherwise it is pulled from Docker Hub), and lint the
+pipeline:
+
+```bash
+for tag in $(grep -rhoE 'hariszaf/pema-nf:[0-9.]+' modules/ | sort -u); do
+    docker build -f containers/Dockerfile.pema_nf -t "$tag" .
+done
+nextflow lint pema.nf modules/ nextflow.config
+```
 
 
 ### Running the CI workflow locally

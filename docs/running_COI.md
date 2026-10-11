@@ -26,7 +26,7 @@ With `classifier: rdp`, PEMA assigns the taxonomy with [RDPClassifier](https://g
 * `midori_2`: MIDORI 2, all eukaryotes; about 100,000 more species, but considerably slower and needing more memory.
 
 Set `database` to one of them and `databases_dir` to a folder of yours (in the `rdp` section): PEMA downloads the database from
-[Zenodo](https://zenodo.org/records/23266088) the first time it is used, and reuses it afterwards.
+[Zenodo](https://zenodo.org/records/23298141) the first time it is used, and reuses it afterwards.
 Set `memory` to at least `20 GB`; with MIDORI 2 you will most likely need an HPC system or a server
 (see [Running on HPC]({{ '/3.running_on_HPC/' | relative_url }})).
 

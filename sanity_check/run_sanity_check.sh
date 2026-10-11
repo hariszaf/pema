@@ -5,7 +5,7 @@
 #       a new feature causes any issues or not.
 #       Should be always run before a new version is to be released.
 #
-#       Each test runs pema.nf (fastp, Swarm or VSEARCH, then crest4 or RDPClassifier) on the
+#       Each test runs pema.nf (fastp, Swarm, VSEARCH or DADA2, then crest4 or RDPClassifier) on the
 #       sanity dataset of one marker gene, with a parameters file generated from config_files/pema.yaml.
 #
 # Usage: ./run_sanity_check.sh [options] [test ...]

@@ -256,7 +256,7 @@ crest:
   mount_crest_dbs: /home/luna.kuleuven.be/u0156635/.crest4/
 
   # Where PEMA's crest4 databases are downloaded from: <download_url>/<database>.tar.gz
-  download_url: https://zenodo.org/records/23266088/files
+  download_url: https://zenodo.org/records/23298141/files
 
   # The algorithm used for the sequence similarity search
   # that will be run to match the sequences against the database chosen. Either `blast` or `vsearch`. By default, `blast`.
@@ -304,7 +304,7 @@ rdp:
   databases_dir:
 
   # Where the PEMA-trained databases are downloaded from: <download_url>/<database>.tar.gz
-  download_url: https://zenodo.org/records/23266088/files
+  download_url: https://zenodo.org/records/23298141/files
 
   # Ranks are kept from the top down while RDPClassifier's confidence is at least this value.
   # 0.8 is the usual threshold for reads of 250 bp or more; for shorter reads 0.5 is often used. 0 keeps all ranks.

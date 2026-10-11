@@ -201,7 +201,7 @@ def resolveCrestParams() {
         if (!crest_params.mount_crest_dbs) {
             error "To download the CREST database '${db}', set `mount_crest_dbs` in the 'crest' section (where it is saved)."
         }
-        crest_params.download_url     = valueOr(crest_params.download_url, 'https://zenodo.org/records/23266088/files')
+        crest_params.download_url     = valueOr(crest_params.download_url, 'https://zenodo.org/records/23298141/files')
         crest_params.download_archive = pemaCrestDBs[db.toString()]
         crest_params.database_name    = db.toString()
         crest_params.needs_download   = true
@@ -292,7 +292,7 @@ def resolveRdpParams() {
         if (!rdp_params.databases_dir) {
             error "To download the RDP database '${db}', set `databases_dir` in the 'rdp' section (where it is saved)."
         }
-        rdp_params.download_url     = valueOr(rdp_params.download_url, 'https://zenodo.org/records/23266088/files')
+        rdp_params.download_url     = valueOr(rdp_params.download_url, 'https://zenodo.org/records/23298141/files')
         rdp_params.download_archive = pemaTrainedRdpDBs[db.toString()]
         rdp_params.needs_download  = true
         file(rdp_params.databases_dir.toString()).mkdirs()
