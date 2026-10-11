@@ -340,11 +340,13 @@ ncbi_taxonomy:
 
   get_ncbi_taxonomy: true
 
-  # When To get one:  https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/
-  # Leave empty and export NCBI_API_KEY instead, to keep the key out of version control.
+  # NCBI Datasets allows 5 requests per second without an API key and 10 with one (https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/).
+  # The key is optional: leave it empty and export NCBI_API_KEY instead, to keep it out of version control.
   ncbi_api_key:
 
-  max_parallel: 1
+  # Lookups running at the same time: at most 2 without an API key and 4 with one (the default), to stay within the limits.
+  max_parallel:
 
+  # Pause (in seconds) after each lookup: at least 0.4 without an API key and 0.1 with one (default: 0.4).
   sleep: 
 

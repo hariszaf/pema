@@ -28,11 +28,15 @@ params.marker_gene     = loadYamlParams(params.yaml, 'marker_gene') ?: error(
 )
 params.ncbi_taxonomy   = valueOr(loadYamlParams(params.yaml, 'ncbi_taxonomy'), [:])
 
-// Flat params read by modules/ncbi.nf. Without an API key NCBI allows ~3 requests/sec,
-// so parallel queries are only allowed when a key is given.
-// The key can also be provided through the NCBI_API_KEY environment variable.
+// Flat params read by modules/ncbi.nf. The key can also be provided through the NCBI_API_KEY environment variable.
+// NCBI Datasets allows 5 requests per second without an API key and 10 with one. A lookup takes ~0.5-1 s and is
+// followed by a pause (sleep: at least 0.4 s without a key, 0.1 s with one), so at most 2 lookups at a time without
+// a key and 4 with one stay within these limits: max_parallel is capped to that (and is that by default).
 params.ncbi_api_key = params.ncbi_taxonomy.ncbi_api_key ?: System.getenv('NCBI_API_KEY')
-params.max_parallel = params.ncbi_api_key ? valueOr(params.ncbi_taxonomy.max_parallel, 1) : 1
+params.max_parallel = Math.min(
+    valueOr(params.ncbi_taxonomy.max_parallel, params.ncbi_api_key ? 4 : 2) as int,
+    params.ncbi_api_key ? 4 : 2
+)
 params.sleep        = valueOr(params.ncbi_taxonomy.sleep, 0.4)
 
 // -------------------- MODULES --------------------
@@ -56,6 +60,14 @@ include {
 } from './modules/ncbi.nf'
 
 // -------------------- ADJUST PARAMS  --------------------
+
+def checkNcbiParams() {
+    def requested = params.ncbi_taxonomy.max_parallel
+    if (params.ncbi_taxonomy.get_ncbi_taxonomy == true && requested != null && (requested as int) > params.max_parallel) {
+        log.warn "ncbi_taxonomy.max_parallel lowered from ${requested} to ${params.max_parallel}, to stay within the NCBI rate limit " +
+            "(${params.ncbi_api_key ? '10 requests per second with an API key' : '5 requests per second without an API key'})."
+    }
+}
 
 def checkSupported() {
     if (!(params.marker_gene.toString() in ['16S', '18S', '12S', 'COI', 'ITS'])) {
@@ -314,6 +326,7 @@ def resolveRdpParams() {
 workflow {
 
     checkSupported()
+    checkNcbiParams()
     def fastpParams   = resolveFastpParams()
     def swarmParams   = params.clustering_algo == 'swarm' ? resolveSwarmParams() : null
     def vsearchParams = params.clustering_algo == 'vsearch' ? resolveVsearchParams() : null

@@ -256,7 +256,8 @@ Training large databases needs a lot of memory (`train.memory`; MIDORI needed mo
 
 **NCBI Taxonomy.** With `get_ncbi_taxonomy: true`, the lowest taxon of each assignment is looked up in NCBI Taxonomy
 and the NCBI lineage and taxids are added to the final table.
-Without an API key, queries run one at a time (NCBI allows about 3 requests per second); with a key, `max_parallel` queries can run at once.
+NCBI allows 5 requests per second without an API key and 10 with one, so the key is optional: without it, up to 2 queries run at once,
+and with it up to 4 (`max_parallel`, capped to these to stay within the limits).
 [Get an API key](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/) and preferably provide it through an environment variable,
 to keep it out of your configuration files:
 

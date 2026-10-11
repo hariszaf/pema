@@ -101,7 +101,7 @@ process NCBI_TAXONOMY_QUERY {
         // Single-quote the taxon for the shell, so names with quotes, $ or backticks are safe
         def taxon_q = "'" + taxon.replace("'", "'\\''") + "'"
         def api_key = params.ncbi_api_key ?: ''
-        // NCBI allows ~10 requests/sec with an API key and ~3 without one
+        // NCBI Datasets allows 10 requests/sec with an API key and 5 without one
         def sleep_time = Math.max((params.sleep ?: 0) as double, api_key ? 0.1 : 0.4)
         """
         mkdir -p ncbi_ids

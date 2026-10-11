@@ -28,8 +28,9 @@ Names that NCBI does not know are listed in `ncbi_taxonomy/not_found.tsv`; they 
 
 ## API key
 
-Without an API key, NCBI allows about 3 requests per second, so PEMA looks up one taxon at a time.
-With a key (free, [get one here](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/)), up to `max_parallel` lookups run at the same time.
+The key is optional. NCBI Datasets allows 5 requests per second without an API key, and 10 with one
+(free, [get one here](https://www.ncbi.nlm.nih.gov/datasets/docs/v2/api/api-keys/)). To stay within these limits, PEMA runs up to 2 lookups
+at the same time without a key and up to 4 with one (`max_parallel`, which can be lower but not higher), with a pause (`sleep`) after each.
 Rather than writing the key in the parameters file, set it in your environment:
 
 ```
